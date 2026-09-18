@@ -1,0 +1,13 @@
+{
+  "name": "SENTIA Academy · Club VIP",
+  "short_name": "SENTIA VIP",
+  "start_url": "./vip-auth.html",
+  "display": "standalone",
+  "background_color": "#081225",
+  "theme_color": "#081225",
+  "description": "Club VIP de SENTIA Human Institute",
+  "icons": [
+    {"src": "assets/icon-sentia.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "assets/icon-sentia.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
