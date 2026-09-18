@@ -1294,39 +1294,11 @@ const Modal={
    DATOS SEED (después → Firestore)
    ========================================================= */
 const SEED={
-  cursos:[
-    {id:'c1',titulo:'Microbiología clínica · diagnóstico bacteriano',area:'Microbiología',nivel:'Intermedio',instructor:'Dra. María López',horas:12,modulos:8,activo:true,inscritos:184},
-    {id:'c2',titulo:'Hematología: interpretación de la biometría hemática',area:'Hematología',nivel:'Avanzado',instructor:'Dr. Mauricio León',horas:10,modulos:6,activo:true,inscritos:96},
-    {id:'c3',titulo:'Química sanguínea y perfil bioquímico',area:'Bioquímica',nivel:'Intermedio',instructor:'QFB Patricia Solís',horas:14,modulos:9,activo:true,inscritos:67},
-    {id:'c4',titulo:'Bioseguridad y buenas prácticas de laboratorio',area:'Laboratorio Clínico',nivel:'Básico',instructor:'QFB Daniela Ríos',horas:8,modulos:5,activo:true,inscritos:240},
-    {id:'c5',titulo:'Uroanálisis y estudio del sedimento urinario',area:'Laboratorio Clínico',nivel:'Intermedio',instructor:'QFB Patricia Solís',horas:16,modulos:10,activo:true,inscritos:312},
-    {id:'c6',titulo:'Inmunología y serología diagnóstica (ELISA)',area:'Inmunología',nivel:'Avanzado',instructor:'Dra. María López',horas:18,modulos:11,activo:true,inscritos:45},
-    {id:'c7',titulo:'Biología molecular: PCR y qPCR aplicada',area:'Biología Molecular',nivel:'Avanzado',instructor:'Dra. María López',horas:40,modulos:24,activo:true,inscritos:28},
-    {id:'c8',titulo:'Parasitología: identificación en muestras clínicas',area:'Parasitología',nivel:'Intermedio',instructor:'Biól. Carlos Vidal',horas:12,modulos:8,activo:true,inscritos:54},
-    {id:'c9',titulo:'Control de calidad en el laboratorio clínico',area:'Laboratorio Clínico',nivel:'Avanzado',instructor:'QFB Patricia Solís',horas:24,modulos:14,activo:false,inscritos:0},
-    {id:'c10',titulo:'Antibiograma e interpretación de resistencias',area:'Microbiología',nivel:'Intermedio',instructor:'Biól. Carlos Vidal',horas:10,modulos:7,activo:true,inscritos:39},
-    {id:'c11',titulo:'Toma de muestras y fase preanalítica',area:'Laboratorio Clínico',nivel:'Básico',instructor:'QFB Daniela Ríos',horas:14,modulos:10,activo:true,inscritos:71},
-    {id:'c12',titulo:'Biomedicina: marcadores y diagnóstico integrado',area:'Biomedicina',nivel:'Intermedio',instructor:'Dr. Mauricio León',horas:10,modulos:6,activo:true,inscritos:158}
-  ],
-  webinars:[
-    {id:'w1',titulo:'Interpretación de la biometría hemática en vivo',instructor:'Dr. Mauricio León',fecha:'2026-05-28T19:00:00',duracion:90,area:'Hematología',link:'https://meet.sentiafood.com/bh-mayo28',publicado:true,registrados:84},
-    {id:'w2',titulo:'Tinción de Gram paso a paso',instructor:'Dra. María López',fecha:'2026-06-03T19:00:00',duracion:75,area:'Microbiología',link:'https://meet.sentiafood.com/gram-junio3',publicado:true,registrados:52},
-    {id:'w3',titulo:'Pruebas de función hepática · cómo interpretarlas',instructor:'QFB Patricia Solís',fecha:'2026-06-10T19:00:00',duracion:60,area:'Bioquímica',link:'',publicado:false,registrados:0}
-  ],
-  pdfs:[
-    {id:'p1',titulo:'Guía de medios de cultivo en microbiología',cat:'Microbiología',paginas:14,size:'2.4 MB',publicado:true,descargas:184},
-    {id:'p2',titulo:'Valores de referencia · química sanguínea',cat:'Bioquímica',paginas:22,size:'1.8 MB',publicado:true,descargas:412},
-    {id:'p3',titulo:'Protocolo de bioseguridad nivel BSL-2',cat:'Laboratorio Clínico',paginas:32,size:'4.1 MB',publicado:true,descargas:67},
-    {id:'p4',titulo:'Checklist de control de calidad interno',cat:'Laboratorio Clínico',paginas:8,size:'820 KB',publicado:true,descargas:128},
-    {id:'p5',titulo:'Formato de reporte de laboratorio clínico',cat:'Laboratorio Clínico',paginas:6,size:'480 KB',publicado:true,descargas:96},
-    {id:'p6',titulo:'Manual de toma de muestras sanguíneas',cat:'Laboratorio Clínico',paginas:18,size:'3.6 MB',publicado:true,descargas:54},
-    {id:'p7',titulo:'Antibiograma · método de Kirby-Bauer',cat:'Microbiología',paginas:4,size:'320 KB',publicado:true,descargas:210},
-    {id:'p8',titulo:'Procedimiento de extracción de ADN',cat:'Biología Molecular',paginas:12,size:'1.5 MB',publicado:false,descargas:0},
-    {id:'p9',titulo:'Plantilla de bitácora de equipos',cat:'Laboratorio Clínico',paginas:6,size:'540 KB',publicado:true,descargas:42}
-  ],
+  cursos:[],
+  webinars:[],
+  pdfs:[],
   certificados:[
-    {id:'cert1',estudiante:'Carlos Méndez',email:'carlos.mendez@email.com',curso:'Microbiología clínica · diagnóstico bacteriano',folio:'SENTIA-2026-48201',emitido:'2026-04-18',horas:8,calificacion:96,enviado:true},
-    {id:'cert2',estudiante:'María Hernández',email:'maria.hernandez@email.com',curso:'Hematología: interpretación de la biometría hemática',folio:'SENTIA-2026-37154',emitido:'2026-03-22',horas:16,calificacion:92,enviado:true}
+
   ],
   miembros:[
     {id:'m1',nombre:'Carlos Méndez Aguilar',email:'carlos.mendez@email.com',plan:'Anual',inicio:'2026-03-15',renovacion:'2027-03-15',activo:true,cursos:7},
@@ -1338,10 +1310,7 @@ const SEED={
     {id:'m7',nombre:'Fernando Castro Ortiz',email:'f.castro@email.com',plan:'Mensual',inicio:'2026-05-18',renovacion:'2026-06-18',activo:true,cursos:1}
   ],
   noticias:[
-    {id:'n1',titulo:'Nuevas guías de diagnóstico microbiológico para laboratorios clínicos',cat:'Microbiología',fuente:'Salud Pública MX',fecha:'Hoy',color:'#2fbf2e'},
-    {id:'n2',titulo:'Avances en biología molecular aplicada al diagnóstico temprano',cat:'Biología Molecular',fuente:'Gaceta Médica',fecha:'Hoy',color:'#3B82F6'},
-    {id:'n3',titulo:'Hematología: actualizan valores de referencia de la biometría hemática',cat:'Hematología',fuente:'Medscape',fecha:'Ayer',color:'#3ddc5a'},
-    {id:'n4',titulo:'Control de calidad en laboratorios: tendencias 2026',cat:'Laboratorio Clínico',fuente:'Lab Médica',fecha:'Ayer',color:'#A855F7'}
+
   ],
   config:{
     precioMensual:199,
@@ -1349,8 +1318,8 @@ const SEED={
     monedaSimbolo:'$',
     moneda:'MXN',
     whatsapp:'+52 000 000 0000', // TODO Jorge: pon el WhatsApp real de SENTIA
-    instagram:'@sentiafood', // TODO Jorge: confirma si es el handle correcto
-    emailContacto:'contacto@sentiafood.com',
+    instagram:'',
+    emailContacto:'fisiotec25@gmail.com',
     admins:['teccapitalweb@gmail.com'],
     stripePublicKey:'pk_live_••••••••••••••••',
     cronStatus:'activo',
@@ -1570,7 +1539,7 @@ const Pages={
                   return `<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px;">${ready ? 'Sin noticias del cron' : 'Cargando…'}</div>`;
                 }
                 return arr.map(n => {
-                  const colorMap = {'Microbiología':'#2fbf2e','Biología Molecular':'#3B82F6','Hematología':'#3ddc5a','Laboratorio Clínico':'#A855F7'};
+                  const colorMap = {'Psicología Clínica':'#2fbf2e','Psicología Educativa':'#3B82F6','Salud Mental':'#3ddc5a','Psicología Laboral':'#A855F7'};
                   const c = colorMap[n.categoria] || colorMap[n.cat] || '#2fbf2e';
                   const titulo = n.titulo || 'Sin título';
                   const f = n.fecha?.toDate ? n.fecha.toDate() : (n.fecha ? new Date(n.fecha) : null);
@@ -1714,7 +1683,7 @@ const Pages={
 
               <div>
                 <label for="notif-desc" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Descripción <span style="color:var(--primary);">*</span></label>
-                <textarea id="notif-desc" maxlength="180" rows="3" placeholder="Ej: Únete este viernes 18:00 a la clase en vivo de Hematología con la Dra. López" style="
+                <textarea id="notif-desc" maxlength="180" rows="3" placeholder="Ej: Únete este viernes 18:00 a la clase en vivo de Psicología Clínica" style="
                   width:100%;padding:11px 14px;border-radius:10px;
                   background:var(--surface-2);border:1px solid var(--border-2);
                   color:var(--text);font-size:13.5px;font-family:inherit;
@@ -2001,9 +1970,9 @@ const Pages={
       if(a.indexOf('microbi')>=0||a.indexOf('parasit')>=0)return'micro';
       if(a.indexOf('molecular')>=0||a.indexOf('gen\u00e9t')>=0||a.indexOf('genet')>=0)return'mol';
       if(a.indexOf('investig')>=0)return'scope';
-      if(a.indexOf('bioqu')>=0||a.indexOf('qu\u00edmic')>=0||a.indexOf('quimic')>=0||a.indexOf('laboratorio')>=0||a.indexOf('hemato')>=0||a.indexOf('inmuno')>=0||a.indexOf('biomedic')>=0)return'lab';
-      if(/microbi|bacteri|gram|cultivo|antibiog|ferment|levadur|petri|agar/.test(t))return'micro';
-      if(/molecular|adn|dna|pcr|crispr|gen\u00e9t|genet|secuenc/.test(t))return'mol';
+      if(a.indexOf('clínic')>=0||a.indexOf('clinic')>=0||a.indexOf('terapi')>=0||a.indexOf('intervencion')>=0||a.indexOf('evaluación')>=0)return'lab';
+      if(/infantil|niño|tea|tdah|autismo|desarrollo|aprendizaje|bullying/.test(t))return'micro';
+      if(/laboral|burnout|riesgo|psicosocial|nom.?035|organizacional/.test(t))return'mol';
       if(/cristal|material|difrac|microsc/.test(t))return'scope';
       return'lab';
     }
@@ -2409,9 +2378,9 @@ const Pages={
     const activo = c.activo !== false && c.disponible !== false;
     const area = c.area || 'Sin área';
     const areaColors = {
-      'Microbiología':'#EF4444', 'Laboratorio Clínico':'#3ddc5a', 'Biomedicina':'#3B82F6',
-      'Biología Molecular':'#A855F7', 'Hematología':'#F59E0B', 'Bioquímica':'#3ddc5a',
-      'Inmunología':'#14B8A6', 'Parasitología':'#F97316', 'Genética':'#8B5CF6',
+      'Psicología Clínica':'#2fbf2e', 'Psicología Educativa':'#3B82F6', 'Psicología Laboral':'#F59E0B',
+      'Neuropsicología':'#A855F7', 'Evaluación Psicológica':'#3ddc5a', 'Salud Mental':'#EF4444',
+      'Intervención Psicológica':'#14B8A6', 'Desarrollo Infantil':'#F97316', 'Psicología Forense':'#8B5CF6',
       'Investigación':'#06B6D4', 'Otro':'#EC4899'
     };
     const areaColor = areaColors[area] || '#2fbf2e';
@@ -2464,9 +2433,9 @@ const Pages={
     const activo = c.activo !== false && c.disponible !== false;
     const area = c.area || 'Sin área';
     const areaColors = {
-      'Microbiología':'#EF4444', 'Laboratorio Clínico':'#3ddc5a', 'Biomedicina':'#3B82F6',
-      'Biología Molecular':'#A855F7', 'Hematología':'#F59E0B', 'Bioquímica':'#3ddc5a',
-      'Inmunología':'#14B8A6', 'Parasitología':'#F97316', 'Genética':'#8B5CF6',
+      'Psicología Clínica':'#2fbf2e', 'Psicología Educativa':'#3B82F6', 'Psicología Laboral':'#F59E0B',
+      'Neuropsicología':'#A855F7', 'Evaluación Psicológica':'#3ddc5a', 'Salud Mental':'#EF4444',
+      'Intervención Psicológica':'#14B8A6', 'Desarrollo Infantil':'#F97316', 'Psicología Forense':'#8B5CF6',
       'Investigación':'#06B6D4', 'Otro':'#EC4899'
     };
     const areaColor = areaColors[area] || '#2fbf2e';
@@ -2593,7 +2562,7 @@ const Pages={
     const areasExistentes = store?.ready
       ? Array.from(new Set(store.cursos.map(c => c.area).filter(Boolean)))
       : [];
-    const areasEstandar = ['Microbiología','Laboratorio Clínico','Biomedicina','Biología Molecular','Hematología','Bioquímica','Inmunología','Parasitología','Genética','Investigación','Otro'];
+    const areasEstandar = ['Psicología Clínica','Psicología Educativa','Psicología Laboral','Neuropsicología','Evaluación Psicológica','Intervención Psicológica','Salud Mental','Desarrollo Infantil','Psicología Forense','Otro'];
     const areas = Array.from(new Set([...areasEstandar, ...areasExistentes])).sort();
 
     const c = esEdicion ? curso : {};
@@ -3616,9 +3585,9 @@ const Pages={
     }
 
     const areaColors = {
-      'Microbiología':'#EF4444','Laboratorio Clínico':'#3ddc5a','Biomedicina':'#3B82F6',
-      'Biología Molecular':'#A855F7','Hematología':'#F59E0B','Bioquímica':'#3ddc5a',
-      'Inmunología':'#14B8A6','Parasitología':'#F97316','Genética':'#8B5CF6',
+      'Psicología Clínica':'#2fbf2e','Psicología Educativa':'#3B82F6','Psicología Laboral':'#F59E0B',
+      'Neuropsicología':'#A855F7','Evaluación Psicológica':'#3ddc5a','Salud Mental':'#EF4444',
+      'Intervención Psicológica':'#14B8A6','Desarrollo Infantil':'#F97316','Psicología Forense':'#8B5CF6',
       'Investigación':'#06B6D4','Otro':'#EC4899'
     };
 
@@ -4232,7 +4201,7 @@ const Pages={
             </svg>
           </div>
           <div class="curso-empty__title">${(S.search || S.plan !== 'todos' || S.estado !== 'todos') ? 'Sin resultados' : (hayMiembros ? 'Sin miembros visibles' : 'Aún no hay registros')}</div>
-          <div class="curso-empty__sub">${(S.search || S.plan !== 'todos' || S.estado !== 'todos') ? 'Prueba con otros filtros' : 'Cuando alguien cree cuenta en sentiafood.com aparecerá aquí como "Sin pagar". Cuando pague, cambiará a Mensual/Anual.'}</div>
+          <div class="curso-empty__sub">${(S.search || S.plan !== 'todos' || S.estado !== 'todos') ? 'Prueba con otros filtros' : 'Cuando alguien cree cuenta en club.sentiamx.com aparecerá aquí como "Sin pagar". Cuando pague, cambiará a Mensual/Anual.'}</div>
         </div>
       `;
       return;
@@ -4355,7 +4324,7 @@ const Pages={
           <label class="label" for="mb-search-email">Buscar miembro por email</label>
           <input type="email" class="input" id="mb-search-email" placeholder="ejemplo@correo.com" autocomplete="off">
           <div style="font-size:11px;color:var(--text-3);margin-top:6px;">
-            ⚡ El usuario debe haberse registrado ya en sentiafood.com. Si solo quieres activar a alguien existente, búscalo aquí.
+            ⚡ El usuario debe haberse registrado ya en club.sentiamx.com. Si solo quieres activar a alguien existente, búscalo aquí.
           </div>
         </div>
         <div id="mb-search-result" class="form-field form-field--full" style="min-height:60px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px dashed var(--border);border-radius:10px;padding:14px;color:var(--text-3);font-size:13px;">
@@ -4387,7 +4356,7 @@ const Pages={
         (m.nombre || '').toLowerCase().includes(q)
       ).slice(0, 5);
       if (matches.length === 0) {
-        result.innerHTML = `<div style="text-align:center;"><div style="color:#EF4444;font-weight:600;margin-bottom:4px;">No encontrado</div><div style="font-size:11.5px;color:var(--text-3);">Esta persona no se ha registrado en sentiafood.com aún. Pídele que cree cuenta primero.</div></div>`;
+        result.innerHTML = `<div style="text-align:center;"><div style="color:#EF4444;font-weight:600;margin-bottom:4px;">No encontrado</div><div style="font-size:11.5px;color:var(--text-3);">Esta persona no se ha registrado en club.sentiamx.com aún. Pídele que cree cuenta primero.</div></div>`;
         result.style.color = '';
         return;
       }
