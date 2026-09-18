@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#081225">
-<meta name="description" content="SENTIA Academy Admin · Panel de administración">
-<title>SENTIA Academy · Admin</title>
+<meta name="description" content="SENTIA Admin · Panel de administración">
+<title>SENTIA · Admin</title>
 <link rel="icon" type="image/png" href="assets/icon-sentia.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
 <style>
-/* SENTIA Academy ADMIN · misma identidad agri-futurista que vip-panel */
+/* SENTIA ADMIN · misma identidad agri-futurista que vip-panel */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
@@ -26,24 +26,24 @@ input,select,textarea{font:inherit;color:inherit}
 :root[data-theme="night"]{
   --bg:#081225;--bg-deep:#050a16;
   --surface:#0b1530;--surface-2:#0f1e3a;--surface-3:#13284a;
-  --border:rgba(255,230,200,0.07);--border-2:rgba(255,230,200,0.14);--border-strong:rgba(255,230,200,0.22);
+  --border:rgba(63,123,255,0.07);--border-2:rgba(63,123,255,0.14);--border-strong:rgba(63,123,255,0.22);
   --text:#eaf2ff;--text-2:#aebfd6;--text-3:#5b6b86;
-  --primary:#C94B68;--primary-soft:#D5A13D;--primary-deep:#9E3550;
-  --primary-glow:rgba(201,75,104,0.38);--highlight:#D5A13D;
-  --success:#E5C171;--danger:#F87171;--warning:#FBBF24;--whatsapp:#22C55E;
+  --primary:#1b5df0;--primary-soft:#3f7bff;--primary-deep:#0d3fb8;
+  --primary-glow:rgba(27,93,240,0.38);--highlight:#2fbf2e;
+  --success:#3DDC5A;--danger:#F87171;--warning:#FBBF24;--whatsapp:#22C55E;
   --info:#3B82F6;--accent:#A855F7;
   --shadow-card:0 10px 40px rgba(0,0,0,0.5);
 }
 :root[data-theme="day"]{
   --bg:#f5f9ff;--bg-deep:#e6eefb;
-  --surface:#FFF6EA;--surface-2:#F6E9D6;--surface-3:#EFDFC9;
-  --border:rgba(59,36,32,0.07);--border-2:rgba(59,36,32,0.14);--border-strong:rgba(59,36,32,0.24);
+  --surface:#FFFFFF;--surface-2:#f1f6ff;--surface-3:#e7eefc;
+  --border:rgba(15,23,42,0.07);--border-2:rgba(15,23,42,0.14);--border-strong:rgba(15,23,42,0.24);
   --text:#0f172a;--text-2:#52617a;--text-3:#94a3b8;
-  --primary:#C94B68;--primary-soft:#D5A13D;--primary-deep:#9E3550;
-  --primary-glow:rgba(201,75,104,0.32);--highlight:#D5A13D;
-  --success:#0F9D58;--danger:#DC2D3F;--warning:#E89B1F;--whatsapp:#16A34A;
+  --primary:#1b5df0;--primary-soft:#3f7bff;--primary-deep:#0d3fb8;
+  --primary-glow:rgba(27,93,240,0.32);--highlight:#2fbf2e;
+  --success:#1E8F1D;--danger:#DC2D3F;--warning:#E89B1F;--whatsapp:#16A34A;
   --info:#3B82F6;--accent:#A855F7;
-  --shadow-card:0 8px 32px rgba(59,36,32,0.10);
+  --shadow-card:0 8px 32px rgba(15,23,42,0.08);
 }
 
 body{
@@ -1151,10 +1151,10 @@ window.__signOut = async () => {
   <aside class="sidebar">
     <div class="brand">
       <div class="brand__logo">
-        <img src="assets/icon-sentia.png" alt="SENTIA Academy">
+        <img src="assets/icon-sentia.png" alt="SENTIA">
       </div>
       <div>
-        <div class="brand__name">SENTIA Academy</div>
+        <div class="brand__name">SENTIA</div>
         <span class="brand__role">Admin</span>
       </div>
     </div>
@@ -1243,7 +1243,7 @@ window.__signOut = async () => {
 
 <script>
 /* =========================================================
-   SENTIA Academy ADMIN · datos seed + lógica completa
+   SENTIA ADMIN · datos seed + lógica completa
    Para conectar a Firebase en sprint 5
    ========================================================= */
 
@@ -1325,8 +1325,8 @@ const SEED={
     {id:'p9',titulo:'Plantilla de bitácora de equipos',cat:'Laboratorio Clínico',paginas:6,size:'540 KB',publicado:true,descargas:42}
   ],
   certificados:[
-    {id:'cert1',estudiante:'Carlos Méndez',email:'carlos.mendez@email.com',curso:'Microbiología clínica · diagnóstico bacteriano',folio:'SENTIA Academy-2026-48201',emitido:'2026-04-18',horas:8,calificacion:96,enviado:true},
-    {id:'cert2',estudiante:'María Hernández',email:'maria.hernandez@email.com',curso:'Hematología: interpretación de la biometría hemática',folio:'SENTIA Academy-2026-37154',emitido:'2026-03-22',horas:16,calificacion:92,enviado:true}
+    {id:'cert1',estudiante:'Carlos Méndez',email:'carlos.mendez@email.com',curso:'Microbiología clínica · diagnóstico bacteriano',folio:'SENTIA-2026-48201',emitido:'2026-04-18',horas:8,calificacion:96,enviado:true},
+    {id:'cert2',estudiante:'María Hernández',email:'maria.hernandez@email.com',curso:'Hematología: interpretación de la biometría hemática',folio:'SENTIA-2026-37154',emitido:'2026-03-22',horas:16,calificacion:92,enviado:true}
   ],
   miembros:[
     {id:'m1',nombre:'Carlos Méndez Aguilar',email:'carlos.mendez@email.com',plan:'Anual',inicio:'2026-03-15',renovacion:'2027-03-15',activo:true,cursos:7},
@@ -1383,7 +1383,7 @@ async function cargarPreciosClub(){
     if (c.emailContacto) SEED.config.emailContacto = c.emailContacto;
     SEED.config.facebook = c.facebook || '';
     SEED.config.whatsappCanal = c.whatsappCanal || '';
-  } catch(e){ console.warn('[SENTIA Academy admin] No se pudo leer config/club:', e.message); }
+  } catch(e){ console.warn('[SENTIA admin] No se pudo leer config/club:', e.message); }
 }
 window.addEventListener('adminready', cargarPreciosClub);
 
@@ -1433,7 +1433,7 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Resumen general</span>
           <h1 class="sec-hero__title">Dashboard</h1>
-          <p class="sec-hero__sub">Vista general del panel SENTIA Academy · miembros, contenido, certificados emitidos e ingresos del mes.</p>
+          <p class="sec-hero__sub">Vista general del panel SENTIA · miembros, contenido, certificados emitidos e ingresos del mes.</p>
           ${loadingBadge}
         </div>
 
@@ -2588,7 +2588,7 @@ const Pages={
         }))
       : [];
 
-    // Áreas dinámicas (de los cursos existentes + las estándar de SENTIA Academy)
+    // Áreas dinámicas (de los cursos existentes + las estándar de SENTIA)
     const store = window.AdminStore;
     const areasExistentes = store?.ready
       ? Array.from(new Set(store.cursos.map(c => c.area).filter(Boolean)))
@@ -2978,7 +2978,7 @@ const Pages={
 
   // ════════════════════════════════════════════════════════════════════
   // CLASES EN VIVO (WEBINARS) · CRUD real conectado a Firestore col `webinars`
-  // Lógica idéntica a Sinergia · adaptada al diseño SENTIA Academy
+  // Lógica idéntica a Sinergia · adaptada al diseño SENTIA
   // ════════════════════════════════════════════════════════════════════
 
   _webState: {
@@ -3396,7 +3396,7 @@ const Pages={
   // PDFs y MATERIAL · Vista agregada de todos los materiales de Firestore
   // Cada material vive dentro de su curso (en cursos/{id}.materiales[])
   // Esta vista los recorre todos y los muestra en una sola lista.
-  // (Lógica de Sinergia · adaptada al diseño SENTIA Academy)
+  // (Lógica de Sinergia · adaptada al diseño SENTIA)
   // ════════════════════════════════════════════════════════════════════
 
   _pdfsState: {
@@ -3867,7 +3867,7 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Emisión</span>
           <h1 class="sec-hero__title">Certificados</h1>
-          <p class="sec-hero__sub">Emite certificados con folio único SENTIA Academy-AÑO-XXXXX. El sistema genera el PDF, lo guarda y envía al estudiante por email.</p>
+          <p class="sec-hero__sub">Emite certificados con folio único SENTIA-AÑO-XXXXX. El sistema genera el PDF, lo guarda y envía al estudiante por email.</p>
           <div class="sec-hero__actions">
             <button class="btn btn--accent" id="new-cert"><svg class="ic"><use href="#i-plus"/></svg>Emitir certificado</button>
           </div>
@@ -3909,7 +3909,7 @@ const Pages={
     }
     function certModal(){
       const cursosOpts=SEED.cursos.filter(c=>c.activo).map(c=>`<option>${c.titulo}</option>`).join('');
-      const folio='SENTIA Academy-2026-'+String(Math.floor(10000+Math.random()*89999));
+      const folio='SENTIA-2026-'+String(Math.floor(10000+Math.random()*89999));
       const body=`
         <div class="form-grid">
           <div class="form-field form-field--full"><label class="label">Estudiante</label><input type="text" class="input" id="ce-nom" placeholder="Nombre completo del estudiante"></div>
@@ -4908,7 +4908,7 @@ const Pages={
             <div class="cron-card__info">
               <span class="cron-card__lbl">Estado sin confirmar</span>
               <div class="cron-card__title">NewsData → Firestore</div>
-              <div class="cron-card__sub">Aún no hay registro de ejecuciones reales del cron para SENTIA Academy. Verifica el cron de Railway en el repo del webhook.</div>
+              <div class="cron-card__sub">Aún no hay registro de ejecuciones reales del cron para SENTIA. Verifica el cron de Railway en el repo del webhook.</div>
             </div>
             <button class="btn btn--ghost" id="cron-run"><svg class="ic"><use href="#i-refresh"/></svg>Ejecutar ahora</button>
           </div>
@@ -4916,7 +4916,7 @@ const Pages={
 
         <div class="section-header"><h2 class="section-header__title">Noticias publicadas${noticiasReales.length?` <span class="section-header__badge">${noticiasReales.length}</span>`:''}</h2></div>
         <div class="adm-list">
-          ${noticiasReales.length===0?`<div class="empty"><div class="empty__icon"><svg class="ic"><use href="#i-news"/></svg></div><h3>Sin noticias publicadas</h3><p>El cron aún no ha generado noticias reales para SENTIA Academy.</p></div>`:noticiasReales.map(n=>`
+          ${noticiasReales.length===0?`<div class="empty"><div class="empty__icon"><svg class="ic"><use href="#i-news"/></svg></div><h3>Sin noticias publicadas</h3><p>El cron aún no ha generado noticias reales para SENTIA.</p></div>`:noticiasReales.map(n=>`
             <div class="news-card" style="--c1:${n.color||'#C94B68'};">
               <div class="news-card__cover"><svg class="ic"><use href="#i-news"/></svg></div>
               <div class="news-card__body">
@@ -5078,7 +5078,7 @@ const Pages={
         <div class="kpi-card"><div class="kpi-card__label">Últimas 24 h</div><div class="kpi-card__value" id="fs-24">—</div></div>
       </div>
       <div class="adm-composer" style="margin-top:18px;">
-        <div class="adm-composer__head"><span class="tag-mini tag-mini--admin">SENTIA Academy</span><span class="adm-composer__hint">Publica como cuenta oficial — ideal para anuncios o resolver dudas de membresía</span></div>
+        <div class="adm-composer__head"><span class="tag-mini tag-mini--admin">SENTIA</span><span class="adm-composer__hint">Publica como cuenta oficial — ideal para anuncios o resolver dudas de membresía</span></div>
         <textarea class="adm-composer__input" id="adm-post-text" rows="2" maxlength="1500" placeholder="Escribe un anuncio o mensaje para la comunidad…"></textarea>
         <div id="adm-post-img-prev" class="adm-img-prev" style="display:none;">
           <img id="adm-post-img-el" alt="adjunto">
@@ -5090,7 +5090,7 @@ const Pages={
             <input type="file" id="adm-post-file" accept="image/*" style="display:none;">
             <span class="adm-composer__char" id="adm-post-char">0 / 1500</span>
           </div>
-          <button class="btn btn--primary" id="adm-post-publicar">Publicar como SENTIA Academy</button>
+          <button class="btn btn--primary" id="adm-post-publicar">Publicar como SENTIA</button>
         </div>
       </div>
       <div id="foro-admin-list" class="foro-admin-list" style="margin-top:18px;"><div class="empty-state">Cargando publicaciones…</div></div>
@@ -5199,13 +5199,13 @@ function _admAutor(){
   const a = window.__currentAdmin || {};
   return {
     uid: a.uid || 'admin',
-    nombre: 'SENTIA Academy',
+    nombre: 'SENTIA',
     iniciales: 'IM',
     color: '#C94B68',
     esAdmin: true
   };
 }
-// Publicar como cuenta oficial SENTIA Academy
+// Publicar como cuenta oficial SENTIA
 async function foroAdminPublicar(txtEl){
   const t = (txtEl.value||'').trim();
   if (!t && !_admPostImg){ Toast.error('Escribe algo','o adjunta una imagen'); return; }
@@ -5222,11 +5222,11 @@ async function foroAdminPublicar(txtEl){
     txtEl.value=''; const ch=document.getElementById('adm-post-char'); if(ch) ch.textContent='0 / 1500';
     _admPostImg = null;
     const pv=document.getElementById('adm-post-img-prev'); if(pv) pv.style.display='none';
-    Toast.success('Publicado como SENTIA Academy','Ya aparece en el foro');
+    Toast.success('Publicado como SENTIA','Ya aparece en el foro');
   } catch(e){ console.error(e); Toast.error('No se pudo publicar', e.message||''); }
   finally { btn.disabled=false; btn.textContent=orig; }
 }
-// Responder a un post como SENTIA Academy
+// Responder a un post como SENTIA
 async function foroAdminResponder(postId, inputEl){
   const t = (inputEl.value||'').trim();
   if (!t) return;
@@ -5271,13 +5271,13 @@ function foroAdminCargar(){
         <div class="foro-admin-card__main">
           <div class="foro-admin-card__head">
             <span class="foro-admin-card__name">${(x.nombre||'Miembro')}</span>
-            ${x.esAdmin?'<span class="tag-mini tag-mini--admin">SENTIA Academy</span>':'<span class="tag-mini">VIP</span>'}
+            ${x.esAdmin?'<span class="tag-mini tag-mini--admin">SENTIA</span>':'<span class="tag-mini">VIP</span>'}
             <span class="foro-admin-card__time">${foroAdminTiempo(x.createdAt)}</span>
           </div>
           ${x.texto?`<div class="foro-admin-card__text">${(x.texto||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
           ${x.imagen?`<img class="foro-admin-card__img" src="${x.imagen}" alt="adjunto">`:''}
           <div class="foro-admin-card__meta">❤ ${x.likes||0} · 💬 ${x.comentariosCount||0} respuestas</div>
-          <button class="foro-admin-card__vercom" data-vercom="${x.id}">${(x.comentariosCount||0)>0?'Ver respuestas y responder':'Responder como SENTIA Academy'}</button>
+          <button class="foro-admin-card__vercom" data-vercom="${x.id}">${(x.comentariosCount||0)>0?'Ver respuestas y responder':'Responder como SENTIA'}</button>
           <div class="foro-admin-coms" id="adm-coms-${x.id}" style="display:none;"></div>
         </div>
         <button class="foro-admin-card__del" data-fdel="${x.id}" title="Eliminar publicación"><svg class="ic"><use href="#i-trash"/></svg></button>
@@ -5305,7 +5305,7 @@ function foroAdminVerComentarios(postId){
   cont.innerHTML = `
     <div class="adm-comlist" id="adm-comlist-${postId}"><div class="empty-state" style="padding:12px;">Cargando…</div></div>
     <div class="adm-reply">
-      <input type="text" class="adm-reply__in" id="adm-reply-${postId}" placeholder="Responder como SENTIA Academy…" maxlength="600">
+      <input type="text" class="adm-reply__in" id="adm-reply-${postId}" placeholder="Responder como SENTIA…" maxlength="600">
       <button class="btn btn--primary btn--sm" data-reply="${postId}">Responder</button>
     </div>
   `;
@@ -5325,7 +5325,7 @@ function foroAdminVerComentarios(postId){
       <div class="adm-com">
         <div class="adm-com__av" style="background:linear-gradient(135deg,${c.color||'#888'},${(c.color||'#888')}aa);">${(c.iniciales||'?')}</div>
         <div class="adm-com__body">
-          <div class="adm-com__head"><span class="adm-com__name">${(c.nombre||'Miembro')}</span>${c.esAdmin?'<span class="tag-mini tag-mini--admin" style="font-size:8px;padding:1px 6px;">SENTIA Academy</span>':''}<span class="adm-com__time">${foroAdminTiempo(c.createdAt)}</span></div>
+          <div class="adm-com__head"><span class="adm-com__name">${(c.nombre||'Miembro')}</span>${c.esAdmin?'<span class="tag-mini tag-mini--admin" style="font-size:8px;padding:1px 6px;">SENTIA</span>':''}<span class="adm-com__time">${foroAdminTiempo(c.createdAt)}</span></div>
           <div class="adm-com__text">${(c.texto||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
         </div>
         <button class="adm-com__del" data-comdel="${postId}|${c.id}" title="Eliminar respuesta"><svg class="ic"><use href="#i-trash"/></svg></button>
