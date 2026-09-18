@@ -1433,17 +1433,18 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Resumen general</span>
           <h1 class="sec-hero__title">Dashboard</h1>
-          <p class="sec-hero__sub">Vista general del panel SENTIA · miembros, contenido, certificados emitidos e ingresos del mes.</p>
+          <p class="sec-hero__sub">Vista general del panel SENTIA · miembros, contenido y certificados emitidos.</p>
           ${loadingBadge}
         </div>
 
         <div class="kpi-grid">
-          <div class="kpi-card" style="--c1:#E5C171;--c2:#22C55E;">
+          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
             <div class="kpi-card__label">Miembros activos</div>
             <div class="kpi-card__value">${stats.miembrosActivos}<span style="font-size:18px;color:var(--text-3);margin-left:4px;">/${stats.miembrosTotal}</span></div>
             <div class="kpi-card__sub">${stats.miembrosTotal > 0 ? `<strong>${Math.round(stats.miembrosActivos/stats.miembrosTotal*100)}%</strong> activos` : 'Sin miembros aún'}</div>
           </div>
-          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
+          <!-- Ingresos estimados oculto por decisión -->
+          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;display:none;">
             <div class="kpi-card__label">Ingresos estimados/mes</div>
             <div class="kpi-card__value">$${ingresoMes.toLocaleString('es-MX')}</div>
             <div class="kpi-card__sub">MXN · basado en miembros activos</div>
@@ -1647,7 +1648,7 @@ const Pages={
             <div class="kpi-card__value">${notifs.length}</div>
             <div class="kpi-card__sub">Últimas 50</div>
           </div>
-          <div class="kpi-card" style="--c1:#E5C171;--c2:#22C55E;">
+          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
             <div class="kpi-card__label">Hoy</div>
             <div class="kpi-card__value">${notifs.filter(n => {
               const ms = n.createdAt?.toDate?.()?.getTime?.() || 0;
@@ -2277,7 +2278,7 @@ const Pages={
         <div class="kpi-card__value">${cursos.length}</div>
         <div class="kpi-card__sub">${ready ? 'En Firestore' : 'Cargando…'}</div>
       </div>
-      <div class="kpi-card" style="--c1:#E5C171;--c2:#22C55E;">
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
         <div class="kpi-card__label">Activos</div>
         <div class="kpi-card__value">${activos}</div>
         <div class="kpi-card__sub">${inactivos} inactivo${inactivos!==1?'s':''}</div>
@@ -3521,7 +3522,7 @@ const Pages={
         <div class="kpi-card__value">${total}</div>
         <div class="kpi-card__sub">${cursosConMat} curso${cursosConMat!==1?'s':''} con material</div>
       </div>
-      <div class="kpi-card" style="--c1:#E5C171;--c2:#22C55E;">
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
         <div class="kpi-card__label">Siempre disponibles</div>
         <div class="kpi-card__value">${siempre}</div>
         <div class="kpi-card__sub">Sin esperar desbloqueo</div>
@@ -4099,7 +4100,7 @@ const Pages={
     const conversion = totalConCuenta > 0 ? Math.round((activos / totalConCuenta) * 100) : 0;
 
     wrap.innerHTML = `
-      <div class="kpi-card" style="--c1:#E5C171;--c2:#22C55E;">
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
         <div class="kpi-card__label">Miembros activos</div>
         <div class="kpi-card__value">${activos}</div>
         <div class="kpi-card__sub">${ready ? `de ${totalConCuenta} con cuenta · ${conversion}% conversión` : 'Cargando…'}</div>
@@ -4119,7 +4120,8 @@ const Pages={
         <div class="kpi-card__value">${anuales}</div>
         <div class="kpi-card__sub">${anuales > 0 ? '$' + (anuales * _pa).toLocaleString('es-MX') + ' MXN al año' : 'Sin anuales'}</div>
       </div>
-      <div class="kpi-card" style="--c1:#A855F7;--c2:#C084FC;">
+      <!-- MRR oculto por decisión -->
+      <div class="kpi-card" style="--c1:#A855F7;--c2:#C084FC;display:none;">
         <div class="kpi-card__label">MRR estimado</div>
         <div class="kpi-card__value">$${mrr.toLocaleString('es-MX')}</div>
         <div class="kpi-card__sub">${regalos} con acceso de regalo</div>
