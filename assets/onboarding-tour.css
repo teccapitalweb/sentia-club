@@ -1,0 +1,40 @@
+/* Recorrido guiado del club SENTIA — estilos para assets/onboarding-tour.js */
+.membership-tour{position:fixed;inset:0;z-index:10000;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .22s ease,visibility .22s ease}
+.membership-tour[aria-hidden="false"],body.membership-tour-open .membership-tour{visibility:visible;opacity:1;pointer-events:auto}
+
+.membership-tour__shade{position:fixed;background:rgba(8,18,40,.62);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px);transition:all .25s ease}
+.membership-tour__spotlight{position:fixed;border-radius:12px;box-shadow:0 0 0 2px #2fbf2e,0 0 0 6px rgba(47,191,46,.28),0 10px 30px rgba(0,0,0,.35);pointer-events:none;transition:all .25s ease}
+.membership-tour__guard{position:fixed;background:transparent;cursor:not-allowed}
+
+.membership-tour__dialog{position:fixed;width:min(360px,calc(100vw - 24px));background:#fff;color:#13294A;border-radius:16px;padding:18px 18px 16px;box-shadow:0 24px 60px rgba(8,18,40,.35);font-family:'Inter','Plus Jakarta Sans',system-ui,sans-serif;outline:none;transition:left .25s ease,top .25s ease}
+
+.membership-tour__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.membership-tour__brand{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#1b5df0}
+.membership-tour__brand-mark{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#1b5df0,#2fbf2e)}
+.membership-tour__skip{border:0;background:none;color:#6B7688;font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px}
+.membership-tour__skip:hover{color:#13294A;background:#F1F4F9}
+
+.membership-tour__progress{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.membership-tour__track{flex:1;height:5px;background:#E6EBF3;border-radius:99px;overflow:hidden}
+.membership-tour__bar{height:100%;width:0;background:linear-gradient(90deg,#1b5df0,#2fbf2e);border-radius:99px;transition:width .3s ease}
+.membership-tour__count{font-size:11.5px;font-weight:600;color:#6B7688;white-space:nowrap}
+
+.membership-tour__title{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.25;margin:0 0 6px;color:#0d1f3c}
+.membership-tour__copy{font-size:13.5px;line-height:1.55;color:#44506A;margin:0 0 16px}
+
+.membership-tour__actions{display:flex;justify-content:flex-end;gap:8px}
+.membership-tour__button{border:0;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s ease,opacity .15s ease}
+.membership-tour__button--back{background:#F1F4F9;color:#13294A}
+.membership-tour__button--back:hover{background:#E6EBF3}
+.membership-tour__button--back:disabled{opacity:.45;cursor:default}
+.membership-tour__button--next{background:#1b5df0;color:#fff}
+.membership-tour__button--next:hover{background:#1649c4}
+.membership-tour__button:focus-visible,.membership-tour__skip:focus-visible{outline:2px solid #2fbf2e;outline-offset:2px}
+
+@media (max-width:900px){
+  .membership-tour__dialog{width:calc(100vw - 24px);padding:16px}
+  .membership-tour__title{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .membership-tour,.membership-tour *{transition:none!important}
+}
