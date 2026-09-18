@@ -1443,10 +1443,9 @@ const Pages={
             <div class="kpi-card__value">${stats.miembrosActivos}<span style="font-size:18px;color:var(--text-3);margin-left:4px;">/${stats.miembrosTotal}</span></div>
             <div class="kpi-card__sub">${stats.miembrosTotal > 0 ? `<strong>${Math.round(stats.miembrosActivos/stats.miembrosTotal*100)}%</strong> activos` : 'Sin miembros aún'}</div>
           </div>
-          <!-- Ingresos estimados oculto por decisión -->
-          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;display:none;">
+          <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
             <div class="kpi-card__label">Ingresos estimados/mes</div>
-            <div class="kpi-card__value">$${ingresoMes.toLocaleString('es-MX')}</div>
+            <div class="kpi-card__value">$0</div>
             <div class="kpi-card__sub">MXN · basado en miembros activos</div>
           </div>
           <div class="kpi-card" style="--c1:#3B82F6;--c2:#60A5FA;">
