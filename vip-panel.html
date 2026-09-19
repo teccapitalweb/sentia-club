@@ -3234,8 +3234,12 @@ if (window.__isDemoMode) {
       window.UserState.membership = { activo:true, plan:'admin' };
     } else {
       try {
-        const res = await fetch(`${WEBHOOK_URL}/membership/${user.uid}`, { method:'GET' });
-        const data = await res.json();
+        // MODIFICADO: la membresia se lee directo de miembros/{uid} (antes via webhook)
+        const mSnap = await getDoc(doc(db, 'miembros', user.uid));
+        const md = mSnap.exists() ? mSnap.data() : {};
+        const mExp = md.expiraEn ? (md.expiraEn.toDate ? md.expiraEn.toDate() : new Date(md.expiraEn)) : null;
+        const mVigente = (md.activo === true || md.activa === true) && (!mExp || mExp.getTime() > Date.now());
+        const data = { activo: mVigente, plan: mVigente ? (md.plan || 'mensual') : null, expiraEn: mExp ? mExp.toISOString() : null };
         window.UserState.membership = data;
         if (data.activo) {
           window.UserState.modo = 'vip';
@@ -3244,7 +3248,7 @@ if (window.__isDemoMode) {
           window.UserState.modo = 'sin-membresia';
         }
       } catch(e) {
-        console.warn('Backend Railway no responde · modo permisivo: sin-membresia');
+        console.warn('No se pudo leer la membresia · modo: sin-membresia', e);
         window.UserState.modo = 'sin-membresia';
       }
 

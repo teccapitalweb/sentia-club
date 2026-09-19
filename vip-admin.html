@@ -4815,17 +4815,30 @@ const Pages={
   },
 
   // ─── Llamadas reales al webhook Railway ───
+  // MODIFICADO: activacion/cancelacion/eliminacion directo en Firestore (sin webhook, plan Spark)
   async _llamarActivar(uid, plan, durationDays, esRegalo) {
     try {
-      const token = await Pages._getAuthToken();
-      const res = await fetch(`${Pages._webhookUrl}/admin/activar-manual`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ uid, plan, durationDays, esRegalo: !!esRegalo })
-      });
-      const data = await res.json();
-      if (!res.ok) return { ok: false, error: data.error || res.statusText };
-      return { ok: true, data };
+      const fb = window._fb;
+      const ref = fb.doc(fb.db, 'miembros', uid);
+      const snap = await fb.getDoc(ref);
+      const actual = snap.exists() ? snap.data() : {};
+      const dias = Math.max(1, Math.min(3660, Number(durationDays) || 30));
+      // Si ya tenia VIP vigente, los dias se suman a partir de su vencimiento
+      const expiraActual = Pages._mbToDate(actual.expiraEn);
+      const vigente = (actual.activo === true || actual.activa === true) && expiraActual && expiraActual.getTime() > Date.now();
+      const base = vigente ? expiraActual : new Date();
+      const expira = new Date(base.getTime() + dias * 86400000);
+      const data = {
+        activo: true, activa: true, plan, esRegalo: !!esRegalo,
+        expiraEn: fb.Timestamp.fromDate(expira),
+        activadoEn: fb.serverTimestamp(),
+        activadoPor: window._fb.auth?.currentUser?.email || 'admin',
+        cancelacionProgramada: false, fechaFinAcceso: null
+      };
+      if (!actual.fechaAlta) data.fechaAlta = fb.serverTimestamp();
+      if (!vigente) data.fechaVipDesde = fb.serverTimestamp();
+      await fb.setDoc(ref, data, { merge: true });
+      return { ok: true, data: { uid, plan, expiraEn: expira.toISOString() } };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -4833,15 +4846,17 @@ const Pages={
 
   async _llamarCancelar(uid, atPeriodEnd) {
     try {
-      const token = await Pages._getAuthToken();
-      const res = await fetch(`${Pages._webhookUrl}/admin/cancelar-stripe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ uid, atPeriodEnd })
-      });
-      const data = await res.json();
-      if (!res.ok) return { ok: false, error: data.error || res.statusText };
-      return { ok: true, data };
+      const fb = window._fb;
+      const ref = fb.doc(fb.db, 'miembros', uid);
+      const snap = await fb.getDoc(ref);
+      if (!snap.exists()) return { ok: false, error: 'Miembro no encontrado' };
+      if (atPeriodEnd) {
+        await fb.setDoc(ref, { cancelacionProgramada: true, fechaFinAcceso: snap.data().expiraEn || null }, { merge: true });
+      } else {
+        const ahora = fb.Timestamp.now();
+        await fb.setDoc(ref, { activo: false, activa: false, cancelacionProgramada: false, fechaFinAcceso: ahora, expiraEn: ahora }, { merge: true });
+      }
+      return { ok: true, data: { uid, atPeriodEnd: !!atPeriodEnd } };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -4849,15 +4864,19 @@ const Pages={
 
   async _llamarEliminar(uid) {
     try {
-      const token = await Pages._getAuthToken();
-      const res = await fetch(`${Pages._webhookUrl}/admin/eliminar-miembro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ uid })
-      });
-      const data = await res.json();
-      if (!res.ok) return { ok: false, error: data.error || res.statusText };
-      return { ok: true, data };
+      const fb = window._fb;
+      await fb.deleteDoc(fb.doc(fb.db, 'miembros', uid));
+      try { await fb.deleteDoc(fb.doc(fb.db, 'directorio', uid)); } catch (_) {}
+      // La cuenta de acceso (Auth) se borra en el webhook; si falla, el miembro ya no tiene datos ni VIP
+      try {
+        const token = await Pages._getAuthToken();
+        await fetch(`${Pages._webhookUrl}/admin/eliminar-usuario`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ uid })
+        });
+      } catch (_) {}
+      return { ok: true, data: { uid } };
     } catch (e) {
       return { ok: false, error: e.message };
     }
