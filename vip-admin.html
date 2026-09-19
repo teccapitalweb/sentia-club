@@ -4833,7 +4833,9 @@ const Pages={
         expiraEn: fb.Timestamp.fromDate(expira),
         activadoEn: fb.serverTimestamp(),
         activadoPor: window._fb.auth?.currentUser?.email || 'admin',
-        cancelacionProgramada: false, fechaFinAcceso: null
+        cancelacionProgramada: false, fechaFinAcceso: null,
+        // Splash de bienvenida en el panel del alumno (lo marca como mostrada al verlo)
+        notificacionPendiente: { tipo: esRegalo ? 'regalo' : null, plan, dias, mostrada: false, creadaEn: fb.Timestamp.now() }
       };
       if (!actual.fechaAlta) data.fechaAlta = fb.serverTimestamp();
       if (!vigente) data.fechaVipDesde = fb.serverTimestamp();
