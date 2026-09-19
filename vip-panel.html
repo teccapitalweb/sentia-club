@@ -8022,6 +8022,16 @@ const Sections = (function(){
     const _nom = escapeHtml(S.nombre || S.displayName || 'Miembro');
     const _em  = escapeHtml(S.email || '—');
     const _ini = (S.iniciales || 'IN');
+    // MODIFICADO: insignias reales (antes estaban fijas "VIP Anual / Nivel 2 / mar 2026")
+    const _planTxt = S.modo === 'vip'
+      ? ({ anual:'VIP Anual', mensual:'VIP Mensual', regalo:'VIP de regalo', admin:'Administrador' }[S.plan] || 'VIP')
+      : 'Sin membresía';
+    const _planBadge = `<span class="pill"><svg class="ic"><use href="#i-crown"/></svg>${_planTxt}</span>`;
+    const _nivel = getNivel((typeof usuario !== 'undefined' && usuario.xp) || 0);
+    const _md = window.memberData || {};
+    const _fReg = _md.fechaRegistro || _md.createdAt || _md.fechaAlta;
+    const _fRegD = _fReg ? (_fReg.toDate ? _fReg.toDate() : new Date(_fReg)) : null;
+    const _desde = (_fRegD && !isNaN(_fRegD)) ? _fRegD.toLocaleDateString('es-MX', { month:'short', year:'numeric' }) : '';
     container.innerHTML = `
       <div class="fade-up">
         <div class="sec-hero">
@@ -8036,9 +8046,9 @@ const Sections = (function(){
             <h2 class="perfil-hero__name">${_nom}</h2>
             <div class="perfil-hero__email">${_em}</div>
             <div class="perfil-hero__badges">
-              <span class="pill"><svg class="ic"><use href="#i-crown"/></svg>VIP Anual</span>
-              <span class="tag tag--new">Nivel 2 · Técnico</span>
-              <span class="tag tag--down">Miembro desde mar 2026</span>
+              ${_planBadge}
+              <span class="tag tag--new">Nivel ${_nivel.id} · ${_nivel.nombre}</span>
+              ${_desde ? `<span class="tag tag--down">Miembro desde ${_desde}</span>` : ''}
             </div>
           </div>
           <button class="btn btn--ghost" id="btn-edit-profile" style="align-self:flex-start;"><svg class="ic"><use href="#i-tools"/></svg>Editar perfil</button>
