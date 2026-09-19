@@ -3083,7 +3083,7 @@ body.has-fomo .main{padding-top:18px}
 <!-- Banner sticky FOMO · solo visible para invitado y sin-membresia -->
 <div class="fomo-banner" id="fomo-banner" style="display:none">
   <span class="fomo-banner__icon" aria-hidden="true">⭐</span>
-  <span class="fomo-banner__text" id="fomo-banner-text"><strong>Tus primeras 4 clases y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.</span>
+  <span class="fomo-banner__text" id="fomo-banner-text"><strong>Tu primera clase y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.</span>
   <span class="fomo-banner__timer" id="fomo-banner-timer" style="display:none">5:00</span>
   <button class="fomo-banner__cta" id="fomo-banner-cta" type="button">
     Suscribirme
@@ -4782,7 +4782,7 @@ const Sections = (function(){
     ) || null;
   }
 
-  const CLASES_GRATIS = 4;
+  const CLASES_GRATIS = 1; // MODIFICADO: solo la 1a clase del curso de muestra es gratis
   const MATERIALES_GRATIS = 1;
   function esPrimeraClaseGratis(cursoId, indexClase) {
     const cursoGratis = cursoConPrimeraClaseGratis();
@@ -4801,7 +4801,7 @@ const Sections = (function(){
   }
 
   function textoPaywallCurso(curso) {
-    return `Disfruta gratis las primeras ${CLASES_GRATIS} clases y el primer material en PDF del primer curso. Activa tu membresía para abrir el resto del contenido.`;
+    return `Disfruta gratis ${CLASES_GRATIS === 1 ? 'la primera clase' : 'las primeras ' + CLASES_GRATIS + ' clases'} y el primer material en PDF del primer curso. Activa tu membresía para abrir el resto del contenido.`;
   }
 
   function mostrarPaywallCurso(curso) {
@@ -5612,7 +5612,7 @@ const Sections = (function(){
       <article class="curso-card ${accesoCompleto && !desbloqueado?'curso-card--locked':''}" data-cid="${c.id}" tabindex="0" style="--area-color:${COLOR_AREA[c.area]||'#1b5df0'};">
         <div class="curso-card__cover" style="background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${portada}');background-size:cover;background-position:center;">
           <svg class="ic" style="opacity:.85;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));"><use href="#${ICON_AREA[c.area]||'i-book'}"/></svg>
-          ${esCursoMuestra ? `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${CLASES_GRATIS} CLASES GRATIS</span>` : ''}
+          ${esCursoMuestra ? `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${CLASES_GRATIS === 1 ? '1 CLASE GRATIS' : CLASES_GRATIS + ' CLASES GRATIS'}</span>` : ''}
           ${c.disponibleSiempre ? '<span class="curso-card__cover-badge" style="background:var(--success);color:#081225;">DISPONIBLE</span>' : ''}
           ${accesoCompleto && !desbloqueado && diasFalta > 0 ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--primary);border:1px solid var(--primary);">🔒 Se desbloquea en ${diasFalta} día${diasFalta!==1?'s':''}</span>` : ''}
         </div>
@@ -9741,7 +9741,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       } else { // sin-membresia
         banner.style.display = '';
         document.body.classList.add('has-fomo');
-        if (bannerText) bannerText.innerHTML = '<strong>Tus primeras 4 clases y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.';
+        if (bannerText) bannerText.innerHTML = '<strong>Tu primera clase y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.';
         if (bannerTimer) bannerTimer.style.display = 'none';
       }
     }
