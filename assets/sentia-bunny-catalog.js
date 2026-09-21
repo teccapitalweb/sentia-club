@@ -1,5 +1,5 @@
 // Catalogo Bunny.net para SENTIA Academy
-// Generado 2026-09-18 18:24 · libreria 756118
+// Generado 2026-09-21 12:48 · libreria 756118
 window.SENTIA_BUNNY_CATALOG = [
     {
         "titulo":  "EVALUACIÓN PSICOLÓGICA EN GUARDIA Y CUSTODIA ENTREVISTA, INTEGRACIÓN E INFORME",
@@ -40,6 +40,16 @@ window.SENTIA_BUNNY_CATALOG = [
                              "numero":  3,
                              "titulo":  "SESION NO. 3 PRIMEROS AUXILIOS PSICOLÓGICOS_ CONTENCIÓN, DETECCIÓN DE RIESGO Y CANALIZACIÓN.",
                              "videoId":  "acdd3b8c-5a49-4e6e-ad29-30e908c4b3d0"
+                         },
+                         {
+                             "numero":  4,
+                             "titulo":  "SESION NO. 4 PRIMEROS AUXILIOS PSICOLÓGICOS_ CONTENCIÓN, DETECCIÓN DE RIESGO Y CANALIZACIÓN.",
+                             "videoId":  "1dc14282-377e-4e9e-b07f-16de3650bf9f"
+                         },
+                         {
+                             "numero":  5,
+                             "titulo":  "SESION NO. 5 PRIMEROS AUXILIOS PSICOLÓGICOS_ CONTENCIÓN, DETECCIÓN DE RIESGO Y CANALIZACIÓN.",
+                             "videoId":  "3aec8e4a-d766-4b88-86d2-30e552b8dd30"
                          }
                      ]
     },
