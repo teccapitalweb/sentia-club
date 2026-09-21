@@ -1959,25 +1959,21 @@ const Pages={
   // (CREAR/EDITAR/ELIMINAR vienen en 3B y 3C)
   // ════════════════════════════════════════════════════════════════════
 
+  // MODIFICADO: portada SENTIA (igual que el panel del alumno)
   _coverSVG(area, titulo){
-    var a=(area||'').toLowerCase(), t=(titulo||'').toLowerCase();
-    var IMG={
-      micro:'https://images.unsplash.com/photo-1596051827487-7b3d6f6df842?w=900&q=80&auto=format&fit=crop',
-      mol:'https://images.unsplash.com/photo-1681911046064-e663d5192921?w=900&q=80&auto=format&fit=crop',
-      lab:'https://images.unsplash.com/photo-1748261348213-62f4c399bb72?w=900&q=80&auto=format&fit=crop',
-      scope:'https://images.unsplash.com/photo-1526930700683-86db0d6bab09?w=900&q=80&auto=format&fit=crop'
-    };
-    function pick(){
-      if(a.indexOf('microbi')>=0||a.indexOf('parasit')>=0)return'micro';
-      if(a.indexOf('molecular')>=0||a.indexOf('gen\u00e9t')>=0||a.indexOf('genet')>=0)return'mol';
-      if(a.indexOf('investig')>=0)return'scope';
-      if(a.indexOf('clínic')>=0||a.indexOf('clinic')>=0||a.indexOf('terapi')>=0||a.indexOf('intervencion')>=0||a.indexOf('evaluación')>=0)return'lab';
-      if(/infantil|niño|tea|tdah|autismo|desarrollo|aprendizaje|bullying/.test(t))return'micro';
-      if(/laboral|burnout|riesgo|psicosocial|nom.?035|organizacional/.test(t))return'mol';
-      if(/cristal|material|difrac|microsc/.test(t))return'scope';
-      return'lab';
-    }
-    return IMG[pick()];
+    var a=(area||'').toLowerCase();
+    var P=[['#0a1f4d','#1b5df0','#2fbf2e'],['#0d1b3e','#3f7bff','#7c5cff'],['#0a2540','#1b5df0','#15b8a6'],['#101a3a','#2f6bff','#f5a524'],['#0b1f3a','#0ea5e9','#2fbf2e']];
+    var i=0;
+    if(/forense|jur|custod/.test(a))i=1; else if(/laboral|organiz/.test(a))i=3; else if(/educa|infantil|desarrollo/.test(a))i=4; else if(/interv|cl[ií]n|salud|neuro/.test(a))i=2;
+    var c=P[i];
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">'+
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c[0]+'"/><stop offset=".65" stop-color="'+c[1]+'"/><stop offset="1" stop-color="'+c[2]+'"/></linearGradient>'+
+      '<radialGradient id="r" cx=".85" cy=".2" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>'+
+      '<rect width="900" height="360" fill="url(#g)"/><rect width="900" height="360" fill="url(#r)"/>'+
+      '<g fill="none" stroke="#fff" stroke-opacity=".10" stroke-width="2"><circle cx="760" cy="60" r="140"/><circle cx="760" cy="60" r="200"/><circle cx="120" cy="330" r="110"/></g>'+
+      '<text x="820" y="320" text-anchor="end" font-family="Georgia,serif" font-size="260" fill="#fff" fill-opacity=".10">\u03A8</text>'+
+      '</svg>';
+    return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   },
   _getPortada(curso) {
     if (curso.portada) return curso.portada;
@@ -2611,8 +2607,16 @@ const Pages={
           <input type="number" class="input" id="cf-horas" min="1" max="200" value="${horasVal}" placeholder="${horasAuto || 1}">
         </div>
         <div class="form-field">
-          <label class="label" for="cf-portada">URL portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional)</span></label>
-          <input type="url" class="input" id="cf-portada" value="${(c.portada || '').replace(/"/g,'&quot;')}" placeholder="https://…">
+          <label class="label">Imagen de portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional · si no subes, se usa la portada SENTIA)</span></label>
+          <!-- MODIFICADO: subir imagen sin codigo; se comprime y se guarda con el curso -->
+          <input type="hidden" id="cf-portada" value="${(c.portada || '').replace(/"/g,'&quot;')}">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div id="cf-portada-prev" style="width:150px;height:60px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;${c.portada ? `background-image:url('${(c.portada||'').replace(/'/g,'%27')}');` : ''}display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);">${c.portada ? '' : 'Portada SENTIA'}</div>
+            <button type="button" class="btn btn--ghost btn--sm" onclick="document.getElementById('cf-portada-file').click()">Subir imagen</button>
+            <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaSet('')">Quitar</button>
+            <input type="file" id="cf-portada-file" accept="image/*" style="display:none" onchange="window.__cfPortadaArchivo(this)">
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:6px;">JPG o PNG horizontal. Se recorta a 1200 × 480 y se optimiza sola.</div>
         </div>
 
         <div class="form-field form-field--full">
@@ -2711,7 +2715,7 @@ const Pages={
         <span style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">CLASE ${idx + 1}</span>
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título de la clase" value="${(s.titulo || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="titulo" style="font-size:13px;padding:8px 11px;">
-          <input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">
+          ${s.videoId && !s.url ? `<div style="font-size:12.5px;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">🐰 Video de Bunny vinculado · no necesita URL</div>` : `<input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">`}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
           <button type="button" class="curso-card__action" data-sesion-mover="${idx}" data-delta="-1" ${idx === 0 ? 'disabled' : ''} title="Subir" style="width:28px;height:24px;${idx === 0 ? 'opacity:.4;cursor:not-allowed;' : ''}">▲</button>
@@ -2900,7 +2904,7 @@ const Pages={
         activo: true,
         disponible: true
       };
-      if (portada) data.portada = portada;
+      data.portada = portada || ''; // MODIFICADO: vacio = portada SENTIA automatica
 
       // Firebase
       const fb = window._fb;
@@ -5745,5 +5749,31 @@ if (window.__currentAdmin) AdminStore.init();
 
 
 <script src="pwa.js" defer></script>
+<script>
+/* MODIFICADO: portada del curso subida desde el admin (sin GitHub ni codigo).
+   La imagen se recorta a 1200x480, se comprime a JPG y se guarda en el curso (Firestore). */
+window.__cfPortadaSet = function(v){
+  const h=document.getElementById('cf-portada'), p=document.getElementById('cf-portada-prev');
+  if(h) h.value=v||'';
+  if(p){ p.style.backgroundImage = v ? "url('"+v+"')" : 'none'; p.textContent = v ? '' : 'Portada SENTIA'; }
+};
+window.__cfPortadaArchivo = function(input){
+  const f=input.files && input.files[0]; input.value='';
+  if(!f) return;
+  if(!/^image\//.test(f.type)){ (typeof Toast!=='undefined'?Toast:{error:(a,b)=>alert(a+'. '+b)}).error('Archivo no válido','Sube una imagen JPG o PNG'); return; }
+  const r=new FileReader();
+  r.onload=e=>{ const img=new Image(); img.onload=()=>{
+    const W=1200,H=480, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const esc=Math.max(W/img.width,H/img.height), w=img.width*esc, h=img.height*esc;
+    const ctx=cv.getContext('2d'); ctx.fillStyle='#0a1f4d'; ctx.fillRect(0,0,W,H);
+    ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+    let q=0.82, out=cv.toDataURL('image/jpeg',q);
+    while(out.length>260000 && q>0.45){ q-=0.07; out=cv.toDataURL('image/jpeg',q); }
+    window.__cfPortadaSet(out);
+    if(typeof Toast!=='undefined') Toast.success('Portada lista','Se guarda al dar "Guardar cambios"');
+  }; img.onerror=()=>{ if(typeof Toast!=='undefined') Toast.error('No se pudo leer la imagen'); }; img.src=e.target.result; };
+  r.readAsDataURL(f);
+};
+</script>
 </body>
 </html>
