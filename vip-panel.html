@@ -3083,7 +3083,7 @@ body.has-fomo .main{padding-top:18px}
 <!-- Banner sticky FOMO · solo visible para invitado y sin-membresia -->
 <div class="fomo-banner" id="fomo-banner" style="display:none">
   <span class="fomo-banner__icon" aria-hidden="true">⭐</span>
-  <span class="fomo-banner__text" id="fomo-banner-text"><strong>Tu primera clase y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.</span>
+  <span class="fomo-banner__text" id="fomo-banner-text"><strong>Tus primeras 2 clases y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.</span>
   <span class="fomo-banner__timer" id="fomo-banner-timer" style="display:none">5:00</span>
   <button class="fomo-banner__cta" id="fomo-banner-cta" type="button">
     Suscribirme
@@ -4923,7 +4923,7 @@ const Sections = (function(){
     ) || null;
   }
 
-  const CLASES_GRATIS = 1; // MODIFICADO: solo la 1a clase del curso de muestra es gratis
+  const CLASES_GRATIS = 2; // MODIFICADO: las 2 primeras clases del curso de muestra son gratis
   const MATERIALES_GRATIS = 1;
   function esPrimeraClaseGratis(cursoId, indexClase) {
     const cursoGratis = cursoConPrimeraClaseGratis();
@@ -5094,21 +5094,9 @@ const Sections = (function(){
   };
 
   function claseDesbloqueada(cursoId, indexClase, sesiones) {
-    if (!tieneAccesoVipCompleto()) {
-      // No-VIP: solo las 4 clases gratis, secuenciales (marcar vista para abrir la siguiente)
-      if (!esPrimeraClaseGratis(cursoId, indexClase)) return false;
-      if (Number(indexClase) === 0) return true;
-      const progFree = getProgresoCurso(cursoId);
-      const antFree = sesiones[Number(indexClase) - 1];
-      const antNumFree = antFree?.numero || Number(indexClase);
-      return progFree.clasesVistas.includes(antNumFree);
-    }
-    if (esAdminReal()) return true;
-    if (indexClase === 0) return true; // primera siempre desbloqueada
-    const prog = getProgresoCurso(cursoId);
-    const anterior = sesiones[indexClase - 1];
-    const anteriorNum = anterior.numero || indexClase;
-    return prog.clasesVistas.includes(anteriorNum);
+    // MODIFICADO: no-VIP ve abiertas las clases gratis; el VIP tiene todas abiertas desde que paga
+    if (!tieneAccesoVipCompleto()) return esPrimeraClaseGratis(cursoId, indexClase);
+    return true;
   }
 
   window.abrirClaseSentia = function(cursoId, indexClase) {
@@ -5433,6 +5421,25 @@ const Sections = (function(){
   }
 
   // ─── Cargar cursos desde Firestore ───
+  // MODIFICADO: portadas subidas desde el admin (portadas/{id}); se cargan despues del catalogo
+  const _portadasCache = {};
+  async function cargarPortadasCursos(){
+    const fs = window.__fs, db = window.__db; if (!fs || !db) return;
+    await Promise.all(cursos.filter(c => c.portadaId).map(async c => {
+      try {
+        if (!_portadasCache[c.portadaId]) {
+          const d = await fs.getDoc(fs.doc(db, 'portadas', c.portadaId));
+          if (d.exists()) _portadasCache[c.portadaId] = d.data().img;
+        }
+        const img = _portadasCache[c.portadaId]; if (!img) return;
+        c.portada = img;
+        document.querySelectorAll('.curso-card[data-cid="' + c.id + '"] .curso-card__cover').forEach(el => {
+          el.style.backgroundImage = "linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('" + img + "')";
+        });
+      } catch (e) { console.warn('[portada]', e.message); }
+    }));
+  }
+
   async function cargarCursosFirestore(){
     if (_cursosLoading) return;
     _cursosLoading = true;
@@ -5464,7 +5471,8 @@ const Sections = (function(){
           marcarProximamente: data.marcarProximamente === true,
           orden: data.orden || (i + 1),
           // Portada automática
-          portada: data.portada || getPortadaCurso({ titulo: data.titulo, portada: data.portada }),
+          portada: data.portada || getPortadaCurso({ titulo: data.titulo, area: data.area, portada: data.portada }),
+          portadaId: data.portadaId || null,
           // Compatibilidad con UI vieja
           status: 'catalogo',
           progreso: 0
@@ -5487,6 +5495,7 @@ const Sections = (function(){
         _ce('bn-stat-pdfs', _pdfs);
       } catch(_e){}
       _cursosLoaded = true;
+      cargarPortadasCursos();
     } catch (e) {
       console.warn('No se pudieron cargar cursos de Firestore:', e.message);
       cursos = [];
@@ -9942,7 +9951,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       } else { // sin-membresia
         banner.style.display = '';
         document.body.classList.add('has-fomo');
-        if (bannerText) bannerText.innerHTML = '<strong>Tu primera clase y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.';
+        if (bannerText) bannerText.innerHTML = '<strong>Tus primeras 2 clases y el primer material del primer curso son gratis.</strong> Activa tu suscripción para desbloquear todos los cursos y materiales.';
         if (bannerTimer) bannerTimer.style.display = 'none';
       }
     }

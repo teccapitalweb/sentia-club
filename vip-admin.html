@@ -1977,6 +1977,7 @@ const Pages={
   },
   _getPortada(curso) {
     if (curso.portada) return curso.portada;
+    if (curso.portadaId) { const cache = window.__portadasCache || {}; if (cache[curso.id]) return cache[curso.id]; window.__cfPortadaPrecargar && window.__cfPortadaPrecargar(curso.id, curso.portadaId); }
     return Pages._coverSVG(curso.area, curso.titulo);
   },
 
@@ -2609,14 +2610,15 @@ const Pages={
         <div class="form-field">
           <label class="label">Imagen de portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional · si no subes, se usa la portada SENTIA)</span></label>
           <!-- MODIFICADO: subir imagen sin codigo; se comprime y se guarda con el curso -->
-          <input type="hidden" id="cf-portada" value="${(c.portada || '').replace(/"/g,'&quot;')}">
+          <input type="hidden" id="cf-portada" value="${c.portadaId ? '__keep__' : (c.portada || '').replace(/"/g,'&quot;')}">
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div id="cf-portada-prev" style="width:150px;height:60px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;${c.portada ? `background-image:url('${(c.portada||'').replace(/'/g,'%27')}');` : ''}display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);">${c.portada ? '' : 'Portada SENTIA'}</div>
+            <div id="cf-portada-prev" style="width:150px;height:60px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;${c.portada ? `background-image:url('${(c.portada||'').replace(/'/g,'%27')}');` : ''}display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);">${c.portada ? '' : (c.portadaId ? 'Cargando…' : 'Portada SENTIA')}</div>
             <button type="button" class="btn btn--ghost btn--sm" onclick="document.getElementById('cf-portada-file').click()">Subir imagen</button>
+            <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaLink()">Pegar link</button>
             <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaSet('')">Quitar</button>
             <input type="file" id="cf-portada-file" accept="image/*" style="display:none" onchange="window.__cfPortadaArchivo(this)">
           </div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:6px;">JPG o PNG horizontal. Se recorta a 1200 × 480 y se optimiza sola.</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:6px;">JPG o PNG horizontal de al menos 1600 px de ancho. Se ajusta sola a 1600 × 640 en alta calidad.</div>
         </div>
 
         <div class="form-field form-field--full">
@@ -2689,6 +2691,9 @@ const Pages={
       body,
       footer
     });
+
+    // MODIFICADO: si la portada esta en portadas/{id}, mostrarla en la miniatura
+    if (esEdicion && c.portadaId) window.__cfPortadaCargar(c.portadaId);
 
     // ─── Renderizar listas dinámicas iniciales ───
     this._renderSesionesModal();
@@ -2904,7 +2909,11 @@ const Pages={
         activo: true,
         disponible: true
       };
-      data.portada = portada || ''; // MODIFICADO: vacio = portada SENTIA automatica
+      // MODIFICADO: la imagen subida se guarda aparte (portadas/{cursoId}) para no hacer pesado el catalogo
+      const portadaEsImagen = portada.startsWith('data:image');
+      if (portada === '__keep__') { /* no se toca la portada */ }
+      else if (portadaEsImagen) { data.portada = ''; }
+      else { data.portada = portada || ''; data.portadaId = null; }
 
       // Firebase
       const fb = window._fb;
@@ -2915,7 +2924,12 @@ const Pages={
 
       if (editId) {
         // ─── EDITAR ───
+        if (portadaEsImagen) {
+          await fb.setDoc(fb.doc(fb.db, 'portadas', editId), { img: portada, actualizadoEn: fb.serverTimestamp() });
+          data.portadaId = editId; data.portadaV = Date.now();
+        }
         await fb.updateDoc(fb.doc(fb.db, 'cursos', editId), data);
+        if (portadaEsImagen && window.__portadasCache) window.__portadasCache[editId] = portada;
         Toast.success('Curso actualizado', titulo);
       } else {
         // ─── CREAR ───
@@ -2926,7 +2940,12 @@ const Pages={
         data.orden = maxOrden + 1;
         data.createdAt = fb.serverTimestamp();
         data.creadoPor = window.__currentAdmin?.email || 'admin';
-        await fb.addDoc(fb.collection(fb.db, 'cursos'), data);
+        const nuevoRef = await fb.addDoc(fb.collection(fb.db, 'cursos'), data);
+        if (portadaEsImagen) {
+          await fb.setDoc(fb.doc(fb.db, 'portadas', nuevoRef.id), { img: portada, actualizadoEn: fb.serverTimestamp() });
+          await fb.updateDoc(fb.doc(fb.db, 'cursos', nuevoRef.id), { portadaId: nuevoRef.id, portadaV: Date.now() });
+          if (window.__portadasCache) window.__portadasCache[nuevoRef.id] = portada;
+        }
         Toast.success('¡Curso creado!', `${titulo} · aparecerá en orden #${data.orden}`);
       }
 
@@ -5751,27 +5770,58 @@ if (window.__currentAdmin) AdminStore.init();
 <script src="pwa.js" defer></script>
 <script>
 /* MODIFICADO: portada del curso subida desde el admin (sin GitHub ni codigo).
-   La imagen se recorta a 1200x480, se comprime a JPG y se guarda en el curso (Firestore). */
+   Alta calidad: 1600x640, WebP (o JPG si el navegador no soporta WebP), sin bajar de calidad 0.78.
+   Se guarda en portadas/{cursoId} para que el catalogo siga ligero. */
+window.__portadasCache = window.__portadasCache || {};
 window.__cfPortadaSet = function(v){
   const h=document.getElementById('cf-portada'), p=document.getElementById('cf-portada-prev');
   if(h) h.value=v||'';
-  if(p){ p.style.backgroundImage = v ? "url('"+v+"')" : 'none'; p.textContent = v ? '' : 'Portada SENTIA'; }
+  if(p){ p.style.backgroundImage = v && v!=='__keep__' ? "url('"+v+"')" : 'none'; p.textContent = v ? '' : 'Portada SENTIA'; }
+};
+window.__cfPortadaLink = function(){
+  const u=(prompt('Pega el link directo de la imagen (debe terminar en .jpg, .png o .webp):')||'').trim();
+  if(!u) return;
+  if(!/^https?:\/\//.test(u)){ if(typeof Toast!=='undefined') Toast.error('Link no válido','Debe empezar con https://'); return; }
+  if(/drive\.google\.com/.test(u)){ if(typeof Toast!=='undefined') Toast.error('Link de Drive no sirve','Usa "Subir imagen" en su lugar'); return; }
+  window.__cfPortadaSet(u);
+};
+window.__cfPortadaCargar = async function(id){
+  try{
+    const cache=window.__portadasCache;
+    if(!cache[id]){ const fb=window._fb; const d=await fb.getDoc(fb.doc(fb.db,'portadas',id)); if(d.exists()) cache[id]=d.data().img; }
+    const p=document.getElementById('cf-portada-prev'), h=document.getElementById('cf-portada');
+    if(p && h && h.value==='__keep__'){ if(cache[id]){ p.style.backgroundImage="url('"+cache[id]+"')"; p.textContent=''; } else p.textContent='Portada SENTIA'; }
+  }catch(e){ console.warn('[portada]', e.message); }
+};
+window.__cfPortadaPrecargar = function(cursoId, pid){
+  window.__portadasPend = window.__portadasPend || {};
+  if(window.__portadasPend[cursoId]) return; window.__portadasPend[cursoId]=true;
+  (async()=>{ try{
+    const fb=window._fb; const d=await fb.getDoc(fb.doc(fb.db,'portadas',pid));
+    if(d.exists()){ window.__portadasCache[cursoId]=d.data().img;
+      document.querySelectorAll('[data-id="'+cursoId+'"] .curso-card__cover, [data-id="'+cursoId+'"] .curso-row__thumb, [data-id="'+cursoId+'"].curso-row__thumb').forEach(el=>el.style.backgroundImage="url('"+d.data().img+"')"); }
+  }catch(e){} })();
 };
 window.__cfPortadaArchivo = function(input){
   const f=input.files && input.files[0]; input.value='';
   if(!f) return;
-  if(!/^image\//.test(f.type)){ (typeof Toast!=='undefined'?Toast:{error:(a,b)=>alert(a+'. '+b)}).error('Archivo no válido','Sube una imagen JPG o PNG'); return; }
+  const T=(typeof Toast!=='undefined')?Toast:{success(){},error:(a,b)=>alert(a+'. '+(b||''))};
+  if(!/^image\//.test(f.type)){ T.error('Archivo no válido','Sube una imagen JPG, PNG o WebP'); return; }
   const r=new FileReader();
   r.onload=e=>{ const img=new Image(); img.onload=()=>{
-    const W=1200,H=480, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const W=1600,H=640, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
     const esc=Math.max(W/img.width,H/img.height), w=img.width*esc, h=img.height*esc;
-    const ctx=cv.getContext('2d'); ctx.fillStyle='#0a1f4d'; ctx.fillRect(0,0,W,H);
-    ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h);
-    let q=0.82, out=cv.toDataURL('image/jpeg',q);
-    while(out.length>260000 && q>0.45){ q-=0.07; out=cv.toDataURL('image/jpeg',q); }
+    const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.fillStyle='#0a1f4d'; ctx.fillRect(0,0,W,H); ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+    const webp = cv.toDataURL('image/webp',0.9).startsWith('data:image/webp');
+    const tipo = webp ? 'image/webp' : 'image/jpeg';
+    let q=0.92, out=cv.toDataURL(tipo,q);
+    while(out.length>900000 && q>0.78){ q-=0.03; out=cv.toDataURL(tipo,q); }
+    if(out.length>1000000){ T.error('Imagen demasiado pesada','Prueba con otra imagen o una versión más simple'); return; }
     window.__cfPortadaSet(out);
-    if(typeof Toast!=='undefined') Toast.success('Portada lista','Se guarda al dar "Guardar cambios"');
-  }; img.onerror=()=>{ if(typeof Toast!=='undefined') Toast.error('No se pudo leer la imagen'); }; img.src=e.target.result; };
+    if(img.width<1200) T.error('Imagen pequeña ('+img.width+' px de ancho)','Se puede ver borrosa. Usa una de al menos 1600 px.');
+    else T.success('Portada lista','Se guarda al dar "Guardar cambios"');
+  }; img.onerror=()=>T.error('No se pudo leer la imagen'); img.src=e.target.result; };
   r.readAsDataURL(f);
 };
 </script>
