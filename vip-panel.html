@@ -7462,12 +7462,12 @@ const Sections = (function(){
         const cover = (n.imagen && /^https:\/\//.test(n.imagen))
           ? `<div class="news-card__cover" style="background-image:url('${String(n.imagen).replace(/['"()\\\s<>]/g, c => encodeURIComponent(c))}');background-size:cover;background-position:center;">
                <span class="news-card__date">${fecha}</span>
-               <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'')}</span>
+               <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'Psicología')}</span>
              </div>`
           : `<div class="news-card__cover">
                <svg class="ic"><use href="#i-news"/></svg>
                <span class="news-card__date">${fecha}</span>
-               <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'')}</span>
+               <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'Psicología')}</span>
              </div>`;
         return `
         <article class="news-card" style="--cat-color:${n.color||'#1b5df0'};">
