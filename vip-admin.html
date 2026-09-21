@@ -2608,8 +2608,16 @@ const Pages={
           <input type="number" class="input" id="cf-horas" min="1" max="200" value="${horasVal}" placeholder="${horasAuto || 1}">
         </div>
         <div class="form-field">
-          <label class="label" for="cf-portada">URL portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional)</span></label>
-          <input type="url" class="input" id="cf-portada" value="${(c.portada || '').replace(/"/g,'&quot;')}" placeholder="https://…">
+          <label class="label" for="cf-portada-url">URL portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional)</span></label>
+          <!-- MODIFICADO: pegar link (GitHub u otra web) o subir la imagen desde la computadora -->
+          <input type="hidden" id="cf-portada" value="${c.portadaId ? '__keep__' : (c.portada || '').replace(/"/g,'&quot;')}">
+          <input type="url" class="input" id="cf-portada-url" value="${(!c.portadaId && c.portada && !String(c.portada).startsWith('data:')) ? String(c.portada).replace(/"/g,'&quot;') : ''}" placeholder="${c.portadaId || String(c.portada||'').startsWith('data:') ? 'Imagen subida ✓ · pega un link para reemplazarla' : 'https://…'}" oninput="window.__cfPortadaUrl(this.value)">
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+            <div id="cf-portada-prev" style="width:120px;height:48px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;${(c.portada && !c.portadaId) ? `background-image:url('${String(c.portada).replace(/'/g,'%27')}');` : ''}display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--text-3);">${c.portada && !c.portadaId ? '' : (c.portadaId ? 'Cargando…' : 'Portada SENTIA')}</div>
+            <button type="button" class="btn btn--ghost btn--sm" onclick="document.getElementById('cf-portada-file').click()">o subir desde tu computadora</button>
+            <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaSet('')">Quitar</button>
+            <input type="file" id="cf-portada-file" accept="image/*" style="display:none" onchange="window.__cfPortadaArchivo(this)">
+          </div>
         </div>
 
         <div class="form-field form-field--full">
@@ -5765,9 +5773,21 @@ if (window.__currentAdmin) AdminStore.init();
    Se guarda en portadas/{cursoId} para que el catalogo siga ligero. */
 window.__portadasCache = window.__portadasCache || {};
 window.__cfPortadaSet = function(v){
-  const h=document.getElementById('cf-portada'), p=document.getElementById('cf-portada-prev');
+  const h=document.getElementById('cf-portada'), p=document.getElementById('cf-portada-prev'), u=document.getElementById('cf-portada-url');
   if(h) h.value=v||'';
   if(p){ p.style.backgroundImage = v && v!=='__keep__' ? "url('"+v+"')" : 'none'; p.textContent = v ? '' : 'Portada SENTIA'; }
+  if(u){
+    if(!v){ u.value=''; u.placeholder='https://…'; }
+    else if(String(v).startsWith('data:')){ u.value=''; u.placeholder='Imagen subida ✓ · se guarda al dar "Guardar cambios"'; }
+    else if(v!=='__keep__' && u.value!==v){ u.value=v; }
+  }
+};
+window.__cfPortadaUrl = function(val){
+  const v=(val||'').trim(), h=document.getElementById('cf-portada'), p=document.getElementById('cf-portada-prev');
+  if(!v){ if(h && h.value!=='__keep__' && !String(h.value).startsWith('data:')){ h.value=''; if(p){ p.style.backgroundImage='none'; p.textContent='Portada SENTIA'; } } return; }
+  if(/drive\.google\.com/.test(v) && typeof Toast!=='undefined') Toast.error('Link de Drive no sirve','Usa un link directo a la imagen o súbela desde tu computadora');
+  if(h) h.value=v;
+  if(p){ p.style.backgroundImage="url('"+v+"')"; p.textContent=''; }
 };
 window.__cfPortadaLink = function(){
   const u=(prompt('Pega el link directo de la imagen (debe terminar en .jpg, .png o .webp):')||'').trim();
