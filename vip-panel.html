@@ -7447,6 +7447,8 @@ const Sections = (function(){
         const data = r.ok ? await r.json() : { items: [] };
         arts = (data.items || []).slice(0, 6);
       }
+      // sin repetidas (la misma nota publicada por dos medios)
+      { const vistos = new Set(); arts = arts.filter(n => { const k = String(n.titulo||'').toLowerCase().replace(/[^a-z0-9áéíóúñ]/g,''); if (!k || vistos.has(k)) return false; vistos.add(k); return true; }); }
       if (!arts.length){
         grid.innerHTML = '<div class="foro-empty" style="grid-column:1/-1;">Aún no hay noticias publicadas. Se actualizan cada mañana.</div>';
         { const sec = grid.closest('section'); if (sec) sec.style.display = 'none'; } // MODIFICADO: sin noticias no se muestra
