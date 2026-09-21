@@ -2608,17 +2608,8 @@ const Pages={
           <input type="number" class="input" id="cf-horas" min="1" max="200" value="${horasVal}" placeholder="${horasAuto || 1}">
         </div>
         <div class="form-field">
-          <label class="label">Imagen de portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional · si no subes, se usa la portada SENTIA)</span></label>
-          <!-- MODIFICADO: subir imagen sin codigo; se comprime y se guarda con el curso -->
-          <input type="hidden" id="cf-portada" value="${c.portadaId ? '__keep__' : (c.portada || '').replace(/"/g,'&quot;')}">
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div id="cf-portada-prev" style="width:150px;height:60px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;${c.portada ? `background-image:url('${(c.portada||'').replace(/'/g,'%27')}');` : ''}display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);">${c.portada ? '' : (c.portadaId ? 'Cargando…' : 'Portada SENTIA')}</div>
-            <button type="button" class="btn btn--ghost btn--sm" onclick="document.getElementById('cf-portada-file').click()">Subir imagen</button>
-            <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaLink()">Pegar link</button>
-            <button type="button" class="btn btn--ghost btn--sm" onclick="window.__cfPortadaSet('')">Quitar</button>
-            <input type="file" id="cf-portada-file" accept="image/*" style="display:none" onchange="window.__cfPortadaArchivo(this)">
-          </div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:6px;">JPG o PNG horizontal de al menos 1600 px de ancho. Se ajusta sola a 1600 × 640 en alta calidad.</div>
+          <label class="label" for="cf-portada">URL portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional)</span></label>
+          <input type="url" class="input" id="cf-portada" value="${(c.portada || '').replace(/"/g,'&quot;')}" placeholder="https://…">
         </div>
 
         <div class="form-field form-field--full">
