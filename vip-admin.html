@@ -4891,7 +4891,7 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Cron automático</span>
           <h1 class="sec-hero__title">Noticias</h1>
-          <p class="sec-hero__sub">El cron de Railway publica noticias del sector gastronómico y alimentos en el panel VIP.</p>
+          <p class="sec-hero__sub">El cron de Railway publica noticias del sector en el panel VIP. Requiere plan Blaze de Firebase; mientras no haya noticias, la sección no se muestra al alumno.</p>
         </div>
 
         <section class="cron-card">
@@ -4962,6 +4962,8 @@ const Pages={
             <div class="form-grid">
               <div class="form-field form-field--full"><label class="label">WhatsApp (venta)</label><input type="text" class="input" id="cfg-wa" value="${c.whatsapp}" placeholder="+52 ..."></div>
               <div class="form-field form-field--full"><label class="label">Canal de WhatsApp (comunidad/anuncios)</label><input type="url" class="input" id="cfg-canal" value="${c.whatsappCanal || ''}" placeholder="https://whatsapp.com/channel/..."></div>
+              <div class="form-field form-field--full"><label class="label">Grupo de WhatsApp (botón "Abrir grupo")</label><input type="url" class="input" id="cfg-grupo" value="" placeholder="https://chat.whatsapp.com/..."></div>
+              <div class="form-field form-field--full"><label class="label">Miembros de la comunidad (número que se muestra · vacío = no mostrar)</label><input type="number" class="input" id="cfg-miembros" value="" min="0" placeholder="Ej. 120"></div>
               <div class="form-field form-field--full"><label class="label">Instagram</label><input type="text" class="input" id="cfg-ig" value="${c.instagram}"></div>
               <div class="form-field form-field--full"><label class="label">Facebook</label><input type="url" class="input" id="cfg-fb" value="${c.facebook || ''}" placeholder="https://www.facebook.com/..."></div>
               <div class="form-field form-field--full"><label class="label">Email de contacto</label><input type="email" class="input" id="cfg-em" value="${c.emailContacto}"></div>
@@ -4997,6 +4999,16 @@ const Pages={
         </div>
       </div>
     `;
+    // MODIFICADO: al entrar, llenar Contacto con lo guardado en Firestore (config/club)
+    (async ()=>{
+      try{
+        const fb=window._fb; const snap=await fb.getDoc(fb.doc(fb.db,'config','club'));
+        if(!snap.exists()) return; const d=snap.data();
+        const set=(id,v)=>{ const el=document.getElementById(id); if(el && v!==undefined && v!==null && v!=='') el.value=v; };
+        set('cfg-wa',d.whatsapp); set('cfg-canal',d.whatsappCanal); set('cfg-grupo',d.whatsappGrupo);
+        set('cfg-miembros',d.miembrosComunidad||''); set('cfg-ig',d.instagram); set('cfg-fb',d.facebook); set('cfg-em',d.emailContacto);
+      }catch(e){ console.warn('[SENTIA admin] contacto config/club:', e.message); }
+    })();
     // MODIFICADO: al entrar, cargar los precios REALES desde Firestore (config/club)
     cargarPreciosClub().then(()=>{
       const iM=document.getElementById('cfg-mens'), iA=document.getElementById('cfg-anual');
@@ -5030,10 +5042,12 @@ const Pages={
         const instagram = document.getElementById('cfg-ig').value.trim();
         const facebook = document.getElementById('cfg-fb').value.trim();
         const emailContacto = document.getElementById('cfg-em').value.trim();
+        const whatsappGrupo = (document.getElementById('cfg-grupo')?.value || '').trim();
+        const miembrosComunidad = parseInt(document.getElementById('cfg-miembros')?.value || '0') || 0;
         try{
           const fb=window._fb;
           await fb.setDoc(fb.doc(fb.db,'config','club'),{
-            whatsapp, whatsappCanal, instagram, facebook, emailContacto,
+            whatsapp, whatsappCanal, whatsappGrupo, miembrosComunidad, instagram, facebook, emailContacto,
             actualizadoPor:(window.__currentAdmin&&window.__currentAdmin.email)||'admin',
             actualizadoEn:fb.serverTimestamp()
           },{merge:true});
