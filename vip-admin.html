@@ -2202,9 +2202,13 @@ const Pages={
           return nueva;
         });
 
+        const _upd = { sesiones, bunnyCollectionId: mejor.collectionId };
+        if (curso.horasManual !== true) {
+          const _s = sesiones.reduce((t, x) => t + (Number(x.duracionSeg) || 0), 0);
+          _upd.horas = _s > 0 ? Math.max(1, Math.round(_s / 3600)) : Math.max(1, sesiones.length);
+        }
         batch.update(fb.doc(fb.db, 'cursos', curso.id), {
-          sesiones,
-          bunnyCollectionId: mejor.collectionId,
+          ..._upd,
           bunnySincronizadoEn: fb.serverTimestamp()
         });
         vinculados++;
@@ -2564,8 +2568,10 @@ const Pages={
     const areas = Array.from(new Set([...areasEstandar, ...areasExistentes])).sort();
 
     const c = esEdicion ? curso : {};
-    const horasAuto = (c.sesiones?.length) || 0;
-    const horasVal = (typeof c.horas === 'number' && c.horas > 0) ? c.horas : horasAuto;
+    // MODIFICADO: horas automaticas = duracion real de los videos de Bunny (o 1 h por clase si aun no hay duracion)
+    const _segs = (c.sesiones || []).reduce((t, x) => t + (Number(x.duracionSeg) || 0), 0);
+    const horasAuto = _segs > 0 ? Math.max(1, Math.round(_segs / 3600)) : ((c.sesiones?.length) || 0);
+    const horasVal = (c.horasManual === true && typeof c.horas === 'number' && c.horas > 0) ? c.horas : '';
     const dispSiempre = c.disponibleSiempre === true;
 
     // ─── Construcción del body del modal ───
@@ -2604,8 +2610,8 @@ const Pages={
         </div>
 
         <div class="form-field">
-          <label class="label" for="cf-horas">Horas totales <span style="font-weight:400;color:var(--text-3);font-size:11px;">(default = nº de clases)</span></label>
-          <input type="number" class="input" id="cf-horas" min="1" max="200" value="${horasVal}" placeholder="${horasAuto || 1}">
+          <label class="label" for="cf-horas">Horas totales <span style="font-weight:400;color:var(--text-3);font-size:11px;">(vacío = automático según los videos)</span></label>
+          <input type="number" class="input" id="cf-horas" min="1" max="200" value="${horasVal}" placeholder="Automático: ${horasAuto || 1} h">
         </div>
         <div class="form-field">
           <label class="label" for="cf-portada-url">URL portada <span style="font-weight:400;color:var(--text-3);font-size:11px;">(opcional)</span></label>
@@ -2892,11 +2898,14 @@ const Pages={
       }
 
       // Horas: si el usuario no puso nada o puso 0/inválido → usa nº de sesiones (mínimo 1)
-      const horas = (Number.isFinite(horasRaw) && horasRaw > 0) ? horasRaw : Math.max(1, sesionesLimpias.length);
+      const horasManual = Number.isFinite(horasRaw) && horasRaw > 0;
+      const _segsG = sesionesLimpias.reduce((t, x) => t + (Number(x.duracionSeg) || 0), 0);
+      const horas = horasManual ? horasRaw : (_segsG > 0 ? Math.max(1, Math.round(_segsG / 3600)) : Math.max(1, sesionesLimpias.length));
 
       // Construir objeto base
       const data = {
         titulo,
+        horasManual,
         descripcion,
         area,
         nivel,
@@ -3271,7 +3280,7 @@ const Pages={
       <div class="form-grid">
         <div class="form-field form-field--full">
           <label class="label" for="wf-titulo">Título de la clase *</label>
-          <input type="text" class="input" id="wf-titulo" maxlength="120" value="${(wb.titulo || '').replace(/"/g,'&quot;')}" placeholder="Ej: Interpretación de la biometría hemática" required>
+          <input type="text" class="input" id="wf-titulo" maxlength="120" value="${(wb.titulo || '').replace(/"/g,'&quot;')}" placeholder="Ej: Casos prácticos de contención emocional" required>
         </div>
 
         <div class="form-field form-field--full">
@@ -3281,7 +3290,7 @@ const Pages={
 
         <div class="form-field">
           <label class="label" for="wf-instructor">Instructor *</label>
-          <input type="text" class="input" id="wf-instructor" value="${(wb.instructor || '').replace(/"/g,'&quot;')}" placeholder="Ej: Ing. María López" required>
+          <input type="text" class="input" id="wf-instructor" value="${(wb.instructor || '').replace(/"/g,'&quot;')}" placeholder="Ej: Mtra. Carla Yanin Martínez Abrego" required>
         </div>
 
         <div class="form-field">
