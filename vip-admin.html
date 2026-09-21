@@ -2726,6 +2726,7 @@ const Pages={
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título de la clase" value="${(s.titulo || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="titulo" style="font-size:13px;padding:8px 11px;">
           ${s.videoId && !s.url ? `<div style="font-size:12.5px;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">🐰 Video de Bunny vinculado · no necesita URL</div>` : `<input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">`}
+          ${Pages._actividadBoxHTML(s, idx)}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
           <button type="button" class="curso-card__action" data-sesion-mover="${idx}" data-delta="-1" ${idx === 0 ? 'disabled' : ''} title="Subir" style="width:28px;height:24px;${idx === 0 ? 'opacity:.4;cursor:not-allowed;' : ''}">▲</button>
@@ -2743,6 +2744,7 @@ const Pages={
         if (Pages._modalCurso.sesiones[idx]) Pages._modalCurso.sesiones[idx][campo] = e.target.value;
       });
     });
+    Pages._bindActividades(cont);
     cont.querySelectorAll('[data-sesion-mover]').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.sesionMover, 10);
@@ -2756,6 +2758,101 @@ const Pages={
         Pages._eliminarSesionModal(idx);
       });
     });
+  },
+
+  // ═══ MODIFICADO: ACTIVIDADES INTERACTIVAS POR CLASE ═══
+  _ACT_TIPOS: {
+    trivia:  { label:'Trivia',              ayuda:'Una pregunta por bloque (deja una línea en blanco entre preguntas).\nPrimera línea = pregunta · "*" = opción correcta · "-" = opción incorrecta · ">" = explicación.\n\nEjemplo:\n¿Qué se evalúa primero en guarda y custodia?\n* El interés superior del menor\n- La solvencia económica\n- La opinión de los abuelos\n> El interés superior del menor guía toda la evaluación.' },
+    vf:      { label:'Verdadero o falso',   ayuda:'Una afirmación por línea: V o F | afirmación | explicación (opcional).\n\nEjemplo:\nV | La entrevista al menor debe adaptarse a su edad | Se usan preguntas abiertas y lenguaje sencillo.\nF | El informe pericial puede basarse en una sola entrevista | Se requieren varias fuentes.' },
+    memorama:{ label:'Memorama',            ayuda:'Una pareja por línea: concepto = definición (de 4 a 8 parejas).\n\nEjemplo:\nAlienación parental = Conducta que obstaculiza el vínculo con el otro progenitor\nEntrevista semiestructurada = Guion flexible con temas definidos' },
+    caso:    { label:'Caso práctico',       ayuda:'Primer bloque: SITUACIÓN: descripción del caso.\nLuego cada decisión como en trivia. Puedes agregar la consecuencia de cada opción con "=>".\n\nEjemplo:\nSITUACIÓN: Un niño de 8 años llega a la evaluación muy ansioso.\n\n¿Qué haces primero?\n* Generar rapport con juego => El niño se relaja y colabora\n- Iniciar con preguntas del caso => Se cierra y responde con monosílabos\n> Sin rapport, la información pierde calidad.' },
+    externo: { label:'Link externo',        ayuda:'Pega el link del juego (Wordwall, Genially, Educaplay…). El alumno lo juega y confirma que terminó.' }
+  },
+  _parseActividad(tipo, texto){
+    const t = String(texto || '').replace(/\r/g,'').trim();
+    const errores = []; let items = []; let situacion = '';
+    const bloques = t.split(/\n\s*\n/).map(b => b.split('\n').map(x => x.trim()).filter(Boolean)).filter(b => b.length);
+    if (tipo === 'trivia' || tipo === 'caso') {
+      bloques.forEach((b, i) => {
+        if (tipo === 'caso' && /^situaci[oó]n\s*:/i.test(b[0])) { situacion = b.join(' ').replace(/^situaci[oó]n\s*:\s*/i,''); return; }
+        const pregunta = b[0].replace(/^\d+[\.\)]\s*/,'');
+        const opciones = []; let explicacion = '';
+        b.slice(1).forEach(l => {
+          if (/^[\*\-]/.test(l)) { const [txt, cons] = l.slice(1).split('=>'); opciones.push({ texto: txt.trim(), correcta: l[0] === '*', consecuencia: (cons || '').trim() }); }
+          else if (/^>/.test(l)) explicacion += (explicacion ? ' ' : '') + l.slice(1).trim();
+        });
+        if (opciones.length < 2) errores.push(`Pregunta ${i+1}: necesita al menos 2 opciones`);
+        else if (!opciones.some(o => o.correcta)) errores.push(`Pregunta ${i+1}: marca la correcta con *`);
+        items.push({ pregunta, opciones, explicacion });
+      });
+      if (tipo === 'caso' && !situacion) errores.push('Falta el bloque SITUACIÓN:');
+    } else if (tipo === 'vf') {
+      t.split('\n').map(x => x.trim()).filter(Boolean).forEach((l, i) => {
+        const p = l.split('|').map(x => x.trim());
+        const r = (p[0] || '').toUpperCase();
+        if (!['V','F'].includes(r) || !p[1]) { errores.push(`Línea ${i+1}: usa V | afirmación | explicación`); return; }
+        items.push({ afirmacion: p[1], respuesta: r === 'V', explicacion: p[2] || '' });
+      });
+    } else if (tipo === 'memorama') {
+      t.split('\n').map(x => x.trim()).filter(Boolean).forEach((l, i) => {
+        const k = l.indexOf('=');
+        if (k < 1) { errores.push(`Línea ${i+1}: usa concepto = definición`); return; }
+        items.push({ a: l.slice(0, k).trim(), b: l.slice(k + 1).trim() });
+      });
+      if (items.length && (items.length < 3 || items.length > 8)) errores.push('El memorama debe tener entre 3 y 8 parejas');
+    } else if (tipo === 'externo') {
+      const u = (t.match(/https?:\/\/\S+/) || [])[0];
+      if (!u) errores.push('Pega un link que empiece con https://'); else items = [{ url: u }];
+    }
+    if (!items.length && !errores.length) errores.push('Agrega el contenido de la actividad');
+    return { items, situacion, errores };
+  },
+  _actividadBoxHTML(s, idx){
+    const a = s.actividad;
+    const lbl = a ? (this._ACT_TIPOS[a.tipo]?.label || a.tipo) : '';
+    const n = a ? (a.items || []).length : 0;
+    const esc = v => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    const tipo = a?.tipo || 'trivia';
+    return `<div style="border:1px dashed ${a ? 'color-mix(in srgb,var(--primary) 45%,transparent)' : 'var(--border)'};border-radius:9px;padding:8px 10px;">
+      <button type="button" data-act-toggle="${idx}" style="background:none;border:0;color:${a ? 'var(--primary)' : 'var(--text-2)'};font-weight:700;font-size:12.5px;cursor:pointer;padding:0;">🎮 ${a ? `Actividad: ${lbl} · ${a.tipo === 'externo' ? 'link' : n + ' elementos'} · mínimo ${a.minimo || 60}% · Editar` : '+ Agregar actividad interactiva'}</button>
+      <div data-act-editor="${idx}" style="display:none;margin-top:10px;display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 110px;gap:8px;margin-bottom:8px;">
+          <select class="input" data-act-tipo="${idx}" style="font-size:12.5px;padding:7px 9px;">${Object.entries(this._ACT_TIPOS).map(([k,v]) => `<option value="${k}" ${k === tipo ? 'selected' : ''}>${v.label}</option>`).join('')}</select>
+          <input class="input" data-act-titulo="${idx}" placeholder="Título (ej. Repaso de la clase 1)" value="${esc(a?.titulo)}" style="font-size:12.5px;padding:7px 9px;">
+          <input class="input" type="number" min="0" max="100" data-act-minimo="${idx}" value="${a?.minimo ?? 60}" title="% mínimo para aprobar" style="font-size:12.5px;padding:7px 9px;">
+        </div>
+        <textarea class="input" data-act-texto="${idx}" rows="8" placeholder="${esc(this._ACT_TIPOS[tipo].ayuda)}" style="font-size:12.5px;line-height:1.5;font-family:inherit;min-height:150px;">${esc(a?.texto)}</textarea>
+        <div data-act-msg="${idx}" style="font-size:11.5px;margin-top:6px;color:var(--text-3);">% mínimo para aprobar: el alumno debe alcanzarlo para desbloquear la siguiente clase.</div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" class="btn btn--primary btn--sm" data-act-guardar="${idx}">Guardar actividad</button>
+          ${a ? `<button type="button" class="btn btn--ghost btn--sm" data-act-quitar="${idx}">Quitar actividad</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  },
+  _bindActividades(cont){
+    const q = (sel, idx) => cont.querySelector(`[${sel}="${idx}"]`);
+    cont.querySelectorAll('[data-act-toggle]').forEach(b => b.addEventListener('click', () => {
+      const ed = q('data-act-editor', b.dataset.actToggle); ed.style.display = ed.style.display === 'none' ? 'block' : 'none';
+    }));
+    cont.querySelectorAll('[data-act-tipo]').forEach(sel => sel.addEventListener('change', () => {
+      q('data-act-texto', sel.dataset.actTipo).placeholder = Pages._ACT_TIPOS[sel.value].ayuda;
+    }));
+    cont.querySelectorAll('[data-act-guardar]').forEach(b => b.addEventListener('click', () => {
+      const idx = b.dataset.actGuardar;
+      const tipo = q('data-act-tipo', idx).value, texto = q('data-act-texto', idx).value;
+      const titulo = q('data-act-titulo', idx).value.trim() || 'Actividad de la clase';
+      const minimo = Math.max(0, Math.min(100, parseInt(q('data-act-minimo', idx).value, 10) || 60));
+      const r = Pages._parseActividad(tipo, texto);
+      const msg = q('data-act-msg', idx);
+      if (r.errores.length) { msg.style.color = 'var(--danger)'; msg.innerHTML = '⚠ ' + r.errores.slice(0, 4).join('<br>⚠ '); return; }
+      Pages._modalCurso.sesiones[idx].actividad = { tipo, titulo, minimo, texto, items: r.items, situacion: r.situacion };
+      Pages._renderSesionesModal();
+      if (typeof Toast !== 'undefined') Toast.success('Actividad lista', 'Se guarda con "Guardar cambios" del curso');
+    }));
+    cont.querySelectorAll('[data-act-quitar]').forEach(b => b.addEventListener('click', () => {
+      delete Pages._modalCurso.sesiones[b.dataset.actQuitar].actividad; Pages._renderSesionesModal();
+    }));
   },
 
   _agregarSesionModal() {

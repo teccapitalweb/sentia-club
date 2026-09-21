@@ -4880,11 +4880,11 @@ const Sections = (function(){
   };
   const COLOR_CAT = {
     'Primeros pasos':'#1b5df0','Evaluación y peritaje':'#7c5cff','Intervención y crisis':'#15b8a6',
-    'Salud laboral':'#f59e0b','Educación y desarrollo':'#0ea5e9','Herramientas':'#3f7bff','Constancia':'#2fbf2e','Maestría':'#1b5df0'
+    'Salud laboral':'#f59e0b','Educación y desarrollo':'#0ea5e9','Herramientas':'#3f7bff','Constancia':'#2fbf2e','Maestría':'#1b5df0','Actividades':'#a855f7'
   };
   const ICON_CAT = {
     'Primeros pasos':'i-ps-seed','Evaluación y peritaje':'i-ps-scale','Intervención y crisis':'i-ps-hands',
-    'Salud laboral':'i-ps-briefcase','Educación y desarrollo':'i-ps-child','Herramientas':'i-ps-note','Constancia':'i-ps-trend','Maestría':'i-crown'
+    'Salud laboral':'i-ps-briefcase','Educación y desarrollo':'i-ps-child','Herramientas':'i-ps-note','Constancia':'i-ps-trend','Maestría':'i-crown','Actividades':'i-ps-target'
   };
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -5083,25 +5083,227 @@ const Sections = (function(){
     }
     setProgreso(p);
 
-    // Detectar si se completó el curso
-    const curso = cursos.find(c => c.id === cursoId);
-    if (curso && curso.sesiones && p[cursoId].clasesVistas.length >= curso.sesiones.length && !p[cursoId].completado) {
-      p[cursoId].completado = true;
-      p[cursoId].fechaCompletado = new Date().toISOString();
-      setProgreso(p);
-      // Emitir el certificado a Firestore (para que se acumule y sea verificable)
-      emitirCertificadoFirestore(curso);
-      // Mostrar splash de felicitación
-      setTimeout(() => mostrarSplashCompletado(curso), 400);
-    }
-    return p[cursoId];
+    // MODIFICADO: el curso se completa al ver todas las clases Y aprobar sus actividades interactivas
+    verificarCursoCompleto(cursoId);
+    return getProgreso()[cursoId];
   };
 
   function claseDesbloqueada(cursoId, indexClase, sesiones) {
     // MODIFICADO: no-VIP ve abiertas las clases gratis; el VIP tiene todas abiertas desde que paga
-    if (!tieneAccesoVipCompleto()) return esPrimeraClaseGratis(cursoId, indexClase);
+    if (!tieneAccesoVipCompleto() && !esPrimeraClaseGratis(cursoId, indexClase)) return false;
+    // ...salvo que la clase anterior tenga actividad interactiva sin aprobar
+    const i = Number(indexClase);
+    if (i > 0 && Array.isArray(sesiones) && tieneActividad(sesiones[i - 1]) && !(typeof esAdminReal === 'function' && esAdminReal())) {
+      return actividadAprobada(cursoId, sesiones[i - 1].numero || i);
+    }
     return true;
   }
+
+  // ═══════════════ MODIFICADO: ACTIVIDADES INTERACTIVAS POR CLASE ═══════════════
+  // Una clase puede traer sesion.actividad = { tipo, titulo, minimo, items, situacion }.
+  // Si la tiene, la siguiente clase se desbloquea al aprobarla (>= minimo %).
+  // El resultado se guarda en el progreso del alumno: progreso[cursoId].actividades[numClase].
+  function tieneActividad(s){ return !!(s && s.actividad && s.actividad.tipo && ((s.actividad.items || []).length)); }
+  function getActividadRes(cursoId, numClase){
+    const p = getProgreso(); return (p[cursoId] && p[cursoId].actividades && p[cursoId].actividades[numClase]) || null;
+  }
+  function actividadAprobada(cursoId, numClase){ const r = getActividadRes(cursoId, numClase); return !!(r && r.aprobada); }
+  function guardarActividadRes(cursoId, numClase, score, minimo){
+    const p = getProgreso();
+    if (!p[cursoId]) p[cursoId] = { clasesVistas: [], completado: false, fechaCompletado: null };
+    if (!p[cursoId].actividades) p[cursoId].actividades = {};
+    const prev = p[cursoId].actividades[numClase] || { intentos: 0, mejor: 0, aprobada: false };
+    const aprobada = prev.aprobada || score >= minimo;
+    p[cursoId].actividades[numClase] = { intentos: (prev.intentos || 0) + 1, mejor: Math.max(prev.mejor || 0, score), ultimo: score, aprobada, fecha: new Date().toISOString() };
+    setProgreso(p);
+    return p[cursoId].actividades[numClase];
+  }
+  function actividadesPendientes(curso, progCurso){
+    return (curso.sesiones || []).filter((s, i) => tieneActividad(s) && !((progCurso.actividades || {})[s.numero || (i + 1)] || {}).aprobada).length;
+  }
+  // Se completa el curso cuando vio todas las clases Y aprobó todas sus actividades
+  function verificarCursoCompleto(cursoId){
+    const p = getProgreso(); const pc = p[cursoId]; const curso = cursos.find(c => c.id === cursoId);
+    if (!pc || !curso || !curso.sesiones || pc.completado) return;
+    if (pc.clasesVistas.length >= curso.sesiones.length && actividadesPendientes(curso, pc) === 0) {
+      pc.completado = true; pc.fechaCompletado = new Date().toISOString(); setProgreso(p);
+      emitirCertificadoFirestore(curso);
+      setTimeout(() => mostrarSplashCompletado(curso), 400);
+    }
+  }
+  window.__verificarCursoCompleto = verificarCursoCompleto;
+
+  // Chip de actividad debajo de cada clase en el detalle del curso
+  window.__sesConActividad = function(cursoId, curso, s, i, html){
+    if (!tieneActividad(s)) return html;
+    const num = s.numero || (i + 1);
+    const abierta = claseDesbloqueada(cursoId, i, curso.sesiones);
+    const r = getActividadRes(cursoId, num);
+    const vista = getProgresoCurso(cursoId).clasesVistas.includes(num);
+    const a = s.actividad;
+    let estado, estilo, click = '';
+    if (!abierta) { estado = '🔒 Actividad interactiva · se abre junto con la clase'; estilo = 'opacity:.55;'; }
+    else if (r && r.aprobada) { estado = `✓ ${escapeHtml(a.titulo || 'Actividad')} · aprobada con ${r.mejor}% · volver a jugar`; estilo = 'color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,transparent);'; click = `onclick="window.abrirActividadSentia('${cursoId}', ${i})"`; }
+    else if (!vista) { estado = `🎮 ${escapeHtml(a.titulo || 'Actividad')} · disponible al terminar la clase`; estilo = ''; click = `onclick="window.abrirActividadSentia('${cursoId}', ${i})"`; }
+    else { estado = `🎮 ${escapeHtml(a.titulo || 'Actividad')} · pendiente · necesaria para avanzar`; estilo = 'color:var(--warning,#f59e0b);border-color:color-mix(in srgb,#f59e0b 45%,transparent);'; click = `onclick="window.abrirActividadSentia('${cursoId}', ${i})"`; }
+    return html + `<div class="act-chip" ${click} data-bypass-paywall="true" style="${estilo}">${estado}${click ? '<span class="act-chip__go">Jugar →</span>' : ''}</div>`;
+  };
+
+  // Al marcar una clase como vista: si tiene actividad pendiente, se abre
+  window.__actividadTrasClase = function(cursoId, numClase){
+    const curso = cursos.find(c => c.id === cursoId); if (!curso) return;
+    const i = (curso.sesiones || []).findIndex((s, k) => (s.numero || (k + 1)) === numClase);
+    if (i >= 0 && tieneActividad(curso.sesiones[i]) && !actividadAprobada(cursoId, numClase)) {
+      setTimeout(() => window.abrirActividadSentia(cursoId, i), 350);
+    }
+  };
+
+  function actBarajar(arr){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  window.abrirActividadSentia = function(cursoId, idx){
+    const curso = cursos.find(c => c.id === cursoId); const s = curso && curso.sesiones && curso.sesiones[idx];
+    if (!s || !tieneActividad(s)) return;
+    if (!claseDesbloqueada(cursoId, idx, curso.sesiones)) { if (!tieneAccesoVipCompleto()) mostrarPaywallCurso(curso); return; }
+    const a = s.actividad, num = s.numero || (idx + 1), minimo = Number(a.minimo ?? 60);
+    document.getElementById('act-overlay')?.remove();
+    const ov = document.createElement('div'); ov.id = 'act-overlay'; ov.className = 'act-ov';
+    ov.innerHTML = `<div class="act-box" role="dialog" aria-modal="true">
+      <div class="act-head"><div><div class="act-kicker">🎮 Actividad · Clase ${num}</div><div class="act-title">${escapeHtml(a.titulo || 'Actividad de la clase')}</div></div>
+        <button class="act-x" aria-label="Cerrar">✕</button></div>
+      <div class="act-bar"><div class="act-bar__fill" style="width:0%"></div></div>
+      <div class="act-body"></div></div>`;
+    document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+    const body = ov.querySelector('.act-body'), fill = ov.querySelector('.act-bar__fill');
+    const cerrar = () => { ov.remove(); document.body.style.overflow = ''; };
+    ov.querySelector('.act-x').onclick = cerrar;
+    ov.addEventListener('click', e => { if (e.target === ov) cerrar(); });
+
+    function terminar(score){
+      score = Math.max(0, Math.min(100, Math.round(score)));
+      const yaAprobada = actividadAprobada(cursoId, num);
+      const res = guardarActividadRes(cursoId, num, score, minimo);
+      const paso = score >= minimo;
+      fill.style.width = '100%';
+      const siguiente = curso.sesiones[idx + 1];
+      body.innerHTML = `<div class="act-result">
+        <div class="act-score ${paso ? 'is-ok' : 'is-bad'}">${score}%</div>
+        <div class="act-result__t">${paso ? (score === 100 ? '¡Perfecto!' : '¡Aprobada!') : 'Casi lo logras'}</div>
+        <div class="act-result__d">${paso
+          ? (yaAprobada ? 'Mejoraste tu práctica. ' : '+20 XP ganados. ') + (siguiente && !yaAprobada ? 'Ya se desbloqueó la siguiente clase.' : '')
+          : `Necesitas ${minimo}% para avanzar. Repasa la clase si lo necesitas e inténtalo de nuevo.`}</div>
+        <div class="act-actions">
+          ${paso ? '' : '<button class="btn btn--ghost" data-act="retry">Intentar de nuevo</button>'}
+          <button class="btn btn--primary" data-act="ok">${paso ? 'Continuar' : 'Cerrar'}</button>
+        </div></div>`;
+      body.querySelector('[data-act="retry"]')?.addEventListener('click', () => { cerrar(); window.abrirActividadSentia(cursoId, idx); });
+      body.querySelector('[data-act="ok"]').addEventListener('click', () => {
+        cerrar();
+        verificarCursoCompleto(cursoId);
+        if (typeof window.__refrescarCursoDetalle === 'function') window.__refrescarCursoDetalle(cursoId);
+        if (typeof renderCursosList === 'function') renderCursosList();
+      });
+      if (paso && !yaAprobada && typeof Toast !== 'undefined') Toast.success('Actividad aprobada', siguiente ? 'Siguiente clase desbloqueada' : 'Completaste las actividades de esta clase');
+      try { window.__evaluarLogros && window.__evaluarLogros(); } catch (_) {}
+    }
+
+    // ── Trivia, verdadero/falso y caso práctico: una pregunta a la vez ──
+    function preguntas(lista, intro){
+      let k = 0, buenas = 0;
+      function pintar(){
+        fill.style.width = (k / lista.length * 100) + '%';
+        const it = lista[k];
+        body.innerHTML = `${intro && k === 0 ? `<div class="act-caso">${escapeHtml(intro)}</div>` : ''}
+          <div class="act-q__n">${k + 1} de ${lista.length}</div>
+          <div class="act-q">${escapeHtml(it.q)}</div>
+          <div class="act-ops">${it.ops.map((o, j) => `<button class="act-op" data-j="${j}">${escapeHtml(o.texto)}</button>`).join('')}</div>
+          <div class="act-fb"></div>`;
+        body.querySelectorAll('.act-op').forEach(b => b.addEventListener('click', () => {
+          const o = it.ops[+b.dataset.j]; if (o.correcta) buenas++;
+          body.querySelectorAll('.act-op').forEach((x, j) => { x.disabled = true; if (it.ops[j].correcta) x.classList.add('is-ok'); });
+          if (!o.correcta) b.classList.add('is-bad');
+          const fb = body.querySelector('.act-fb');
+          fb.innerHTML = `<div class="act-fb__t ${o.correcta ? 'is-ok' : 'is-bad'}">${o.correcta ? '✓ Correcto' : '✕ No es la mejor opción'}</div>
+            ${o.consecuencia ? `<div class="act-fb__d"><b>Qué pasa:</b> ${escapeHtml(o.consecuencia)}</div>` : ''}
+            ${it.exp ? `<div class="act-fb__d">${escapeHtml(it.exp)}</div>` : ''}
+            <button class="btn btn--primary btn--sm act-next">${k + 1 < lista.length ? 'Siguiente' : 'Ver resultado'}</button>`;
+          fb.querySelector('.act-next').addEventListener('click', () => { k++; if (k < lista.length) pintar(); else terminar(buenas / lista.length * 100); });
+        }));
+      }
+      pintar();
+    }
+
+    if (a.tipo === 'trivia' || a.tipo === 'caso') {
+      preguntas(a.items.map(it => ({ q: it.pregunta, ops: a.tipo === 'caso' ? it.opciones : actBarajar(it.opciones), exp: it.explicacion })), a.tipo === 'caso' ? a.situacion : '');
+    } else if (a.tipo === 'vf') {
+      preguntas(actBarajar(a.items).map(it => ({ q: it.afirmacion, exp: it.explicacion,
+        ops: [{ texto: 'Verdadero', correcta: it.respuesta === true }, { texto: 'Falso', correcta: it.respuesta === false }] })));
+    } else if (a.tipo === 'memorama') {
+      const cartas = actBarajar(a.items.flatMap((p, k) => [{ k, t: p.a, lado: 'a' }, { k, t: p.b, lado: 'b' }]));
+      let abiertas = [], hechas = 0, movs = 0, bloqueo = false;
+      body.innerHTML = `<div class="act-q__n">Encuentra cada concepto con su definición</div><div class="act-mem">${cartas.map((c, i) => `<button class="act-card" data-i="${i}"><span>${escapeHtml(c.t)}</span></button>`).join('')}</div><div class="act-q__n act-mem__movs">Intentos: 0</div>`;
+      body.querySelectorAll('.act-card').forEach(el => el.addEventListener('click', () => {
+        if (bloqueo || el.classList.contains('is-open') || el.classList.contains('is-done')) return;
+        el.classList.add('is-open'); abiertas.push(el);
+        if (abiertas.length === 2) {
+          movs++; body.querySelector('.act-mem__movs').textContent = 'Intentos: ' + movs;
+          const [x, y] = abiertas.map(e => cartas[+e.dataset.i]);
+          if (x.k === y.k && x.lado !== y.lado) { abiertas.forEach(e => e.classList.add('is-done')); abiertas = []; hechas++;
+            fill.style.width = (hechas / a.items.length * 100) + '%';
+            if (hechas === a.items.length) setTimeout(() => terminar(100 - Math.max(0, movs - a.items.length) * 8), 500);
+          } else { bloqueo = true; setTimeout(() => { abiertas.forEach(e => e.classList.remove('is-open')); abiertas = []; bloqueo = false; }, 900); }
+        }
+      }));
+    } else if (a.tipo === 'externo') {
+      const url = a.items[0].url;
+      body.innerHTML = `<div class="act-ext"><iframe src="${escapeHtml(url)}" allowfullscreen loading="lazy"></iframe></div>
+        <div class="act-actions"><a class="btn btn--ghost" href="${escapeHtml(url)}" target="_blank" rel="noopener">Abrir en otra pestaña</a>
+        <button class="btn btn--primary" data-act="fin">Ya terminé la actividad</button></div>`;
+      body.querySelector('[data-act="fin"]').addEventListener('click', () => terminar(100));
+    }
+  };
+
+  (function(){
+    if (document.getElementById('act-css')) return;
+    const st = document.createElement('style'); st.id = 'act-css';
+    st.textContent = `
+    .act-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 10px 44px;padding:9px 12px;border:1px dashed var(--border);border-radius:10px;font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;background:color-mix(in srgb,var(--primary) 5%,transparent)}
+    .act-chip__go{font-size:12px;font-weight:800;white-space:nowrap}
+    .act-ov{position:fixed;inset:0;z-index:9999;background:rgba(5,12,30,.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px}
+    .act-box{width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+    .act-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 10px}
+    .act-kicker{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);font-weight:800}
+    .act-title{font-size:18px;font-weight:800;margin-top:4px;color:var(--text)}
+    .act-x{background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);width:34px;height:34px;border-radius:10px;cursor:pointer}
+    .act-bar{height:6px;background:var(--surface-3);margin:0 20px;border-radius:4px;overflow:hidden}
+    .act-bar__fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--success));transition:width .35s ease}
+    .act-body{padding:18px 20px 22px}
+    .act-caso{padding:12px 14px;border-radius:12px;background:var(--surface-2);border-left:4px solid var(--primary);font-size:14px;line-height:1.55;margin-bottom:14px}
+    .act-q__n{font-size:11.5px;color:var(--text-3);font-weight:700;margin-bottom:6px}
+    .act-q{font-size:16.5px;font-weight:700;line-height:1.45;margin-bottom:14px;color:var(--text)}
+    .act-ops{display:flex;flex-direction:column;gap:8px}
+    .act-op{text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:14px;cursor:pointer;transition:border-color .15s,transform .1s}
+    .act-op:hover:not(:disabled){border-color:var(--primary);transform:translateY(-1px)}
+    .act-op.is-ok{border-color:var(--success);background:color-mix(in srgb,var(--success) 14%,var(--surface-2))}
+    .act-op.is-bad{border-color:var(--danger,#ef4444);background:color-mix(in srgb,#ef4444 12%,var(--surface-2))}
+    .act-fb{margin-top:12px}
+    .act-fb__t{font-weight:800;margin-bottom:6px}.act-fb__t.is-ok{color:var(--success)}.act-fb__t.is-bad{color:var(--danger,#ef4444)}
+    .act-fb__d{font-size:13.5px;color:var(--text-2);line-height:1.55;margin-bottom:6px}
+    .act-next{margin-top:8px}
+    .act-mem{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:10px 0}
+    .act-card{min-height:92px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg,var(--primary),#0d3fb8);color:transparent;font-size:12.5px;font-weight:600;padding:10px;cursor:pointer;line-height:1.35;transition:all .2s}
+    .act-card span{visibility:hidden}
+    .act-card.is-open,.act-card.is-done{background:var(--surface-2);color:var(--text)}
+    .act-card.is-open span,.act-card.is-done span{visibility:visible}
+    .act-card.is-done{border-color:var(--success);background:color-mix(in srgb,var(--success) 12%,var(--surface-2));cursor:default}
+    .act-ext iframe{width:100%;height:60vh;border:0;border-radius:12px;background:#fff}
+    .act-result{text-align:center;padding:10px 0}
+    .act-score{font-size:54px;font-weight:900;letter-spacing:-1px}.act-score.is-ok{color:var(--success)}.act-score.is-bad{color:#f59e0b}
+    .act-result__t{font-size:19px;font-weight:800;margin-top:4px}
+    .act-result__d{font-size:14px;color:var(--text-2);margin:8px auto 16px;max-width:460px;line-height:1.55}
+    .act-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+    @media (max-width:600px){.act-chip{margin-left:0}.act-mem{grid-template-columns:repeat(2,1fr)}}`;
+    document.head.appendChild(st);
+  })();
 
   window.abrirClaseSentia = function(cursoId, indexClase) {
     const curso = cursos.find(c => c.id === cursoId);
@@ -5117,6 +5319,11 @@ const Sections = (function(){
       if (!claseDesbloqueada(cursoId, Number(indexClase), curso.sesiones)) return;
     }
 
+    // MODIFICADO: si la clase anterior tiene actividad sin aprobar, no se abre
+    if (!claseDesbloqueada(cursoId, Number(indexClase), curso.sesiones)) {
+      if (typeof Toast !== 'undefined') Toast.info ? Toast.info('Clase bloqueada', 'Aprueba la actividad de la clase anterior') : Toast.error('Clase bloqueada', 'Aprueba la actividad de la clase anterior');
+      return;
+    }
     const numClase = sesion.numero || (Number(indexClase) + 1);
     window.abrirVisor(
       sesion.videoId || sesion.url || '',
@@ -5397,6 +5604,7 @@ const Sections = (function(){
         window.cerrarVisor();
         if (typeof window.__refrescarCursoDetalle === 'function') window.__refrescarCursoDetalle(cursoId);
         if (typeof renderCursosList === 'function') renderCursosList();
+        if (typeof window.__actividadTrasClase === 'function') window.__actividadTrasClase(cursoId, numClase);
       }, 1200);
     });
   });
@@ -5541,6 +5749,9 @@ const Sections = (function(){
     {id:'co1',cat:'Constancia',nombre:'Constante',desc:'Entraste 7 días seguidos',xp:120,unlock:null,criterio:'Entra 7 días seguidos'},
     {id:'co2',cat:'Constancia',nombre:'Imparable',desc:'Entraste 30 días seguidos',xp:350,unlock:null,criterio:'Entra 30 días seguidos'},
     {id:'co3',cat:'Constancia',nombre:'Horas de vuelo',desc:'Viste 10 clases',xp:100,unlock:null,criterio:'Mira 10 clases'},
+    {id:'ac1',cat:'Actividades',nombre:'A jugar',desc:'Aprobaste tu primera actividad interactiva',xp:30,unlock:null,criterio:'Aprueba 1 actividad'},
+    {id:'ac2',cat:'Actividades',nombre:'Práctica constante',desc:'Aprobaste 5 actividades interactivas',xp:120,unlock:null,criterio:'Aprueba 5 actividades'},
+    {id:'ac3',cat:'Actividades',nombre:'Puntaje perfecto',desc:'Obtuviste 100% en una actividad',xp:80,unlock:null,criterio:'Saca 100% en una actividad'},
     {id:'ma1',cat:'Maestría',nombre:'Tres de tres',desc:'Completaste 3 cursos',xp:250,unlock:null,criterio:'Termina 3 cursos'},
     {id:'ma2',cat:'Maestría',nombre:'Coleccionista',desc:'Completaste 5 cursos certificados',xp:400,unlock:null,criterio:'Termina 5 cursos'},
     {id:'ma3',cat:'Maestría',nombre:'Maestro SENTIA',desc:'Completaste 10 cursos. Una referencia.',xp:1000,unlock:null,criterio:'Termina 10 cursos'}
@@ -5622,6 +5833,8 @@ const Sections = (function(){
       const lista = Array.isArray(cursos) ? cursos : [];
       const hechos = lista.filter(c=>prog[c.id] && prog[c.id].completado);
       const clases = Object.values(prog).reduce((n,p)=>n+((p&&p.clasesVistas)?p.clasesVistas.length:0),0);
+      const acts = Object.values(prog).flatMap(p => Object.values((p && p.actividades) || {}));
+      const actOk = acts.filter(r => r.aprobada).length, actPerfecta = acts.some(r => (r.mejor || 0) >= 100);
       const area = re => hechos.some(c=>re.test(String(c.area||'')+' '+String(c.titulo||'')));
       const keys = ['nota','plan','puntajes','consentimiento','riesgo','seguimiento','psicosocial','informe'];
       const usado = k => { try{ return !!localStorage.getItem('sentia:'+k); }catch(e){ return false; } };
@@ -5642,6 +5855,7 @@ const Sections = (function(){
         ed1: area(/educativ|infantil|desarrollo|aula|escolar/i),
         he1: nTools>=1, he2: nTools>=4, he3: nTools>=8, he4: pdfs>=10,
         co1: racha>=7, co2: racha>=30, co3: clases>=10,
+        ac1: actOk>=1, ac2: actOk>=5, ac3: actPerfecta,
         ma1: hechos.length>=3, ma2: hechos.length>=5, ma3: hechos.length>=10
       };
       let fechas = {}; try{ fechas = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); }catch(e){}
@@ -5650,7 +5864,7 @@ const Sections = (function(){
         else l.unlock=null;
       });
       try{ localStorage.setItem('sentia:logros', JSON.stringify(fechas)); }catch(e){}
-      usuario.xp = logros.filter(l=>l.unlock).reduce((n,l)=>n+l.xp,0) + clases*10;
+      usuario.xp = logros.filter(l=>l.unlock).reduce((n,l)=>n+l.xp,0) + clases*10 + actOk*20;
       usuario.racha = racha; usuario.diasActivos = dias.length;
     }catch(e){ console.warn('[SENTIA] logros:', e); }
   }
@@ -5892,7 +6106,7 @@ const Sections = (function(){
             <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--primary),var(--highlight));border-radius:3px;transition:width .4s ease;"></div>
           </div>
           <div class="modulos-list" style="margin-bottom:18px;">
-            ${c.sesiones.map((s, i) => {
+            ${c.sesiones.map((s, i) => window.__sesConActividad(cursoId, c, s, i, ((s, i) => {
               const numSes = s.numero || (i+1);
               const vista = progCurso.clasesVistas.includes(numSes);
               const desblok = claseDesbloqueada(cursoId, i, c.sesiones);
@@ -5932,7 +6146,7 @@ const Sections = (function(){
                   <div class="modulo__num" style="background:var(--surface-3);color:var(--text-3);">🔒</div>
                   <div style="flex:1;min-width:0;">
                     <div class="modulo__title" style="color:var(--text-2);">${s.titulo}</div>
-                    <div class="modulo__meta" style="color:var(--success);">Clase gratuita · marca como vista la anterior para desbloquear</div>
+                    <div class="modulo__meta" style="color:var(--success);">Clase gratuita · ${tieneActividad(c.sesiones[i-1]) ? 'aprueba la actividad 🎮 de la clase anterior' : 'marca como vista la anterior'} para desbloquear</div>
                   </div>
                   <svg class="ic" style="color:var(--text-3);"><use href="#i-arrow-right"/></svg>
                 </div>`;
@@ -5953,10 +6167,10 @@ const Sections = (function(){
                   <div class="modulo__num" style="background:var(--surface-3);color:var(--text-3);">🔒</div>
                   <div style="flex:1;min-width:0;">
                     <div class="modulo__title" style="color:var(--text-2);">${s.titulo}</div>
-                    <div class="modulo__meta">Marca como vista la clase anterior para desbloquear</div>
+                    <div class="modulo__meta">${tieneActividad(c.sesiones[i-1]) ? 'Aprueba la actividad 🎮 de la clase anterior para desbloquear' : 'Marca como vista la clase anterior para desbloquear'}</div>
                   </div>
                 </div>`;
-            }).join('')}
+            })(s, i))).join('')}
           </div>
         `;
       } else {
@@ -6693,7 +6907,7 @@ const Sections = (function(){
     const proxNivel=niveles[nivelActual.id]?.nombre||'Maestro';
     const ganados=logros.filter(l=>l.unlock).length;
     const totalXp=logros.filter(l=>l.unlock).reduce((s,l)=>s+l.xp,0);
-    const cats=['Primeros pasos','Evaluación y peritaje','Intervención y crisis','Salud laboral','Educación y desarrollo','Herramientas','Constancia','Maestría'];
+    const cats=['Primeros pasos','Actividades','Evaluación y peritaje','Intervención y crisis','Salud laboral','Educación y desarrollo','Herramientas','Constancia','Maestría'];
     container.innerHTML=`
       <div class="fade-up">
         <div class="sec-hero">
