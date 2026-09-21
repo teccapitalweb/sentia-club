@@ -7442,10 +7442,12 @@ const Sections = (function(){
           snap.forEach(d => arts.push(d.data()));
         } catch (e) { /* sin permiso o sin datos: se usa el respaldo */ }
       }
-      if (!arts.length) {
-        const r = await fetch((window.WEBHOOK_URL || '') + '/api/noticias', { cache: 'no-store' });
-        const data = r.ok ? await r.json() : { items: [] };
-        arts = (data.items || []).slice(0, 6);
+      if (arts.length < 6) {   // completar con el RSS si hay pocas
+        try {
+          const r = await fetch((window.WEBHOOK_URL || '') + '/api/noticias', { cache: 'no-store' });
+          const data = r.ok ? await r.json() : { items: [] };
+          arts = arts.concat((data.items || []).slice(0, 6 - arts.length));
+        } catch (e) {}
       }
       // sin repetidas (la misma nota publicada por dos medios)
       { const vistos = new Set(); arts = arts.filter(n => { const k = String(n.titulo||'').toLowerCase().replace(/[^a-z0-9áéíóúñ]/g,''); if (!k || vistos.has(k)) return false; vistos.add(k); return true; }); }
