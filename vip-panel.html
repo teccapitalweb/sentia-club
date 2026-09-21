@@ -3428,7 +3428,7 @@ window.__showWelcomeSplash = function(opts) {
         <div class="splash-film__dots" id="splash-dots"></div>
         <button class="splash-bnv__btn splash-film__next" id="splash-next">Siguiente →</button>
       </div>
-      <div class="splash-bnv__foot">Cualquier duda · <a href="https://wa.me/5212381863904" target="_blank" rel="noopener">WhatsApp +52 238 409 2448</a></div>
+      <div class="splash-bnv__foot">Cualquier duda · <a href="https://wa.me/${(window.SENTIA_CONTACT&&window.SENTIA_CONTACT.whatsapp)||'5212381863904'}" target="_blank" rel="noopener">WhatsApp ${(window.__fmtWa&&window.__fmtWa())||'SENTIA'}</a></div>
     </div>
   `;
   document.body.appendChild(splash);
@@ -3716,7 +3716,7 @@ window.__setDisplayName = async (nombre) => {
       <div class="widget__label"><svg class="ic"><use href="#i-whatsapp"/></svg>Comunidad SENTIA</div>
       <div class="widget__count" id="com-count" style="display:none"></div><!-- MODIFICADO: cifra desde admin (config/club.miembrosComunidad) -->
       <div class="widget__count-sub">Profesionales de psicología y educación compartiendo experiencias</div>
-      <button class="btn btn--wa btn--block btn--sm" id="btn-wa"><svg class="ic"><use href="#i-whatsapp"/></svg>Abrir grupo</button>
+      <button class="btn btn--wa btn--block btn--sm" id="btn-wa"><svg class="ic"><use href="#i-whatsapp"/></svg><span id="btn-wa-lbl">Unirme al canal</span></button>
     </div>
 
     <div class="widget widget--disc" id="widget-disc">
@@ -5764,7 +5764,7 @@ const Sections = (function(){
         <div class="empty-state__icon"><svg class="ic ic--xl"><use href="#i-book"/></svg></div>
         <h3>Aún no hay cursos publicados</h3>
         <p>Estamos preparando los primeros cursos de SENTIA. Apenas se publiquen, los verás aquí. Síguenos en WhatsApp para enterarte primero.</p>
-        <a class="btn btn--ghost" href="https://wa.me/5212381863904" target="_blank" rel="noopener" data-bypass-paywall="true" style="margin-top:14px;"><svg class="ic"><use href="#i-whatsapp"/></svg>Avísame por WhatsApp</a>
+        <a class="btn btn--ghost" href="${SENTIA_CONTACT.canal}" target="_blank" rel="noopener" data-bypass-paywall="true" style="margin-top:14px;"><svg class="ic"><use href="#i-whatsapp"/></svg>Avísame por WhatsApp</a>
       </div>`;
       return;
     }
@@ -8169,7 +8169,7 @@ const Sections = (function(){
           </div>
 
           <div style="position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            <button class="btn btn--wa" id="btn-wa-canal-open"><svg class="ic"><use href="#i-whatsapp"/></svg>Abrir grupo</button>
+            <button class="btn btn--wa" id="btn-wa-canal-open"><svg class="ic"><use href="#i-whatsapp"/></svg>${SENTIA_CONTACT.grupo ? 'Abrir grupo' : 'Unirme al canal'}</button>
             <button class="btn btn--ghost" id="btn-wa-canal-share"><svg class="ic"><use href="#i-arrow-right"/></svg>Compartir invitación</button>
           </div>
         </section>
@@ -8962,7 +8962,11 @@ window.__aplicarContactoClub = function(){
   if (cc) { cc.style.display = n ? '' : 'none'; if (n) cc.innerHTML = n + '<span style="font-size:13px; opacity:.6; font-weight:500"> miembros</span>'; }
   const ws = document.getElementById('wa-stat-miembros'), wn = document.getElementById('wa-stat-num');
   if (ws && wn) { ws.style.display = n ? '' : 'none'; wn.textContent = n; }
+  const lb = document.getElementById('btn-wa-lbl'); if (lb) lb.textContent = SENTIA_CONTACT.grupo ? 'Abrir grupo' : 'Unirme al canal';
+  console.info('[SENTIA] Contacto desde admin →', { whatsapp: SENTIA_CONTACT.whatsapp, canal: SENTIA_CONTACT.canal, grupo: SENTIA_CONTACT.grupo || '(sin grupo)' });
 };
+// Numero de soporte con formato +52 238 000 0000
+window.__fmtWa = function(){ const w = String(SENTIA_CONTACT.whatsapp || ''); return w.length === 12 ? '+' + w.slice(0,2) + ' ' + w.slice(2,5) + ' ' + w.slice(5,8) + ' ' + w.slice(8) : '+' + w; };
 window.__aplicarContactoClub();
 
 // ═══════════════════════════════════════════════════════════════════

@@ -4960,9 +4960,9 @@ const Pages={
           <div class="dash-card">
             <div class="dash-card__header"><div class="dash-card__title"><svg class="ic"><use href="#i-whatsapp"/></svg>Contacto</div></div>
             <div class="form-grid">
-              <div class="form-field form-field--full"><label class="label">WhatsApp (venta)</label><input type="text" class="input" id="cfg-wa" value="${c.whatsapp}" placeholder="+52 ..."></div>
-              <div class="form-field form-field--full"><label class="label">Canal de WhatsApp (comunidad/anuncios)</label><input type="url" class="input" id="cfg-canal" value="${c.whatsappCanal || ''}" placeholder="https://whatsapp.com/channel/..."></div>
-              <div class="form-field form-field--full"><label class="label">Grupo de WhatsApp (botón "Abrir grupo")</label><input type="url" class="input" id="cfg-grupo" value="" placeholder="https://chat.whatsapp.com/..."></div>
+              <div class="form-field form-field--full"><label class="label">WhatsApp de soporte y ventas · botones "Soporte", "Descuento 20%" y bienvenida</label><input type="text" class="input" id="cfg-wa" value="${c.whatsapp}" placeholder="+52 ..."></div>
+              <div class="form-field form-field--full"><label class="label">Canal de WhatsApp · menú "Canal WhatsApp" y "Unirme al canal"</label><input type="url" class="input" id="cfg-canal" value="${c.whatsappCanal || ''}" placeholder="https://whatsapp.com/channel/..."></div>
+              <div class="form-field form-field--full"><label class="label">Grupo de WhatsApp · si lo llenas, el botón verde cambia a "Abrir grupo"</label><input type="url" class="input" id="cfg-grupo" value="" placeholder="https://chat.whatsapp.com/..."></div>
               <div class="form-field form-field--full"><label class="label">Miembros de la comunidad (número que se muestra · vacío = no mostrar)</label><input type="number" class="input" id="cfg-miembros" value="" min="0" placeholder="Ej. 120"></div>
               <div class="form-field form-field--full"><label class="label">Instagram</label><input type="text" class="input" id="cfg-ig" value="${c.instagram}"></div>
               <div class="form-field form-field--full"><label class="label">Facebook</label><input type="url" class="input" id="cfg-fb" value="${c.facebook || ''}" placeholder="https://www.facebook.com/..."></div>
@@ -5052,7 +5052,7 @@ const Pages={
             actualizadoEn:fb.serverTimestamp()
           },{merge:true});
           c.whatsapp=whatsapp; c.whatsappCanal=whatsappCanal; c.instagram=instagram; c.facebook=facebook; c.emailContacto=emailContacto;
-          Toast.success('Contacto actualizado','Ya se reflejan en el sitio');
+          Toast.success('Contacto guardado','Recarga el panel del alumno (Ctrl + F5) para verlo');
         }catch(e){Toast.error('Error al guardar contacto',e.message);}
       }
     }));
