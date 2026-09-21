@@ -3873,7 +3873,7 @@ async function initCountdown(){
     const proximos = arrWebs
       .filter(w => {
         const fMs = w.fechaMs || (w.fecha ? new Date(w.fecha).getTime() : 0);
-        return fMs > ahora;
+        return (fMs + (Number(w.duracion) || 60) * 60000) > ahora; // MODIFICADO: visible mientras dura la clase
       })
       .sort((a, b) => {
         const fa = a.fechaMs || new Date(a.fecha).getTime();
@@ -5581,12 +5581,15 @@ const Sections = (function(){
           duracion: data.duracion || 60,
           link: data.link || '',
           area: data.area || 'General',
-          status: fechaMs > ahora ? 'proxima' : 'grabada',
+          // MODIFICADO: sigue abierta mientras dure la clase (inicio + duracion), no solo hasta la hora de inicio
+          status: (fechaMs + (Number(data.duracion) || 60) * 60000) > ahora ? 'proxima' : 'grabada',
           registrado: false,
           visto: false
         };
       });
       _webinarsLoaded = true;
+      // MODIFICADO: punto rojo en "Clases en vivo" solo si hay una clase proxima
+      try { const hay = webinars.some(w => w.status === 'proxima'); document.querySelectorAll('#nav-live-dot').forEach(d => d.style.display = hay ? '' : 'none'); } catch (_) {}
     } catch (e) {
       console.warn('No se pudieron cargar webinars de Firestore:', e.message);
       webinars = [];
@@ -9987,7 +9990,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         if (typeof window.__resetWebinarsCache === 'function') {
           window.__resetWebinarsCache();
         }
-        initCountdown().catch(e => console.warn('[initCountdown post-auth]', e));
+        initCountdown()
+          .then(() => {
+            // MODIFICADO: si el alumno ya estaba en "Clases en vivo", repintar con la lista ya cargada
+            if ((window.location.hash || '').replace(/^#\/?/, '') === 'webinars' && typeof window.navigateToSection === 'function') {
+              window.navigateToSection('webinars', { replace: true });
+            }
+          })
+          .catch(e => console.warn('[initCountdown post-auth]', e));
       }
     }, 150);
   };
