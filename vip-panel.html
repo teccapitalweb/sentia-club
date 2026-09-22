@@ -5323,7 +5323,11 @@ const Sections = (function(){
       pintar();
     }
 
-    if (a.tipo === 'trivia' || a.tipo === 'caso') {
+    if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
+      preguntas(a.items.map(it => it.tipo === 'vf'
+        ? { q: it.pregunta, exp: it.explicacion, ops: [{ texto: 'Verdadero', correcta: it.respuesta !== false }, { texto: 'Falso', correcta: it.respuesta === false }] }
+        : { q: it.pregunta, exp: it.explicacion, ops: actBarajar(it.opciones || []) }));
+    } else if (a.tipo === 'trivia' || a.tipo === 'caso') {
       preguntas(a.items.map(it => ({ q: it.pregunta, ops: a.tipo === 'caso' ? it.opciones : actBarajar(it.opciones), exp: it.explicacion })), a.tipo === 'caso' ? a.situacion : '');
     } else if (a.tipo === 'vf') {
       preguntas(actBarajar(a.items).map(it => ({ q: it.afirmacion, exp: it.explicacion,
