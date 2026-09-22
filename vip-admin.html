@@ -2916,7 +2916,7 @@ const Pages={
     if (s.actividad && a !== s.actividad) s.actividad = a;
     const esc = v => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     if (!a) return '';
-    const tipos = { quiz:'Preguntas (opción múltiple y V/F)', ahorcado:'Ahorcado', sopa:'Sopa de letras', crucigrama:'Crucigrama', memorama:'Memorama', caso:'Caso práctico', externo:'Link externo' };
+    const tipos = { quiz:'Preguntas (opción múltiple y V/F)', ahorcado:'Ahorcado', sopa:'Sopa de letras', crucigrama:'Crucigrama', memorama:'Memorama', rompecabezas:'Rompecabezas', caso:'Caso práctico', externo:'Link externo' };
     const filas = (cols) => `<div class="actw">${(a.items || []).map((it, wi) => `<div class="actw__row" data-w="${wi}">
         <input class="input" data-wf="${cols[0].k}" value="${esc(it[cols[0].k])}" placeholder="${cols[0].ph}">
         <input class="input" data-wf="${cols[1].k}" value="${esc(it[cols[1].k])}" placeholder="${cols[1].ph}">
@@ -2927,6 +2927,20 @@ const Pages={
          <button type="button" class="actq__add" data-qadd="${idx}">+ Agregar pregunta</button>`
       : ['ahorcado','sopa','crucigrama'].includes(a.tipo)
       ? `<div class="actw__help">${a.tipo === 'ahorcado' ? 'El alumno adivina cada palabra letra por letra; la pista aparece arriba.' : a.tipo === 'sopa' ? 'Palabras de hasta 12 letras (se buscan en horizontal, vertical y diagonal). La pista es opcional.' : 'Palabras de hasta 12 letras con su pista; el crucigrama se arma solo.'}</div>` + filas([{k:'palabra',ph:'Palabra'},{k:'pista',ph: a.tipo === 'sopa' ? 'Pista (opcional)' : 'Pista o definición'},'Agregar palabra'])
+      : a.tipo === 'rompecabezas'
+      ? `<div class="actw__help">El alumno acomoda las piezas de una imagen (diagrama, infografía, portada del curso…). Usa una imagen cuadrada o casi cuadrada.</div>
+         <div class="actpz">
+           <div class="actpz__prev" style="${a.imagen ? `background-image:url('${String(a.imagen).replace(/'/g,'%27')}')` : ''}">${a.imagen ? '' : 'Sin imagen'}</div>
+           <div class="actpz__cfg">
+             <input class="input" data-pz="url" value="${a.imagen && !String(a.imagen).startsWith('data:') ? esc(a.imagen) : ''}" placeholder="Link de la imagen (https://…)">
+             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+               <button type="button" class="actq__add" data-pz-subir="${idx}">o subir desde tu computadora</button>
+               <input type="file" accept="image/*" data-pz-file="${idx}" style="display:none">
+               <label class="actbox__min">Piezas <select class="input actq__sel" data-pz="piezas">${[3,4,5].map(n => `<option value="${n}" ${Number(a.piezas || 3) === n ? 'selected' : ''}>${n} × ${n}</option>`).join('')}</select></label>
+             </div>
+             <input class="input" data-pz="mensaje" value="${esc(a.mensaje)}" placeholder="Mensaje al completarlo (opcional): qué representa la imagen">
+           </div>
+         </div>`
       : a.tipo === 'memorama'
       ? `<div class="actw__help">De 3 a 8 parejas. El alumno voltea cartas para unir cada concepto con su definición.</div>` + filas([{k:'a',ph:'Concepto'},{k:'b',ph:'Definición'},'Agregar pareja'])
       : `<textarea class="input" data-act-texto="${idx}" rows="7" placeholder="${esc(this._ACT_TIPOS[a.tipo]?.ayuda)}" style="font-size:12.5px;line-height:1.5;font-family:inherit;min-height:140px;">${esc(a.texto)}</textarea>
@@ -2963,6 +2977,9 @@ const Pages={
       .actq__exp{font-size:12.5px;padding:8px 11px}
       .actw{display:flex;flex-direction:column;gap:6px}.actw__row{display:grid;grid-template-columns:1fr 1.6fr 26px;gap:8px;align-items:center}.actw__row .input{padding:8px 11px;font-size:13px}
       .actw__help{font-size:11.5px;color:var(--text-3)}
+      .actpz{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start}
+      .actpz__prev{width:120px;height:120px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;display:grid;place-items:center;font-size:11px;color:var(--text-3)}
+      .actpz__cfg{display:flex;flex-direction:column;gap:8px}.actpz__cfg .input{padding:8px 11px;font-size:13px}
       .actbox__head{grid-template-columns:minmax(150px,210px) 1fr auto 30px!important}`;
       document.head.appendChild(st);
     }
@@ -2980,6 +2997,7 @@ const Pages={
       if (t.dataset.actTitulo !== undefined) a.titulo = t.value;
       else if (t.dataset.actMinimo !== undefined) a.minimo = Math.max(0, Math.min(100, parseInt(t.value, 10) || 0));
       else if (t.dataset.actTexto !== undefined) a.texto = t.value;
+      else if (t.dataset.pz) { if (t.dataset.pz === 'url') { a.imagen = t.value.trim(); const pv = t.closest('.actpz').querySelector('.actpz__prev'); pv.style.backgroundImage = a.imagen ? `url('${a.imagen}')` : 'none'; pv.textContent = a.imagen ? '' : 'Sin imagen'; } else if (t.dataset.pz === 'mensaje') a.mensaje = t.value; }
       else if (t.dataset.wf) { const w = t.closest('[data-w]'); if (w) a.items[+w.dataset.w][t.dataset.wf] = t.value; }
       else { const qi = qDe(t); if (qi === null) return; const q = a.items[qi];
         if (t.dataset.qf) q[t.dataset.qf] = t.value;
@@ -2987,10 +3005,22 @@ const Pages={
     }));
     cont.querySelectorAll('[data-actbox]').forEach(box => box.addEventListener('change', e => {
       const t = e.target, i = idxDe(t), a = ses(i).actividad; if (!a) return;
+      if (t.dataset.pz === 'piezas') { a.piezas = parseInt(t.value, 10) || 3; return; }
+      if (t.dataset.pzFile !== undefined) {
+        const f = t.files && t.files[0]; t.value = ''; if (!f) return;
+        const rd = new FileReader(); rd.onload = ev => { const img = new Image(); img.onload = () => {
+          const L = 720, cv = document.createElement('canvas'); cv.width = L; cv.height = L;
+          const esc2 = Math.max(L / img.width, L / img.height), w = img.width * esc2, h = img.height * esc2;
+          const cx = cv.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, (L - w) / 2, (L - h) / 2, w, h);
+          a.imagen = cv.toDataURL('image/jpeg', 0.84); a.items = [{ pz: true }]; re();
+          if (typeof Toast !== 'undefined') Toast.success('Imagen lista', 'Se guarda con "Guardar cambios"');
+        }; img.src = ev.target.result; }; rd.readAsDataURL(f); return;
+      }
       if (t.dataset.actTipo !== undefined) {
         a.tipo = t.value;
         if (t.value === 'quiz') { a.items = (a.items && a.items[0] && a.items[0].pregunta !== undefined) ? a.items : [{ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false}], explicacion:'' }]; }
         else if (['ahorcado','sopa','crucigrama'].includes(t.value)) { a.items = (a.items && a.items[0] && a.items[0].palabra !== undefined) ? a.items : [{palabra:'',pista:''},{palabra:'',pista:''},{palabra:'',pista:''}]; }
+        else if (t.value === 'rompecabezas') { a.items = [{ pz: true }]; a.piezas = a.piezas || 3; }
         else if (t.value === 'memorama') { a.items = (a.items && a.items[0] && a.items[0].a !== undefined) ? a.items : [{a:'',b:''},{a:'',b:''},{a:'',b:''}]; }
         else { a.items = []; a.texto = a.texto || ''; }
         return re();
@@ -3004,6 +3034,7 @@ const Pages={
       const t = e.target.closest('button'); if (!t) return;
       const i = idxDe(t), a = ses(i).actividad; if (!a) return;
       if (t.dataset.actQuitar !== undefined) { if (confirm('¿Quitar la actividad de esta clase?')) { delete ses(i).actividad; re(); } return; }
+      if (t.dataset.pzSubir !== undefined) { t.parentElement.querySelector('[data-pz-file]').click(); return; }
       if (t.dataset.wadd !== undefined) { a.items.push(a.tipo === 'memorama' ? {a:'',b:''} : {palabra:'',pista:''}); return re(); }
       if (t.dataset.wdel !== undefined) { a.items.splice(+t.dataset.wdel, 1); return re(); }
       if (t.dataset.qadd !== undefined) { a.items.push({ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false},{texto:'',correcta:false}], explicacion:'' }); return re(); }
@@ -3043,6 +3074,9 @@ const Pages={
         if (a.tipo !== 'ahorcado' && (w.replace(/ /g,'').length > 12 || w.includes(' '))) return `Clase ${n}: "${it.palabra}" debe ser una sola palabra de máximo 12 letras`;
         if (a.tipo === 'crucigrama' && !String(it.pista || '').trim()) return `Clase ${n}: falta la pista de "${it.palabra}"`;
       }
+    } else if (a.tipo === 'rompecabezas') {
+      if (!a.imagen) return `Clase ${n}: el rompecabezas necesita una imagen`;
+      a.items = [{ pz: true }]; a.piezas = a.piezas || 3;
     } else if (a.tipo === 'memorama') {
       a.items = (a.items || []).filter(it => String(it.a || '').trim() || String(it.b || '').trim());
       if (a.items.length < 3 || a.items.length > 8) return `Clase ${n}: el memorama necesita de 3 a 8 parejas`;

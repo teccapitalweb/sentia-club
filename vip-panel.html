@@ -5477,7 +5477,42 @@ const Sections = (function(){
       body.querySelector('[data-act="fin"]').onclick = () => terminar(correctas().length / cr.puestos.length * 100);
     }
 
-    if (a.tipo === 'ahorcado') { jugarAhorcado(a.items); }
+
+    function jugarRompecabezas(){
+      const n = Math.max(3, Math.min(5, Number(a.piezas) || 3)), total = n * n;
+      let orden = actBarajar([...Array(total).keys()]);
+      while (orden.every((v, i) => v === i)) orden = actBarajar(orden);
+      let sel = null, movs = 0;
+      const img = String(a.imagen || '').replace(/'/g, '%27');
+      function pintar(){
+        const listos = orden.filter((v, i) => v === i).length;
+        fill.style.width = (listos / total * 100) + '%';
+        body.innerHTML = `<div class="act-q__n">Da clic en dos piezas para intercambiarlas · movimientos: ${movs}</div>
+          <div class="pz-grid" style="grid-template-columns:repeat(${n},1fr)">${orden.map((pieza, pos) => {
+            const r = Math.floor(pieza / n), c = pieza % n;
+            return `<button class="pz-t ${sel === pos ? 'is-sel' : ''} ${pieza === pos ? 'is-ok' : ''}" data-pos="${pos}" style="background-image:url('${img}');background-size:${n * 100}% ${n * 100}%;background-position:${n > 1 ? c / (n - 1) * 100 : 0}% ${n > 1 ? r / (n - 1) * 100 : 0}%"></button>`;
+          }).join('')}</div>
+          <div class="pz-ref"><span>Imagen de referencia</span><div style="background-image:url('${img}')"></div></div>`;
+        body.querySelectorAll('.pz-t').forEach(b => b.onclick = () => {
+          const pos = +b.dataset.pos;
+          if (sel === null) { sel = pos; return pintar(); }
+          if (sel !== pos) { [orden[sel], orden[pos]] = [orden[pos], orden[sel]]; movs++; }
+          sel = null;
+          if (orden.every((v, i) => v === i)) {
+            fill.style.width = '100%';
+            body.innerHTML = `<div class="pz-done" style="background-image:url('${img}')"></div>
+              ${a.mensaje ? `<div class="act-fb__d" style="text-align:center;margin-top:10px">${escapeHtml(a.mensaje)}</div>` : ''}
+              <div class="act-actions"><button class="btn btn--primary" data-act="pz-ok">Ver resultado</button></div>`;
+            body.querySelector('[data-act="pz-ok"]').onclick = () => terminar(Math.max(70, 100 - Math.max(0, movs - total) * 2));
+            return;
+          }
+          pintar();
+        });
+      }
+      pintar();
+    }
+    if (a.tipo === 'rompecabezas') { jugarRompecabezas(); }
+    else if (a.tipo === 'ahorcado') { jugarAhorcado(a.items); }
     else if (a.tipo === 'sopa') { jugarSopa(a.items); }
     else if (a.tipo === 'crucigrama') { jugarCrucigrama(a.items); }
     else if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
@@ -5564,6 +5599,11 @@ const Sections = (function(){
     .cw-n{position:absolute;top:1px;left:3px;font-size:8.5px;font-weight:700;color:var(--text-3);pointer-events:none}
     .cw-clues{flex:1;min-width:220px;font-size:13px;line-height:1.5;color:var(--text)}.cw-h{font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:6px 0}
     .cw-clues div[data-pw]{padding:3px 0}.cw-clues div.is-ok{color:var(--success)}
+.pz-grid{display:grid;gap:3px;max-width:420px;margin:8px auto;aspect-ratio:1}
+    .pz-t{aspect-ratio:1;border:2px solid transparent;border-radius:6px;cursor:pointer;padding:0;background-color:var(--surface-2);transition:transform .12s,border-color .12s}
+    .pz-t:hover{transform:scale(.97)}.pz-t.is-sel{border-color:var(--primary);transform:scale(.94)}.pz-t.is-ok{border-color:color-mix(in srgb,var(--success) 55%,transparent)}
+    .pz-ref{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:8px;font-size:12px;color:var(--text-3)}.pz-ref div{width:64px;height:64px;border-radius:8px;background-size:cover;background-position:center;border:1px solid var(--border)}
+    .pz-done{width:min(360px,100%);aspect-ratio:1;margin:6px auto 0;border-radius:12px;background-size:cover;background-position:center;border:2px solid var(--success)}
     .act-ext iframe{width:100%;height:60vh;border:0;border-radius:12px;background:#fff}
     .act-result{text-align:center;padding:10px 0}
     .act-score{font-size:54px;font-weight:900;letter-spacing:-1px}.act-score.is-ok{color:var(--success)}.act-score.is-bad{color:#f59e0b}
