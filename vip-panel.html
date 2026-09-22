@@ -4101,8 +4101,22 @@ function toolEsVIP(){
   if (S.isAdmin) return true;
   return false;
 }
+// MODIFICADO: lo bloqueado lleva directo a la pantalla de planes, sin ventana intermedia
+window.__irASuscripcion = function(){
+  try { document.querySelectorAll('.modal-backdrop.is-open').forEach(b => { try { window.Modal?.close(b.dataset.modalId); } catch(e){} }); } catch(e){}
+  try { document.getElementById('paywall-modal')?.classList.remove('is-open'); } catch(e){}
+  const S = window.UserState || {};
+  setTimeout(() => {
+    if (S.modo === 'invitado') window.location.href = 'vip-auth.html?plan=' + (localStorage.getItem('sentia_intent_plan') || 'anual');
+    else window.navigateToSection?.('suscripcion');
+  }, 150);
+};
+
 function toolRequiereVIP(nombreHerramienta){
   if (toolEsVIP()) return true;
+  window.__irASuscripcion();
+  return false;
+  /* eslint-disable no-unreachable */
   if (typeof window.__showPaywallModal === 'function'){
     window.__showPaywallModal({
       title: 'Función exclusiva para miembros VIP',
@@ -4879,6 +4893,8 @@ function seccionPanelDesdeHash(){
 
 function navigateToSection(section, opts){
   opts = opts || {};
+  // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
+  if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
   document.querySelectorAll(`[data-section="${section}"]`).forEach(ni => ni.classList.add('is-active'));
@@ -5047,10 +5063,8 @@ const Sections = (function(){
   }
 
   function mostrarPaywallCurso(curso) {
-    window.__showPaywallModal?.({
-      title: 'Continúa aprendiendo con SENTIA VIP',
-      sub: textoPaywallCurso(curso)
-    });
+    void curso;
+    window.__irASuscripcion();   // MODIFICADO: directo a los planes
   }
 
   // Expuestos para las filas generadas con HTML dinámico y para pruebas de acceso.
@@ -7446,12 +7460,7 @@ const Sections = (function(){
       // Paywall · solo VIP puede inscribirse a la lista de la clase
       const S = window.UserState;
       if (S && S.modo !== 'vip') {
-        if (typeof window.__showPaywallModal === 'function') {
-          window.__showPaywallModal({
-            title: 'Inscripción exclusiva para VIP',
-            sub: 'Activa tu suscripción para registrarte y recibir el recordatorio una hora antes'
-          });
-        }
+        window.__irASuscripcion();   // MODIFICADO: directo a los planes
         return;
       }
       prox.registrado=!prox.registrado;
@@ -7462,12 +7471,7 @@ const Sections = (function(){
       // Bloqueo paywall · invitados y sin-membresia ven el countdown PERO no pueden unirse
       const S = window.UserState;
       if (S && S.modo !== 'vip') {
-        if (typeof window.__showPaywallModal === 'function') {
-          window.__showPaywallModal({
-            title: 'Clase exclusiva para miembros VIP',
-            sub: 'Activa tu suscripción para unirte a las transmisiones en vivo y ver las grabaciones'
-          });
-        }
+        window.__irASuscripcion();   // MODIFICADO: directo a los planes
         return;
       }
       // Solo VIP: abrir el enlace REAL siempre (sin importar si ya empezó)
@@ -7618,12 +7622,7 @@ const Sections = (function(){
       // Bloqueo paywall · solo VIP puede unirse
       const S = window.UserState;
       if (S && S.modo !== 'vip') {
-        if (typeof window.__showPaywallModal === 'function') {
-          window.__showPaywallModal({
-            title: 'Clase exclusiva para miembros VIP',
-            sub: 'Activa tu suscripción para unirte a las transmisiones en vivo'
-          });
-        }
+        window.__irASuscripcion();   // MODIFICADO: directo a los planes
         return;
       }
       const url = w.link || w.zoom;
