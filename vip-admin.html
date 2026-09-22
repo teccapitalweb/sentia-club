@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* SENTIA ADMIN · misma identidad agri-futurista que vip-panel */
@@ -47,7 +47,7 @@ input,select,textarea{font:inherit;color:inherit}
 }
 
 body{
-  font-family:'Inter',sans-serif;
+  font-family:'Instrument Sans',sans-serif;
   font-size:14px;line-height:1.5;
   color:var(--text);background:var(--bg);
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
@@ -58,7 +58,7 @@ body{
 
 /* SIDEBAR */
 .sidebar{
-  background:linear-gradient(180deg,#071510 0%,#081225 100%);
+  background:var(--surface);
   border-right:1px solid var(--border);
   padding:18px 14px;
   overflow-y:auto;
@@ -67,12 +67,12 @@ body{
 .sidebar::-webkit-scrollbar{width:6px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:3px}
 .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:8px}
-.brand__logo{width:36px;height:36px;border-radius:9px;background:#3B2420;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.brand__logo{width:36px;height:36px;border-radius:9px;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
 .brand__logo svg{width:24px;height:24px}
 .brand__logo img{width:28px;height:28px;object-fit:contain;display:block}
-.brand__name{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+.brand__name{font-family:'Sora','Instrument Sans',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
 .brand__role{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
   color:var(--primary);
   padding:3px 8px;border-radius:100px;
@@ -84,7 +84,7 @@ body{
 
 .nav-section{display:flex;flex-direction:column;gap:2px;margin-top:8px}
 .nav-label{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--text-3);padding:8px 12px 6px;
 }
@@ -100,7 +100,7 @@ body{
 .nav-item .ic{width:16px;height:16px;flex-shrink:0}
 .nav-item__badge{
   margin-left:auto;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:700;
   padding:2px 7px;border-radius:100px;
   background:var(--surface-2);color:var(--text-3);
@@ -122,7 +122,7 @@ body{
 }
 .topbar__pill{
   display:inline-flex;align-items:center;gap:7px;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
   padding:7px 13px;border-radius:100px;
   background:color-mix(in srgb,#2fbf2e 14%,transparent);
@@ -154,7 +154,7 @@ body{
   flex-shrink:0;
 }
 .avatar__name{font-size:12px;font-weight:600;letter-spacing:-.1px;line-height:1.1}
-.avatar__role{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--primary);font-weight:700;letter-spacing:.6px;margin-top:1px}
+.avatar__role{font-family:'Instrument Sans',monospace;font-size:9px;color:var(--primary);font-weight:700;letter-spacing:.6px;margin-top:1px}
 
 .page{padding:28px 32px 80px;max-width:1240px;margin:0 auto}
 
@@ -162,7 +162,7 @@ body{
 .sec-hero{padding:10px 0 24px;border-bottom:1px solid var(--border);margin-bottom:28px}
 .sec-hero__eyebrow{
   display:inline-flex;align-items:center;gap:8px;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10.5px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;
   color:var(--primary);
   padding:7px 13px;border-radius:100px;
@@ -171,7 +171,7 @@ body{
 }
 .sec-hero__eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#137a33,#2fbf2e);animation:pulseDotSmall 1.8s ease-out infinite;box-shadow:0 0 8px var(--primary-glow)}
 .sec-hero__title{
-  font-family:'Plus Jakarta Sans','Inter',sans-serif;
+  font-family:'Sora','Instrument Sans',sans-serif;
   font-size:clamp(28px,3.4vw,38px);font-weight:800;letter-spacing:-1.1px;line-height:1.05;
   margin-top:14px;
   background:linear-gradient(135deg,var(--text),color-mix(in srgb,var(--text) 55%,transparent));
@@ -208,7 +208,7 @@ body{
 .foro-admin-card__time{font-size:11px;color:var(--text-3);margin-left:auto}
 .foro-admin-card__text{font-size:13.5px;color:var(--text);line-height:1.5;word-break:break-word;margin-bottom:8px}
 .foro-admin-card__img{max-width:200px;max-height:200px;border-radius:10px;display:block;margin-bottom:8px;object-fit:cover}
-.foro-admin-card__meta{font-size:11.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace}
+.foro-admin-card__meta{font-size:11.5px;color:var(--text-3);font-family:'Instrument Sans',monospace}
 .foro-admin-card__del{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text-3);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s;align-self:flex-start}
 .foro-admin-card__del:hover{background:color-mix(in srgb,#F87171 16%,transparent);color:#F87171;border-color:#F87171}
 .foro-admin-card__del .ic{width:16px;height:16px}
@@ -240,7 +240,7 @@ body{
 .adm-img-prev{position:relative;margin:10px 0;max-width:220px}
 .adm-img-prev img{width:100%;border-radius:10px;display:block}
 .adm-img-quitar{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.adm-composer__char{font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace}
+.adm-composer__char{font-size:11px;color:var(--text-3);font-family:'Instrument Sans',monospace}
 .adm-reply{display:flex;gap:8px;margin-top:10px}
 .adm-reply__in{flex:1;background:var(--surface-2);border:1px solid var(--border-2);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none}
 .adm-reply__in:focus{border-color:var(--primary)}
@@ -266,7 +266,7 @@ body{
 .dir-adm-card__sub{font-size:13px;color:var(--text);margin-bottom:3px}
 .dir-adm-card__sector{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--primary);background:color-mix(in srgb,#2fbf2e 14%,transparent);padding:3px 9px;border-radius:999px;margin-bottom:6px}
 .dir-adm-card__bio{font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:6px}
-.dir-adm-card__meta{font-size:11.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace}
+.dir-adm-card__meta{font-size:11.5px;color:var(--text-3);font-family:'Instrument Sans',monospace}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .spin{animation:spin 0.9s linear infinite}
 @keyframes shimmerSkeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -328,7 +328,7 @@ body{
   display:inline-flex;align-items:center;gap:5px;
   padding:7px 11px;border-radius:8px;
   background:transparent;border:none;cursor:pointer;
-  color:var(--text-3);font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--text-3);font-family:'Sora',sans-serif;
   font-size:12px;font-weight:600;letter-spacing:-.1px;
   transition:all .15s;
 }
@@ -369,7 +369,7 @@ body{
   background:var(--surface-2);
   border:1px solid var(--border-2);
   color:var(--text-2);cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif;
+  font-family:'Sora',sans-serif;
   font-size:12.5px;font-weight:600;letter-spacing:-.1px;
   transition:all .15s;
 }
@@ -384,7 +384,7 @@ body{
   color:var(--primary);
 }
 .curso-pill__count{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10.5px;font-weight:700;
   padding:1px 6px;border-radius:5px;
   background:color-mix(in srgb, var(--text-3) 18%, transparent);
@@ -438,7 +438,7 @@ body{
   display:inline-flex;align-items:center;
   padding:4px 9px;border-radius:6px;
   background:rgba(201,75,104,.95);color:#442A22;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
 }
@@ -446,7 +446,7 @@ body{
   display:inline-flex;align-items:center;
   padding:3px 8px;border-radius:5px;
   background:rgba(255,255,255,.92);color:#442A22;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
 }
 /* Toggle on/off · estilo iOS */
@@ -479,7 +479,7 @@ body{
 }
 .curso-card__body{padding:14px 14px 12px;}
 .curso-card__title{
-  font-family:'Plus Jakarta Sans',sans-serif;
+  font-family:'Sora',sans-serif;
   font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.3;
   color:var(--text);
   overflow:hidden;
@@ -501,7 +501,7 @@ body{
 }
 .curso-card__meta-item{
   display:inline-flex;align-items:center;gap:4px;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10.5px;font-weight:600;letter-spacing:.3px;
   color:var(--text-2);
 }
@@ -511,7 +511,7 @@ body{
 }
 .curso-card__status{
   display:inline-flex;align-items:center;gap:5px;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
 }
 .curso-card__status.is-active{color:#E5C171;}
@@ -575,7 +575,7 @@ body{
 }
 .curso-row__body{flex:1;min-width:0;}
 .curso-row__title{
-  font-family:'Plus Jakarta Sans',sans-serif;
+  font-family:'Sora',sans-serif;
   font-size:13.5px;font-weight:700;letter-spacing:-.2px;
   color:var(--text);line-height:1.3;
   overflow:hidden;text-overflow:ellipsis;
@@ -589,13 +589,13 @@ body{
 .curso-row__area{
   padding:2px 7px;border-radius:5px;
   border:1px solid currentColor;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
 }
 .curso-row__nivel{
   padding:2px 7px;border-radius:5px;
   background:var(--surface-2);
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:700;color:var(--text-3);
   letter-spacing:.5px;text-transform:uppercase;
 }
@@ -605,12 +605,12 @@ body{
 }
 .curso-row__stat{text-align:center;}
 .curso-row__stat-val{
-  font-family:'Plus Jakarta Sans',sans-serif;
+  font-family:'Sora',sans-serif;
   font-size:15px;font-weight:800;color:var(--text);
   letter-spacing:-.3px;line-height:1;
 }
 .curso-row__stat-lbl{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
   color:var(--text-3);margin-top:2px;
 }
@@ -647,7 +647,7 @@ body{
   margin-bottom:14px;
 }
 .curso-empty__title{
-  font-family:'Plus Jakarta Sans',sans-serif;
+  font-family:'Sora',sans-serif;
   font-size:16px;font-weight:700;color:var(--text);
   margin-bottom:6px;
 }
@@ -668,13 +668,13 @@ body{
 }
 .kpi-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--c1,var(--primary)) 35%,transparent);box-shadow:0 14px 36px rgba(0,0,0,.12)}
 .kpi-card__label{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--text-3);display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;
 }
 .kpi-card__label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c1,var(--primary));animation:pulseDotSmall 2s ease-out infinite;box-shadow:0 0 8px var(--c1,var(--primary))}
 .kpi-card__value{
-  font-family:'Plus Jakarta Sans','Inter',sans-serif;
+  font-family:'Sora','Instrument Sans',sans-serif;
   font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1;
   font-feature-settings:"tnum" 1;
   background:linear-gradient(135deg,var(--text),color-mix(in srgb,var(--text) 55%,transparent));
@@ -720,7 +720,7 @@ body{
 .select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236F6555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 
 .label{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
   color:var(--text-3);margin-bottom:7px;display:block;
 }
@@ -729,7 +729,7 @@ body{
 .tag{
   display:inline-flex;align-items:center;gap:5px;
   padding:4px 10px;border-radius:100px;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
   background:var(--surface-2);color:var(--text-2);
   border:1px solid var(--border);
@@ -745,12 +745,12 @@ body{
 /* Section header */
 .section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
 .section-header__title{
-  font-family:'Plus Jakarta Sans','Inter',sans-serif;
+  font-family:'Sora','Instrument Sans',sans-serif;
   font-size:19px;font-weight:700;letter-spacing:-.3px;
   display:inline-flex;align-items:center;gap:10px;
 }
 .section-header__badge{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:9.5px;font-weight:700;letter-spacing:.8px;
   padding:4px 11px;border-radius:100px;
   background:color-mix(in srgb,var(--primary) 14%,transparent);
@@ -776,7 +776,7 @@ body{
 /* Tabs */
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
 .tab{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:11.5px;font-weight:700;letter-spacing:.5px;
   padding:10px 18px;border-radius:100px;
   background:var(--surface);border:1px solid var(--border-2);color:var(--text-2);
@@ -809,9 +809,9 @@ body{
 }
 .adm-row__thumb .ic{width:20px;height:20px}
 .adm-row__body{flex:1;min-width:0}
-.adm-row__title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
+.adm-row__title{font-family:'Sora','Instrument Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
 .adm-row__meta{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10.5px;color:var(--text-3);font-weight:600;
   display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;
 }
@@ -850,10 +850,10 @@ body{
   padding:22px 24px;
 }
 .dash-card__header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.dash-card__title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+.dash-card__title{font-family:'Sora','Instrument Sans',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
 .dash-card__title .ic{width:18px;height:18px;color:var(--primary)}
 .dash-card__link{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Instrument Sans',monospace;
   font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   color:var(--primary);display:inline-flex;align-items:center;gap:5px;
   transition:gap .2s;
@@ -878,8 +878,8 @@ body{
 .mini-row__dot .ic{width:14px;height:14px}
 .mini-row__body{flex:1;min-width:0}
 .mini-row__title{font-size:13px;font-weight:600;letter-spacing:-.1px}
-.mini-row__meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-3);font-weight:500;margin-top:2px}
-.mini-row__right{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--c1,var(--primary));font-feature-settings:"tnum" 1}
+.mini-row__meta{font-family:'Instrument Sans',monospace;font-size:10.5px;color:var(--text-3);font-weight:500;margin-top:2px}
+.mini-row__right{font-family:'Instrument Sans',monospace;font-size:11.5px;font-weight:700;color:var(--c1,var(--primary));font-feature-settings:"tnum" 1}
 
 /* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
@@ -904,8 +904,8 @@ body{
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .modal__icon .ic{width:18px;height:18px} /* MODIFICADO: el ícono se desbordaba */
-.modal__title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.2px}
-.modal__subtitle{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-3);font-weight:600;margin-top:2px}
+.modal__title{font-family:'Sora','Instrument Sans',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.2px}
+.modal__subtitle{font-family:'Instrument Sans',monospace;font-size:10.5px;color:var(--text-3);font-weight:600;margin-top:2px}
 .modal__close{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--surface-2);color:var(--text-2);display:flex;align-items:center;justify-content:center;transition:all .15s}
 .modal__close:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}
 .modal__close .ic{width:14px;height:14px;stroke-width:2.2}
@@ -955,10 +955,10 @@ body{
 .news-card__cover .ic{width:24px;height:24px}
 .news-card__body{flex:1;min-width:0}
 .news-card__head{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
-.news-card__date{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-3);font-weight:600;letter-spacing:.8px}
-.news-card__title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
+.news-card__date{font-family:'Instrument Sans',monospace;font-size:9.5px;color:var(--text-3);font-weight:600;letter-spacing:.8px}
+.news-card__title{font-family:'Sora','Instrument Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
 .news-card__desc{font-size:12px;color:var(--text-2);line-height:1.5;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.news-card__source{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:4px}
+.news-card__source{font-family:'Instrument Sans',monospace;font-size:10px;color:var(--text-3);font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:4px}
 
 /* Empty state */
 .empty{
@@ -971,7 +971,7 @@ body{
   display:flex;align-items:center;justify-content:center;
 }
 .empty__icon .ic{width:32px;height:32px}
-.empty h3{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:17px;font-weight:700;margin-bottom:7px}
+.empty h3{font-family:'Sora','Instrument Sans',sans-serif;font-size:17px;font-weight:700;margin-bottom:7px}
 .empty p{font-size:13px;color:var(--text-2);max-width:380px;margin:0 auto;line-height:1.55}
 
 /* Cron card especial */
@@ -997,9 +997,9 @@ body{
   box-shadow:0 8px 22px color-mix(in srgb,var(--success) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.18);
 }
 .cron-card__info{flex:1;min-width:0}
-.cron-card__lbl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--success);display:inline-flex;align-items:center;gap:6px}
+.cron-card__lbl{font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--success);display:inline-flex;align-items:center;gap:6px}
 .cron-card__lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulseDotSmall 1.8s ease-out infinite;box-shadow:0 0 8px var(--success)}
-.cron-card__title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.4px;margin-top:4px}
+.cron-card__title{font-family:'Sora','Instrument Sans',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.4px;margin-top:4px}
 .cron-card__sub{font-size:12.5px;color:var(--text-2);margin-top:4px}
 
 @keyframes pulseDotSmall{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.4}}
@@ -1039,6 +1039,64 @@ body{
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SENTIA ACADEMY">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style id="sentia-tema">
+/* ═══ MODIFICADO: TEMA SENTIA minimalista (día y noche) ═══ */
+:root[data-theme="night"]{
+  --bg:#0a1122;--bg-deep:#070d1b;--surface:#0f1830;--surface-2:#131e3a;--surface-3:#1a2747;
+  --border:rgba(148,163,196,.12);--border-2:rgba(148,163,196,.18);--border-strong:rgba(148,163,196,.28);
+  --text:#e8edf8;--text-2:#9aa6c2;--text-3:#6b7894;
+  --success:#3ecf5a;--ok:#3ecf5a;--ok-soft:rgba(62,207,90,.12);
+  --primary-glow:transparent;--shadow-card:none;
+}
+:root[data-theme="day"]{
+  --bg:#f5f7fb;--bg-deep:#eef1f7;--surface:#ffffff;--surface-2:#f1f4f9;--surface-3:#e8edf5;
+  --border:#e3e8f1;--border-2:#d7deea;--border-strong:#c5cfe0;
+  --text:#0e1d40;--text-2:#5b6b8f;--text-3:#8793ad;
+  --success:#1f9d24;--ok:#1f9d24;--ok-soft:#e9f7ea;
+  --primary-glow:transparent;--shadow-card:0 1px 2px rgba(14,29,64,.04);
+}
+body{font-family:'Instrument Sans',system-ui,sans-serif;letter-spacing:0}
+body::before,body::after,.banner::before,.banner::after{display:none!important;animation:none!important}
+h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font-family:'Sora',sans-serif!important;letter-spacing:-.02em}
+/* tarjetas planas: borde fino, sin brillos */
+.banner,.widget,.card,.curso-card,.news-card,.bn-card,.perfil-card,.stat-card,.kpi,.panel-card,.modal,.act-box{box-shadow:none!important}
+.banner{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:16px}
+.widget,.curso-card,.news-card,.bn-card,.perfil-card{border:1px solid var(--border)!important}
+.banner__eyebrow{background:transparent!important;border:0!important;box-shadow:none!important;padding-left:0!important;color:var(--ok)!important;backdrop-filter:none!important}
+.banner__eyebrow__dot{background:var(--ok)!important;box-shadow:none!important;animation:none!important}
+.banner__version{display:none!important}
+.banner__stat{background:var(--surface-2)!important;box-shadow:none!important;border:1px solid var(--border)!important}
+.banner__stat::before,.banner__stat-lbl::before{display:none!important}
+.brand__logo{background:transparent!important;box-shadow:none!important;border:0!important}
+.kpi-card::before{display:none!important}.kpi-card{box-shadow:none!important;border:1px solid var(--border)!important}.kpi-card:hover{transform:none!important;box-shadow:none!important;border-color:color-mix(in srgb,var(--ok) 40%,var(--border))!important}.kpi-card__label::before{animation:none!important;box-shadow:none!important}
+.brand__role{color:var(--ok)!important;background:var(--ok-soft)!important;border-color:color-mix(in srgb,var(--ok) 30%,transparent)!important}.brand__role::before{background:var(--ok)!important;animation:none!important;box-shadow:none!important}
+/* barra lateral: verde al estar o pasar sobre una sección */
+.sidebar{background:var(--surface)!important;border-right:1px solid var(--border)!important}
+.nav-item,.mobile-drawer__item{transition:background .15s,color .15s}
+.nav-item:hover,.mobile-drawer__item:hover{background:color-mix(in srgb,var(--ok) 8%,transparent)!important;color:var(--ok)!important}
+.nav-item.is-active,.mobile-drawer__item.is-active{background:var(--ok-soft)!important;color:var(--ok)!important;font-weight:600}
+.nav-item.is-active .ic,.nav-item:hover .ic,.mobile-drawer__item.is-active .ic,.mobile-drawer__item:hover .ic{color:var(--ok)!important}
+.nav-item.is-active .nav-item__badge{background:var(--ok)!important;color:#fff!important}
+/* botones: azul del logo para acciones, sin sombras de color */
+.btn--primary{background:var(--primary)!important;color:#fff!important;box-shadow:none!important}
+.btn{box-shadow:none}
+/* barras de progreso en verde */
+.progress__fill,.bar__fill,.act-bar__fill{background:var(--ok)!important}
+/* "Tu avance" en Inicio */
+.avance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.av-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.av-card:hover{border-color:color-mix(in srgb,var(--ok) 45%,var(--border));transform:translateY(-1px)}
+.av-cover{height:92px;background-size:cover;background-position:center}
+.av-body{padding:14px}
+.av-tag{font-size:10.5px;font-weight:700;color:var(--primary);letter-spacing:.06em;text-transform:uppercase}
+.av-title{font-family:'Sora',sans-serif;font-size:14.5px;font-weight:600;line-height:1.35;margin:6px 0 10px;min-height:39px;color:var(--text)}
+.av-bar{height:5px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.av-bar i{display:block;height:100%;background:var(--ok);border-radius:4px}
+.av-row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2)}
+.av-row b{color:var(--ok)}
+.av-go{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--primary)}
+.av-go .ic{width:14px;height:14px}
+</style>
 </head>
 <body style="visibility:hidden">
 
@@ -1396,7 +1454,7 @@ const Pages={
       : '—';
 
     // Loader si aún no ha cargado Firestore
-    const loadingBadge = ready ? '' : `<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-top:8px;"><span style="width:8px;height:8px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;"></span>Cargando Firestore…</div>`;
+    const loadingBadge = ready ? '' : `<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);border-radius:8px;font-family:'Instrument Sans',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-top:8px;"><span style="width:8px;height:8px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;"></span>Cargando Firestore…</div>`;
 
     p.innerHTML=`
       <div class="fade-up">
@@ -1607,7 +1665,7 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Comunicación con miembros</span>
           <h1 class="sec-hero__title">Notificaciones</h1>
-          <p class="sec-hero__sub">Envía avisos a todos los miembros VIP. Aparecen <strong style="color:var(--primary);">en tiempo real</strong> en la campanita 🔔 del panel de usuario, con un punto rojo hasta que cada quien lo abra.</p>
+          <p class="sec-hero__sub">Envía avisos a todos los miembros VIP. Aparecen <strong style="color:var(--primary);">en tiempo real</strong> en la campanita del panel de usuario, con un punto rojo hasta que cada quien lo abra.</p>
         </div>
 
         <!-- KPIs rápidos -->
@@ -1649,7 +1707,7 @@ const Pages={
             <div style="padding:4px 4px 8px;display:flex;flex-direction:column;gap:14px;">
 
               <div>
-                <label style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Tipo</label>
+                <label style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Tipo</label>
                 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
                   ${Object.entries(TIPOS).map(([key, t], i) => `
                     <button type="button" class="notif-tipo-btn ${i===0?'is-active':''}" data-tipo="${key}" style="
@@ -1658,7 +1716,7 @@ const Pages={
                       background:${i===0 ? 'color-mix(in srgb,'+t.color+' 18%, transparent)' : 'var(--surface-2)'};
                       border:1.5px solid ${i===0 ? t.color : 'var(--border-2)'};
                       color:${i===0 ? t.color : 'var(--text-2)'};
-                      font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;
+                      font-family:'Sora',sans-serif;font-size:10.5px;font-weight:700;
                       letter-spacing:.2px;
                       transition:all .15s;
                     " data-color="${t.color}" data-icono="${t.icono}">
@@ -1670,34 +1728,34 @@ const Pages={
               </div>
 
               <div>
-                <label for="notif-titulo" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Título <span style="color:var(--primary);">*</span></label>
+                <label for="notif-titulo" style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Título <span style="color:var(--primary);">*</span></label>
                 <input id="notif-titulo" type="text" maxlength="80" placeholder="Ej: Nueva clase en vivo el viernes" style="
                   width:100%;padding:11px 14px;border-radius:10px;
                   background:var(--surface-2);border:1px solid var(--border-2);
                   color:var(--text);font-size:14px;font-family:inherit;
                   transition:border-color .15s;
                 " />
-                <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;font-family:'JetBrains Mono',monospace;">
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;font-family:'Instrument Sans',monospace;">
                   <span id="notif-titulo-count">0</span>/80 caracteres
                 </div>
               </div>
 
               <div>
-                <label for="notif-desc" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Descripción <span style="color:var(--primary);">*</span></label>
+                <label for="notif-desc" style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Descripción <span style="color:var(--primary);">*</span></label>
                 <textarea id="notif-desc" maxlength="180" rows="3" placeholder="Ej: Únete este viernes 18:00 a la clase en vivo de Psicología Clínica" style="
                   width:100%;padding:11px 14px;border-radius:10px;
                   background:var(--surface-2);border:1px solid var(--border-2);
                   color:var(--text);font-size:13.5px;font-family:inherit;
                   resize:vertical;min-height:74px;line-height:1.5;
                 "></textarea>
-                <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;font-family:'JetBrains Mono',monospace;">
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;font-family:'Instrument Sans',monospace;">
                   <span id="notif-desc-count">0</span>/180 caracteres
                 </div>
               </div>
 
               <!-- Preview -->
               <div>
-                <label style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Vista previa</label>
+                <label style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Vista previa</label>
                 <div id="notif-preview" style="
                   display:flex;gap:11px;padding:13px 14px;
                   background:var(--surface-2);border:1px solid var(--border-2);
@@ -1711,7 +1769,7 @@ const Pages={
                   <div style="flex:1;min-width:0;">
                     <div id="notif-preview-titulo" style="font-size:13px;font-weight:700;color:var(--text);line-height:1.35;">Título de la notificación</div>
                     <div id="notif-preview-desc" style="font-size:12px;color:var(--text-2);line-height:1.45;margin-top:3px;">La descripción aparecerá aquí mientras la escribes</div>
-                    <div style="font-size:10px;color:var(--text-3);margin-top:5px;letter-spacing:.4px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;font-weight:700;">Ahora</div>
+                    <div style="font-size:10px;color:var(--text-3);margin-top:5px;letter-spacing:.4px;text-transform:uppercase;font-family:'Instrument Sans',monospace;font-weight:700;">Ahora</div>
                   </div>
                 </div>
               </div>
@@ -1720,7 +1778,7 @@ const Pages={
                 display:flex;align-items:center;justify-content:center;gap:8px;
                 padding:13px 18px;border-radius:11px;cursor:pointer;
                 background:linear-gradient(135deg,var(--primary),#2fbf2e);
-                color:#442A22;font-family:'Plus Jakarta Sans',sans-serif;
+                color:#442A22;font-family:'Sora',sans-serif;
                 font-size:14px;font-weight:800;letter-spacing:-.2px;
                 border:none;
                 transition:transform .15s, box-shadow .15s;
@@ -1739,7 +1797,7 @@ const Pages={
                 <svg class="ic"><use href="#i-bell"/></svg>
                 Historial de notificaciones
               </div>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);font-weight:700;">
+              <span style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);font-weight:700;">
                 ${notifs.length} en total
               </span>
             </div>
@@ -1776,10 +1834,10 @@ const Pages={
                     <div style="flex:1;min-width:0;">
                       <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
                         <span style="font-size:13.5px;font-weight:700;color:var(--text);line-height:1.3;">${(n.titulo || 'Sin título').replace(/</g,'&lt;')}</span>
-                        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:${color};font-weight:700;padding:2px 6px;background:color-mix(in srgb,${color} 14%, transparent);border-radius:4px;">${tipoInfo.label}</span>
+                        <span style="font-family:'Instrument Sans',monospace;font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:${color};font-weight:700;padding:2px 6px;background:color-mix(in srgb,${color} 14%, transparent);border-radius:4px;">${tipoInfo.label}</span>
                       </div>
                       <div style="font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:6px;">${(n.descripcion || '').replace(/</g,'&lt;')}</div>
-                      <div style="display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace;letter-spacing:.3px;text-transform:uppercase;font-weight:600;">
+                      <div style="display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-3);font-family:'Instrument Sans',monospace;letter-spacing:.3px;text-transform:uppercase;font-weight:600;">
                         <span>${formatTime(ms)}</span>
                         <span>·</span>
                         <span>Por ${creadoPor}</span>
@@ -2007,7 +2065,7 @@ const Pages={
               Nuevo curso
             </button>
             <button class="btn btn--ghost" id="sync-sentia-bunny-btn">
-              🐰 Sincronizar videos Bunny
+              Sincronizar videos Bunny
             </button>
           </div>
         </div>
@@ -2226,7 +2284,7 @@ const Pages={
       console.error('[Bunny sync]', error);
       Toast.error('No se pudo sincronizar', error.message || 'Intenta nuevamente');
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = '🐰 Sincronizar videos Bunny'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Sincronizar videos Bunny'; }
     }
   },
 
@@ -2722,10 +2780,10 @@ const Pages={
     }
     cont.innerHTML = sesiones.map((s, idx) => `
       <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">CLASE ${idx + 1}</span>
+        <span style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);font-family:'Instrument Sans',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">CLASE ${idx + 1}</span>
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título de la clase" value="${(s.titulo || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="titulo" style="font-size:13px;padding:8px 11px;">
-          ${s.videoId && !s.url ? `<div style="font-size:12.5px;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">🐰 Video de Bunny vinculado · no necesita URL</div>` : `<input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">`}
+          ${s.videoId && !s.url ? `<div style="font-size:12.5px;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">Video de Bunny vinculado · no necesita URL</div>` : `<input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">`}
           ${Pages._actividadBoxHTML(s, idx)}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
@@ -2814,7 +2872,7 @@ const Pages={
     const esc = v => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     const tipo = a?.tipo || 'trivia';
     return `<div style="border:1px dashed ${a ? 'color-mix(in srgb,var(--primary) 45%,transparent)' : 'var(--border)'};border-radius:9px;padding:8px 10px;">
-      <button type="button" data-act-toggle="${idx}" style="background:none;border:0;color:${a ? 'var(--primary)' : 'var(--text-2)'};font-weight:700;font-size:12.5px;cursor:pointer;padding:0;">🎮 ${a ? `Actividad: ${lbl} · ${a.tipo === 'externo' ? 'link' : n + ' elementos'} · mínimo ${a.minimo || 60}% · Editar` : '+ Agregar actividad interactiva'}</button>
+      <button type="button" data-act-toggle="${idx}" style="background:none;border:0;color:${a ? 'var(--primary)' : 'var(--text-2)'};font-weight:700;font-size:12.5px;cursor:pointer;padding:0;">${a ? `Actividad: ${lbl} · ${a.tipo === 'externo' ? 'link' : n + ' elementos'} · mínimo ${a.minimo || 60}% · Editar` : '+ Agregar actividad interactiva'}</button>
       <div data-act-editor="${idx}" style="display:none;margin-top:10px;display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 110px;gap:8px;margin-bottom:8px;">
           <select class="input" data-act-tipo="${idx}" style="font-size:12.5px;padding:7px 9px;">${Object.entries(this._ACT_TIPOS).map(([k,v]) => `<option value="${k}" ${k === tipo ? 'selected' : ''}>${v.label}</option>`).join('')}</select>
@@ -2845,7 +2903,7 @@ const Pages={
       const minimo = Math.max(0, Math.min(100, parseInt(q('data-act-minimo', idx).value, 10) || 60));
       const r = Pages._parseActividad(tipo, texto);
       const msg = q('data-act-msg', idx);
-      if (r.errores.length) { msg.style.color = 'var(--danger)'; msg.innerHTML = '⚠ ' + r.errores.slice(0, 4).join('<br>⚠ '); return; }
+      if (r.errores.length) { msg.style.color = 'var(--danger)'; msg.innerHTML = '' + r.errores.slice(0, 4).join('<br>'); return; }
       Pages._modalCurso.sesiones[idx].actividad = { tipo, titulo, minimo, texto, items: r.items, situacion: r.situacion };
       Pages._renderSesionesModal();
       if (typeof Toast !== 'undefined') Toast.success('Actividad lista', 'Se guarda con "Guardar cambios" del curso');
@@ -2884,7 +2942,7 @@ const Pages={
     }
     cont.innerHTML = mats.map((m, idx) => `
       <div style="display:flex;gap:8px;align-items:flex-start;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-        <span style="background:color-mix(in srgb,#3B82F6 14%,transparent);color:#3B82F6;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">MAT ${idx + 1}</span>
+        <span style="background:color-mix(in srgb,#3B82F6 14%,transparent);color:#3B82F6;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">MAT ${idx + 1}</span>
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título (ej. Guía de medios de cultivo.pdf)" value="${(m.titulo || '').replace(/"/g,'&quot;')}" data-mat-idx="${idx}" data-mat-campo="titulo" style="font-size:13px;padding:8px 11px;">
           <input type="url" class="input" placeholder="URL de descarga (Google Drive, etc.)" value="${(m.url || '').replace(/"/g,'&quot;')}" data-mat-idx="${idx}" data-mat-campo="url" style="font-size:13px;padding:8px 11px;">
@@ -3723,10 +3781,10 @@ const Pages={
     wrap.innerHTML = `<div class="curso-list">${mats.map(m => {
       const areaColor = areaColors[m.cursoArea] || '#3B82F6';
       const dispLabel = m.disponibleSiempre
-        ? `<span style="color:#E5C171;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Siempre</span>`
+        ? `<span style="color:#E5C171;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Siempre</span>`
         : (m.desbloquearEnDias !== null
-            ? `<span style="color:#FBBF24;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Día ${m.desbloquearEnDias}</span>`
-            : `<span style="color:#9CA3AF;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Progresivo</span>`);
+            ? `<span style="color:#FBBF24;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Día ${m.desbloquearEnDias}</span>`
+            : `<span style="color:#9CA3AF;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Progresivo</span>`);
       const tituloEsc = (m.titulo || '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
       const cursoTitEsc = (m.cursoTitulo || '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
       return `
@@ -4012,7 +4070,7 @@ const Pages={
         <div class="form-grid">
           <div class="form-field form-field--full"><label class="label">Estudiante</label><input type="text" class="input" id="ce-nom" placeholder="Nombre completo del estudiante"></div>
           <div class="form-field"><label class="label">Email</label><input type="email" class="input" id="ce-email" placeholder="email@example.com"></div>
-          <div class="form-field"><label class="label">Folio (auto)</label><input type="text" class="input" id="ce-folio" value="${folio}" readonly style="font-family:'JetBrains Mono',monospace;color:var(--primary);font-weight:700;"></div>
+          <div class="form-field"><label class="label">Folio (auto)</label><input type="text" class="input" id="ce-folio" value="${folio}" readonly style="font-family:'Instrument Sans',monospace;color:var(--primary);font-weight:700;"></div>
           <div class="form-field form-field--full"><label class="label">Curso completado</label><select class="select" id="ce-curso">${cursosOpts}</select></div>
           <div class="form-field"><label class="label">Horas</label><input type="number" class="input" id="ce-horas" value="8" min="1"></div>
           <div class="form-field"><label class="label">Calificación</label><input type="number" class="input" id="ce-cal" value="90" min="0" max="100"></div>
@@ -4243,7 +4301,7 @@ const Pages={
       return;
     }
 
-    // 🔍 Panel de diagnóstico SOLO si hubo error real al consultar Firestore
+    // Panel de diagnóstico SOLO si hubo error real al consultar Firestore
     // Si la col está simplemente vacía (status ok, count 0) NO mostramos alarma
     let diagBanner = '';
     if (store.miembros.length === 0 && window.__mbDiag) {
@@ -4268,7 +4326,7 @@ const Pages={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
               <div style="flex:1;min-width:0;">
-                <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;color:#EF4444;margin-bottom:4px;">⚠️ ${titulo}</div>
+                <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:800;color:#EF4444;margin-bottom:4px;">${titulo}</div>
                 <div style="font-size:13px;color:var(--text);line-height:1.55;margin-bottom:8px;">${detalle}</div>
                 <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;padding:10px 12px;background:var(--surface-3);border-radius:8px;border-left:3px solid #EF4444;">
                   <strong style="color:var(--text);">¿Qué hacer?</strong> ${accion}
@@ -4343,7 +4401,7 @@ const Pages={
     const activo = Pages._mbEstaActivo(m);
     const expirado = Pages._mbEstaExpirado(m);
     const esRegalo = m.esRegalo === true || m.plan === 'regalo';
-    // ⚡ Distinguir REGISTRADO (solo se registró pero no pagó) vs MIEMBRO (ya pagó)
+    // Distinguir REGISTRADO (solo se registró pero no pagó) vs MIEMBRO (ya pagó)
     const esSoloRegistrado = (m.activa !== true && m.activo !== true) && !m.plan;
 
     const planLabels = {
@@ -4391,7 +4449,7 @@ const Pages={
       estadoTxt = `Expiró ${fmtFecha(expira)}`;
       fechaContextual = fechaActivacion ? `Era miembro desde ${fmtFecha(fechaActivacion)}` : '';
     } else if (esSoloRegistrado) {
-      // 👈 Lo más común para el caso de Britney · solo se registró, no pagó
+      // Lo más común para el caso de Britney · solo se registró, no pagó
       estadoColor = '#A08B7F';
       estadoTxt = 'Sin pagar';
       fechaContextual = fechaRegistro ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="display:inline;vertical-align:-2px;margin-right:3px;color:#A08B7F;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Se registró ${fmtFecha(fechaRegistro)}` : 'Sin fecha de registro';
@@ -4407,7 +4465,7 @@ const Pages={
 
     return `
       <div class="curso-row" data-mb-uid="${m.uid || m.id}" style="--area-color:${pInfo.color};">
-        <div class="curso-row__thumb" style="background:linear-gradient(135deg, ${pInfo.color}, color-mix(in srgb, ${pInfo.color} 60%, #fff));color:#fff;display:flex;align-items:center;justify-content:center;background-image:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;letter-spacing:.3px;">
+        <div class="curso-row__thumb" style="background:linear-gradient(135deg, ${pInfo.color}, color-mix(in srgb, ${pInfo.color} 60%, #fff));color:#fff;display:flex;align-items:center;justify-content:center;background-image:none;font-family:'Sora',sans-serif;font-weight:800;font-size:14px;letter-spacing:.3px;">
           ${iniciales}
         </div>
         <div class="curso-row__body">
@@ -4453,7 +4511,7 @@ const Pages={
           <label class="label" for="mb-search-email">Buscar miembro por email</label>
           <input type="email" class="input" id="mb-search-email" placeholder="ejemplo@correo.com" autocomplete="off">
           <div style="font-size:11px;color:var(--text-3);margin-top:6px;">
-            ⚡ El usuario debe haberse registrado ya en club.sentiamx.com. Si solo quieres activar a alguien existente, búscalo aquí.
+            El usuario debe haberse registrado ya en club.sentiamx.com. Si solo quieres activar a alguien existente, búscalo aquí.
           </div>
         </div>
         <div id="mb-search-result" class="form-field form-field--full" style="min-height:60px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px dashed var(--border);border-radius:10px;padding:14px;color:var(--text-3);font-size:13px;">
@@ -4534,7 +4592,7 @@ const Pages={
     body.innerHTML = `
       <div style="background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--surface-2)), var(--surface-2));border:1px solid color-mix(in srgb, var(--primary) 35%, transparent);border-radius:12px;padding:16px 18px;margin-bottom:18px;">
         <div style="display:flex;gap:12px;align-items:center;">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, var(--primary), #2fbf2e);color:#442A22;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;flex-shrink:0;">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, var(--primary), #2fbf2e);color:#442A22;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Sora',sans-serif;font-size:15px;flex-shrink:0;">
             ${nombre.split(' ').filter(Boolean).slice(0,2).map(s => s[0]).join('').toUpperCase() || '??'}
           </div>
           <div style="flex:1;min-width:0;">
@@ -4639,7 +4697,7 @@ const Pages={
         }
         .mb-action-btn__body { flex: 1; min-width: 0; }
         .mb-action-btn__title {
-          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-family: 'Sora', sans-serif;
           font-weight: 700;
           font-size: 14px;
           color: var(--text);
@@ -4699,7 +4757,7 @@ const Pages={
         <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, ${color}, color-mix(in srgb, ${color} 60%, #fff));color:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Activar ${planLabel}</div>
+        <div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Activar ${planLabel}</div>
         <div style="font-size:13px;color:var(--text-3);">para <strong style="color:var(--text);">${nombre}</strong></div>
       </div>
       <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
@@ -4721,7 +4779,7 @@ const Pages={
         </div>
       </div>
       <div style="font-size:11.5px;color:var(--text-3);padding:10px 12px;background:color-mix(in srgb, var(--primary) 8%, var(--surface-2));border-left:3px solid var(--primary);border-radius:6px;line-height:1.55;">
-        ⚡ Esta es una activación <strong style="color:var(--text);">manual sin pasar por Stripe</strong>. El miembro tendrá acceso completo durante ${days} días. Al expirar, podrás renovar o cancelar.
+        Esta es una activación <strong style="color:var(--text);">manual sin pasar por Stripe</strong>. El miembro tendrá acceso completo durante ${days} días. Al expirar, podrás renovar o cancelar.
       </div>
     `;
     const footer = document.createElement('div');
@@ -4759,7 +4817,7 @@ const Pages={
         <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, #A855F7, #C084FC);color:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
         </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Regalar acceso a</div>
+        <div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Regalar acceso a</div>
         <div style="font-size:14px;color:var(--text-2);font-weight:600;">${nombre}</div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;">
@@ -4770,13 +4828,13 @@ const Pages={
           {dias:30,label:'30 días',sub:'Mes completo'}
         ].map(opt => `
           <button class="mb-gift-opt" data-days="${opt.dias}" style="padding:14px 12px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .18s;color:var(--text);font-family:inherit;" onmouseover="this.style.borderColor='#A855F7';this.style.background='color-mix(in srgb, #A855F7 10%, var(--surface-2))';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface-2)';this.style.transform='none'">
-            <div style="font-size:22px;font-weight:800;color:#A855F7;font-family:'Plus Jakarta Sans',sans-serif;line-height:1;margin-bottom:4px;">${opt.label}</div>
+            <div style="font-size:22px;font-weight:800;color:#A855F7;font-family:'Sora',sans-serif;line-height:1;margin-bottom:4px;">${opt.label}</div>
             <div style="font-size:11px;color:var(--text-3);">${opt.sub}</div>
           </button>
         `).join('')}
       </div>
       <div style="font-size:11.5px;color:var(--text-3);padding:10px 12px;background:color-mix(in srgb, #A855F7 8%, var(--surface-2));border-left:3px solid #A855F7;border-radius:6px;line-height:1.55;">
-        🎁 El miembro recibirá acceso completo durante los días seleccionados. Al expirar volverá a "Sin pagar" y podrás regalar de nuevo o pedirle que pague.
+        El miembro recibirá acceso completo durante los días seleccionados. Al expirar volverá a "Sin pagar" y podrás regalar de nuevo o pedirle que pague.
       </div>
     `;
     const footer = document.createElement('div');
@@ -4791,7 +4849,7 @@ const Pages={
         body.querySelectorAll('[data-days]').forEach(b => b.disabled = true);
         const r = await Pages._llamarActivar(m.uid || m.id, 'regalo', days, true);
         if (r.ok) {
-          Toast.success('🎁 Regalo enviado', `${nombre} tiene ${days} días gratis`);
+          Toast.success('Regalo enviado', `${nombre} tiene ${days} días gratis`);
           Modal.close();
         } else {
           Toast.error('No se pudo regalar', r.error || 'Error desconocido');
@@ -4820,7 +4878,7 @@ const Pages={
         <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, #F59E0B, #FBBF24);color:#442A22;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
         </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Cancelar suscripción</div>
+        <div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Cancelar suscripción</div>
         <div style="font-size:13px;color:var(--text-3);">de <strong style="color:var(--text);">${nombre}</strong></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
@@ -4840,7 +4898,7 @@ const Pages={
         </button>
       </div>
       <div style="font-size:11.5px;color:var(--text-3);padding:10px 12px;background:color-mix(in srgb, #F59E0B 8%, var(--surface-2));border-left:3px solid #F59E0B;border-radius:6px;line-height:1.55;">
-        ⚡ Cancelar Stripe es automático. El backend de Railway llama a la API de Stripe con tu service account.
+        Cancelar Stripe es automático. El backend de Railway llama a la API de Stripe con tu service account.
       </div>
     `;
     const footer = document.createElement('div');
@@ -4882,7 +4940,7 @@ const Pages={
         <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, #EF4444, #F87171);color:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">⚠️ Eliminar miembro</div>
+        <div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Eliminar miembro</div>
         <div style="font-size:13px;color:var(--text-3);">Esta acción es <strong style="color:#EF4444;">IRREVERSIBLE</strong></div>
       </div>
       <div style="background:color-mix(in srgb, #EF4444 8%, var(--surface-2));border:1px solid #EF4444;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
@@ -4902,7 +4960,7 @@ const Pages={
       </div>
       <div style="margin-bottom:6px;">
         <label style="display:block;font-size:12.5px;font-weight:600;color:var(--text-2);margin-bottom:6px;">Para confirmar, escribe <strong style="color:#EF4444;">ELIMINAR</strong> abajo:</label>
-        <input type="text" id="mb-delete-confirm-input" class="input" placeholder="Escribe ELIMINAR" autocomplete="off" style="border-color:var(--border);font-family:'JetBrains Mono',monospace;letter-spacing:1px;">
+        <input type="text" id="mb-delete-confirm-input" class="input" placeholder="Escribe ELIMINAR" autocomplete="off" style="border-color:var(--border);font-family:'Instrument Sans',monospace;letter-spacing:1px;">
       </div>
     `;
     const footer = document.createElement('div');
@@ -4913,7 +4971,7 @@ const Pages={
         Eliminar definitivamente
       </button>
     `;
-    Modal.open({ title: 'Eliminar miembro', subtitle: '⚠️ Irreversible', icon: 'i-users', body, footer });
+    Modal.open({ title: 'Eliminar miembro', subtitle: 'Irreversible', icon: 'i-users', body, footer });
     footer.querySelector('#mb-cancel').addEventListener('click', () => Modal.close());
 
     const input = body.querySelector('#mb-delete-confirm-input');
@@ -5410,7 +5468,7 @@ function foroAdminCargar(){
           </div>
           ${x.texto?`<div class="foro-admin-card__text">${(x.texto||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
           ${x.imagen?`<img class="foro-admin-card__img" src="${x.imagen}" alt="adjunto">`:''}
-          <div class="foro-admin-card__meta">❤ ${x.likes||0} · 💬 ${x.comentariosCount||0} respuestas</div>
+          <div class="foro-admin-card__meta">${x.likes||0} me gusta · ${x.comentariosCount||0} respuestas</div>
           <button class="foro-admin-card__vercom" data-vercom="${x.id}">${(x.comentariosCount||0)>0?'Ver respuestas y responder':'Responder como SENTIA'}</button>
           <div class="foro-admin-coms" id="adm-coms-${x.id}" style="display:none;"></div>
         </div>
@@ -5660,7 +5718,7 @@ const AdminStore = {
     } catch(e) {}
 
     // ─── 4. MIEMBROS ───
-    // ⚡ Doble estrategia: onSnapshot (real-time) + getDocs fallback (lectura única).
+    // Doble estrategia: onSnapshot (real-time) + getDocs fallback (lectura única).
     // Capturamos el resultado en window.__mbDiag para mostrar diagnóstico en pantalla.
     window.__mbDiag = { status: 'iniciando', count: 0, error: null, intentos: [] };
     const getDocsFn = fb.getDocs;
@@ -5750,7 +5808,7 @@ const AdminStore = {
       this.unsubs.push(u);
     } catch(e) {}
 
-    console.log('[AdminStore] ✅ Listeners de Firestore activos');
+    console.log('[AdminStore] Listeners de Firestore activos');
   },
 
   // KPIs calculados en tiempo real
