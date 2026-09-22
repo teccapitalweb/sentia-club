@@ -3132,6 +3132,20 @@ h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font
 /* textos con degradado → color plano */
 .logro-hero__name,.kpi-card__value,.mes-hero__title,.perfil-hero__name,.sec-hero__title,.banner__title,.stat__value{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
 .logro-hero__lbl,.kpi-card__label{color:var(--text-3)!important}
+
+/* Camino de niveles: la línea al centro exacto de los círculos */
+.nivel-path__track::before,.nivel-path__track::after{top:30px!important;height:4px!important;left:10%!important;box-shadow:none!important}
+.nivel-path__track::before{right:10%!important}
+.nivel-path__track::after{width:calc((var(--nivel-progress,30%) - 10%) * 0.93)!important;background:var(--ok)!important}
+.nivel-step.is-current .nivel-step__icon{transform:none!important;box-shadow:none!important}
+/* Medallas: bordes suaves, sin brillos */
+.logro{border-color:var(--border)!important;box-shadow:none!important}
+.logro:hover{transform:none!important;box-shadow:none!important;border-color:color-mix(in srgb,var(--ok) 35%,var(--border))!important}
+.logro.is-unlocked{border-color:color-mix(in srgb,var(--ok) 22%,var(--border))!important}
+.logro__icon{border-color:color-mix(in srgb,var(--cat-color,var(--primary)) 16%,transparent)!important}
+.logro.is-unlocked .logro__icon{background:var(--ok-soft)!important;color:var(--ok)!important;border-color:color-mix(in srgb,var(--ok) 28%,transparent)!important;box-shadow:none!important}
+.logro.is-unlocked .logro__xp{color:var(--ok)!important}
+.logro.is-locked{opacity:.5!important;filter:none!important}
 /* Barra superior de suscripción: sobria, sin degradado */
 .fomo-banner{background:color-mix(in srgb,var(--primary) 9%,var(--surface))!important;color:var(--text)!important;border-bottom:1px solid color-mix(in srgb,var(--primary) 22%,transparent)!important;font-weight:500!important}
 :root[data-theme="night"] .fomo-banner{background:color-mix(in srgb,var(--primary) 16%,var(--surface))!important}
