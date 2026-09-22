@@ -6184,5 +6184,9 @@ window.__cfPortadaArchivo = function(input){
   r.readAsDataURL(f);
 };
 </script>
+<script>
+/* MODIFICADO: al volver con "atrás" después de cerrar sesión, se revisa la sesión */
+window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
+</script>
 </body>
 </html>

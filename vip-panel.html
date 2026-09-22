@@ -3291,6 +3291,7 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+window.__auth = auth;   // MODIFICADO: para revisar la sesión al volver con "atrás"
 const db = getFirestore(app);
 window.__db = db;
 // Exponer funciones de Firestore para que el script no-module pueda usarlas
@@ -3351,6 +3352,7 @@ if (window.__isDemoMode) {
     if (!user) { window.location.href = 'vip-auth.html'; return; }
 
     window.__currentUser = user;
+    try { if (!user) sessionStorage.removeItem('sentia_sesion'); else sessionStorage.setItem('sentia_sesion', '1'); } catch (_) {}
     window.UserState.uid = user.uid;
     window.UserState.email = (user.email||'').toLowerCase();
     window.UserState.displayName = user.displayName || user.email?.split('@')[0] || 'Miembro';
@@ -4143,6 +4145,15 @@ function toolEsVIP(){
   return false;
 }
 // MODIFICADO: lo bloqueado lleva directo a la pantalla de planes, sin ventana intermedia
+// MODIFICADO: si el navegador muestra la página guardada al dar "atrás", se revisa la sesión
+window.addEventListener('pageshow', e => {
+  if (!e.persisted) return;
+  let viva = false;
+  try { viva = sessionStorage.getItem('sentia_sesion') === '1'; } catch (_) { viva = true; }
+  const u = window.__currentUser || (window.__auth && window.__auth.currentUser);
+  if (!u && !viva) location.replace('vip-auth.html'); else location.reload();
+});
+
 // MODIFICADO: instalar el club como app desde el menú
 window.__instalarApp = function(){
   const p = window.__deferredPrompt;
