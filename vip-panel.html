@@ -3115,6 +3115,14 @@ h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font
 .banner__stat-lbl{font-size:11px!important;letter-spacing:.07em!important;color:var(--text-2)!important;margin-bottom:8px!important}
 .banner__stat-val{font-family:'Sora',sans-serif;font-size:26px!important;background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
 @media (max-width:700px){.banner__stats{grid-template-columns:repeat(2,1fr)}.banner__stat:nth-child(2){border-right:0!important}.banner__stat:nth-child(-n+2){border-bottom:1px solid var(--border)!important}}
+/* Barra superior de suscripción: sobria, sin degradado */
+.fomo-banner{background:color-mix(in srgb,var(--primary) 9%,var(--surface))!important;color:var(--text)!important;border-bottom:1px solid color-mix(in srgb,var(--primary) 22%,transparent)!important;font-weight:500!important}
+:root[data-theme="night"] .fomo-banner{background:color-mix(in srgb,var(--primary) 16%,var(--surface))!important}
+.fomo-banner strong{font-weight:700}
+.fomo-banner__icon{color:var(--ok)!important}
+.fomo-banner__timer{background:var(--surface-2)!important;color:var(--text-2)!important}
+.fomo-banner__cta{background:var(--ok)!important;color:#fff!important;box-shadow:none!important;font-weight:700!important}
+.fomo-banner__cta:hover{transform:none!important;box-shadow:none!important;filter:brightness(.95)}
 /* Comunidad: tarjeta normal, sin degradado verde */
 .widget--wa{background:var(--surface)!important;border:1px solid var(--border)!important}
 .widget--wa .widget__label{color:var(--text-3)!important}
@@ -3272,7 +3280,7 @@ window.__cargarPreciosClub = async function(){
     const ano = Number(c.precioAno) > 0 ? Number(c.precioAno) : 1999;
     window.__preciosClub = { mes, ano, equivMes: Math.round(ano / 12), ahorro: Math.max(0, (mes * 12) - ano), cargado: true };
     // MODIFICADO: contacto y comunidad editables desde Admin > Configuracion
-    window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', miembros: Number(c.miembrosComunidad) || 0 };
+    window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', direccion: c.whatsappDireccion || '', miembros: Number(c.miembrosComunidad) || 0 };
     if (typeof window.__aplicarContactoClub === 'function') window.__aplicarContactoClub();
   } catch (e) { console.warn('[SENTIA] No se pudo leer config/club:', e.message); }
   return window.__preciosClub;
@@ -3515,7 +3523,7 @@ window.__showWelcomeSplash = function(opts) {
         <div class="splash-film__dots" id="splash-dots"></div>
         <button class="splash-bnv__btn splash-film__next" id="splash-next">Siguiente →</button>
       </div>
-      <div class="splash-bnv__foot">Cualquier duda · <a href="https://wa.me/${(window.SENTIA_CONTACT&&window.SENTIA_CONTACT.whatsapp)||'5212381863904'}" target="_blank" rel="noopener">WhatsApp ${(window.__fmtWa&&window.__fmtWa())||'SENTIA'}</a></div>
+      ${(window.SENTIA_CONTACT && SENTIA_CONTACT.whatsapp) ? `<div class="splash-bnv__foot">Cualquier duda · <a href="${SENTIA_CONTACT.waLink('Hola, tengo una duda sobre el Club SENTIA.')}" target="_blank" rel="noopener">WhatsApp ${window.__fmtWa()}</a></div>` : ''}
     </div>
   `;
   document.body.appendChild(splash);
@@ -9550,8 +9558,8 @@ const Sections = (function(){
 // ═══════════════════════════════════════════════════════════════════
 const SENTIA_CONTACT = {
   // Número único de contacto (vendedora · soporte · descuento · director)
-  whatsapp: '5212381863904',  // soporte · descuento
-  director: '522361112213', // dirección · temas estratégicos
+  whatsapp: '',  // MODIFICADO: se configura en Admin > Configuración > Contacto
+  director: '',  // MODIFICADO: WhatsApp de dirección (opcional, desde el admin)
   // Canal de difusión oficial
   canal: 'https://whatsapp.com/channel/0029Vb92Oc2HgZWbxDOgCb3W',
   // Zoom de la próxima clase (muestra · sustituir por el real al confirmar webinar)
@@ -9561,7 +9569,10 @@ const SENTIA_CONTACT = {
 
   // Helpers para armar links wa.me con mensajes prediseñados
   waLink(text, num) {
-    return `https://wa.me/${num || this.whatsapp}?text=${encodeURIComponent(text)}`;
+    // MODIFICADO: si no hay número configurado en el admin, se abre el canal en lugar de un link roto
+    const n = num || this.whatsapp;
+    if (!n) return this.canal || '#';
+    return `https://wa.me/${n}?text=${encodeURIComponent(text)}`;
   },
   msgDescuento20() {
     return '¡Hola SENTIA! Soy miembro VIP y quiero conocer más sobre el *descuento del 20%* en certificaciones. ¿Me pueden dar más información?';
@@ -9586,6 +9597,8 @@ window.__aplicarContactoClub = function(){
   if (wa.length >= 11) SENTIA_CONTACT.whatsapp = wa;
   if (/^https?:\/\//.test(k.canal)) SENTIA_CONTACT.canal = k.canal;
   if (/^https?:\/\//.test(k.grupo)) SENTIA_CONTACT.grupo = k.grupo;
+  let dir = String(k.direccion || '').replace(/[^0-9]/g, ''); if (dir.length === 10) dir = '52' + dir;
+  SENTIA_CONTACT.director = dir.length >= 11 ? dir : SENTIA_CONTACT.whatsapp;
   const n = k.miembros > 0 ? k.miembros.toLocaleString('es-MX') : '';
   const cc = document.getElementById('com-count');
   if (cc) { cc.style.display = n ? '' : 'none'; if (n) cc.innerHTML = n + '<span style="font-size:13px; opacity:.6; font-weight:500"> miembros</span>'; }

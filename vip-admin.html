@@ -5331,6 +5331,7 @@ const Pages={
               <div class="form-field form-field--full"><label class="label">WhatsApp de soporte y ventas · botones "Soporte", "Descuento 20%" y bienvenida</label><input type="text" class="input" id="cfg-wa" value="${c.whatsapp}" placeholder="+52 ..."></div>
               <div class="form-field form-field--full"><label class="label">Canal de WhatsApp · menú "Canal WhatsApp" y "Unirme al canal"</label><input type="url" class="input" id="cfg-canal" value="${c.whatsappCanal || ''}" placeholder="https://whatsapp.com/channel/..."></div>
               <div class="form-field form-field--full"><label class="label">Grupo de WhatsApp · si lo llenas, el botón verde cambia a "Abrir grupo"</label><input type="url" class="input" id="cfg-grupo" value="" placeholder="https://chat.whatsapp.com/..."></div>
+              <div class="form-field form-field--full"><label class="label">WhatsApp de dirección (opcional) · botón "Escribir a dirección"</label><input type="tel" class="input" id="cfg-direccion" value="" placeholder="10 dígitos"></div>
               <div class="form-field form-field--full"><label class="label">Miembros de la comunidad (número que se muestra · vacío = no mostrar)</label><input type="number" class="input" id="cfg-miembros" value="" min="0" placeholder="Ej. 120"></div>
               <div class="form-field form-field--full"><label class="label">Instagram</label><input type="text" class="input" id="cfg-ig" value="${c.instagram}"></div>
               <div class="form-field form-field--full"><label class="label">Facebook</label><input type="url" class="input" id="cfg-fb" value="${c.facebook || ''}" placeholder="https://www.facebook.com/..."></div>
@@ -5374,7 +5375,7 @@ const Pages={
         if(!snap.exists()) return; const d=snap.data();
         const set=(id,v)=>{ const el=document.getElementById(id); if(el && v!==undefined && v!==null && v!=='') el.value=v; };
         set('cfg-wa',d.whatsapp); set('cfg-canal',d.whatsappCanal); set('cfg-grupo',d.whatsappGrupo);
-        set('cfg-miembros',d.miembrosComunidad||''); set('cfg-ig',d.instagram); set('cfg-fb',d.facebook); set('cfg-em',d.emailContacto);
+set('cfg-direccion',d.whatsappDireccion);         set('cfg-miembros',d.miembrosComunidad||''); set('cfg-ig',d.instagram); set('cfg-fb',d.facebook); set('cfg-em',d.emailContacto);
       }catch(e){ console.warn('[SENTIA admin] contacto config/club:', e.message); }
     })();
     // MODIFICADO: al entrar, cargar los precios REALES desde Firestore (config/club)
@@ -5411,11 +5412,12 @@ const Pages={
         const facebook = document.getElementById('cfg-fb').value.trim();
         const emailContacto = document.getElementById('cfg-em').value.trim();
         const whatsappGrupo = (document.getElementById('cfg-grupo')?.value || '').trim();
+        const whatsappDireccion = (document.getElementById('cfg-direccion')?.value || '').trim();
         const miembrosComunidad = parseInt(document.getElementById('cfg-miembros')?.value || '0') || 0;
         try{
           const fb=window._fb;
           await fb.setDoc(fb.doc(fb.db,'config','club'),{
-            whatsapp, whatsappCanal, whatsappGrupo, miembrosComunidad, instagram, facebook, emailContacto,
+            whatsapp, whatsappCanal, whatsappGrupo, whatsappDireccion, miembrosComunidad, instagram, facebook, emailContacto,
             actualizadoPor:(window.__currentAdmin&&window.__currentAdmin.email)||'admin',
             actualizadoEn:fb.serverTimestamp()
           },{merge:true});
