@@ -5019,7 +5019,11 @@ const Sections = (function(){
 
   const CLASES_GRATIS = 2; // MODIFICADO: las 2 primeras clases del curso de muestra son gratis
   const MATERIALES_GRATIS = 1;
+  // MODIFICADO: si el admin marcó clases/materiales como gratis, se usan esas marcas; si no, la regla por defecto
+  function hayMarcaGratis(tipo) { return cursos.some(c => (tipo === 'clase' ? c.sesiones : c.materiales || []).some(x => x && x.gratis === true)); }
   function esPrimeraClaseGratis(cursoId, indexClase) {
+    if (tieneAccesoVipCompleto()) return false;
+    if (hayMarcaGratis('clase')) { const c = cursos.find(x => x.id === cursoId); return !!(c && c.sesiones && c.sesiones[Number(indexClase)] && c.sesiones[Number(indexClase)].gratis === true); }
     const cursoGratis = cursoConPrimeraClaseGratis();
     return !tieneAccesoVipCompleto() &&
       Boolean(cursoGratis) &&
@@ -5028,6 +5032,8 @@ const Sections = (function(){
   }
 
   function esMaterialGratis(cursoId, indexMaterial) {
+    if (tieneAccesoVipCompleto()) return false;
+    if (hayMarcaGratis('material')) { const c = cursos.find(x => x.id === cursoId); return !!(c && c.materiales && c.materiales[Number(indexMaterial)] && c.materiales[Number(indexMaterial)].gratis === true); }
     const cursoGratis = cursoConPrimeraClaseGratis();
     return !tieneAccesoVipCompleto() &&
       Boolean(cursoGratis) &&
@@ -5036,6 +5042,7 @@ const Sections = (function(){
   }
 
   function textoPaywallCurso(curso) {
+    if (hayMarcaGratis('clase')) return `Disfruta gratis las clases marcadas como gratuitas. Activa tu membresía VIP para ver todo el contenido de este curso y del resto del catálogo.`;
     return `Disfruta gratis ${CLASES_GRATIS === 1 ? 'la primera clase' : 'las primeras ' + CLASES_GRATIS + ' clases'} y el primer material en PDF del primer curso. Activa tu membresía para abrir el resto del contenido.`;
   }
 
@@ -5323,7 +5330,157 @@ const Sections = (function(){
       pintar();
     }
 
-    if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
+    // ═══ MODIFICADO: juegos de palabras (ahorcado, sopa de letras, crucigrama) ═══
+    const normPal = w => String(w || '').toUpperCase().normalize('NFD').replace(/N\u0303/g, 'Ñ').replace(/[\u0300-\u036f]/g, '').replace(/[^A-ZÑ ]/g, '').trim();
+
+    function jugarAhorcado(items){
+      let k = 0, ganadas = 0;
+      const partes = ['<circle cx="70" cy="38" r="10"/>','<line x1="70" y1="48" x2="70" y2="82"/>','<line x1="70" y1="58" x2="56" y2="70"/>','<line x1="70" y1="58" x2="84" y2="70"/>','<line x1="70" y1="82" x2="58" y2="100"/>','<line x1="70" y1="82" x2="82" y2="100"/>'];
+      function palabra(){
+        const it = items[k], w = normPal(it.palabra); const usadas = new Set(); let errores = 0;
+        fill.style.width = (k / items.length * 100) + '%';
+        function pintar(){
+          const oculta = w.split('').map(ch => ch === ' ' ? '<span class="ah-sp"></span>' : `<span class="ah-l">${usadas.has(ch) ? ch : ''}</span>`).join('');
+          const gano = w.split('').every(ch => ch === ' ' || usadas.has(ch)), perdio = errores >= 6;
+          body.innerHTML = `<div class="act-q__n">Palabra ${k + 1} de ${items.length} · errores ${errores}/6</div>
+            ${it.pista ? `<div class="act-q">${escapeHtml(it.pista)}</div>` : ''}
+            <div class="ah-wrap"><svg class="ah-svg" viewBox="0 0 110 110" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <line x1="10" y1="105" x2="60" y2="105"/><line x1="25" y1="105" x2="25" y2="10"/><line x1="25" y1="10" x2="70" y2="10"/><line x1="70" y1="10" x2="70" y2="28"/>
+              ${partes.slice(0, errores).join('')}</svg>
+              <div class="ah-word">${oculta}</div></div>
+            ${gano || perdio ? `<div class="act-fb"><div class="act-fb__t ${gano ? 'is-ok' : 'is-bad'}">${gano ? '✓ ¡Correcto!' : '✕ La palabra era: ' + escapeHtml(w)}</div>
+                <button class="btn btn--primary btn--sm act-next">${k + 1 < items.length ? 'Siguiente' : 'Ver resultado'}</button></div>`
+              : `<div class="ah-keys">${'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').map(l => `<button class="ah-k" data-l="${l}" ${usadas.has(l) ? 'disabled' : ''}>${l}</button>`).join('')}</div>`}`;
+          if (gano || perdio) {
+            body.querySelector('.act-next').onclick = () => { if (gano) ganadas++; k++; if (k < items.length) palabra(); else terminar(ganadas / items.length * 100); };
+            return;
+          }
+          body.querySelectorAll('.ah-k').forEach(b => b.onclick = () => { const l = b.dataset.l; usadas.add(l); if (!w.includes(l)) errores++; pintar(); });
+        }
+        pintar();
+      }
+      palabra();
+    }
+
+    function jugarSopa(items){
+      const palabras = items.map(it => normPal(it.palabra).replace(/ /g, '')).filter(Boolean);
+      const N = Math.min(15, Math.max(10, Math.max(...palabras.map(p => p.length)) + 2));
+      let grid, pos;
+      for (let intento = 0; intento < 40; intento++) {   // coloca todas las palabras
+        grid = Array.from({ length: N }, () => Array(N).fill('')); pos = {}; let ok = true;
+        for (const w of palabras) {
+          let puesto = false;
+          for (let t = 0; t < 300 && !puesto; t++) {
+            const [dr, dc] = [[0,1],[1,0],[1,1],[-1,1]][Math.floor(Math.random() * 4)];
+            const r0 = Math.floor(Math.random() * N), c0 = Math.floor(Math.random() * N);
+            const rf = r0 + dr * (w.length - 1), cf = c0 + dc * (w.length - 1);
+            if (rf < 0 || rf >= N || cf < 0 || cf >= N) continue;
+            let libre = true;
+            for (let i = 0; i < w.length; i++) { const ch = grid[r0 + dr * i][c0 + dc * i]; if (ch && ch !== w[i]) { libre = false; break; } }
+            if (!libre) continue;
+            for (let i = 0; i < w.length; i++) grid[r0 + dr * i][c0 + dc * i] = w[i];
+            pos[w] = { r0, c0, rf, cf }; puesto = true;
+          }
+          if (!puesto) { ok = false; break; }
+        }
+        if (ok) break;
+      }
+      const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      grid = grid.map(f => f.map(ch => ch || ABC[Math.floor(Math.random() * ABC.length)]));
+      const halladas = new Set(); let inicio = null;
+      body.innerHTML = `<div class="act-q__n">Da clic en la primera y en la última letra de cada palabra</div>
+        <div class="sp-grid" style="grid-template-columns:repeat(${N},1fr)">${grid.map((f, r) => f.map((ch, c) => `<button class="sp-c" data-r="${r}" data-c="${c}">${ch}</button>`).join('')).join('')}</div>
+        <div class="sp-list">${palabras.map(w => `<span data-w="${w}">${w}</span>`).join('')}</div>
+        <div class="act-actions"><button class="btn btn--ghost" data-act="fin">Terminar</button></div>`;
+      const celda = (r, c) => body.querySelector(`.sp-c[data-r="${r}"][data-c="${c}"]`);
+      body.querySelectorAll('.sp-c').forEach(b => b.onclick = () => {
+        const r = +b.dataset.r, c = +b.dataset.c;
+        if (!inicio) { inicio = { r, c }; b.classList.add('is-sel'); return; }
+        celda(inicio.r, inicio.c).classList.remove('is-sel');
+        const hit = Object.entries(pos).find(([w, p]) => !halladas.has(w) &&
+          ((p.r0 === inicio.r && p.c0 === inicio.c && p.rf === r && p.cf === c) || (p.rf === inicio.r && p.cf === inicio.c && p.r0 === r && p.c0 === c)));
+        inicio = null;
+        if (!hit) return;
+        const [w, p] = hit; halladas.add(w);
+        const dr = Math.sign(p.rf - p.r0), dc = Math.sign(p.cf - p.c0);
+        for (let i = 0; i < w.length; i++) celda(p.r0 + dr * i, p.c0 + dc * i).classList.add('is-ok');
+        body.querySelector(`.sp-list [data-w="${w}"]`).classList.add('is-ok');
+        fill.style.width = (halladas.size / palabras.length * 100) + '%';
+        if (halladas.size === palabras.length) setTimeout(() => terminar(100), 500);
+      });
+      body.querySelector('[data-act="fin"]').onclick = () => terminar(halladas.size / palabras.length * 100);
+    }
+
+    function armarCrucigrama(lista){
+      const S = 40, g = Array.from({ length: S }, () => Array(S).fill(null)), puestos = [];
+      const cabe = (w, r, c, dir) => {
+        const dr = dir === 'v' ? 1 : 0, dc = dir === 'h' ? 1 : 0; let cruces = 0;
+        if (r < 0 || c < 0 || r + dr * (w.length - 1) >= S || c + dc * (w.length - 1) >= S) return -1;
+        const rb = r - dr, cb = c - dc, ra = r + dr * w.length, ca = c + dc * w.length;
+        if (rb >= 0 && cb >= 0 && g[rb][cb]) return -1;
+        if (ra < S && ca < S && g[ra][ca]) return -1;
+        for (let i = 0; i < w.length; i++) {
+          const rr = r + dr * i, cc = c + dc * i, ch = g[rr][cc];
+          if (ch) { if (ch !== w[i]) return -1; cruces++; continue; }
+          const [n1r, n1c, n2r, n2c] = dir === 'h' ? [rr - 1, cc, rr + 1, cc] : [rr, cc - 1, rr, cc + 1];
+          if ((n1r >= 0 && n1c >= 0 && g[n1r][n1c]) || (n2r < S && n2c < S && g[n2r][n2c])) return -1;
+        }
+        return cruces;
+      };
+      const poner = (it, r, c, dir) => { const dr = dir === 'v' ? 1 : 0, dc = dir === 'h' ? 1 : 0; for (let i = 0; i < it.w.length; i++) g[r + dr * i][c + dc * i] = it.w[i]; puestos.push({ ...it, r, c, dir }); };
+      const orden = lista.slice().sort((a, b) => b.w.length - a.w.length);
+      poner(orden[0], Math.floor(S / 2), Math.floor((S - orden[0].w.length) / 2), 'h');
+      for (const it of orden.slice(1)) {
+        let mejor = null;
+        for (const p of puestos) for (let i = 0; i < p.w.length; i++) for (let j = 0; j < it.w.length; j++) {
+          if (p.w[i] !== it.w[j]) continue;
+          const dir = p.dir === 'h' ? 'v' : 'h';
+          const r = p.dir === 'h' ? p.r - j : p.r + i, c = p.dir === 'h' ? p.c + i : p.c - j;
+          const x = cabe(it.w, r, c, dir); if (x > 0 && (!mejor || x > mejor.x)) mejor = { r, c, dir, x };
+        }
+        if (!mejor) {   // sin cruce posible: debajo de todo
+          const maxR = Math.max(...puestos.map(p => p.dir === 'v' ? p.r + p.w.length - 1 : p.r));
+          const minC = Math.min(...puestos.map(p => p.c));
+          if (cabe(it.w, maxR + 2, minC, 'h') >= 0) mejor = { r: maxR + 2, c: minC, dir: 'h' };
+        }
+        if (mejor) poner(it, mejor.r, mejor.c, mejor.dir);
+      }
+      const r0 = Math.min(...puestos.map(p => p.r)), c0 = Math.min(...puestos.map(p => p.c));
+      const r1 = Math.max(...puestos.map(p => p.dir === 'v' ? p.r + p.w.length - 1 : p.r)), c1 = Math.max(...puestos.map(p => p.dir === 'h' ? p.c + p.w.length - 1 : p.c));
+      const inicios = {}; let n = 0;
+      puestos.map(p => ({ ...p, r: p.r - r0, c: p.c - c0 })).sort((a, b) => a.r - b.r || a.c - b.c).forEach(p => { const k = p.r + ',' + p.c; if (!inicios[k]) inicios[k] = ++n; p.num = inicios[k]; puestos[puestos.findIndex(q => q.w === p.w)] = p; });
+      return { filas: r1 - r0 + 1, cols: c1 - c0 + 1, puestos, inicios };
+    }
+
+    function jugarCrucigrama(items){
+      const lista = items.map(it => ({ w: normPal(it.palabra).replace(/ /g, ''), pista: it.pista || '' })).filter(x => x.w);
+      const cr = armarCrucigrama(lista);
+      const letra = {}; cr.puestos.forEach(p => { for (let i = 0; i < p.w.length; i++) { const r = p.r + (p.dir === 'v' ? i : 0), c = p.c + (p.dir === 'h' ? i : 0); letra[r + ',' + c] = p.w[i]; } });
+      let html = `<div class="cw-grid" style="grid-template-columns:repeat(${cr.cols},minmax(0,34px))">`;
+      for (let r = 0; r < cr.filas; r++) for (let c = 0; c < cr.cols; c++) {
+        const k = r + ',' + c;
+        html += letra[k] ? `<div class="cw-c">${cr.inicios[k] ? `<span class="cw-n">${cr.inicios[k]}</span>` : ''}<input maxlength="1" data-k="${k}"></div>` : '<div class="cw-e"></div>';
+      }
+      html += '</div>';
+      const pistas = d => cr.puestos.filter(p => p.dir === d).sort((a, b) => a.num - b.num).map(p => `<div data-pw="${p.w}"><b>${p.num}.</b> ${escapeHtml(p.pista || '(sin pista)')} <small>(${p.w.length})</small></div>`).join('');
+      body.innerHTML = `<div class="cw-wrap">${html}<div class="cw-clues"><div class="cw-h">Horizontales</div>${pistas('h')}<div class="cw-h">Verticales</div>${pistas('v')}</div></div>
+        <div class="act-actions"><button class="btn btn--ghost" data-act="rev">Revisar</button><button class="btn btn--primary" data-act="fin">Terminar</button></div>`;
+      const inputs = [...body.querySelectorAll('.cw-c input')];
+      inputs.forEach((inp, i) => inp.addEventListener('input', () => { inp.value = normPal(inp.value).slice(-1); if (inp.value && inputs[i + 1]) inputs[i + 1].focus(); }));
+      const correctas = () => cr.puestos.filter(p => { for (let i = 0; i < p.w.length; i++) { const r = p.r + (p.dir === 'v' ? i : 0), c = p.c + (p.dir === 'h' ? i : 0); const el = body.querySelector(`[data-k="${r},${c}"]`); if (!el || el.value !== p.w[i]) return false; } return true; });
+      body.querySelector('[data-act="rev"]').onclick = () => {
+        const ok = new Set(correctas().map(p => p.w));
+        body.querySelectorAll('[data-pw]').forEach(el => el.classList.toggle('is-ok', ok.has(el.dataset.pw)));
+        inputs.forEach(inp => inp.classList.toggle('is-bad', !!inp.value && inp.value !== letra[inp.dataset.k]));
+        fill.style.width = (ok.size / cr.puestos.length * 100) + '%';
+      };
+      body.querySelector('[data-act="fin"]').onclick = () => terminar(correctas().length / cr.puestos.length * 100);
+    }
+
+    if (a.tipo === 'ahorcado') { jugarAhorcado(a.items); }
+    else if (a.tipo === 'sopa') { jugarSopa(a.items); }
+    else if (a.tipo === 'crucigrama') { jugarCrucigrama(a.items); }
+    else if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
       preguntas(a.items.map(it => it.tipo === 'vf'
         ? { q: it.pregunta, exp: it.explicacion, ops: [{ texto: 'Verdadero', correcta: it.respuesta !== false }, { texto: 'Falso', correcta: it.respuesta === false }] }
         : { q: it.pregunta, exp: it.explicacion, ops: actBarajar(it.opciones || []) }));
@@ -5390,6 +5547,23 @@ const Sections = (function(){
     .act-card.is-open,.act-card.is-done{background:var(--surface-2);color:var(--text)}
     .act-card.is-open span,.act-card.is-done span{visibility:visible}
     .act-card.is-done{border-color:var(--success);background:color-mix(in srgb,var(--success) 12%,var(--surface-2));cursor:default}
+    .ah-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:10px 0 14px}.ah-svg{width:110px;height:110px;color:var(--text-2)}
+    .ah-word{display:flex;gap:6px;flex-wrap:wrap}.ah-l{width:28px;height:36px;border-bottom:2px solid var(--text-2);display:grid;place-items:center;font-size:20px;font-weight:800;color:var(--text)}.ah-sp{width:14px}
+    .ah-keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:6px}
+    .ah-k{height:38px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:700;cursor:pointer}.ah-k:disabled{opacity:.35;cursor:default}
+    .sp-grid{display:grid;gap:3px;max-width:520px;margin:6px auto 12px}
+    .sp-c{aspect-ratio:1;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:700;font-size:13px;border-radius:6px;cursor:pointer;padding:0}
+    .sp-c.is-sel{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 18%,var(--surface-2))}
+    .sp-c.is-ok{background:color-mix(in srgb,var(--success) 22%,var(--surface-2));border-color:var(--success)}
+    .sp-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.sp-list span{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text-2)}
+    .sp-list span.is-ok{text-decoration:line-through;color:var(--success);border-color:var(--success)}
+    .cw-wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+    .cw-grid{display:grid;gap:2px}.cw-c{position:relative;aspect-ratio:1;min-width:26px}.cw-e{aspect-ratio:1}
+    .cw-c input{width:100%;height:100%;box-sizing:border-box;border:1px solid var(--border-2);border-radius:5px;background:var(--surface);color:var(--text);text-align:center;font-weight:800;font-size:15px;text-transform:uppercase;padding:0}
+    .cw-c input.is-bad{border-color:var(--danger,#ef4444);color:var(--danger,#ef4444)}
+    .cw-n{position:absolute;top:1px;left:3px;font-size:8.5px;font-weight:700;color:var(--text-3);pointer-events:none}
+    .cw-clues{flex:1;min-width:220px;font-size:13px;line-height:1.5;color:var(--text)}.cw-h{font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:6px 0}
+    .cw-clues div[data-pw]{padding:3px 0}.cw-clues div.is-ok{color:var(--success)}
     .act-ext iframe{width:100%;height:60vh;border:0;border-radius:12px;background:#fff}
     .act-result{text-align:center;padding:10px 0}
     .act-score{font-size:54px;font-weight:900;letter-spacing:-1px}.act-score.is-ok{color:var(--success)}.act-score.is-bad{color:#f59e0b}
@@ -5421,11 +5595,11 @@ const Sections = (function(){
     }
     const numClase = sesion.numero || (Number(indexClase) + 1);
     window.abrirVisor(
-      sesion.videoId || sesion.url || '',
+      sesion.url || sesion.videoId || '',   // MODIFICADO: si el admin pegó un link, ese manda
       sesion.titulo || `Clase ${numClase}`,
       cursoId,
       numClase,
-      { videoId: sesion.videoId || '' }
+      { videoId: sesion.url ? '' : (sesion.videoId || '') }
     );
   };
 

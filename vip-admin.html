@@ -2613,6 +2613,7 @@ const Pages={
           titulo: m.titulo || '',
           url: m.url || '',
           disponibleSiempre: m.disponibleSiempre === true,
+          gratis: m.gratis === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
         }))
       : [];
@@ -2783,7 +2784,13 @@ const Pages={
         <span style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);font-family:'Instrument Sans',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">CLASE ${idx + 1}</span>
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título de la clase" value="${(s.titulo || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="titulo" style="font-size:13px;padding:8px 11px;">
-          ${s.videoId && !s.url ? `<div style="font-size:12.5px;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">Video de Bunny vinculado · no necesita URL</div>` : `<input type="url" class="input" placeholder="URL del video (Google Drive, YouTube, etc.)" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">`}
+          <!-- MODIFICADO: link del video siempre disponible (por si Bunny no sincroniza) + clase gratis -->
+          ${s.videoId ? `<div style="font-size:12px;padding:6px 10px;border-radius:8px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">Video de Bunny vinculado${s.url ? ' · se usará el link de abajo' : ''}</div>` : ''}
+          <input type="url" class="input" placeholder="Link del video (Bunny, Google Drive, YouTube…) · opcional si ya está vinculado" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">
+          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:2px;">
+            <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer;"><input type="checkbox" data-ses-gratis="${idx}" ${s.gratis ? 'checked' : ''} style="accent-color:var(--ok,#1f9d24);width:15px;height:15px;"><b style="color:var(--text)">Clase gratis</b> · visible sin membresía</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer;"><input type="checkbox" data-act-check="${idx}" ${s.actividad ? 'checked' : ''} style="accent-color:var(--ok,#1f9d24);width:15px;height:15px;"><b style="color:var(--text)">Agregar actividad</b> al terminar esta clase</label>
+          </div>
           ${Pages._actividadBoxHTML(s, idx)}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
@@ -2803,6 +2810,13 @@ const Pages={
       });
     });
     Pages._bindActividades(cont);
+    cont.querySelectorAll('[data-ses-gratis]').forEach(cb => cb.addEventListener('change', () => { const ss = Pages._modalCurso.sesiones[+cb.dataset.sesGratis]; if (ss) ss.gratis = cb.checked; }));
+    cont.querySelectorAll('[data-act-check]').forEach(cb => cb.addEventListener('change', () => {
+      const ss = Pages._modalCurso.sesiones[+cb.dataset.actCheck]; if (!ss) return;
+      if (cb.checked) ss.actividad = ss.actividad || { tipo:'quiz', titulo:'Actividad de la clase', minimo:60, items:[{ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false},{texto:'',correcta:false}], explicacion:'' }] };
+      else { if (!confirm('¿Quitar la actividad de esta clase?')) { cb.checked = true; return; } delete ss.actividad; }
+      Pages._renderSesionesModal();
+    }));
     cont.querySelectorAll('[data-sesion-mover]').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.sesionMover, 10);
@@ -2901,11 +2915,20 @@ const Pages={
     const a = this._actNormalizar(s.actividad);
     if (s.actividad && a !== s.actividad) s.actividad = a;
     const esc = v => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-    if (!a) return `<div class="actbox actbox--empty"><button type="button" class="actq__add" data-act-new="${idx}">+ Agregar pregunta / actividad</button></div>`;
-    const tipos = { quiz:'Preguntas', memorama:'Memorama', caso:'Caso práctico', externo:'Link externo' };
+    if (!a) return '';
+    const tipos = { quiz:'Preguntas (opción múltiple y V/F)', ahorcado:'Ahorcado', sopa:'Sopa de letras', crucigrama:'Crucigrama', memorama:'Memorama', caso:'Caso práctico', externo:'Link externo' };
+    const filas = (cols) => `<div class="actw">${(a.items || []).map((it, wi) => `<div class="actw__row" data-w="${wi}">
+        <input class="input" data-wf="${cols[0].k}" value="${esc(it[cols[0].k])}" placeholder="${cols[0].ph}">
+        <input class="input" data-wf="${cols[1].k}" value="${esc(it[cols[1].k])}" placeholder="${cols[1].ph}">
+        <button type="button" class="actq__x actq__x--sm" data-wdel="${wi}" title="Quitar">×</button></div>`).join('')}</div>
+      <button type="button" class="actq__add" data-wadd="${idx}">+ ${cols[2]}</button>`;
     const cuerpo = a.tipo === 'quiz'
       ? `${(a.items || []).map((q, qi) => this._actPreguntaHTML(idx, qi, q)).join('')}
          <button type="button" class="actq__add" data-qadd="${idx}">+ Agregar pregunta</button>`
+      : ['ahorcado','sopa','crucigrama'].includes(a.tipo)
+      ? `<div class="actw__help">${a.tipo === 'ahorcado' ? 'El alumno adivina cada palabra letra por letra; la pista aparece arriba.' : a.tipo === 'sopa' ? 'Palabras de hasta 12 letras (se buscan en horizontal, vertical y diagonal). La pista es opcional.' : 'Palabras de hasta 12 letras con su pista; el crucigrama se arma solo.'}</div>` + filas([{k:'palabra',ph:'Palabra'},{k:'pista',ph: a.tipo === 'sopa' ? 'Pista (opcional)' : 'Pista o definición'},'Agregar palabra'])
+      : a.tipo === 'memorama'
+      ? `<div class="actw__help">De 3 a 8 parejas. El alumno voltea cartas para unir cada concepto con su definición.</div>` + filas([{k:'a',ph:'Concepto'},{k:'b',ph:'Definición'},'Agregar pareja'])
       : `<textarea class="input" data-act-texto="${idx}" rows="7" placeholder="${esc(this._ACT_TIPOS[a.tipo]?.ayuda)}" style="font-size:12.5px;line-height:1.5;font-family:inherit;min-height:140px;">${esc(a.texto)}</textarea>
          <div data-act-msg="${idx}" style="font-size:11.5px;margin-top:6px;color:var(--text-3);">Escribe el contenido y da clic en Aplicar.</div>
          <button type="button" class="btn btn--primary btn--sm" data-act-guardar="${idx}" style="margin-top:6px">Aplicar</button>`;
@@ -2937,7 +2960,10 @@ const Pages={
       .actq__x:hover{color:var(--danger,#ef4444);border-color:var(--danger,#ef4444)}.actq__x--sm{width:26px;height:26px;font-size:14px}
       .actq__add{align-self:flex-start;border:1px solid var(--border-2);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
       .actq__add:hover{border-color:var(--ok,#1f9d24);color:var(--ok,#1f9d24)}
-      .actq__exp{font-size:12.5px;padding:8px 11px}`;
+      .actq__exp{font-size:12.5px;padding:8px 11px}
+      .actw{display:flex;flex-direction:column;gap:6px}.actw__row{display:grid;grid-template-columns:1fr 1.6fr 26px;gap:8px;align-items:center}.actw__row .input{padding:8px 11px;font-size:13px}
+      .actw__help{font-size:11.5px;color:var(--text-3)}
+      .actbox__head{grid-template-columns:minmax(150px,210px) 1fr auto 30px!important}`;
       document.head.appendChild(st);
     }
     const ses = i => Pages._modalCurso.sesiones[i];
@@ -2954,6 +2980,7 @@ const Pages={
       if (t.dataset.actTitulo !== undefined) a.titulo = t.value;
       else if (t.dataset.actMinimo !== undefined) a.minimo = Math.max(0, Math.min(100, parseInt(t.value, 10) || 0));
       else if (t.dataset.actTexto !== undefined) a.texto = t.value;
+      else if (t.dataset.wf) { const w = t.closest('[data-w]'); if (w) a.items[+w.dataset.w][t.dataset.wf] = t.value; }
       else { const qi = qDe(t); if (qi === null) return; const q = a.items[qi];
         if (t.dataset.qf) q[t.dataset.qf] = t.value;
         else if (t.dataset.qop !== undefined) q.opciones[+t.dataset.qop].texto = t.value; }
@@ -2963,6 +2990,8 @@ const Pages={
       if (t.dataset.actTipo !== undefined) {
         a.tipo = t.value;
         if (t.value === 'quiz') { a.items = (a.items && a.items[0] && a.items[0].pregunta !== undefined) ? a.items : [{ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false}], explicacion:'' }]; }
+        else if (['ahorcado','sopa','crucigrama'].includes(t.value)) { a.items = (a.items && a.items[0] && a.items[0].palabra !== undefined) ? a.items : [{palabra:'',pista:''},{palabra:'',pista:''},{palabra:'',pista:''}]; }
+        else if (t.value === 'memorama') { a.items = (a.items && a.items[0] && a.items[0].a !== undefined) ? a.items : [{a:'',b:''},{a:'',b:''},{a:'',b:''}]; }
         else { a.items = []; a.texto = a.texto || ''; }
         return re();
       }
@@ -2975,6 +3004,8 @@ const Pages={
       const t = e.target.closest('button'); if (!t) return;
       const i = idxDe(t), a = ses(i).actividad; if (!a) return;
       if (t.dataset.actQuitar !== undefined) { if (confirm('¿Quitar la actividad de esta clase?')) { delete ses(i).actividad; re(); } return; }
+      if (t.dataset.wadd !== undefined) { a.items.push(a.tipo === 'memorama' ? {a:'',b:''} : {palabra:'',pista:''}); return re(); }
+      if (t.dataset.wdel !== undefined) { a.items.splice(+t.dataset.wdel, 1); return re(); }
       if (t.dataset.qadd !== undefined) { a.items.push({ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false},{texto:'',correcta:false}], explicacion:'' }); return re(); }
       if (t.dataset.actGuardar !== undefined) {
         const r = Pages._parseActividad(a.tipo, a.texto || ''); const msg = cont.querySelector(`[data-act-msg="${i}"]`);
@@ -3001,6 +3032,21 @@ const Pages={
           if (!q.opciones.some(o => o.correcta)) return `Clase ${n}, pregunta ${k + 1}: marca la opción correcta`;
         }
       }
+    } else if (['ahorcado','sopa','crucigrama'].includes(a.tipo)) {
+      const norm = w => String(w || '').toUpperCase().normalize('NFD').replace(/N\u0303/g,'Ñ').replace(/[\u0300-\u036f]/g,'').replace(/[^A-ZÑ ]/g,'').trim();
+      a.items = (a.items || []).filter(it => String(it.palabra || '').trim());
+      const min = a.tipo === 'ahorcado' ? 1 : 3;
+      if (a.items.length < min) return `Clase ${n}: agrega al menos ${min} palabra${min > 1 ? 's' : ''}`;
+      for (const it of a.items) {
+        const w = norm(it.palabra);
+        if (!w) return `Clase ${n}: "${it.palabra}" solo debe tener letras`;
+        if (a.tipo !== 'ahorcado' && (w.replace(/ /g,'').length > 12 || w.includes(' '))) return `Clase ${n}: "${it.palabra}" debe ser una sola palabra de máximo 12 letras`;
+        if (a.tipo === 'crucigrama' && !String(it.pista || '').trim()) return `Clase ${n}: falta la pista de "${it.palabra}"`;
+      }
+    } else if (a.tipo === 'memorama') {
+      a.items = (a.items || []).filter(it => String(it.a || '').trim() || String(it.b || '').trim());
+      if (a.items.length < 3 || a.items.length > 8) return `Clase ${n}: el memorama necesita de 3 a 8 parejas`;
+      if (a.items.some(it => !String(it.a || '').trim() || !String(it.b || '').trim())) return `Clase ${n}: completa concepto y definición en cada pareja`;
     } else if (!(a.items || []).length) return `Clase ${n}: da clic en "Aplicar" en la actividad`;
     return '';
   },
@@ -3042,6 +3088,10 @@ const Pages={
             <input type="checkbox" data-mat-idx="${idx}" data-mat-siempre="1" ${m.disponibleSiempre ? 'checked' : ''} style="cursor:pointer;">
             Disponible siempre (sin esperar desbloqueo)
           </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-2);cursor:pointer;">
+            <input type="checkbox" data-mat-idx="${idx}" data-mat-gratis="1" ${m.gratis ? 'checked' : ''} style="cursor:pointer;accent-color:var(--ok,#1f9d24);">
+            <b style="color:var(--text)">Material gratis</b> · visible sin membresía
+          </label>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
           <button type="button" class="curso-card__action curso-card__action--danger" data-mat-del="${idx}" title="Eliminar material" style="width:28px;height:24px;">✕</button>
@@ -3063,6 +3113,7 @@ const Pages={
         if (Pages._modalCurso.materiales[idx]) Pages._modalCurso.materiales[idx].disponibleSiempre = e.target.checked;
       });
     });
+    cont.querySelectorAll('[data-mat-gratis]').forEach(cb => cb.addEventListener('change', () => { const mm = Pages._modalCurso.materiales[+cb.dataset.matIdx]; if (mm) mm.gratis = cb.checked; }));
     cont.querySelectorAll('[data-mat-del]').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.matDel, 10);
@@ -3118,6 +3169,8 @@ const Pages={
           }
         }
         const sesionLimpia = { ...s, numero: i + 1, titulo: s.titulo.trim() };
+        { const mb = String(s.url || '').match(/mediadelivery\.net\/(?:embed|play)\/(\d+)\/([0-9a-f-]{36})/i);
+          if (mb && mb[1] === '756118') { sesionLimpia.videoId = mb[2]; s.url = ''; } }   // MODIFICADO: link de Bunny de SENTIA -> se reproduce firmado
         if (s.url?.trim()) sesionLimpia.url = s.url.trim(); else delete sesionLimpia.url;
         sesionesLimpias.push(sesionLimpia);
       }
@@ -3141,6 +3194,7 @@ const Pages={
           titulo: m.titulo.trim(),
           url: m.url.trim(),
           disponibleSiempre: m.disponibleSiempre === true,
+          gratis: m.gratis === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
         });
       }
@@ -3749,6 +3803,7 @@ const Pages={
           titulo: m.titulo || 'Sin título',
           url: m.url || '',
           disponibleSiempre: m.disponibleSiempre === true,
+          gratis: m.gratis === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
         });
       });
