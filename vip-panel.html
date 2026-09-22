@@ -3092,6 +3092,11 @@ h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font
 .banner__stat{background:var(--surface-2)!important;box-shadow:none!important;border:1px solid var(--border)!important}
 .banner__stat::before,.banner__stat-lbl::before{display:none!important}
 .brand__logo{background:transparent!important;box-shadow:none!important;border:0!important}
+/* MODIFICADO: candado en Herramientas Pro para quien aun no es VIP */
+.nav-item__lock,.mobile-drawer__item .nav-item__lock{display:none;width:14px;height:14px;margin-left:auto;flex-shrink:0;color:var(--text-3)}
+html:not([data-mode="vip"]) .nav-item[data-tool] .nav-item__lock,
+html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{display:inline-flex}
+.nav-item[data-tool]{display:flex;align-items:center}
 /* barra lateral: verde al estar o pasar sobre una sección */
 .sidebar{background:var(--surface)!important;border-right:1px solid var(--border)!important}
 .nav-item,.mobile-drawer__item{transition:background .15s,color .15s}
@@ -3745,14 +3750,14 @@ window.__setDisplayName = async (nombre) => {
 
     <div class="nav-section" data-tour="tools">
       <div class="nav-label">Herramientas pro</div>
-      <a class="nav-item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión</a>
-      <a class="nav-item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención</a>
-      <a class="nav-item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil</a>
-      <a class="nav-item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado</a>
-      <a class="nav-item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo</a>
-      <a class="nav-item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance</a>
-      <a class="nav-item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral</a>
-      <a class="nav-item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico</a>
+      <a class="nav-item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
     </div>
 
     <div class="nav-section">
@@ -3940,14 +3945,14 @@ window.__setDisplayName = async (nombre) => {
 
       <div class="mobile-drawer__section" data-tour="tools">
         <div class="mobile-drawer__label">Herramientas pro</div>
-        <a class="mobile-drawer__item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión</a>
-        <a class="mobile-drawer__item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención</a>
-        <a class="mobile-drawer__item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil</a>
-        <a class="mobile-drawer__item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado</a>
-        <a class="mobile-drawer__item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo</a>
-        <a class="mobile-drawer__item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance</a>
-        <a class="mobile-drawer__item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral</a>
-        <a class="mobile-drawer__item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico</a>
+        <a class="mobile-drawer__item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
       </div>
 
       <div class="mobile-drawer__section">
@@ -6415,7 +6420,8 @@ const Sections = (function(){
         <div class="curso-card__cover" style="background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${portada}');background-size:cover;background-position:center;">
           <svg class="ic" style="opacity:.85;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));"><use href="#${ICON_AREA[c.area]||'i-book'}"/></svg>
           ${esCursoMuestra ? `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${CLASES_GRATIS === 1 ? '1 CLASE GRATIS' : CLASES_GRATIS + ' CLASES GRATIS'}</span>` : ''}
-          ${c.disponibleSiempre ? '<span class="curso-card__cover-badge" style="background:var(--success);color:#081225;">DISPONIBLE</span>' : ''}
+          ${c.disponibleSiempre && (accesoCompleto || esCursoMuestra) ? '<span class="curso-card__cover-badge" style="background:var(--success);color:#081225;">DISPONIBLE</span>' : ''}
+          ${!accesoCompleto && !esCursoMuestra ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--text-2);border:1px solid var(--border-2);"><svg class="ic" style="width:12px;height:12px;"><use href="#i-lock"/></svg>&nbsp;Solo VIP</span>` : ''}
           ${accesoCompleto && !desbloqueado && diasFalta > 0 ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--primary);border:1px solid var(--primary);">Se desbloquea en ${diasFalta} día${diasFalta!==1?'s':''}</span>` : ''}
         </div>
         <div class="curso-card__body">
@@ -6458,7 +6464,8 @@ const Sections = (function(){
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
           <span class="tag tag--soon" style="color:#fff;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12);">${c.area}</span>
           <span class="tag tag--soon" style="color:#fff;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12);">${c.nivel}</span>
-          ${c.disponibleSiempre ? `<span class="tag tag--soon" style="color:#081225;border-color:var(--success);background:var(--success);font-weight:700;">DISPONIBLE</span>` : ''}
+          ${c.disponibleSiempre && (tieneAccesoVipCompleto() || cursoConPrimeraClaseGratis()?.id === c.id) ? `<span class="tag tag--soon" style="color:#081225;border-color:var(--success);background:var(--success);font-weight:700;">DISPONIBLE</span>` : ''}
+          ${!tieneAccesoVipCompleto() && cursoConPrimeraClaseGratis()?.id !== c.id ? `<span class="tag tag--soon" style="color:#fff;border-color:rgba(255,255,255,.4);background:rgba(0,0,0,.35);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><svg class="ic" style="width:12px;height:12px;"><use href="#i-lock"/></svg>Solo VIP</span>` : ''}
         </div>
         <h2 style="font-family:'Sora',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-bottom:8px;">${c.titulo}</h2>
         <div style="display:flex;gap:14px;font-size:12px;opacity:.9;flex-wrap:wrap;">
@@ -6735,9 +6742,9 @@ const Sections = (function(){
           </div></div>`;
       }
     }
-    // widget de actividades
+    // widget de actividades: MODIFICADO, solo para miembros VIP (antes de pagar no debe presumir avance)
     const w = document.getElementById('widget-actividades'), wl = document.getElementById('widget-actividades-list');
-    const todas = datos.flatMap(d => d.actsInfo).filter(a => a.abierta || (a.r && a.r.aprobada));
+    const todas = tieneAccesoVipCompleto() ? datos.flatMap(d => d.actsInfo).filter(a => a.abierta || (a.r && a.r.aprobada)) : [];
     if (w && wl) {
       if (!todas.length) { w.style.display = 'none'; }
       else {
