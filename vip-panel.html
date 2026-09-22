@@ -5337,7 +5337,7 @@ const Sections = (function(){
       let k = 0, ganadas = 0;
       const partes = ['<circle cx="70" cy="38" r="10"/>','<line x1="70" y1="48" x2="70" y2="82"/>','<line x1="70" y1="58" x2="56" y2="70"/>','<line x1="70" y1="58" x2="84" y2="70"/>','<line x1="70" y1="82" x2="58" y2="100"/>','<line x1="70" y1="82" x2="82" y2="100"/>'];
       function palabra(){
-        const it = items[k], w = normPal(it.palabra); const usadas = new Set(); let errores = 0;
+        const it = items[k], w = normPal(it.palabra); const usadas = new Set(); let errores = 0, pistas = 2;
         fill.style.width = (k / items.length * 100) + '%';
         function pintar(){
           const oculta = w.split('').map(ch => ch === ' ' ? '<span class="ah-sp"></span>' : `<span class="ah-l">${usadas.has(ch) ? ch : ''}</span>`).join('');
@@ -5350,12 +5350,19 @@ const Sections = (function(){
               <div class="ah-word">${oculta}</div></div>
             ${gano || perdio ? `<div class="act-fb"><div class="act-fb__t ${gano ? 'is-ok' : 'is-bad'}">${gano ? '✓ ¡Correcto!' : '✕ La palabra era: ' + escapeHtml(w)}</div>
                 <button class="btn btn--primary btn--sm act-next">${k + 1 < items.length ? 'Siguiente' : 'Ver resultado'}</button></div>`
-              : `<div class="ah-keys">${'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').map(l => `<button class="ah-k" data-l="${l}" ${usadas.has(l) ? 'disabled' : ''}>${l}</button>`).join('')}</div>`}`;
+              : `<div class="ah-keys">${'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').map(l => `<button class="ah-k" data-l="${l}" ${usadas.has(l) ? 'disabled' : ''}>${l}</button>`).join('')}</div>
+                 <div class="act-actions" style="justify-content:flex-start"><button class="btn btn--ghost btn--sm" data-ah-pista ${pistas ? '' : 'disabled'}>Pista (${pistas})</button></div>`}`;
           if (gano || perdio) {
             body.querySelector('.act-next').onclick = () => { if (gano) ganadas++; k++; if (k < items.length) palabra(); else terminar(ganadas / items.length * 100); };
             return;
           }
           body.querySelectorAll('.ah-k').forEach(b => b.onclick = () => { const l = b.dataset.l; usadas.add(l); if (!w.includes(l)) errores++; pintar(); });
+          const bp = body.querySelector('[data-ah-pista]');
+          if (bp) bp.onclick = () => {   // revela una letra que falte
+            const faltan = [...new Set(w.split('').filter(ch => ch !== ' ' && !usadas.has(ch)))];
+            if (!faltan.length || !pistas) return;
+            usadas.add(faltan[Math.floor(Math.random() * faltan.length)]); pistas--; pintar();
+          };
         }
         pintar();
       }
@@ -5628,9 +5635,10 @@ const Sections = (function(){
       if (!claseDesbloqueada(cursoId, Number(indexClase), curso.sesiones)) return;
     }
 
-    // MODIFICADO: si la clase anterior tiene actividad sin aprobar, no se abre
+    // MODIFICADO: clase bloqueada → si no es VIP se le ofrece la membresía; si es VIP, le falta la actividad
     if (!claseDesbloqueada(cursoId, Number(indexClase), curso.sesiones)) {
-      if (typeof Toast !== 'undefined') Toast.info ? Toast.info('Clase bloqueada', 'Aprueba la actividad de la clase anterior') : Toast.error('Clase bloqueada', 'Aprueba la actividad de la clase anterior');
+      if (!tieneAccesoVipCompleto()) mostrarPaywallCurso(curso);
+      else if (typeof Toast !== 'undefined') Toast.error('Clase bloqueada', 'Aprueba la actividad de la clase anterior para continuar');
       return;
     }
     const numClase = sesion.numero || (Number(indexClase) + 1);
@@ -6474,7 +6482,7 @@ const Sections = (function(){
                   <div class="modulo__num" style="background:var(--surface-3);color:var(--text-3);"><svg class="ic" style="width:14px;height:14px"><use href="#i-lock"/></svg></div>
                   <div style="flex:1;min-width:0;">
                     <div class="modulo__title" style="color:var(--text-2);">${s.titulo}</div>
-                    <div class="modulo__meta">${tieneActividad(c.sesiones[i-1]) ? 'Aprueba la actividad de la clase anterior para desbloquear' : 'Marca como vista la clase anterior para desbloquear'}</div>
+                    <div class="modulo__meta">${!window.__sentiaTieneAccesoVipCompleto() ? 'Actívate como VIP para desbloquear esta clase' : (tieneActividad(c.sesiones[i-1]) ? 'Aprueba la actividad de la clase anterior para desbloquear' : 'Marca como vista la clase anterior para desbloquear')}</div>
                   </div>
                 </div>`;
             })(s, i))).join('')}
