@@ -3115,6 +3115,23 @@ h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font
 .banner__stat-lbl{font-size:11px!important;letter-spacing:.07em!important;color:var(--text-2)!important;margin-bottom:8px!important}
 .banner__stat-val{font-family:'Sora',sans-serif;font-size:26px!important;background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
 @media (max-width:700px){.banner__stats{grid-template-columns:repeat(2,1fr)}.banner__stat:nth-child(2){border-right:0!important}.banner__stat:nth-child(-n+2){border-bottom:1px solid var(--border)!important}}
+
+/* Sin difuminados ni degradados: tarjetas planas que igual resaltan */
+.logro-hero::before,.logro-hero::after,.nivel-path::before,.cert-card__top::before,.kpi-card::before,.mes-hero::before,.mes-hero::after,.perfil-hero::before,.perfil-hero::after,.sec-hero::before,.sec-hero::after{display:none!important}
+.logro-hero,.nivel-path,.cert-card,.certb,.kpi-card,.mes-hero,.perfil-hero,.tool-section,.widget--next{background:var(--surface)!important;border:1px solid var(--border)!important;box-shadow:none!important;backdrop-filter:none!important}
+.logro-hero:hover,.nivel-path:hover,.cert-card:hover,.certb:hover,.kpi-card:hover{transform:none!important;box-shadow:none!important;border-color:color-mix(in srgb,var(--ok) 40%,var(--border))!important}
+.kpi-card__label::before,.certb__verify::before,.cert-card__verify::before,.cert-card__eyebrow::before,.nivel-path__title::before{animation:none!important;box-shadow:none!important}
+/* iconos y sellos: fondo suave en vez de degradado */
+.logro-hero__icon,.nivel-step__icon,.certb__seal,.logros-cat__icon,.tool-section__icon,.ats-step__num,.content-row__thumb--tool,.avatar__circle,.cert-card__top{background:color-mix(in srgb,var(--primary) 10%,var(--surface-2))!important;color:var(--primary)!important;box-shadow:none!important;border:1px solid var(--border)!important}
+.cert-card__top{border-radius:0!important;border-width:0 0 1px!important}
+.nivel-step.is-current .nivel-step__icon{background:var(--ok-soft)!important;color:var(--ok)!important;border-color:color-mix(in srgb,var(--ok) 45%,transparent)!important}
+.nivel-step.is-done .nivel-step__icon{color:var(--ok)!important}
+.nivel-path__track::after,.logro-hero__xp-fill{background:var(--ok)!important}
+.logro-hero__xp-fill::after{display:none!important}
+.logro.is-unlocked .logro__icon{background:var(--ok-soft)!important;color:var(--ok)!important}
+/* textos con degradado → color plano */
+.logro-hero__name,.kpi-card__value,.mes-hero__title,.perfil-hero__name,.sec-hero__title,.banner__title,.stat__value{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
+.logro-hero__lbl,.kpi-card__label{color:var(--text-3)!important}
 /* Barra superior de suscripción: sobria, sin degradado */
 .fomo-banner{background:color-mix(in srgb,var(--primary) 9%,var(--surface))!important;color:var(--text)!important;border-bottom:1px solid color-mix(in srgb,var(--primary) 22%,transparent)!important;font-weight:500!important}
 :root[data-theme="night"] .fomo-banner{background:color-mix(in srgb,var(--primary) 16%,var(--surface))!important}
@@ -3733,7 +3750,8 @@ window.__setDisplayName = async (nombre) => {
       <div class="nav-label">Mi cuenta</div>
       <a class="nav-item" data-section="perfil"><svg class="ic"><use href="#i-user"/></svg>Mi perfil</a>
       <a class="nav-item" data-section="suscripcion"><svg class="ic"><use href="#i-credit-card"/></svg>Suscripción</a>
-      <a class="nav-item" id="btn-logout"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
+      <a class="nav-item" id="btn-instalar"><svg class="ic"><use href="#i-download"/></svg>Descargar SENTIA</a>
+  <a class="nav-item" id="btn-logout"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
     </div>
   </aside>
 
@@ -3927,6 +3945,7 @@ window.__setDisplayName = async (nombre) => {
         <div class="mobile-drawer__label">Mi cuenta</div>
         <a class="mobile-drawer__item" data-section="perfil"><svg class="ic"><use href="#i-user"/></svg>Mi perfil</a>
         <a class="mobile-drawer__item" data-section="suscripcion"><svg class="ic"><use href="#i-credit-card"/></svg>Suscripción</a>
+        <a class="mobile-drawer__item" id="drawer-instalar"><svg class="ic"><use href="#i-download"/></svg>Descargar SENTIA</a>
         <a class="mobile-drawer__item" id="drawer-logout-btn" style="color:#EF4444;"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
       </div>
     </div>
@@ -4110,6 +4129,19 @@ function toolEsVIP(){
   return false;
 }
 // MODIFICADO: lo bloqueado lleva directo a la pantalla de planes, sin ventana intermedia
+// MODIFICADO: instalar el club como app desde el menú
+window.__instalarApp = function(){
+  const p = window.__deferredPrompt;
+  if (p) { p.prompt(); p.userChoice.finally(() => { window.__deferredPrompt = null; }); return; }
+  const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (typeof Toast !== 'undefined') {
+    Toast.info ? Toast.info('Instalar SENTIA', iOS ? 'En Safari: Compartir → Agregar a pantalla de inicio' : 'En el menú del navegador elige "Instalar app" o "Agregar a pantalla de inicio"')
+      : Toast.success('Instalar SENTIA', iOS ? 'Compartir → Agregar a pantalla de inicio' : 'Menú del navegador → Instalar app');
+  }
+};
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__deferredPrompt = e; });
+document.addEventListener('click', e => { if (e.target.closest('#drawer-instalar, #btn-instalar')) { e.preventDefault(); window.__instalarApp(); } });
+
 window.__irASuscripcion = function(){
   try { document.querySelectorAll('.modal-backdrop.is-open').forEach(b => { try { window.Modal?.close(b.dataset.modalId); } catch(e){} }); } catch(e){}
   try { document.getElementById('paywall-modal')?.classList.remove('is-open'); } catch(e){}
