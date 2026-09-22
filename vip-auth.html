@@ -129,9 +129,7 @@ body.modo-dia .logo-day{display:block}
   .split{grid-template-columns:1fr;background:transparent;position:relative;z-index:1;min-height:100dvh}
   .hero{border:none;background:transparent;justify-content:flex-start;align-items:center;text-align:center;padding:38px 24px 14px;gap:0;min-height:auto}
   .hero::before,.hero::after{display:none}
-  .theme-btn{position:absolute}
   .lockup{align-items:center}
-  .metrics{display:none}
   /* El hero (lado que vende) pasa a bloque centrado en móvil, como IMDIIL/OdonTeck */
   .hero-mid{display:flex;flex-direction:column;max-width:360px;margin:0 auto;width:100%}
   .hero-mid>.eyebrow,.hero-mid>h1,.hero-mid>p:first-of-type{display:none}
@@ -231,9 +229,9 @@ body.modo-dia{--bg-deep:#eef1f7;--bg:#f5f7fb;--surface:#ffffff;--surface-2:#f1f4
         <!-- MODIFICADO: el "al día" se recalcula en vivo con el precio mensual -->
         <p class="hero-hook">Todo esto <b>empezando gratis</b>:</p>
         <ul class="hero-benefits">
-          <li><b>Biblioteca completa</b> de cursos: psicolog&iacute;a, educaci&oacute;n y desarrollo humano</li>
-          <li><b>Clases en vivo</b> con especialistas en psicolog&iacute;a y educaci&oacute;n</li>
-          <li><b>Herramientas y formatos pro</b> listos para usar:</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span><b>Biblioteca completa</b> de cursos: psicolog&iacute;a, educaci&oacute;n y desarrollo humano</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span><b>Clases en vivo</b> con especialistas en psicolog&iacute;a y educaci&oacute;n</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span><b>Herramientas y formatos pro</b> listos para usar:</span></li>
         </ul>
         <div class="hero-tools"><span>Certificado QR</span><span>Manual por curso</span><span>Checklists periciales</span><span>Matriz psicosocial</span></div>
         <ul class="hero-benefits">
@@ -251,6 +249,11 @@ body.modo-dia{--bg-deep:#eef1f7;--bg:#f5f7fb;--surface:#ffffff;--surface-2:#f1f4
           <div class="hero-ref"><span class="avi">DS</span><div style="flex:1;"><div class="bub"><b>Mtro. Diego Salinas <small>&middot; Docente</small></b><p>Los formatos y checklists los uso a diario en mi trabajo. Las clases en vivo me actualizaron en semanas.</p></div></div></div>
         </div>
         <p class="hero-trust">Pago seguro con Stripe &middot; Acceso inmediato &middot; Sin permanencia</p>
+        <div class="metrics" style="margin-top:16px">
+          <div class="m"><b>8</b><span>Herramientas Pro</span></div>
+          <div class="m"><b>24/7</b><span>Acceso</span></div>
+          <div class="m"><b>100%</b><span>Certificable</span></div>
+        </div>
       </div>
   </section>
 
