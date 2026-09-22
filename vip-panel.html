@@ -3104,8 +3104,35 @@ h1,h2,h3,.banner__title,.sec-hero__title,.section-header__title,.page-title{font
 .btn{box-shadow:none}
 /* barras de progreso en verde */
 .progress__fill,.bar__fill,.act-bar__fill{background:var(--ok)!important}
+
+/* Inicio: saludo limpio + franja de estadisticas */
+.banner{background:transparent!important;border:0!important;padding:4px 0 0!important;flex-direction:column;align-items:stretch!important;gap:22px!important;overflow:visible!important}
+.banner__eyebrow,.banner__version{display:none!important}
+.banner__title{font-size:30px!important}
+.banner__stats{display:grid!important;grid-template-columns:repeat(4,1fr);gap:0!important;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.banner__stat{background:transparent!important;border:0!important;border-right:1px solid var(--border)!important;border-radius:0!important;padding:18px 22px!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;min-width:0!important}
+.banner__stat:last-child{border-right:0!important}
+.banner__stat-lbl{font-size:11px!important;letter-spacing:.07em!important;color:var(--text-2)!important;margin-bottom:8px!important}
+.banner__stat-val{font-family:'Sora',sans-serif;font-size:26px!important;background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
+@media (max-width:700px){.banner__stats{grid-template-columns:repeat(2,1fr)}.banner__stat:nth-child(2){border-right:0!important}.banner__stat:nth-child(-n+2){border-bottom:1px solid var(--border)!important}}
+/* Comunidad: tarjeta normal, sin degradado verde */
+.widget--wa{background:var(--surface)!important;border:1px solid var(--border)!important}
+.widget--wa .widget__label{color:var(--text-3)!important}
+.widget--wa .btn--wa{background:transparent!important;color:var(--text)!important;border:1px solid var(--border-2)!important;box-shadow:none!important;filter:none!important}
+.widget--wa .btn--wa:hover{border-color:var(--ok)!important;color:var(--ok)!important;transform:none!important}
 /* "Tu avance" en Inicio */
-.avance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.avance-grid{display:block}
+.av-one{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:border-color .15s}
+.av-one:hover{border-color:color-mix(in srgb,var(--ok) 45%,var(--border))}
+.av-one__cover{height:120px;border-radius:10px;background-size:cover;background-position:center;background-color:var(--surface-2)}
+.av-one__meta{font-size:12.5px;color:var(--text-2)}
+.av-one__title{font-family:'Sora',sans-serif;font-size:18px;font-weight:600;line-height:1.3;margin:4px 0 2px;color:var(--text)}
+.av-one .btn--sm{padding:7px 14px}
+@media (max-width:700px){.av-one{grid-template-columns:1fr}.av-one__cover{height:110px}}
+.act-w{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:12.5px;color:var(--text);cursor:pointer}
+.act-w:first-child{border-top:0}
+.act-pill{white-space:nowrap;font-size:11px;font-weight:600;color:var(--text-2);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+.act-pill.is-ok{color:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
 .av-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
 .av-card:hover{border-color:color-mix(in srgb,var(--ok) 45%,var(--border));transform:translateY(-1px)}
 .av-cover{height:92px;background-size:cover;background-position:center}
@@ -3736,26 +3763,17 @@ window.__setDisplayName = async (nombre) => {
         <div class="banner__info">
           <span class="banner__eyebrow"><span class="banner__eyebrow__dot"></span><span id="greeting-label">En vivo</span><span class="banner__version">v.2026.05</span></span>
           <h1 class="banner__title" id="hero-title">Buenas tardes</h1>
-          <p class="banner__sub">Tu acceso a cursos premium, materiales descargables y la comunidad de psicología, educación y desarrollo humano más activa de México.</p>
+          <p class="banner__sub" id="bn-sub">Tu acceso a cursos premium, materiales descargables y la comunidad de psicología, educación y desarrollo humano más activa de México.</p>
         </div>
         <div class="banner__stats">
+          <!-- MODIFICADO: avance real del alumno -->
           <div class="banner__stat" data-section="cursos" style="cursor:pointer"><div class="banner__stat-lbl">Cursos</div><div class="banner__stat-val" id="bn-stat-cursos">0</div></div>
-          <div class="banner__stat" data-section="webinars" style="cursor:pointer"><div class="banner__stat-lbl">Clases</div><div class="banner__stat-val" id="bn-stat-clases">0</div></div>
-          <div class="banner__stat" data-section="pdfs" style="cursor:pointer"><div class="banner__stat-lbl">PDFs</div><div class="banner__stat-val" id="bn-stat-pdfs">0</div></div>
-          <div class="banner__stat" style="cursor:default"><div class="banner__stat-lbl">Pro</div><div class="banner__stat-val" id="bn-stat-pro">8</div></div>
+          <div class="banner__stat" data-section="cursos" style="cursor:pointer"><div class="banner__stat-lbl">Clases vistas</div><div class="banner__stat-val" id="bn-stat-clases">0</div></div>
+          <div class="banner__stat" data-section="logros" style="cursor:pointer"><div class="banner__stat-lbl">Actividades</div><div class="banner__stat-val" id="bn-stat-pdfs">0</div></div>
+          <div class="banner__stat" data-section="certificados" style="cursor:pointer"><div class="banner__stat-lbl">Certificados</div><div class="banner__stat-val" id="bn-stat-pro">0</div></div>
         </div>
       </section>
 
-      <div style="height:22px"></div>
-
-      <!-- MODIFICADO: Tu avance (progreso por curso) -->
-      <section id="home-avance-sec" style="display:none">
-        <div class="section-header">
-          <h2 class="section-header__title">Tu avance</h2>
-          <a class="section-header__link" onclick="navigateToSection('cursos')" style="cursor:pointer;font-size:12.5px;color:var(--text-2)">Ver mis cursos</a>
-        </div>
-        <div class="avance-grid" id="home-avance"></div>
-      </section>
       <div style="height:22px"></div>
 
       <!-- Noticias diarias (reales desde Firestore) -->
@@ -3781,6 +3799,11 @@ window.__setDisplayName = async (nombre) => {
         <div style="width:18px;height:18px;border:2px solid var(--text-3);border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-bottom:8px;"></div>
         <div>Cargando…</div>
       </div>
+    </div>
+
+    <div class="widget" id="widget-actividades" style="display:none">
+      <div class="widget__label">Actividades</div>
+      <div id="widget-actividades-list"></div>
     </div>
 
     <div class="widget widget--wa">
@@ -5266,6 +5289,7 @@ const Sections = (function(){
       body.querySelector('[data-act="ok"]').addEventListener('click', () => {
         cerrar();
         verificarCursoCompleto(cursoId);
+        try { window.__renderAvanceHome && window.__renderAvanceHome(); } catch (_) {}
         if (typeof window.__refrescarCursoDetalle === 'function') window.__refrescarCursoDetalle(cursoId);
         if (typeof renderCursosList === 'function') renderCursosList();
       });
@@ -5768,10 +5792,7 @@ const Sections = (function(){
       });
       try {
         var _ce=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
-        _ce('bn-stat-cursos', cursos.length);
-        _ce('bn-stat-clases', (typeof webinars!=='undefined' && webinars) ? webinars.length : 0);
-        var _pdfs=0; cursos.forEach(function(c){ if(c && Array.isArray(c.materiales)) _pdfs+=c.materiales.length; });
-        _ce('bn-stat-pdfs', _pdfs);
+        void _ce; // MODIFICADO: las estadisticas del banner las calcula __renderAvanceHome con el avance del alumno
       } catch(_e){}
       _cursosLoaded = true;
       cargarPortadasCursos().then(() => { try { window.__renderAvanceHome && window.__renderAvanceHome(); } catch (_) {} });
@@ -6362,24 +6383,66 @@ const Sections = (function(){
   // IMPORTANTE: el modal cierra con animación de 250ms; reabrimos DESPUÉS de eso
   // para no chocar con la animación y dejar el modal huérfano (no-cerrable).
 
-  // MODIFICADO: tarjetas de avance por curso en Inicio
+  // MODIFICADO: Inicio con el avance real del alumno (una tarjeta, estadisticas, pendiente y actividades)
   window.__renderAvanceHome = function(){
     const cont = document.getElementById('home-avance'), sec = document.getElementById('home-avance-sec');
-    if (!cont || !sec) return;
     const lista = (Array.isArray(cursos) ? cursos : []).filter(c => Array.isArray(c.sesiones) && c.sesiones.length && c.status !== 'proximamente' && !c.marcarProximamente);
-    if (!lista.length) { sec.style.display = 'none'; return; }
-    sec.style.display = '';
-    cont.innerHTML = lista.slice(0, 6).map(c => {
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+    // datos por curso
+    const datos = lista.map(c => {
       const pc = getProgresoCurso(c.id), total = c.sesiones.length, vistas = pc.clasesVistas.length;
-      const pct = Math.round(vistas / total * 100);
-      const meta = pc.completado ? 'Completado' : (vistas ? `Clase ${Math.min(vistas + 1, total)} de ${total}` : 'Sin iniciar');
-      const acc = pc.completado ? 'Repasar' : (vistas ? 'Continuar' : 'Empezar');
-      return `<div class="av-card" onclick="window.__abrirCursoHome('${c.id}')" data-bypass-paywall="true">
-        <div class="av-cover" style="background-image:url('${String(c.portada || '').replace(/'/g, '%27')}')"></div>
-        <div class="av-body"><div class="av-tag">${escapeHtml(c.area || '')}</div><div class="av-title">${escapeHtml(c.titulo || '')}</div>
-        <div class="av-bar"><i style="width:${pct}%"></i></div>
-        <div class="av-row"><span>${meta} · <b>${pct}%</b></span><span class="av-go">${acc}<svg class="ic"><use href="#i-arrow-right"/></svg></span></div></div></div>`;
-    }).join('');
+      const acts = c.sesiones.map((x, i) => ({ s: x, i, num: x.numero || (i + 1) })).filter(o => tieneActividad(o.s));
+      const res = getProgreso()[c.id] || {};
+      const actsInfo = acts.map(o => ({ curso: c, num: o.num, titulo: (o.s.actividad && o.s.actividad.titulo) || 'Actividad', r: (res.actividades || {})[o.num] || null, abierta: claseDesbloqueada(c.id, o.i, c.sesiones), vista: pc.clasesVistas.includes(o.num), idx: o.i }));
+      return { c, pc, total, vistas, pct: Math.round(vistas / total * 100), actsInfo };
+    });
+    // estadisticas
+    const iniciados = datos.filter(d => d.vistas > 0).length;
+    const clasesVistas = datos.reduce((n, d) => n + d.vistas, 0);
+    const actOk = datos.reduce((n, d) => n + d.actsInfo.filter(a => a.r && a.r.aprobada).length, 0);
+    const certs = datos.filter(d => d.pc.completado).length;
+    set('bn-stat-cursos', `${iniciados}<small style="font-size:.55em;color:var(--text-2);font-weight:500"> / ${lista.length}</small>`);
+    set('bn-stat-clases', clasesVistas); set('bn-stat-pdfs', `${actOk}<small style="font-size:.55em;color:var(--text-2);font-weight:500"> aprobadas</small>`); set('bn-stat-pro', certs);
+    // subtitulo con lo pendiente
+    const pendiente = datos.flatMap(d => d.actsInfo).find(a => a.abierta && a.vista && !(a.r && a.r.aprobada));
+    const enCurso = datos.filter(d => d.vistas > 0 && !d.pc.completado).sort((x, y) => y.pct - x.pct)[0];
+    const sub = document.getElementById('bn-sub');
+    if (sub) sub.textContent = pendiente ? `Tienes una actividad pendiente en ${pendiente.curso.titulo}.`
+      : enCurso ? `Vas en la clase ${Math.min(enCurso.vistas + 1, enCurso.total)} de ${enCurso.total} de ${enCurso.c.titulo}.`
+      : 'Tu acceso a cursos, materiales descargables y la comunidad de psicología, educación y desarrollo humano.';
+    // tarjeta "Continua donde te quedaste": el curso en progreso mas avanzado, si no el primero sin iniciar
+    if (cont && sec) {
+      const d = enCurso || datos.find(x => !x.pc.completado) || datos[0];
+      if (!d) { sec.style.display = 'none'; }
+      else {
+        sec.style.display = '';
+        const faltaAct = !d.pc.completado && d.vistas >= d.total && d.actsInfo.some(a => !(a.r && a.r.aprobada));
+        const meta = d.pc.completado ? 'Curso completado' : faltaAct ? 'Falta aprobar una actividad' : (d.vistas ? `Clase ${Math.min(d.vistas + 1, d.total)} de ${d.total}` : `${d.total} clases`);
+        const acc = d.pc.completado ? 'Repasar' : (d.vistas ? 'Continuar' : 'Empezar');
+        cont.innerHTML = `<div class="av-one" onclick="window.__abrirCursoHome('${d.c.id}')" data-bypass-paywall="true">
+          <div class="av-one__cover" style="background-image:url('${String(d.c.portada || '').replace(/'/g, '%27')}')"></div>
+          <div class="av-one__body">
+            <div class="av-one__meta">${escapeHtml(d.c.area || '')} · ${meta}</div>
+            <div class="av-one__title">${escapeHtml(d.c.titulo || '')}</div>
+            ${d.c.instructor ? `<div class="av-one__meta">${escapeHtml(d.c.instructor)}</div>` : ''}
+            <div class="av-bar" style="margin-top:12px"><i style="width:${d.pct}%"></i></div>
+            <div class="av-row"><span>${d.pct}% completado</span><span class="btn btn--primary btn--sm"><svg class="ic"><use href="#i-play"/></svg>${acc}</span></div>
+          </div></div>`;
+      }
+    }
+    // widget de actividades
+    const w = document.getElementById('widget-actividades'), wl = document.getElementById('widget-actividades-list');
+    const todas = datos.flatMap(d => d.actsInfo).filter(a => a.abierta || (a.r && a.r.aprobada));
+    if (w && wl) {
+      if (!todas.length) { w.style.display = 'none'; }
+      else {
+        w.style.display = '';
+        const orden = todas.sort((x, y) => ((x.r && x.r.aprobada) ? 1 : 0) - ((y.r && y.r.aprobada) ? 1 : 0)).slice(0, 4);
+        wl.innerHTML = orden.map(a => `<div class="act-w" onclick="window.abrirActividadSentia('${a.curso.id}', ${a.idx})" data-bypass-paywall="true">
+          <span>Clase ${a.num} · ${escapeHtml(a.titulo)}</span>
+          ${a.r && a.r.aprobada ? `<span class="act-pill is-ok">Aprobada ${a.r.mejor}%</span>` : `<span class="act-pill">Pendiente</span>`}</div>`).join('');
+      }
+    }
   };
   window.__abrirCursoHome = function(id){ try { navigateToSection('cursos'); setTimeout(() => openCursoDetalle(id), 250); } catch(e){} };
   window.__refrescarCursoDetalle = function(cid){

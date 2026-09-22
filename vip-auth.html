@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="assets/icon-sentia.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg-deep:#050a16; --bg:#081225; --surface:#0b1530; --surface-2:#0f1e3a;
@@ -195,6 +195,22 @@ body.modo-dia .logo-day{display:block}
 <meta name="apple-mobile-web-app-title" content="SENTIA">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style id="sentia-tema">
+/* MODIFICADO: tema SENTIA minimalista (igual que panel y admin) */
+:root{--bg-deep:#070d1b;--bg:#0a1122;--surface:#0f1830;--surface-2:#131e3a;--line:rgba(148,163,196,.14);--text:#e8edf8;--muted:#9aa6c2;--faint:#6b7894;
+  --glass:#0f1830;--glass-brd:rgba(148,163,196,.14);--glow-blue:transparent;--glow-green:transparent;--ok:#3ecf5a;
+  --font-body:'Instrument Sans',sans-serif;--font-mono:'Instrument Sans',sans-serif}
+body.modo-dia{--bg-deep:#eef1f7;--bg:#f5f7fb;--surface:#ffffff;--surface-2:#f1f4f9;--line:#e3e8f1;--text:#0e1d40;--muted:#5b6b8f;--faint:#8793ad;
+  --glass:#ffffff;--glass-brd:#e3e8f1;--ok:#1f9d24}
+.hero::before,.hero::after,.auth-card::before{display:none!important}
+.hero-mid h1 .grad{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--primary)!important}
+.metrics .m b{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--text)!important}
+.hero-mid .eyebrow .dot{box-shadow:none!important;animation:none!important}
+.auth-card{backdrop-filter:none!important;box-shadow:none!important}
+.tab.is-active{background:var(--primary)!important;box-shadow:none!important}
+.theme-btn{backdrop-filter:none!important}
+::-webkit-scrollbar-thumb{background:var(--line)!important}
+</style>
 </head>
 <body>
 
@@ -204,7 +220,7 @@ body.modo-dia .logo-day{display:block}
   <section class="hero">
     <div class="lockup">
       <a class="logo-link" href="index.html"><span style="display:inline-flex;align-items:center;gap:10px"><img src="assets/icon-sentia.png" alt="SENTIA" style="width:62px;height:62px;object-fit:contain"><span style="font-family:var(--font-head),'Sora',sans-serif;font-weight:800;font-size:1.85rem;letter-spacing:.02em;color:#f2f6ff">SEN<span style="color:#3f7bff">TIA</span></span></span></a>
-      <span class="kicker">Instituto &middot; Biomedicina &middot; Microbiolog&iacute;a</span>
+      <span class="kicker">Instituto &middot; Psicolog&iacute;a &middot; Educaci&oacute;n</span>
     </div>
     <div class="hero-mid">
         <span class="eyebrow"><span class="dot"></span>Membres&iacute;a profesional</span>
@@ -228,7 +244,7 @@ body.modo-dia .logo-day{display:block}
              los planes se muestran dentro del panel al momento de activar membresía. -->
         <div class="hero-price">
         </div>
-        <!-- ⚠️ BORRADORES: reemplazar con testimonios REALES antes de pautar fuerte -->
+        <!-- BORRADORES: reemplazar con testimonios REALES antes de pautar fuerte -->
         <p class="hero-refs-title">Referencias</p>
         <div class="hero-refs">
           <div class="hero-ref"><span class="avi">LM</span><div style="flex:1;"><div class="bub"><b>Psic. Laura M&eacute;ndez <small>&middot; Psic&oacute;loga cl&iacute;nica</small></b><p>El curso de guarda y custodia y el de primeros auxilios psicol&oacute;gicos me ordenaron la pr&aacute;ctica. El certificado con folio lo present&eacute; en mi instituci&oacute;n sin problema.</p></div></div></div>
