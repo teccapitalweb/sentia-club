@@ -4998,11 +4998,13 @@ function navigateToSection(section, opts){
     try { window.__sentiaCheckout.destroy(); } catch(e) {}
     window.__sentiaCheckout = null;
   }
-  if(section==='inicio'){inicio.style.display='';dyn.style.display='none';if(typeof window.__cargarNoticiasHome==='function')window.__cargarNoticiasHome();if(typeof window.__renderAvanceHome==='function')window.__renderAvanceHome();if(typeof window.__actualizarWidgetsActividad==='function')window.__actualizarWidgetsActividad();return;}
+  if(section==='inicio'){inicio.style.display='';dyn.style.display='none';if(typeof window.__cargarNoticiasHome==='function')window.__cargarNoticiasHome();if(typeof window.__renderAvanceHome==='function')window.__renderAvanceHome();if(typeof window.__actualizarWidgetsActividad==='function')window.__actualizarWidgetsActividad();if(typeof applyLocksToCurrentView==='function')setTimeout(()=>{try{applyLocksToCurrentView();}catch(e){}},150);return;}
   inicio.style.display='none';dyn.style.display='';
   const renderer=Sections.renderers[section];
   if(renderer){dyn.innerHTML='';renderer(dyn);}
   else{dyn.innerHTML=sectionPlaceholder(section);}
+  // MODIFICADO: candado grande (overlay) en tarjetas bloqueadas de esta sección
+  if(typeof applyLocksToCurrentView==='function')setTimeout(()=>{try{applyLocksToCurrentView();}catch(e){}},150);
   window.scrollTo({top:0,behavior:'instant'});
   document.querySelector('main.main')?.scrollTo({top:0,behavior:'instant'});
 }
@@ -7951,7 +7953,7 @@ const Sections = (function(){
             ${disponible
               ? `<span class="tag tag--soon" style="color:#081225;border-color:#3DDC5A;background:#3DDC5A;font-weight:700;">${muestraGratis ? 'Gratis' : 'Disponible'}</span><button class="row-btn pdf-card__btn-soon" data-bypass-paywall="true" style="margin-left:auto;background:linear-gradient(135deg, var(--primary), var(--highlight));color:#081225;cursor:pointer;" onclick="event.stopPropagation();if(typeof window.abrirVisor==='function'){window.abrirVisor('${(m.url||'').replace(/'/g,'%27')}','${tituloEsc.replace(/'/g,'&apos;')}');}"><svg class="ic"><use href="#i-download"/></svg>Abrir</button>`
               : (requiereMembresia
-                ? `<span class="tag tag--soon">Solo VIP</span><button class="row-btn pdf-card__btn-soon" style="margin-left:auto;opacity:.55;cursor:not-allowed;" disabled><svg class="ic"><use href="#i-crown"/></svg>Activa tu membresía</button>`
+                ? `<span class="tag tag--soon">Solo VIP</span><button class="row-btn pdf-card__btn-soon" style="margin-left:auto;"><svg class="ic"><use href="#i-crown"/></svg>Activa tu membresía</button>`
                 : `<span class="tag tag--soon">${diasFaltan === 1 ? 'Mañana' : 'En '+diasFaltan+' días'}</span><button class="row-btn pdf-card__btn-soon" style="margin-left:auto;opacity:.55;cursor:not-allowed;" disabled><svg class="ic"><use href="#i-clock"/></svg>Disponible pronto</button>`)
             }
           </div>
@@ -10791,16 +10793,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
   // ─── Popup paywall genérico ───
   function showPaywallModal(opts){
-    const modal = document.getElementById('paywall-modal');
-    if (!modal) return;
-    if (opts && opts.title) document.getElementById('paywall-title').textContent = opts.title;
-    if (opts && opts.sub) document.getElementById('paywall-sub').textContent = opts.sub;
-    // El modal debe vivir directamente bajo <body> para no quedar atrapado en
-    // el contexto de apilado del detalle del curso.
-    if (modal.parentElement !== document.body) document.body.appendChild(modal);
-    modal.setAttribute('aria-hidden', 'false');
-    modal.classList.add('is-open');
-    requestAnimationFrame(() => document.getElementById('paywall-close')?.focus());
+    // MODIFICADO: ya no se abre una ventana; se manda directo a la pantalla de planes,
+    // igual que en cursos y herramientas.
+    void opts;
+    window.__irASuscripcion ? window.__irASuscripcion() : (window.location.href = 'vip-auth.html');
   }
   window.__showPaywallModal = showPaywallModal;
 
