@@ -3009,6 +3009,11 @@ const Pages={
         <label class="actbox__min">Mínimo <input class="input" type="number" min="0" max="100" data-act-minimo="${idx}" value="${a.minimo ?? 60}">%</label>
         <button type="button" class="actq__x" data-act-quitar="${idx}" title="Quitar actividad">×</button>
       </div>
+      <div style="font-size:11.5px;display:flex;align-items:center;gap:6px;margin:-2px 0 0;">
+        ${['quiz','trivia','caso','vf'].includes(a.tipo)
+          ? '<span style="color:#16a34a;font-weight:600;">✔ Cuenta para el certificado</span><span style="color:var(--text-3);">· el alumno debe aprobarla para certificar</span>'
+          : '<span style="color:var(--text-3);">🎮 Práctica · no es obligatoria para el certificado (solo hay que ver la clase)</span>'}
+      </div>
       ${cuerpo}
     </div>`;
   },
