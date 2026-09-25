@@ -485,7 +485,7 @@ function mostrarVerificacionPendiente(user) {
   const correo = String(user.email || '').replace(/[<>&"]/g, '');
   z.innerHTML = `<div class="alert alert--error"><div class="alert__msg"><strong>Confirma tu correo para continuar</strong><br>Enviamos un enlace a ${correo}. Hasta confirmarlo no podrás entrar al panel ni obtener certificados.<br><br><button type="button" class="btn google" id="resend-verification" style="height:38px;min-height:38px;font-size:12px;">Reenviar enlace</button> <button type="button" class="btn google" id="check-verification" style="height:38px;min-height:38px;font-size:12px;">Ya confirmé</button></div></div>`;
   z.querySelector('#resend-verification')?.addEventListener('click', async () => {
-    try { await sendEmailVerification(user); showAlert('success', 'Enlace reenviado', 'Revisa tu bandeja de entrada y spam.'); }
+    try { await sendEmailVerification(user, { url: location.origin + '/vip-auth.html', handleCodeInApp: false }); showAlert('success', 'Enlace reenviado', 'Revisa tu bandeja de entrada y spam.'); }
     catch (e) { showAlert('error', 'No pudimos reenviar el enlace', translateError(e.code)); }
   });
   z.querySelector('#check-verification')?.addEventListener('click', async () => {
@@ -629,7 +629,7 @@ document.getElementById('btn-register').addEventListener('click', async () => {
   try{
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: name });
-    await sendEmailVerification(cred.user);
+    await sendEmailVerification(cred.user, { url: location.origin + '/vip-auth.html', handleCodeInApp: false });
     const docResult = await ensureMiembroDoc(cred.user, name, 'registro-web');
     const isAdmin = await esAdministrador(cred.user);
     if (docResult && docResult.ok === false){
