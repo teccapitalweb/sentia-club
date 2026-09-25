@@ -5461,6 +5461,7 @@ const Sections = (function(){
       score = Math.max(0, Math.min(100, Math.round(score)));
       // Las actividades de opción objetiva se califican otra vez en Railway.
       // El porcentaje local nunca autoriza por sí mismo un certificado.
+      let incorrectas = null, notaMinima = minimo, aprobadaServidor = null;
       if (Array.isArray(respuestas)) {
         const validacion = await registrarAvanceServidor(cursoId, 'actividad_aprobada', num, { respuestas });
         if (!validacion || validacion.ok === false) {
@@ -5468,19 +5469,34 @@ const Sections = (function(){
           body.querySelector('[data-act="retry"]')?.addEventListener('click', () => { cerrar(); window.abrirActividadSentia(cursoId, idx); });
           return;
         }
-        score = Number.isFinite(Number(validacion.calificacion)) ? Number(validacion.calificacion) : score;
+        if (Number.isFinite(Number(validacion.calificacion))) score = Number(validacion.calificacion);
+        if (Array.isArray(validacion.incorrectas)) incorrectas = validacion.incorrectas;
+        if (Number.isFinite(Number(validacion.notaMinima))) notaMinima = Number(validacion.notaMinima);
+        if (typeof validacion.aprobada === 'boolean') aprobadaServidor = validacion.aprobada;
       }
       const yaAprobada = actividadAprobada(cursoId, num);
       const res = guardarActividadRes(cursoId, num, score, minimo);
-      const paso = score >= minimo;
+      const paso = aprobadaServidor !== null ? aprobadaServidor : score >= minimo;
       fill.style.width = '100%';
       const siguiente = curso.sesiones[idx + 1];
+      // Al aprobar se muestran las explicaciones que el instructor haya escrito
+      // (refuerzo). Al reprobar solo se dice qué preguntas repasar: nunca se
+      // revela la respuesta correcta, para no filtrar la clave del certificado.
+      let extra = '';
+      if (paso) {
+        const exps = ((a.items) || []).map((it, i) => ({ n: i + 1, txt: it && it.explicacion }))
+          .filter(x => x.txt && String(x.txt).trim());
+        if (exps.length) extra = `<div style="text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:8px;">${exps.map(x => `<div style="font-size:13px;line-height:1.5;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--success) 10%,transparent);border:1px solid color-mix(in srgb,var(--success) 25%,transparent);"><b>Pregunta ${x.n}:</b> ${escapeHtml(x.txt)}</div>`).join('')}</div>`;
+      } else if (incorrectas && incorrectas.length) {
+        extra = `<div style="margin-top:10px;font-size:13px;color:var(--warning,#f59e0b);">Preguntas por repasar: ${incorrectas.map(i => Number(i) + 1).join(', ')}.</div>`;
+      }
       body.innerHTML = `<div class="act-result">
         <div class="act-score ${paso ? 'is-ok' : 'is-bad'}">${score}%</div>
         <div class="act-result__t">${paso ? (score === 100 ? '¡Perfecto!' : '¡Aprobada!') : 'Casi lo logras'}</div>
         <div class="act-result__d">${paso
           ? (yaAprobada ? 'Mejoraste tu práctica. ' : '+20 XP ganados. ') + (siguiente && !yaAprobada ? 'Ya se desbloqueó la siguiente clase.' : '')
-          : `Necesitas ${minimo}% para avanzar. Repasa la clase si lo necesitas e inténtalo de nuevo.`}</div>
+          : `Necesitas ${notaMinima}% para avanzar. Repasa la clase e inténtalo de nuevo.`}</div>
+        ${extra}
         <div class="act-actions">
           ${paso ? '' : '<button class="btn btn--ghost" data-act="retry">Intentar de nuevo</button>'}
           <button class="btn btn--primary" data-act="ok">${paso ? 'Continuar' : 'Cerrar'}</button>
