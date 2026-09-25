@@ -1340,6 +1340,11 @@ instalarCierreAdminPorInactividad();
    Para conectar a Firebase en sprint 5
    ========================================================= */
 
+// Este script clásico necesita su propia copia del indicador: la const definida
+// en el <script type="module"> de arriba no es visible fuera de ese módulo, y sin
+// esto las funciones de guardado lanzaban "MODO_LOCAL_SOLO_LECTURA is not defined".
+const MODO_LOCAL_SOLO_LECTURA = location.hostname === 'localhost';
+
 const Theme={
   init(){const s=localStorage.getItem('sentia-admin:theme')||'night';document.documentElement.dataset.theme=s;this.updateIcon();},
   toggle(){const c=document.documentElement.dataset.theme;const n=c==='night'?'day':'night';document.documentElement.dataset.theme=n;localStorage.setItem('sentia-admin:theme',n);this.updateIcon();},
