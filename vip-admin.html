@@ -1114,29 +1114,47 @@ const firebaseConfig = {
   messagingSenderId: "137510320281",
   appId: "1:137510320281:web:d0d26e7f5aa4eee5a56008"
 };
-const ADMINS = [
-  "teccapitalweb@gmail.com",
-  "fisiotec25@gmail.com"
-];
-
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 setPersistence(auth, browserLocalPersistence);
 
+// Una vista previa local nunca debe cambiar el Firebase real. Las acciones de
+// escritura quedan bloqueadas en localhost; producción conserva las funciones
+// originales después de un despliegue deliberado.
+const MODO_LOCAL_SOLO_LECTURA = location.hostname === 'localhost';
+const escrituraBloqueada = () => {
+  throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+};
+
 // Exponer Firebase y helpers globalmente para que el script no-module los use
 window._fb = {
   db, auth,
-  collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc,
+  collection, doc, getDoc, getDocs,
+  addDoc: MODO_LOCAL_SOLO_LECTURA ? escrituraBloqueada : addDoc,
+  setDoc: MODO_LOCAL_SOLO_LECTURA ? escrituraBloqueada : setDoc,
+  updateDoc: MODO_LOCAL_SOLO_LECTURA ? escrituraBloqueada : updateDoc,
+  deleteDoc: MODO_LOCAL_SOLO_LECTURA ? escrituraBloqueada : deleteDoc,
   query, orderBy, where, limit, onSnapshot,
-  serverTimestamp, Timestamp, writeBatch, increment
+  serverTimestamp, Timestamp,
+  writeBatch: MODO_LOCAL_SOLO_LECTURA ? escrituraBloqueada : writeBatch,
+  increment
 }; // MODIFICADO: + setDoc
-window.__adminEmails = ADMINS;
-
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'vip-auth.html'; return; }
+  const usaContrasena = (user.providerData || []).some(p => p.providerId === 'password');
+  if (usaContrasena && user.emailVerified !== true) {
+    await signOut(auth);
+    window.location.href = 'vip-auth.html?verificar=1';
+    return;
+  }
   const email = (user.email||'').toLowerCase();
-  if (!ADMINS.includes(email)) { window.location.href = 'vip-panel.html'; return; }
+  try {
+    const token = await user.getIdTokenResult(true);
+    if (token.claims.admin !== true) { window.location.href = 'vip-panel.html'; return; }
+  } catch (_) {
+    window.location.href = 'vip-auth.html'; return;
+  }
   // Es admin: mostrar contenido + actualizar avatar
   window.__currentAdmin = { uid: user.uid, email, displayName: user.displayName || email };
   document.body.style.visibility = 'visible';
@@ -1150,10 +1168,26 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Cerrar sesión real
-window.__signOut = async () => {
-  try { await signOut(auth); window.location.href = 'vip-auth.html'; }
+function limpiarSesionAdmin() {
+  try { sessionStorage.removeItem('sentia_sesion'); sessionStorage.removeItem('sentia_ultima_actividad'); localStorage.removeItem('sentia_last_user'); } catch (_) {}
+}
+function instalarCierreAdminPorInactividad() {
+  if (window.__idleAdminGuardInstalled) return;
+  window.__idleAdminGuardInstalled = true;
+  const LIMITE_INACTIVIDAD_MS = 30 * 60 * 1000;
+  const marcar = () => { try { sessionStorage.setItem('sentia_ultima_actividad', String(Date.now())); } catch (_) {} };
+  ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(evento => window.addEventListener(evento, marcar, { passive: true }));
+  marcar();
+  setInterval(async () => {
+    const ultima = Number(sessionStorage.getItem('sentia_ultima_actividad') || Date.now());
+    if (Date.now() - ultima > LIMITE_INACTIVIDAD_MS && auth.currentUser) await window.__signOut('expirada');
+  }, 60 * 1000);
+}
+window.__signOut = async (motivo) => {
+  try { limpiarSesionAdmin(); await signOut(auth); window.location.href = 'vip-auth.html' + (motivo === 'expirada' ? '?sesion=expirada' : ''); }
   catch(e){ alert('No pudimos cerrar sesión. Intenta de nuevo.'); }
 };
+instalarCierreAdminPorInactividad();
 </script>
 
 <script src="assets/sentia-bunny-catalog.js"></script>
@@ -1379,7 +1413,6 @@ const SEED={
     whatsapp:'+52 000 000 0000', // TODO Jorge: pon el WhatsApp real de SENTIA
     instagram:'',
     emailContacto:'fisiotec25@gmail.com',
-    admins:['teccapitalweb@gmail.com'],
     stripePublicKey:'pk_live_••••••••••••••••',
     cronStatus:'activo',
     cronUltima:'Hoy 7:00 AM',
@@ -1519,8 +1552,8 @@ const Pages={
                     <div class="mini-row" style="--c1:${c1};">
                       <div class="mini-row__dot"><svg class="ic"><use href="#i-user"/></svg></div>
                       <div class="mini-row__body">
-                        <div class="mini-row__title">${m.nombre || m.displayName || m.email?.split('@')[0] || 'Miembro'}</div>
-                        <div class="mini-row__meta">${m.email || '—'} · Plan ${planLabel}</div>
+                        <div class="mini-row__title">${String(m.nombre || m.displayName || m.email?.split('@')[0] || 'Miembro').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}</div>
+                        <div class="mini-row__meta">${String(m.email || '—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')} · Plan ${planLabel}</div>
                       </div>
                       <span class="tag ${activo?'tag--success':'tag--danger'}">${activo?'Activo':'Inactivo'}</span>
                     </div>
@@ -1931,9 +1964,8 @@ const Pages={
       if (!titulo) { Toast.error('Falta el título', 'Escribe un título para la notificación'); inputTitulo.focus(); return; }
       if (!descripcion) { Toast.error('Falta la descripción', 'Agrega un mensaje claro para los miembros'); inputDesc.focus(); return; }
 
-      const fb = window._fb;
-      if (!fb || !fb.addDoc || !fb.collection || !fb.serverTimestamp || !fb.db) {
-        Toast.error('Firebase no listo', 'Espera 3 segundos y vuelve a intentar');
+      if (MODO_LOCAL_SOLO_LECTURA) {
+        Toast.info('Vista local', 'El envío está bloqueado para no modificar Firebase durante las pruebas locales.');
         return;
       }
 
@@ -1944,15 +1976,15 @@ const Pages={
       btnEnviar.innerHTML = '<svg style="width:16px;height:16px;animation:spin .8s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="40" stroke-dashoffset="20"/></svg> Enviando…';
 
       try {
-        await fb.addDoc(fb.collection(fb.db, 'notificaciones'), {
-          titulo,
-          descripcion,
-          tipo: tipoSeleccionado,
-          icono: iconoSeleccionado,
-          color: colorSeleccionado,
-          createdAt: fb.serverTimestamp(),
-          creadoPor: window.__currentAdmin?.email || 'admin'
+        const user = window._fb?.auth?.currentUser;
+        if (!user) throw new Error('Sesión admin no disponible');
+        const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + await user.getIdToken() },
+          body: JSON.stringify({ titulo, descripcion, tipo: tipoSeleccionado, icono: iconoSeleccionado, color: colorSeleccionado })
         });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'No se pudo enviar la notificación');
         Toast.success('¡Notificación enviada!', 'Aparecerá en la campanita de todos los miembros VIP');
         // Limpiar form
         inputTitulo.value = '';
@@ -1986,11 +2018,7 @@ const Pages={
         const id = btn.dataset.id;
         const titulo = btn.dataset.titulo;
         if (!confirm(`¿Eliminar esta notificación?\n\n"${titulo}"\n\nLos miembros que no la hayan visto ya no podrán verla.`)) return;
-
-        const fb = window._fb;
-        if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) {
-          Toast.error('Firebase no listo'); return;
-        }
+        if (MODO_LOCAL_SOLO_LECTURA) { Toast.info('Vista local', 'La eliminación está bloqueada durante las pruebas locales.'); return; }
         try {
           // Feedback inmediato (animación de salida)
           const item = btn.closest('.notif-item-admin');
@@ -1999,7 +2027,13 @@ const Pages={
             item.style.opacity = '0';
             item.style.transform = 'translateX(20px)';
           }
-          await fb.deleteDoc(fb.doc(fb.db, 'notificaciones', id));
+          const user = window._fb?.auth?.currentUser;
+          if (!user) throw new Error('Sesión admin no disponible');
+          const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones/${encodeURIComponent(id)}`, {
+            method: 'DELETE', headers: { 'Authorization': 'Bearer ' + await user.getIdToken() }
+          });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(data.error || 'No se pudo eliminar');
           Toast.success('Notificación eliminada');
           // El listener auto re-renderea
         } catch (err) {
@@ -2208,16 +2242,12 @@ const Pages={
 
   async _sincronizarSentiaBunny() {
     const catalogo = window.SENTIA_BUNNY_CATALOG || [];
-    const fb = window._fb;
     const cursos = window.AdminStore?.cursos || [];
     if (!catalogo.length) {
       Toast.error('Falta el catálogo Bunny', 'Verifica assets/sentia-bunny-catalog.js');
       return;
     }
-    if (!fb?.db || !fb?.writeBatch || !fb?.doc) {
-      Toast.error('Firestore no está listo', 'Espera unos segundos y reintenta');
-      return;
-    }
+    if (MODO_LOCAL_SOLO_LECTURA) { Toast.error('Vista local en modo solo lectura', 'No se modificó Firebase.'); return; }
     if (!confirm('Se vincularán los videos de Bunny con los cursos existentes según el catálogo. Los materiales se conservarán. ¿Continuar?')) return;
 
     const btn = document.getElementById('sync-sentia-bunny-btn');
@@ -2225,9 +2255,7 @@ const Pages={
     try {
       const usados = new Set();
       const sinCoincidencia = [];
-      let vinculados = 0;
-      let videos = 0;
-      const batch = fb.writeBatch(fb.db);
+      const sincronizaciones = [];
 
       for (const curso of cursos) {
         let mejor = null;
@@ -2250,30 +2278,32 @@ const Pages={
         }
         usados.add(mejorIndice);
 
-        const anteriores = Array.isArray(curso.sesiones) ? curso.sesiones : [];
-        const sesiones = mejor.sesiones.map((sesion, indice) => {
-          const numero = sesion.numero || (indice + 1);
-          const anterior = anteriores.find(x => Number(x.numero) === Number(numero)) || {};
-          const nueva = { ...anterior, ...sesion, numero, provider:'bunny', videoId:sesion.videoId };
-          if (anterior.url && !nueva.driveUrlAnterior) nueva.driveUrlAnterior = anterior.url;
-          delete nueva.url;
-          return nueva;
+        sincronizaciones.push({
+          cursoId: curso.id,
+          collectionId: mejor.collectionId,
+          sesiones: mejor.sesiones.map((sesion, indice) => ({
+            numero: Number(sesion.numero || (indice + 1)),
+            titulo: String(sesion.titulo || ''),
+            videoId: String(sesion.videoId || ''),
+            duracionSeg: Number(sesion.duracionSeg) || 0
+          }))
         });
-
-        const _upd = { sesiones, bunnyCollectionId: mejor.collectionId };
-        if (curso.horasManual !== true) {
-          const _s = sesiones.reduce((t, x) => t + (Number(x.duracionSeg) || 0), 0);
-          _upd.horas = _s > 0 ? Math.max(1, Math.round(_s / 3600)) : Math.max(1, sesiones.length);
-        }
-        batch.update(fb.doc(fb.db, 'cursos', curso.id), {
-          ..._upd,
-          bunnySincronizadoEn: fb.serverTimestamp()
-        });
-        vinculados++;
-        videos += sesiones.length;
       }
 
-      if (vinculados) await batch.commit();
+      let vinculados = 0, videos = 0;
+      if (sincronizaciones.length) {
+        const user = window._fb?.auth?.currentUser;
+        if (!user) throw new Error('Sesión admin no disponible');
+        const r = await fetch(`${Pages._webhookUrl}/admin/cursos/sincronizar-bunny`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + await user.getIdToken() },
+          body: JSON.stringify({ sincronizaciones })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'No se pudo sincronizar Bunny');
+        vinculados = Number(data.cursos) || 0;
+        videos = Number(data.videos) || 0;
+      }
       console.log('[Bunny sync]', { vinculados, videos, sinCoincidencia });
       if (sinCoincidencia.length) {
         Toast.error(`Bunny: ${vinculados} cursos y ${videos} videos`, `Sin coincidencia: ${sinCoincidencia.join(', ')}`);
@@ -2537,17 +2567,16 @@ const Pages={
         const curso = window.AdminStore.cursos.find(c => c.id === id);
         if (!curso) return;
         const nuevoEstado = !(curso.activo !== false && curso.disponible !== false);
-        const fb = window._fb;
-        if (!fb || !fb.updateDoc || !fb.doc || !fb.db) {
-          Toast.error('Firestore no listo'); return;
-        }
         // Animación inmediata
         btn.classList.toggle('is-active', nuevoEstado);
         try {
-          await fb.updateDoc(fb.doc(fb.db, 'cursos', id), {
-            activo: nuevoEstado,
-            disponible: nuevoEstado
+          if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/cursos/${encodeURIComponent(id)}/estado`,{
+            method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},
+            body:JSON.stringify({activo:nuevoEstado})
           });
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo actualizar');
           Toast.success(nuevoEstado ? 'Curso activado' : 'Curso desactivado', curso.titulo);
         } catch (err) {
           // Revertir animación si falla
@@ -2576,10 +2605,11 @@ const Pages={
         const titulo = curso.titulo || 'este curso';
         const ok = confirm(`¿Eliminar el curso "${titulo}"?\n\nSe eliminará con todas sus clases y materiales. Los miembros perderán acceso a este contenido.\n\nEsta acción NO se puede deshacer.`);
         if (!ok) return;
-        const fb = window._fb;
-        if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { Toast.error('Firestore no listo'); return; }
         try {
-          await fb.deleteDoc(fb.doc(fb.db, 'cursos', id));
+          if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/cursos/${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Authorization':'Bearer '+await user.getIdToken()}});
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo eliminar');
           Toast.success('Curso eliminado', titulo);
         } catch (err) {
           console.error('[curso] error eliminar:', err);
@@ -2601,17 +2631,38 @@ const Pages={
     editandoId: null
   },
 
-  _abrirModalCurso(curso) {
+  async _abrirModalCurso(curso) {
     const esEdicion = !!curso;
     this._modalCurso.editandoId = esEdicion ? curso.id : null;
     // Clonar para no mutar el original
-    this._modalCurso.sesiones = esEdicion && Array.isArray(curso.sesiones)
+    let sesionesEdicion = esEdicion && Array.isArray(curso.sesiones)
       ? curso.sesiones.map(s => ({ ...s, numero: s.numero, titulo: s.titulo || '', url: s.url || '' }))
       : [];
+    if (esEdicion) {
+      const claves = await this._cargarClavesPrivadas(curso.id);
+      const porClase = new Map(claves.map(clave => [Number(clave.numeroClase), clave]));
+      sesionesEdicion = sesionesEdicion.map((sesion, indice) => {
+        const actividad = sesion.actividad;
+        const clave = porClase.get(Number(sesion.numero) || indice + 1);
+        if (!actividad || !clave || !Array.isArray(clave.respuestasCorrectas)) return sesion;
+        const copia = JSON.parse(JSON.stringify(sesion));
+        (copia.actividad.items || []).forEach((item, i) => {
+          const respuesta = clave.respuestasCorrectas[i];
+          if (copia.actividad.tipo === 'vf' || (copia.actividad.tipo === 'quiz' && item.tipo === 'vf')) {
+            item.respuesta = respuesta !== 1;
+          } else {
+            (item.opciones || []).forEach((opcion, oi) => { opcion.correcta = oi === respuesta; });
+          }
+        });
+        return copia;
+      });
+    }
+    this._modalCurso.sesiones = sesionesEdicion;
+    const recursosPrivados = esEdicion ? await this._cargarRecursosPrivados(curso.id) : new Map();
     this._modalCurso.materiales = esEdicion && Array.isArray(curso.materiales)
-      ? curso.materiales.map(m => ({
+      ? curso.materiales.map((m, idx) => ({
           titulo: m.titulo || '',
-          url: m.url || '',
+          url: m.url || recursosPrivados.get(idx) || '',
           disponibleSiempre: m.disponibleSiempre === true,
           gratis: m.gratis === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
@@ -2784,9 +2835,9 @@ const Pages={
         <span style="background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);font-family:'Instrument Sans',monospace;font-size:10px;font-weight:800;letter-spacing:.6px;padding:5px 8px;border-radius:6px;flex-shrink:0;margin-top:4px;white-space:nowrap;">CLASE ${idx + 1}</span>
         <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
           <input type="text" class="input" placeholder="Título de la clase" value="${(s.titulo || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="titulo" style="font-size:13px;padding:8px 11px;">
-          <!-- MODIFICADO: link del video siempre disponible (por si Bunny no sincroniza) + clase gratis -->
-          ${s.videoId ? `<div style="font-size:12px;padding:6px 10px;border-radius:8px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">Video de Bunny vinculado${s.url ? ' · se usará el link de abajo' : ''}</div>` : ''}
-          <input type="url" class="input" placeholder="Link del video (Bunny, Google Drive, YouTube…) · opcional si ya está vinculado" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">
+          <!-- Las clases VIP se firman desde Bunny; enlaces externos solo se admiten como muestra gratuita. -->
+          ${s.videoId ? `<div style="font-size:12px;padding:6px 10px;border-radius:8px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);font-weight:600;">Video de Bunny vinculado y protegido</div>` : ''}
+          <input type="url" class="input" placeholder="Link de Bunny o enlace externo solo para clase gratuita" value="${(s.url || '').replace(/"/g,'&quot;')}" data-sesion-idx="${idx}" data-sesion-campo="url" style="font-size:13px;padding:8px 11px;">
           <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:2px;">
             <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer;"><input type="checkbox" data-ses-gratis="${idx}" ${s.gratis ? 'checked' : ''} style="accent-color:var(--ok,#1f9d24);width:15px;height:15px;"><b style="color:var(--text)">Clase gratis</b> · visible sin membresía</label>
             <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer;"><input type="checkbox" data-act-check="${idx}" ${s.actividad ? 'checked' : ''} style="accent-color:var(--ok,#1f9d24);width:15px;height:15px;"><b style="color:var(--text)">Agregar actividad</b> al terminar esta clase</label>
@@ -2873,7 +2924,7 @@ const Pages={
       });
       if (items.length && (items.length < 3 || items.length > 8)) errores.push('El memorama debe tener entre 3 y 8 parejas');
     } else if (tipo === 'externo') {
-      const u = (t.match(/https?:\/\/\S+/) || [])[0];
+      const u = (t.match(/https:\/\/\S+/) || [])[0];
       if (!u) errores.push('Pega un link que empiece con https://'); else items = [{ url: u }];
     }
     if (!items.length && !errores.length) errores.push('Agrega el contenido de la actividad');
@@ -3165,6 +3216,80 @@ const Pages={
     this._renderMaterialesModal();
   },
 
+  _separarClaveActividad(actividad, numeroClase) {
+    if (!actividad || !['quiz', 'trivia', 'caso', 'vf'].includes(actividad.tipo)) {
+      return { actividadPublica: actividad, clave: null };
+    }
+    const items = Array.isArray(actividad.items) ? actividad.items : [];
+    const respuestasCorrectas = items.map(item => {
+      if (actividad.tipo === 'vf' || (actividad.tipo === 'quiz' && item.tipo === 'vf')) {
+        return item.respuesta === false ? 1 : 0;
+      }
+      return (item.opciones || []).findIndex(opcion => opcion?.correcta === true);
+    });
+    // La validación visual previa impide llegar aquí con valores -1.
+    const actividadPublica = JSON.parse(JSON.stringify(actividad));
+    (actividadPublica.items || []).forEach(item => {
+      delete item.respuesta;
+      (item.opciones || []).forEach(opcion => delete opcion.correcta);
+    });
+    return {
+      actividadPublica,
+      clave: { numeroClase, tipo: actividad.tipo, respuestasCorrectas }
+    };
+  },
+
+  async _guardarClavesPrivadas(cursoId, claves) {
+    if (!claves.length) return;
+    const auth = window._fb?.auth;
+    const user = auth?.currentUser;
+    if (!user) throw new Error('La sesión de administrador no está lista');
+    const base = location.hostname === 'localhost'
+      ? 'http://localhost:8081'
+      : 'https://sentia-academy-webhook-production.up.railway.app';
+    const r = await fetch(`${base}/admin/cursos/${encodeURIComponent(cursoId)}/claves`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + await user.getIdToken()
+      },
+      body: JSON.stringify({ claves })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'No se pudieron guardar las claves privadas');
+  },
+
+  async _cargarClavesPrivadas(cursoId) {
+    const auth = window._fb?.auth;
+    const user = auth?.currentUser;
+    if (!user) return [];
+    const base = location.hostname === 'localhost'
+      ? 'http://localhost:8081'
+      : 'https://sentia-academy-webhook-production.up.railway.app';
+    try {
+      const r = await fetch(`${base}/admin/cursos/${encodeURIComponent(cursoId)}/claves`, {
+        headers: { 'Authorization': 'Bearer ' + await user.getIdToken() }
+      });
+      const data = await r.json().catch(() => ({}));
+      return r.ok && Array.isArray(data.claves) ? data.claves : [];
+    } catch (_) {
+      // Cursos aún no migrados siguen trayendo sus claves en el documento.
+      return [];
+    }
+  },
+  async _guardarRecursosPrivados(cursoId, recursos) {
+    if (!recursos.length) return;
+    const user = window._fb?.auth?.currentUser; if (!user) throw new Error('La sesión de administrador no está lista');
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://sentia-academy-webhook-production.up.railway.app';
+    const r = await fetch(`${base}/admin/cursos/${encodeURIComponent(cursoId)}/materiales`, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()}, body:JSON.stringify({ recursos }) });
+    const data = await r.json().catch(()=>({})); if (!r.ok) throw new Error(data.error || 'No se pudieron guardar los materiales privados');
+  },
+  async _cargarRecursosPrivados(cursoId) {
+    const user = window._fb?.auth?.currentUser; if (!user) return new Map();
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://sentia-academy-webhook-production.up.railway.app';
+    try { const r = await fetch(`${base}/admin/cursos/${encodeURIComponent(cursoId)}/materiales`, {headers:{'Authorization':'Bearer '+await user.getIdToken()}}); const data = await r.json().catch(()=>({})); return new Map((data.recursos||[]).map(x=>[Number(x.indiceMaterial),x.url])); } catch (_) { return new Map(); }
+  },
+
   // ─── Submit del modal · guarda en Firestore ───
   async _submitCurso() {
     const btn = document.getElementById('cf-save');
@@ -3189,6 +3314,7 @@ const Pages={
 
       // Validar sesiones (todas necesitan título + URL válida)
       const sesionesLimpias = [];
+      const clavesPrivadas = [];
       for (let i = 0; i < this._modalCurso.sesiones.length; i++) {
         const s = this._modalCurso.sesiones[i];
         { const errAct = Pages._actValidar(s.actividad, i + 1); if (errAct) { Toast.error('Revisa la actividad', errAct); throw new Error('skip'); } }
@@ -3197,20 +3323,31 @@ const Pages={
           throw new Error('skip');
         }
         if (s.url?.trim()) {
-          try { new URL(s.url); } catch(e) {
+          try { if (new URL(s.url).protocol !== 'https:') throw new Error('https'); } catch(e) {
             Toast.error(`Clase ${i + 1}: URL inválida`, 'Verifica que el enlace sea correcto');
             throw new Error('skip');
           }
         }
         const sesionLimpia = { ...s, numero: i + 1, titulo: s.titulo.trim() };
         { const mb = String(s.url || '').match(/mediadelivery\.net\/(?:embed|play)\/(\d+)\/([0-9a-f-]{36})/i);
-          if (mb && mb[1] === '756118') { sesionLimpia.videoId = mb[2]; s.url = ''; } }   // MODIFICADO: link de Bunny de SENTIA -> se reproduce firmado
-        if (s.url?.trim()) sesionLimpia.url = s.url.trim(); else delete sesionLimpia.url;
+          if (mb && mb[1] === '756118') sesionLimpia.videoId = mb[2]; }
+        if (sesionLimpia.videoId) delete sesionLimpia.url;
+        else if (s.url?.trim()) {
+          if (!s.gratis) {
+            Toast.error(`Clase ${i + 1} sin protección`, 'Las clases VIP deben usar Bunny. Un enlace externo solo puede marcarse como gratuito.');
+            throw new Error('skip');
+          }
+          sesionLimpia.url = s.url.trim();
+        } else delete sesionLimpia.url;
+        const separada = this._separarClaveActividad(sesionLimpia.actividad, i + 1);
+        if (separada.clave) clavesPrivadas.push(separada.clave);
+        if (separada.actividadPublica) sesionLimpia.actividad = separada.actividadPublica;
         sesionesLimpias.push(sesionLimpia);
       }
 
       // Validar materiales (si tienen título, también necesitan URL · y al revés)
       const matsLimpios = [];
+      const recursosPrivadosMateriales = [];
       for (let i = 0; i < this._modalCurso.materiales.length; i++) {
         const m = this._modalCurso.materiales[i];
         const tieneTit = !!m.titulo?.trim();
@@ -3220,17 +3357,18 @@ const Pages={
           throw new Error('skip');
         }
         if (!tieneTit && !tieneUrl) continue; // skip vacío
-        try { new URL(m.url); } catch(e) {
+        try { if (new URL(m.url).protocol !== 'https:') throw new Error('https'); } catch(e) {
           Toast.error(`Material ${i + 1}: URL inválida`, 'Verifica el enlace');
           throw new Error('skip');
         }
         matsLimpios.push({
           titulo: m.titulo.trim(),
-          url: m.url.trim(),
+          tipo: (/\.xlsx?(?:$|[?#])/i.test(m.url) ? 'excel' : /\.pptx?(?:$|[?#])/i.test(m.url) ? 'ppt' : /\.docx?(?:$|[?#])/i.test(m.url) ? 'doc' : 'pdf'),
           disponibleSiempre: m.disponibleSiempre === true,
           gratis: m.gratis === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
         });
+        recursosPrivadosMateriales.push({ indiceMaterial: matsLimpios.length - 1, url: m.url.trim() });
       }
 
       // Horas: si el usuario no puso nada o puso 0/inválido → usa nº de sesiones (mínimo 1)
@@ -3259,38 +3397,22 @@ const Pages={
       else if (portadaEsImagen) { data.portada = ''; }
       else { data.portada = portada || ''; data.portadaId = null; }
 
-      // Firebase
-      const fb = window._fb;
-      if (!fb || !fb.db || !fb.addDoc || !fb.updateDoc || !fb.collection || !fb.doc || !fb.serverTimestamp) {
-        Toast.error('Firestore no listo', 'Espera unos segundos y reintenta');
-        throw new Error('skip');
-      }
-
+      if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+      const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+      const ruta=editId?`${Pages._webhookUrl}/admin/cursos/${encodeURIComponent(editId)}`:`${Pages._webhookUrl}/admin/cursos`;
+      const guardado=await fetch(ruta,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},body:JSON.stringify({curso:data,portada})});
+      const resultado=await guardado.json().catch(()=>({}));if(!guardado.ok)throw new Error(resultado.error||'No se pudo guardar el curso');
+      const cursoId=resultado.id;
       if (editId) {
-        // ─── EDITAR ───
-        if (portadaEsImagen) {
-          await fb.setDoc(fb.doc(fb.db, 'portadas', editId), { img: portada, actualizadoEn: fb.serverTimestamp() });
-          data.portadaId = editId; data.portadaV = Date.now();
-        }
-        await fb.updateDoc(fb.doc(fb.db, 'cursos', editId), data);
+        await this._guardarClavesPrivadas(editId, clavesPrivadas);
+        await this._guardarRecursosPrivados(editId, recursosPrivadosMateriales);
         if (portadaEsImagen && window.__portadasCache) window.__portadasCache[editId] = portada;
         Toast.success('Curso actualizado', titulo);
       } else {
-        // ─── CREAR ───
-        // Asignar orden al final del catálogo
-        const store = window.AdminStore;
-        const ordenes = store?.cursos?.map(c => typeof c.orden === 'number' ? c.orden : 0) || [];
-        const maxOrden = ordenes.length ? Math.max(...ordenes) : -1;
-        data.orden = maxOrden + 1;
-        data.createdAt = fb.serverTimestamp();
-        data.creadoPor = window.__currentAdmin?.email || 'admin';
-        const nuevoRef = await fb.addDoc(fb.collection(fb.db, 'cursos'), data);
-        if (portadaEsImagen) {
-          await fb.setDoc(fb.doc(fb.db, 'portadas', nuevoRef.id), { img: portada, actualizadoEn: fb.serverTimestamp() });
-          await fb.updateDoc(fb.doc(fb.db, 'cursos', nuevoRef.id), { portadaId: nuevoRef.id, portadaV: Date.now() });
-          if (window.__portadasCache) window.__portadasCache[nuevoRef.id] = portada;
-        }
-        Toast.success('¡Curso creado!', `${titulo} · aparecerá en orden #${data.orden}`);
+        await this._guardarClavesPrivadas(cursoId, clavesPrivadas);
+        await this._guardarRecursosPrivados(cursoId, recursosPrivadosMateriales);
+        if (portadaEsImagen && window.__portadasCache) window.__portadasCache[cursoId] = portada;
+        Toast.success('¡Curso creado!', `${titulo} · aparecerá en orden #${resultado.orden}`);
       }
 
       Modal.close();
@@ -3583,10 +3705,11 @@ const Pages={
         if (!w) return;
         const ok = confirm(`¿Eliminar la clase "${w.titulo}"?\n\nLos miembros que se hayan registrado ya no la verán.\n\nEsta acción NO se puede deshacer.`);
         if (!ok) return;
-        const fb = window._fb;
-        if (!fb?.deleteDoc || !fb?.doc || !fb?.db) { Toast.error('Firestore no listo'); return; }
         try {
-          await fb.deleteDoc(fb.doc(fb.db, 'webinars', id));
+          if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/webinars/${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Authorization':'Bearer '+await user.getIdToken()}});
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo eliminar');
           Toast.success('Clase eliminada', w.titulo);
         } catch (err) {
           console.error('[webinar] error eliminar:', err);
@@ -3682,35 +3805,32 @@ const Pages={
         if (!instructor) { Toast.error('Falta el instructor'); document.getElementById('wf-instructor')?.focus(); throw new Error('skip'); }
         if (!fechaStr) { Toast.error('Falta la fecha'); document.getElementById('wf-fecha')?.focus(); throw new Error('skip'); }
         if (!link) { Toast.error('Falta el link de transmisión'); document.getElementById('wf-link')?.focus(); throw new Error('skip'); }
-        try { new URL(link); } catch(e) { Toast.error('Link inválido', 'Verifica que sea una URL completa'); throw new Error('skip'); }
+        try {
+          if (new URL(link).protocol !== 'https:') throw new Error('Solo HTTPS');
+        } catch(e) { Toast.error('Link inválido', 'Usa una URL HTTPS completa'); throw new Error('skip'); }
 
         // Convertir datetime-local a Date
         const fechaDate = new Date(fechaStr);
         if (isNaN(fechaDate.getTime())) { Toast.error('Fecha inválida'); throw new Error('skip'); }
-
-        const fb = window._fb;
-        if (!fb?.db || !fb?.addDoc || !fb?.updateDoc || !fb?.collection || !fb?.doc || !fb?.serverTimestamp) {
-          Toast.error('Firestore no listo'); throw new Error('skip');
-        }
 
         const data = {
           titulo,
           descripcion,
           instructor,
           duracion,
-          fecha: fb.Timestamp ? fb.Timestamp.fromDate(fechaDate) : fechaDate,
+          fecha: fechaDate.toISOString(),
           link,
           activo: true
         };
+        if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+        const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+        const ruta=editId?`${Pages._webhookUrl}/admin/webinars/${encodeURIComponent(editId)}`:`${Pages._webhookUrl}/admin/webinars`;
+        const r=await fetch(ruta,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},body:JSON.stringify(data)});
+        const respuesta=await r.json().catch(()=>({}));if(!r.ok)throw new Error(respuesta.error||'No se pudo guardar el webinar');
 
         if (editId) {
-          await fb.updateDoc(fb.doc(fb.db, 'webinars', editId), data);
           Toast.success('Clase actualizada', titulo);
         } else {
-          data.createdAt = fb.serverTimestamp();
-          data.creadoPor = window.__currentAdmin?.email || 'admin';
-          data.registrados = 0;
-          await fb.addDoc(fb.collection(fb.db, 'webinars'), data);
           Toast.success('¡Clase programada!', titulo);
         }
         Modal.close();
@@ -4017,12 +4137,13 @@ const Pages={
         if (!mat) return;
         const ok = confirm(`¿Eliminar el material "${mat.titulo}"?\n\nSe quitará del curso "${curso.titulo}". Los miembros ya no podrán descargarlo.\n\nEsta acción NO se puede deshacer.`);
         if (!ok) return;
-        const fb = window._fb;
-        if (!fb?.updateDoc || !fb?.doc || !fb?.db) { Toast.error('Firestore no listo'); return; }
         try {
           const nuevos = (curso.materiales || []).slice();
           nuevos.splice(idx, 1);
-          await fb.updateDoc(fb.doc(fb.db, 'cursos', cid), { materiales: nuevos });
+          if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/cursos/${encodeURIComponent(cid)}/materiales-publicos`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},body:JSON.stringify({materiales:nuevos})});
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo eliminar');
           Toast.success('Material eliminado', mat.titulo);
         } catch (err) {
           console.error('[material] error eliminar:', err);
@@ -4153,9 +4274,6 @@ const Pages={
           if (Number.isFinite(n) && n >= 0) dia = n;
         }
 
-        const fb = window._fb;
-        if (!fb?.db || !fb?.updateDoc || !fb?.doc) { Toast.error('Firestore no listo'); throw new Error('skip'); }
-
         const curso = store.cursos.find(c => c.id === cidSel);
         if (!curso) { Toast.error('Curso no encontrado'); throw new Error('skip'); }
 
@@ -4181,7 +4299,10 @@ const Pages={
           nuevos.push(nuevoMat);
         }
 
-        await fb.updateDoc(fb.doc(fb.db, 'cursos', cidSel), { materiales: nuevos });
+        if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+        const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+        const r=await fetch(`${Pages._webhookUrl}/admin/cursos/${encodeURIComponent(cidSel)}/materiales-publicos`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},body:JSON.stringify({materiales:nuevos})});
+        const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo guardar el material');
         Toast.success(esEdicion ? 'Material actualizado' : '¡Material creado!', titulo);
         Modal.close();
       } catch (err) {
@@ -4205,15 +4326,11 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Emisión</span>
           <h1 class="sec-hero__title">Certificados</h1>
-          <p class="sec-hero__sub">Emite certificados con folio único SENTIA-AÑO-XXXXX. El sistema genera el PDF, lo guarda y envía al estudiante por email.</p>
-          <div class="sec-hero__actions">
-            <button class="btn btn--accent" id="new-cert"><svg class="ic"><use href="#i-plus"/></svg>Emitir certificado</button>
-          </div>
+          <p class="sec-hero__sub">Los certificados se emiten automáticamente por el servidor al validar un curso. Desde aquí puedes revisar su estado o revocarlos con un motivo documentado.</p>
         </div>
         <div class="adm-list" id="cert-list"></div>
       </div>
     `;
-    document.getElementById('new-cert').addEventListener('click',()=>certModal());
     renderCerts();
     function renderCerts(){
       const list=document.getElementById('cert-list');
@@ -4223,53 +4340,31 @@ const Pages={
         <div class="adm-row" style="--c1:#2fbf2e;">
           <div class="adm-row__thumb"><svg class="ic"><use href="#i-certificate"/></svg></div>
           <div class="adm-row__body">
-            <div class="adm-row__title">${c.estudiante} · ${c.curso}</div>
+            <div class="adm-row__title">${adminEsc(c.alumno||c.estudiante||'Alumno')} · ${adminEsc(c.curso||'Curso SENTIA')}</div>
             <div class="adm-row__meta">
-              <span><svg class="ic"><use href="#i-mail"/></svg>${c.email}</span>
-              <span><svg class="ic"><use href="#i-calendar"/></svg>${c.emitido}</span>
-              <span><svg class="ic"><use href="#i-clock"/></svg>${c.horas}h · ${c.calificacion}/100</span>
-              <span style="color:var(--primary);font-weight:700;">${c.folio}</span>
+              <span><svg class="ic"><use href="#i-calendar"/></svg>${c.emitidoEn?.toDate?c.emitidoEn.toDate().toLocaleDateString('es-MX'):(c.emitido||'—')}</span>
+              <span><svg class="ic"><use href="#i-clock"/></svg>${c.horas||0}h</span>
+              <span style="color:var(--primary);font-weight:700;">${adminEsc(c.folio||'')}</span>
             </div>
           </div>
-          <span class="tag ${c.enviado?'tag--success':'tag--warning'}">${c.enviado?'Enviado':'Pendiente'}</span>
+          <span class="tag ${(c.estado||'vigente')==='vigente'?'tag--success':'tag--warning'}">${(c.estado||'vigente')==='vigente'?'Vigente':'Revocado'}</span>
           <div class="adm-row__actions">
-            <button class="icon-action" title="Ver PDF"><svg class="ic"><use href="#i-eye"/></svg></button>
-            <button class="icon-action icon-action--danger" data-del="${c.id}" title="Eliminar"><svg class="ic"><use href="#i-trash"/></svg></button>
+            ${(c.estado||'vigente')==='vigente'?`<button class="icon-action icon-action--danger" data-revoke="${adminEsc(c.folio||'')}" title="Revocar certificado"><svg class="ic"><use href="#i-alert-circle"/></svg></button>`:''}
           </div>
         </div>
       `).join('');
-      list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async ()=>{
-        if(confirm('¿Eliminar este certificado? Esta acción es irreversible.')){
-          try{ const fb=window._fb; await fb.deleteDoc(fb.doc(fb.db,'certificados',b.dataset.del)); Toast.success('Certificado eliminado'); }
-          catch(e){ Toast.error('No se pudo eliminar', e.message||''); }
-        }
+      list.querySelectorAll('[data-revoke]').forEach(b=>b.addEventListener('click',async ()=>{
+        const folio=b.dataset.revoke;
+        const motivo=prompt('Motivo de revocación para '+folio+' (quedará registrado):');
+        if(!motivo||!motivo.trim()) return;
+        if(location.hostname==='localhost'){Toast.info('Vista local','La revocación está bloqueada durante pruebas locales.');return;}
+        try{
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch('https://sentia-academy-webhook-production.up.railway.app/admin/certificados/'+encodeURIComponent(folio)+'/revocar',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},body:JSON.stringify({motivo:motivo.trim()})});
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo revocar');
+          Toast.success('Certificado revocado',folio);
+        }catch(e){Toast.error('No se pudo revocar',e.message||'');}
       }));
-    }
-    function certModal(){
-      const cursosOpts=SEED.cursos.filter(c=>c.activo).map(c=>`<option>${c.titulo}</option>`).join('');
-      const folio='SENTIA-2026-'+String(Math.floor(10000+Math.random()*89999));
-      const body=`
-        <div class="form-grid">
-          <div class="form-field form-field--full"><label class="label">Estudiante</label><input type="text" class="input" id="ce-nom" placeholder="Nombre completo del estudiante"></div>
-          <div class="form-field"><label class="label">Email</label><input type="email" class="input" id="ce-email" placeholder="email@example.com"></div>
-          <div class="form-field"><label class="label">Folio (auto)</label><input type="text" class="input" id="ce-folio" value="${folio}" readonly style="font-family:'Instrument Sans',monospace;color:var(--primary);font-weight:700;"></div>
-          <div class="form-field form-field--full"><label class="label">Curso completado</label><select class="select" id="ce-curso">${cursosOpts}</select></div>
-          <div class="form-field"><label class="label">Horas</label><input type="number" class="input" id="ce-horas" value="8" min="1"></div>
-          <div class="form-field"><label class="label">Calificación</label><input type="number" class="input" id="ce-cal" value="90" min="0" max="100"></div>
-          <div class="form-field form-field--full" style="display:flex;align-items:center;gap:10px;flex-direction:row;"><input type="checkbox" id="ce-enviar" checked><label for="ce-enviar" style="cursor:pointer;font-size:13px;font-weight:500;">Enviar al estudiante por email automáticamente</label></div>
-        </div>
-      `;
-      const footer=document.createElement('div');
-      footer.innerHTML=`<button class="btn btn--ghost" id="m-cancel">Cancelar</button><button class="btn btn--accent" id="m-save">Emitir certificado<svg class="ic"><use href="#i-certificate"/></svg></button>`;
-      Modal.open({title:'Emitir nuevo certificado',subtitle:folio,icon:'i-certificate',body,footer});
-      footer.querySelector('#m-cancel').addEventListener('click',()=>Modal.close());
-      footer.querySelector('#m-save').addEventListener('click',()=>{
-        const data={estudiante:document.getElementById('ce-nom').value.trim(),email:document.getElementById('ce-email').value.trim(),folio:document.getElementById('ce-folio').value,curso:document.getElementById('ce-curso').value,horas:+document.getElementById('ce-horas').value,calificacion:+document.getElementById('ce-cal').value,enviado:document.getElementById('ce-enviar').checked,emitido:new Date().toISOString().slice(0,10)};
-        if(!data.estudiante||!data.email){Toast.error('Faltan datos','Nombre y email son obligatorios.');return;}
-        SEED.certificados.unshift({id:'cert'+Date.now(),...data});
-        Toast.success('Certificado emitido',data.folio+(data.enviado?' · Enviado por email':''));
-        Modal.close();renderCerts();
-      });
     }
   },
 
@@ -4832,8 +4927,8 @@ const Pages={
           <button class="mb-action-btn" data-act="cancelar" style="--c:#F59E0B;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
             <div class="mb-action-btn__body">
-              <div class="mb-action-btn__title">Cancelar suscripción</div>
-              <div class="mb-action-btn__sub">Detiene cobros de Stripe automáticamente</div>
+              <div class="mb-action-btn__title">Cancelar acceso VIP</div>
+              <div class="mb-action-btn__sub">Programa o finaliza el acceso del miembro</div>
             </div>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="color:var(--text-3);"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -5080,7 +5175,7 @@ const Pages={
         </button>
       </div>
       <div style="font-size:11.5px;color:var(--text-3);padding:10px 12px;background:color-mix(in srgb, #F59E0B 8%, var(--surface-2));border-left:3px solid #F59E0B;border-radius:6px;line-height:1.55;">
-        Cancelar Stripe es automático. El backend de Railway llama a la API de Stripe con tu service account.
+        Esta acción solo administra el acceso VIP en SENTIA. La cancelación de cobros en Stripe debe confirmarse por su flujo de pagos cuando ese servicio esté activo.
       </div>
     `;
     const footer = document.createElement('div');
@@ -5133,7 +5228,7 @@ const Pages={
       <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;">
         <div style="font-weight:700;font-size:12.5px;color:var(--text);margin-bottom:8px;">Lo que va a pasar:</div>
         <ul style="margin:0;padding-left:20px;font-size:12px;color:var(--text-2);line-height:1.7;">
-          ${activo ? '<li style="color:#F59E0B;">Su suscripción Stripe se cancelará automáticamente</li>' : ''}
+          ${activo ? '<li style="color:#F59E0B;">Se retirará su acceso VIP; los cobros de Stripe se revisan por separado</li>' : ''}
           <li>Su documento en Firestore col <code style="background:var(--surface-3);padding:2px 5px;border-radius:3px;">miembros</code> será borrado</li>
           <li>Su cuenta en Firebase Auth será eliminada</li>
           <li>NO podrá iniciar sesión nunca más</li>
@@ -5182,33 +5277,17 @@ const Pages={
     });
   },
 
-  // ─── Llamadas reales al webhook Railway ───
-  // MODIFICADO: activacion/cancelacion/eliminacion directo en Firestore (sin webhook, plan Spark)
+  // ─── Operaciones sensibles de membresía · siempre por el webhook ───
   async _llamarActivar(uid, plan, durationDays, esRegalo) {
     try {
-      const fb = window._fb;
-      const ref = fb.doc(fb.db, 'miembros', uid);
-      const snap = await fb.getDoc(ref);
-      const actual = snap.exists() ? snap.data() : {};
-      const dias = Math.max(1, Math.min(3660, Number(durationDays) || 30));
-      // Si ya tenia VIP vigente, los dias se suman a partir de su vencimiento
-      const expiraActual = Pages._mbToDate(actual.expiraEn);
-      const vigente = (actual.activo === true || actual.activa === true) && expiraActual && expiraActual.getTime() > Date.now();
-      const base = vigente ? expiraActual : new Date();
-      const expira = new Date(base.getTime() + dias * 86400000);
-      const data = {
-        activo: true, activa: true, plan, esRegalo: !!esRegalo,
-        expiraEn: fb.Timestamp.fromDate(expira),
-        activadoEn: fb.serverTimestamp(),
-        activadoPor: window._fb.auth?.currentUser?.email || 'admin',
-        cancelacionProgramada: false, fechaFinAcceso: null,
-        // Splash de bienvenida en el panel del alumno (lo marca como mostrada al verlo)
-        notificacionPendiente: { tipo: esRegalo ? 'regalo' : null, plan, dias, mostrada: false, creadaEn: fb.Timestamp.now() }
-      };
-      if (!actual.fechaAlta) data.fechaAlta = fb.serverTimestamp();
-      if (!vigente) data.fechaVipDesde = fb.serverTimestamp();
-      await fb.setDoc(ref, data, { merge: true });
-      return { ok: true, data: { uid, plan, expiraEn: expira.toISOString() } };
+      if (MODO_LOCAL_SOLO_LECTURA) return { ok:false, error:'Vista local en modo solo lectura: no se modificó Firebase.' };
+      const token = await Pages._getAuthToken();
+      const r = await fetch(`${Pages._webhookUrl}/admin/miembros/${encodeURIComponent(uid)}/activar`, {
+        method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body: JSON.stringify({ plan, durationDays: Number(durationDays), esRegalo: !!esRegalo })
+      });
+      const data = await r.json().catch(() => ({}));
+      return r.ok ? { ok:true, data } : { ok:false, error:data.error || 'No se pudo activar la membresía' };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -5216,17 +5295,14 @@ const Pages={
 
   async _llamarCancelar(uid, atPeriodEnd) {
     try {
-      const fb = window._fb;
-      const ref = fb.doc(fb.db, 'miembros', uid);
-      const snap = await fb.getDoc(ref);
-      if (!snap.exists()) return { ok: false, error: 'Miembro no encontrado' };
-      if (atPeriodEnd) {
-        await fb.setDoc(ref, { cancelacionProgramada: true, fechaFinAcceso: snap.data().expiraEn || null }, { merge: true });
-      } else {
-        const ahora = fb.Timestamp.now();
-        await fb.setDoc(ref, { activo: false, activa: false, cancelacionProgramada: false, fechaFinAcceso: ahora, expiraEn: ahora }, { merge: true });
-      }
-      return { ok: true, data: { uid, atPeriodEnd: !!atPeriodEnd } };
+      if (MODO_LOCAL_SOLO_LECTURA) return { ok:false, error:'Vista local en modo solo lectura: no se modificó Firebase.' };
+      const token = await Pages._getAuthToken();
+      const r = await fetch(`${Pages._webhookUrl}/admin/miembros/${encodeURIComponent(uid)}/cancelar`, {
+        method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body: JSON.stringify({ atPeriodEnd: !!atPeriodEnd })
+      });
+      const data = await r.json().catch(() => ({}));
+      return r.ok ? { ok:true, data } : { ok:false, error:data.error || 'No se pudo cancelar la membresía' };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -5234,19 +5310,13 @@ const Pages={
 
   async _llamarEliminar(uid) {
     try {
-      const fb = window._fb;
-      await fb.deleteDoc(fb.doc(fb.db, 'miembros', uid));
-      try { await fb.deleteDoc(fb.doc(fb.db, 'directorio', uid)); } catch (_) {}
-      // La cuenta de acceso (Auth) se borra en el webhook; si falla, el miembro ya no tiene datos ni VIP
-      try {
-        const token = await Pages._getAuthToken();
-        await fetch(`${Pages._webhookUrl}/admin/eliminar-usuario`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ uid })
-        });
-      } catch (_) {}
-      return { ok: true, data: { uid } };
+      if (MODO_LOCAL_SOLO_LECTURA) return { ok:false, error:'Vista local en modo solo lectura: no se modificó Firebase.' };
+      const token = await Pages._getAuthToken();
+      const r = await fetch(`${Pages._webhookUrl}/admin/miembros/${encodeURIComponent(uid)}`, {
+        method: 'DELETE', headers: { 'Authorization':'Bearer '+token }
+      });
+      const data = await r.json().catch(() => ({}));
+      return r.ok ? { ok:true, data } : { ok:false, error:data.error || 'No se pudo eliminar el miembro' };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -5298,8 +5368,15 @@ const Pages={
     document.getElementById('cron-run').addEventListener('click',()=>Toast.info('Este botón aún no ejecuta el cron real','Falta conectar el endpoint del webhook de SENTIA que corre el cron de noticias'));
     p.querySelectorAll('[data-del-news]').forEach(b=>b.addEventListener('click',async ()=>{
       if(confirm('¿Eliminar esta noticia del panel?')){
-        try{ const fb=window._fb; await fb.deleteDoc(fb.doc(fb.db,'noticias',b.dataset.delNews)); Toast.success('Noticia eliminada'); }
-        catch(e){ Toast.error('No se pudo eliminar', e.message||''); }
+        try{
+          if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user = window._fb?.auth?.currentUser; if (!user) throw new Error('Sesión admin no disponible');
+          const r = await fetch(`${Pages._webhookUrl}/admin/noticias/${encodeURIComponent(b.dataset.delNews)}`, {
+            method:'DELETE', headers:{'Authorization':'Bearer '+await user.getIdToken()}
+          });
+          const data = await r.json().catch(()=>({})); if (!r.ok) throw new Error(data.error||'No se pudo eliminar');
+          Toast.success('Noticia eliminada');
+        } catch(e){ Toast.error('No se pudo eliminar', e.message||''); }
       }
     }));
   },
@@ -5311,7 +5388,7 @@ const Pages={
         <div class="sec-hero">
           <span class="sec-hero__eyebrow">Ajustes globales</span>
           <h1 class="sec-hero__title">Configuración</h1>
-          <p class="sec-hero__sub">Precios de membresía Stripe, datos de contacto, emails admin y claves de servicios externos.</p>
+      <p class="sec-hero__sub">Precios de membresía Stripe y datos de contacto. Los privilegios administrativos se gestionan únicamente con Firebase Auth.</p>
         </div>
 
         <div class="dash-grid">
@@ -5342,17 +5419,7 @@ const Pages={
 
           <div class="dash-card">
             <div class="dash-card__header"><div class="dash-card__title"><svg class="ic"><use href="#i-shield-check"/></svg>Administradores</div></div>
-            <p style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:14px;">Los emails registrados aquí pueden acceder al panel admin. <strong style="color:var(--danger);">No elimines <code style="font-family:JetBrains Mono,monospace;color:var(--primary);">teccapitalweb@gmail.com</code> bajo ningún motivo.</strong></p>
-            <div id="adm-list" class="adm-list" style="margin-bottom:14px;">
-              ${c.admins.map((e,i)=>`
-                <div class="adm-row" style="padding:11px 14px;">
-                  <div class="adm-row__thumb" style="--c1:#2fbf2e;"><svg class="ic"><use href="#i-shield-check"/></svg></div>
-                  <div class="adm-row__body"><div class="adm-row__title" style="font-size:13px;">${e}</div></div>
-                  ${e==='teccapitalweb@gmail.com'?'<span class="tag tag--primary">Superadmin</span>':`<button class="icon-action icon-action--danger" data-rm-admin="${i}"><svg class="ic"><use href="#i-trash"/></svg></button>`}
-                </div>
-              `).join('')}
-            </div>
-            <div style="display:flex;gap:8px;"><input type="email" class="input" id="cfg-new-admin" placeholder="nuevo@email.com"><button class="btn btn--ghost btn--sm" id="add-admin"><svg class="ic"><use href="#i-plus"/></svg>Agregar</button></div>
+            <p style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin:0;">El acceso administrativo se controla con el claim firmado <code style="font-family:JetBrains Mono,monospace;color:var(--primary);">admin: true</code> de Firebase. Para asignarlo o revocarlo usa el procedimiento seguro del webhook; escribir un correo en esta pantalla no concede privilegios.</p>
           </div>
 
           <div class="dash-card">
@@ -5387,17 +5454,17 @@ set('cfg-direccion',d.whatsappDireccion);         set('cfg-miembros',d.miembrosC
     p.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',async ()=>{
       const type=b.dataset.save;
       if(type==='precios'){
-        // MODIFICADO: guardar en Firestore config/club (patrón SYNOVA) — es lo que
-        // leen vip-auth.html, vip-panel.html, index.html y el webhook para el cobro real.
+        // Precios globales: el navegador no escribe Firestore directamente.
         const precioMes=parseInt(document.getElementById('cfg-mens').value)||199;
         const precioAno=parseInt(document.getElementById('cfg-anual').value)||1999;
         try{
-          const fb=window._fb;
-          await fb.setDoc(fb.doc(fb.db,'config','club'),{
-            precioMes, precioAno,
-            actualizadoPor:(window.__currentAdmin&&window.__currentAdmin.email)||'admin',
-            actualizadoEn:fb.serverTimestamp()
-          },{merge:true});
+          if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/config/club/precios`,{
+            method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},
+            body:JSON.stringify({precioMes,precioAno})
+          });
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudieron guardar los precios');
           c.precioMensual=precioMes;c.precioAnual=precioAno;
           window.__preciosClub={mes:precioMes,ano:precioAno};
           c.stripePublicKey=document.getElementById('cfg-stripe').value;
@@ -5405,7 +5472,7 @@ set('cfg-direccion',d.whatsappDireccion);         set('cfg-miembros',d.miembrosC
         }catch(e){Toast.error('Error al guardar precios',e.message);}
       }
       else if(type==='contacto'){
-        // MODIFICADO: ahora sí escribe en Firestore config/club (antes solo actualizaba la variable local y no persistía nada)
+        // Contacto y enlaces globales: validados y guardados por Railway.
         const whatsapp = document.getElementById('cfg-wa').value.trim();
         const whatsappCanal = document.getElementById('cfg-canal').value.trim();
         const instagram = document.getElementById('cfg-ig').value.trim();
@@ -5415,26 +5482,17 @@ set('cfg-direccion',d.whatsappDireccion);         set('cfg-miembros',d.miembrosC
         const whatsappDireccion = (document.getElementById('cfg-direccion')?.value || '').trim();
         const miembrosComunidad = parseInt(document.getElementById('cfg-miembros')?.value || '0') || 0;
         try{
-          const fb=window._fb;
-          await fb.setDoc(fb.doc(fb.db,'config','club'),{
-            whatsapp, whatsappCanal, whatsappGrupo, whatsappDireccion, miembrosComunidad, instagram, facebook, emailContacto,
-            actualizadoPor:(window.__currentAdmin&&window.__currentAdmin.email)||'admin',
-            actualizadoEn:fb.serverTimestamp()
-          },{merge:true});
+          if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');
+          const r=await fetch(`${Pages._webhookUrl}/admin/config/club/contacto`,{
+            method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+await user.getIdToken()},
+            body:JSON.stringify({whatsapp,whatsappCanal,whatsappGrupo,whatsappDireccion,miembrosComunidad,instagram,facebook,emailContacto})
+          });
+          const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'No se pudo guardar el contacto');
           c.whatsapp=whatsapp; c.whatsappCanal=whatsappCanal; c.instagram=instagram; c.facebook=facebook; c.emailContacto=emailContacto;
           Toast.success('Contacto guardado','Recarga el panel del alumno (Ctrl + F5) para verlo');
         }catch(e){Toast.error('Error al guardar contacto',e.message);}
       }
-    }));
-    document.getElementById('add-admin').addEventListener('click',()=>{
-      const e=document.getElementById('cfg-new-admin').value.trim();
-      if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){Toast.error('Email inválido');return;}
-      if(c.admins.includes(e)){Toast.error('Ya existe');return;}
-      c.admins.push(e);Toast.success('Admin agregado',e);Pages.config(p);
-    });
-    p.querySelectorAll('[data-rm-admin]').forEach(b=>b.addEventListener('click',()=>{
-      const i=+b.dataset.rmAdmin;
-      if(confirm('¿Eliminar este administrador?')){c.admins.splice(i,1);Toast.success('Admin eliminado');Pages.config(p);}
     }));
   },
 
@@ -5581,6 +5639,19 @@ function _admAutor(){
     esAdmin: true
   };
 }
+async function foroAdminRequest(ruta, method, body){
+  if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+  const user = window._fb?.auth?.currentUser;
+  if (!user) throw new Error('Sesión admin no disponible');
+  const r = await fetch(`${Pages._webhookUrl}${ruta}`, {
+    method,
+    headers: { 'Authorization':'Bearer '+await user.getIdToken(), ...(body ? {'Content-Type':'application/json'} : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'No se pudo completar la acción');
+  return data;
+}
 // Publicar como cuenta oficial SENTIA
 async function foroAdminPublicar(txtEl){
   const t = (txtEl.value||'').trim();
@@ -5588,13 +5659,7 @@ async function foroAdminPublicar(txtEl){
   const btn = document.getElementById('adm-post-publicar');
   const orig = btn.textContent; btn.disabled=true; btn.textContent='Publicando…';
   try {
-    const { db, collection, addDoc, serverTimestamp } = window._fb;
-    const a = _admAutor();
-    await addDoc(collection(db,'posts'), {
-      uid: a.uid, nombre: a.nombre, iniciales: a.iniciales, color: a.color, esAdmin: true,
-      texto: t, imagen: _admPostImg || null, likes: 0, likedBy: {}, comentariosCount: 0,
-      createdAt: serverTimestamp()
-    });
+    await foroAdminRequest('/api/foro/publicaciones', 'POST', { texto: t, imagen: _admPostImg || null });
     txtEl.value=''; const ch=document.getElementById('adm-post-char'); if(ch) ch.textContent='0 / 1500';
     _admPostImg = null;
     const pv=document.getElementById('adm-post-img-prev'); if(pv) pv.style.display='none';
@@ -5608,13 +5673,7 @@ async function foroAdminResponder(postId, inputEl){
   if (!t) return;
   inputEl.value='';
   try {
-    const { db, collection, addDoc, doc, updateDoc, increment, serverTimestamp } = window._fb;
-    const a = _admAutor();
-    await addDoc(collection(db,'posts',postId,'comentarios'), {
-      uid: a.uid, nombre: a.nombre, iniciales: a.iniciales, color: a.color, esAdmin: true,
-      texto: t, createdAt: serverTimestamp()
-    });
-    try { await updateDoc(doc(db,'posts',postId), { comentariosCount: increment(1) }); } catch(e){}
+    await foroAdminRequest('/api/foro/publicaciones/'+encodeURIComponent(postId)+'/comentarios', 'POST', { texto: t });
     Toast.success('Respuesta enviada','');
   } catch(e){ console.error(e); Toast.error('No se pudo responder',''); }
 }
@@ -5643,15 +5702,15 @@ function foroAdminCargar(){
     if(!posts.length){ cont.innerHTML='<div class="empty-state">Aún no hay publicaciones en el foro.</div>'; return; }
     cont.innerHTML = posts.map(x=>`
       <div class="foro-admin-card" data-fpost="${x.id}">
-        <div class="foro-admin-card__av" style="background:linear-gradient(135deg,${x.color||'#2fbf2e'},${(x.color||'#2fbf2e')}aa);">${(x.iniciales||'?')}</div>
+        <div class="foro-admin-card__av" style="background:linear-gradient(135deg,#2fbf2e,#2fbf2eaa);">${adminEsc(x.iniciales||'?')}</div>
         <div class="foro-admin-card__main">
           <div class="foro-admin-card__head">
-            <span class="foro-admin-card__name">${(x.nombre||'Miembro')}</span>
+            <span class="foro-admin-card__name">${adminEsc(x.nombre||'Miembro')}</span>
             ${x.esAdmin?'<span class="tag-mini tag-mini--admin">SENTIA</span>':'<span class="tag-mini">VIP</span>'}
             <span class="foro-admin-card__time">${foroAdminTiempo(x.createdAt)}</span>
           </div>
           ${x.texto?`<div class="foro-admin-card__text">${(x.texto||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`:''}
-          ${x.imagen?`<img class="foro-admin-card__img" src="${x.imagen}" alt="adjunto">`:''}
+          ${x.imagen&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(x.imagen)?`<img class="foro-admin-card__img" src="${x.imagen}" alt="adjunto">`:''}
           <div class="foro-admin-card__meta">${x.likes||0} me gusta · ${x.comentariosCount||0} respuestas</div>
           <button class="foro-admin-card__vercom" data-vercom="${x.id}">${(x.comentariosCount||0)>0?'Ver respuestas y responder':'Responder como SENTIA'}</button>
           <div class="foro-admin-coms" id="adm-coms-${x.id}" style="display:none;"></div>
@@ -5663,8 +5722,7 @@ function foroAdminCargar(){
       const ok = await adminConfirm('¿Eliminar esta publicación?','Se borrará del foro junto con sus respuestas. No se puede deshacer.');
       if(!ok) return;
       try {
-        const { db, doc, deleteDoc } = window._fb;
-        await deleteDoc(doc(db,'posts',b.dataset.fdel));
+        await foroAdminRequest('/api/foro/publicaciones/'+encodeURIComponent(b.dataset.fdel), 'DELETE');
         Toast.success('Publicación eliminada','');
       } catch(e){ console.error(e); Toast.error('No se pudo eliminar', e.message||''); }
     }));
@@ -5674,6 +5732,7 @@ function foroAdminCargar(){
 
 // Ver y moderar comentarios de un post (admin)
 const _admComUnsub = {};
+const adminEsc = v => String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 function foroAdminVerComentarios(postId){
   const cont = document.getElementById('adm-coms-'+postId); if(!cont) return;
   if (cont.style.display!=='none'){ cont.style.display='none'; if(_admComUnsub[postId]){_admComUnsub[postId]();delete _admComUnsub[postId];} return; }
@@ -5690,7 +5749,7 @@ function foroAdminVerComentarios(postId){
   cont.querySelector('[data-reply]').addEventListener('click', send);
   replyInput.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
 
-  const { db, collection, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc, increment } = window._fb;
+  const { db, collection, query, orderBy, onSnapshot } = window._fb;
   if (_admComUnsub[postId]) _admComUnsub[postId]();
   const q = query(collection(db,'posts',postId,'comentarios'), orderBy('createdAt','asc'));
   _admComUnsub[postId] = onSnapshot(q, (snap)=>{
@@ -5699,9 +5758,9 @@ function foroAdminVerComentarios(postId){
     const arr=[]; snap.forEach(d=>{ const c=d.data(); c.id=d.id; arr.push(c); });
     list.innerHTML = arr.map(c=>`
       <div class="adm-com">
-        <div class="adm-com__av" style="background:linear-gradient(135deg,${c.color||'#888'},${(c.color||'#888')}aa);">${(c.iniciales||'?')}</div>
+        <div class="adm-com__av" style="background:linear-gradient(135deg,#888,#888aaa);">${adminEsc(c.iniciales||'?')}</div>
         <div class="adm-com__body">
-          <div class="adm-com__head"><span class="adm-com__name">${(c.nombre||'Miembro')}</span>${c.esAdmin?'<span class="tag-mini tag-mini--admin" style="font-size:8px;padding:1px 6px;">SENTIA</span>':''}<span class="adm-com__time">${foroAdminTiempo(c.createdAt)}</span></div>
+          <div class="adm-com__head"><span class="adm-com__name">${adminEsc(c.nombre||'Miembro')}</span>${c.esAdmin?'<span class="tag-mini tag-mini--admin" style="font-size:8px;padding:1px 6px;">SENTIA</span>':''}<span class="adm-com__time">${foroAdminTiempo(c.createdAt)}</span></div>
           <div class="adm-com__text">${(c.texto||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
         </div>
         <button class="adm-com__del" data-comdel="${postId}|${c.id}" title="Eliminar respuesta"><svg class="ic"><use href="#i-trash"/></svg></button>
@@ -5712,8 +5771,7 @@ function foroAdminVerComentarios(postId){
       if(!ok) return;
       const [pid,cid] = b.dataset.comdel.split('|');
       try {
-        await deleteDoc(doc(db,'posts',pid,'comentarios',cid));
-        try { await updateDoc(doc(db,'posts',pid), { comentariosCount: increment(-1) }); } catch(e){}
+        await foroAdminRequest('/api/foro/publicaciones/'+encodeURIComponent(pid)+'/comentarios/'+encodeURIComponent(cid), 'DELETE');
         Toast.success('Respuesta eliminada','');
       } catch(e){ console.error(e); Toast.error('No se pudo eliminar',''); }
     }));
@@ -5741,8 +5799,10 @@ function dirAdminCargar(){
     if(!cards.length){ cont.innerHTML='<div class="empty-state">Aún no hay tarjetas en el directorio.</div>'; return; }
     cont.innerHTML = cards.map(x=>{
       const ini=(x.nombre||'?').trim().slice(0,2).toUpperCase();
-      const foto = x.foto ? `<img class="dir-adm-card__av" src="${x.foto}" alt="">`
-        : `<div class="dir-adm-card__av dir-adm-card__av--ini" style="background:linear-gradient(135deg,${x.color||'#2fbf2e'},${(x.color||'#2fbf2e')}aa);">${ini}</div>`;
+      const fotoSegura=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(x.foto||'')) ? x.foto : '';
+      const colorSeguro=/^#[0-9a-f]{6}$/i.test(String(x.color||'')) ? x.color : '#2fbf2e';
+      const foto = fotoSegura ? `<img class="dir-adm-card__av" src="${fotoSegura}" alt="">`
+        : `<div class="dir-adm-card__av dir-adm-card__av--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${adminEsc(ini)}</div>`;
       const contactos=[];
       if(x.whatsapp) contactos.push('WhatsApp');
       if(x.email) contactos.push('Correo');
@@ -5753,15 +5813,15 @@ function dirAdminCargar(){
         ${foto}
         <div class="dir-adm-card__main">
           <div class="dir-adm-card__head">
-            <span class="dir-adm-card__name">${(x.nombre||'Miembro')}</span>
+            <span class="dir-adm-card__name">${adminEsc(x.nombre||'Miembro')}</span>
             ${x.visible===false?'<span class="tag-mini" style="background:rgba(150,150,150,.18);color:#999;">Oculta</span>':'<span class="tag-mini tag-mini--admin">Visible</span>'}
           </div>
-          ${x.puesto?`<div class="dir-adm-card__sub">${(x.puesto||'')}${x.empresa?' · '+x.empresa:''}</div>`:''}
-          ${x.sector?`<div class="dir-adm-card__sector">${x.sector}</div>`:''}
-          ${x.bio?`<div class="dir-adm-card__bio">${(x.bio||'').replace(/</g,'&lt;')}</div>`:''}
+          ${x.puesto?`<div class="dir-adm-card__sub">${adminEsc(x.puesto||'')}${x.empresa?' · '+adminEsc(x.empresa):''}</div>`:''}
+          ${x.sector?`<div class="dir-adm-card__sector">${adminEsc(x.sector)}</div>`:''}
+          ${x.bio?`<div class="dir-adm-card__bio">${adminEsc(x.bio||'')}</div>`:''}
           <div class="dir-adm-card__meta">${contactos.length?'Contacto: '+contactos.join(' · '):'Sin contacto'}</div>
         </div>
-        <button class="foro-admin-card__del" data-dirdel="${x.id}" data-dirname="${(x.nombre||'Miembro').replace(/"/g,'&quot;')}" title="Eliminar tarjeta"><svg class="ic"><use href="#i-trash"/></svg></button>
+        <button class="foro-admin-card__del" data-dirdel="${adminEsc(x.id)}" data-dirname="${adminEsc(x.nombre||'Miembro')}" title="Eliminar tarjeta"><svg class="ic"><use href="#i-trash"/></svg></button>
       </div>`;
     }).join('');
     cont.querySelectorAll('[data-dirdel]').forEach(b=>b.addEventListener('click', async ()=>{
@@ -5881,15 +5941,8 @@ const AdminStore = {
       this.unsubs.push(u);
     } catch(e) { console.warn('[AdminStore] cursos init:', e.message); }
 
-    // ─── 2. MATERIALES (PDFs) ───
-    try {
-      const q = query(collection(db, 'materiales'), orderBy('fecha', 'desc'));
-      const u = onSnapshot(q, (snap) => {
-        this.pdfs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        this._emit('pdfs');
-      }, (err) => { /* col aún no existe · OK */ });
-      this.unsubs.push(u);
-    } catch(e) { /* OK · se creará al primer doc */ }
+    // Los materiales viven dentro de cada curso; no existe una colección
+    // pública `materiales` y no se abre un listener que las reglas bloquearían.
 
     // ─── 3. WEBINARS / Clases en vivo ───
     try {
@@ -5964,7 +6017,7 @@ const AdminStore = {
 
     // ─── 5. CERTIFICADOS ───
     try {
-      const q = query(collection(db, 'certificados'), orderBy('emitido', 'desc'), limit(200));
+      const q = query(collection(db, 'certificados'), orderBy('emitidoEn', 'desc'), limit(200));
       const u = onSnapshot(q, (snap) => {
         this.certificados = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         this._emit('certificados');
@@ -5974,7 +6027,7 @@ const AdminStore = {
 
     // ─── 6. NOTICIAS (col que ya existe del cron) ───
     try {
-      const q = query(collection(db, 'noticias_auto'), orderBy('fecha', 'desc'), limit(20));
+      const q = query(collection(db, 'noticias_auto'), orderBy('createdAt', 'desc'), limit(20));
       const u = onSnapshot(q, (snap) => {
         this.noticias = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         this._emit('noticias');
@@ -6140,7 +6193,7 @@ window.__cfPortadaUrl = function(val){
 window.__cfPortadaLink = function(){
   const u=(prompt('Pega el link directo de la imagen (debe terminar en .jpg, .png o .webp):')||'').trim();
   if(!u) return;
-  if(!/^https?:\/\//.test(u)){ if(typeof Toast!=='undefined') Toast.error('Link no válido','Debe empezar con https://'); return; }
+  if(!/^https:\/\//.test(u)){ if(typeof Toast!=='undefined') Toast.error('Link no válido','Debe empezar con https://'); return; }
   if(/drive\.google\.com/.test(u)){ if(typeof Toast!=='undefined') Toast.error('Link de Drive no sirve','Usa "Subir imagen" en su lugar'); return; }
   window.__cfPortadaSet(u);
 };

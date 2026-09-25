@@ -3332,8 +3332,6 @@ window.SENTIA_STRIPE_PK = '';
 window.__authHeaders = async function(){ const h = { 'Content-Type': 'application/json' }; try { if (window.__currentUser) h.Authorization = 'Bearer ' + await window.__currentUser.getIdToken(); } catch(e){} return h; };
 window.WEBHOOK_URL = WEBHOOK_URL;
 
-const ADMIN_EMAILS = ['teccapitalweb@gmail.com','fisiotec25@gmail.com'];
-
 function calcIniciales(nameOrEmail){
   const s = (nameOrEmail||'').trim();
   if (!s) return 'IN';
@@ -3356,13 +3354,25 @@ if (window.__isDemoMode) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = 'vip-auth.html'; return; }
 
+    const usaContrasena = (user.providerData || []).some(p => p.providerId === 'password');
+    if (usaContrasena && user.emailVerified !== true) {
+      await signOut(auth);
+      window.location.href = 'vip-auth.html?verificar=1';
+      return;
+    }
+
     window.__currentUser = user;
     try { if (!user) sessionStorage.removeItem('sentia_sesion'); else sessionStorage.setItem('sentia_sesion', '1'); } catch (_) {}
     window.UserState.uid = user.uid;
     window.UserState.email = (user.email||'').toLowerCase();
     window.UserState.displayName = user.displayName || user.email?.split('@')[0] || 'Miembro';
     window.UserState.iniciales = calcIniciales(user.displayName || user.email);
-    window.UserState.isAdmin = ADMIN_EMAILS.includes(window.UserState.email);
+    try {
+      const token = await user.getIdTokenResult(true);
+      window.UserState.isAdmin = token.claims.admin === true;
+    } catch (_) {
+      window.UserState.isAdmin = false;
+    }
 
     if (window.UserState.isAdmin) {
       window.UserState.modo = 'vip';
@@ -3471,10 +3481,34 @@ if (window.__isDemoMode) {
   });
 }
 
-window.__signOut = async () => {
-  try { await signOut(auth); window.location.href = 'vip-auth.html'; }
+function limpiarSesionLocal() {
+  try {
+    sessionStorage.removeItem('sentia_sesion');
+    sessionStorage.removeItem('sentia_ultima_actividad');
+    localStorage.removeItem('sentia_last_user');
+  } catch (_) {}
+}
+
+function instalarCierrePorInactividad() {
+  if (window.__idleGuardInstalled) return;
+  window.__idleGuardInstalled = true;
+  const LIMITE_INACTIVIDAD_MS = 30 * 60 * 1000;
+  const marcarActividad = () => { try { sessionStorage.setItem('sentia_ultima_actividad', String(Date.now())); } catch (_) {} };
+  ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(evento => window.addEventListener(evento, marcarActividad, { passive: true }));
+  marcarActividad();
+  setInterval(async () => {
+    const ultima = Number(sessionStorage.getItem('sentia_ultima_actividad') || Date.now());
+    if (Date.now() - ultima > LIMITE_INACTIVIDAD_MS && window.__currentUser) {
+      await window.__signOut('expirada');
+    }
+  }, 60 * 1000);
+}
+
+window.__signOut = async (motivo) => {
+  try { limpiarSesionLocal(); await signOut(auth); window.location.href = 'vip-auth.html' + (motivo === 'expirada' ? '?sesion=expirada' : ''); }
   catch(e){ alert('No pudimos cerrar sesión.'); }
 };
+instalarCierrePorInactividad();
 
 // ═══════════════════════════════════════════════════════════════
 // SPLASH DE BIENVENIDA · cinematográfico
@@ -3626,13 +3660,17 @@ window.__showWelcomeSplash = function(opts) {
     timer = setInterval(() => goTo(cur+1), AUTO_MS);
   }
 
-  function marcarMostrada(){
+  async function marcarMostrada(){
     if (marcado || !opts.fromNotif) return;
     marcado = true;
     try {
-      const fs = window.__fs;
-      if (fs && fs.updateDoc && S.uid) {
-        fs.updateDoc(fs.doc(fs.db, 'miembros', S.uid), { 'notificacionPendiente.mostrada': true }).catch(()=>{});
+      // No se modifica la membresía desde Firestore en el navegador. El
+      // webhook comprueba el token y cambia exclusivamente este indicador.
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      if (base && window.__currentUser) {
+        fetch(`${base}/api/notificaciones/marcar-mostrada`, {
+          method: 'POST', headers: await window.__authHeaders()
+        }).catch(()=>{});
       }
     } catch(e){ /* noop */ }
   }
@@ -5257,7 +5295,66 @@ const Sections = (function(){
     return p[cursoId] || { clasesVistas: [], completado: false, fechaCompletado: null };
   }
 
-  window.marcarClaseVista = function(cursoId, numeroClase) {
+  // El progreso visual permanece local para que la interfaz sea rápida, pero el
+  // avance que autoriza un certificado se registra y valida en Railway. Las
+  // peticiones de un curso se encadenan para conservar su orden.
+  const avancesPendientes = new Map();
+  function registrarAvanceServidor(cursoId, tipo, numeroClase, detalle = {}) {
+    // En localhost usamos un webhook local para que una prueba nunca escriba
+    // ni llame al servicio de producción. Fuera de localhost se usa Railway.
+    const webhookCertificados = location.hostname === 'localhost'
+      ? 'http://localhost:8081'
+      : window.WEBHOOK_URL;
+    if (window.__isDemoMode || !window.__currentUser || !webhookCertificados) return Promise.resolve(null);
+    const anterior = avancesPendientes.get(cursoId) || Promise.resolve();
+    const tarea = anterior.catch(() => null).then(async () => {
+      const response = await fetch(`${webhookCertificados}/api/cursos/progreso`, {
+        method: 'POST',
+        headers: await window.__authHeaders(),
+        body: JSON.stringify({ cursoId, tipo, numeroClase, ...detalle })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      // La interfaz puede conservar avances visuales locales, pero el estado
+      // de "curso completado" solo se acepta cuando Railway lo confirma.
+      if (data.completo) {
+        const prog = getProgresoCurso(cursoId);
+        if (!prog.completado) {
+          prog.completado = true;
+          prog.fechaCompletado = new Date().toISOString();
+          const todos = getProgreso(); todos[cursoId] = prog; setProgreso(todos);
+        }
+      }
+      if (data.certificado) {
+        const prog = getProgresoCurso(cursoId);
+        if (!prog.certificadoEmitido) {
+          prog.certificadoEmitido = true;
+          prog.certificadoFolio = data.certificado.folio;
+          const todos = getProgreso(); todos[cursoId] = prog; setProgreso(todos);
+          const curso = cursos.find(c => c.id === cursoId);
+          if (curso) mostrarSplashCompletado(curso, data.certificado);
+          try { window.__actualizarWidgetsActividad && window.__actualizarWidgetsActividad(); } catch (_) {}
+        }
+      }
+      return data;
+    }).catch(error => {
+      console.warn('[avance seguro]', error.message);
+      return { ok: false, error: error.message };
+    });
+    avancesPendientes.set(cursoId, tarea);
+    return tarea;
+  }
+
+  window.marcarClaseVista = async function(cursoId, numeroClase) {
+    // Fuera del modo demostración, el progreso local se actualiza únicamente
+    // después de la confirmación de Railway. Así recargar la página no puede
+    // convertir una marca local manipulada en avance certificable.
+    const confirmado = await registrarAvanceServidor(cursoId, 'clase_vista', numeroClase);
+    if (!window.__isDemoMode && (!confirmado || confirmado.ok === false)) {
+      const mensaje = confirmado?.error || 'No pudimos confirmar esta clase.';
+      if (window.Toast?.show) window.Toast.show(mensaje, 'error');
+      return null;
+    }
     const p = getProgreso();
     if (!p[cursoId]) p[cursoId] = { clasesVistas: [], completado: false, fechaCompletado: null };
     if (!p[cursoId].clasesVistas.includes(numeroClase)) {
@@ -5309,9 +5406,8 @@ const Sections = (function(){
     const p = getProgreso(); const pc = p[cursoId]; const curso = cursos.find(c => c.id === cursoId);
     if (!pc || !curso || !curso.sesiones || pc.completado) return;
     if (pc.clasesVistas.length >= curso.sesiones.length && actividadesPendientes(curso, pc) === 0) {
-      pc.completado = true; pc.fechaCompletado = new Date().toISOString(); setProgreso(p);
-      emitirCertificadoFirestore(curso);
-      setTimeout(() => mostrarSplashCompletado(curso), 400);
+      // La emisión y el estado final llegan desde Railway al validar el último
+      // evento; aquí no se completan cursos ni se generan folios localmente.
     }
   }
   window.__verificarCursoCompleto = verificarCursoCompleto;
@@ -5361,8 +5457,19 @@ const Sections = (function(){
     ov.querySelector('.act-x').onclick = cerrar;
     ov.addEventListener('click', e => { if (e.target === ov) cerrar(); });
 
-    function terminar(score){
+    async function terminar(score, respuestas){
       score = Math.max(0, Math.min(100, Math.round(score)));
+      // Las actividades de opción objetiva se califican otra vez en Railway.
+      // El porcentaje local nunca autoriza por sí mismo un certificado.
+      if (Array.isArray(respuestas)) {
+        const validacion = await registrarAvanceServidor(cursoId, 'actividad_aprobada', num, { respuestas });
+        if (!validacion || validacion.ok === false) {
+          body.innerHTML = `<div class="act-result"><div class="act-result__t">No pudimos validar esta actividad</div><div class="act-result__d">${escapeHtml(validacion?.error || 'Intenta de nuevo en unos segundos.')}</div><div class="act-actions"><button class="btn btn--primary" data-act="retry">Intentar de nuevo</button></div></div>`;
+          body.querySelector('[data-act="retry"]')?.addEventListener('click', () => { cerrar(); window.abrirActividadSentia(cursoId, idx); });
+          return;
+        }
+        score = Number.isFinite(Number(validacion.calificacion)) ? Number(validacion.calificacion) : score;
+      }
       const yaAprobada = actividadAprobada(cursoId, num);
       const res = guardarActividadRes(cursoId, num, score, minimo);
       const paso = score >= minimo;
@@ -5392,7 +5499,7 @@ const Sections = (function(){
 
     // ── Trivia, verdadero/falso y caso práctico: una pregunta a la vez ──
     function preguntas(lista, intro){
-      let k = 0, buenas = 0;
+      let k = 0; const respuestas = [];
       function pintar(){
         fill.style.width = (k / lista.length * 100) + '%';
         const it = lista[k];
@@ -5402,15 +5509,14 @@ const Sections = (function(){
           <div class="act-ops">${it.ops.map((o, j) => `<button class="act-op" data-j="${j}">${escapeHtml(o.texto)}</button>`).join('')}</div>
           <div class="act-fb"></div>`;
         body.querySelectorAll('.act-op').forEach(b => b.addEventListener('click', () => {
-          const o = it.ops[+b.dataset.j]; if (o.correcta) buenas++;
-          body.querySelectorAll('.act-op').forEach((x, j) => { x.disabled = true; if (it.ops[j].correcta) x.classList.add('is-ok'); });
-          if (!o.correcta) b.classList.add('is-bad');
+          const o = it.ops[+b.dataset.j];
+          respuestas.push(Number.isInteger(o.indiceRespuesta) ? o.indiceRespuesta : -1);
+          body.querySelectorAll('.act-op').forEach(x => { x.disabled = true; });
+          b.classList.add('is-sel');
           const fb = body.querySelector('.act-fb');
-          fb.innerHTML = `<div class="act-fb__t ${o.correcta ? 'is-ok' : 'is-bad'}">${o.correcta ? '✓ Correcto' : '✕ No es la mejor opción'}</div>
-            ${o.consecuencia ? `<div class="act-fb__d"><b>Qué pasa:</b> ${escapeHtml(o.consecuencia)}</div>` : ''}
-            ${it.exp ? `<div class="act-fb__d">${escapeHtml(it.exp)}</div>` : ''}
+          fb.innerHTML = `<div class="act-fb__t">Respuesta registrada</div>
             <button class="btn btn--primary btn--sm act-next">${k + 1 < lista.length ? 'Siguiente' : 'Ver resultado'}</button>`;
-          fb.querySelector('.act-next').addEventListener('click', () => { k++; if (k < lista.length) pintar(); else terminar(buenas / lista.length * 100); });
+          fb.querySelector('.act-next').addEventListener('click', () => { k++; if (k < lista.length) pintar(); else terminar(0, respuestas); });
         }));
       }
       pintar();
@@ -5610,13 +5716,13 @@ const Sections = (function(){
     else if (a.tipo === 'crucigrama') { jugarCrucigrama(a.items); }
     else if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
       preguntas(a.items.map(it => it.tipo === 'vf'
-        ? { q: it.pregunta, exp: it.explicacion, ops: [{ texto: 'Verdadero', correcta: it.respuesta !== false }, { texto: 'Falso', correcta: it.respuesta === false }] }
-        : { q: it.pregunta, exp: it.explicacion, ops: actBarajar(it.opciones || []) }));
+        ? { q: it.pregunta, exp: it.explicacion, ops: [{ texto: 'Verdadero', indiceRespuesta: 0 }, { texto: 'Falso', indiceRespuesta: 1 }] }
+        : { q: it.pregunta, exp: it.explicacion, ops: actBarajar((it.opciones || []).map((o, i) => ({ ...o, indiceRespuesta: i }))) }));
     } else if (a.tipo === 'trivia' || a.tipo === 'caso') {
-      preguntas(a.items.map(it => ({ q: it.pregunta, ops: a.tipo === 'caso' ? it.opciones : actBarajar(it.opciones), exp: it.explicacion })), a.tipo === 'caso' ? a.situacion : '');
+      preguntas(a.items.map(it => ({ q: it.pregunta, ops: (a.tipo === 'caso' ? it.opciones : actBarajar(it.opciones || [])).map((o, i, arr) => ({ ...o, indiceRespuesta: a.tipo === 'caso' ? i : (it.opciones || []).indexOf(o) })), exp: it.explicacion })), a.tipo === 'caso' ? a.situacion : '');
     } else if (a.tipo === 'vf') {
-      preguntas(actBarajar(a.items).map(it => ({ q: it.afirmacion, exp: it.explicacion,
-        ops: [{ texto: 'Verdadero', correcta: it.respuesta === true }, { texto: 'Falso', correcta: it.respuesta === false }] })));
+      preguntas(a.items.map(it => ({ q: it.afirmacion, exp: it.explicacion,
+        ops: [{ texto: 'Verdadero', indiceRespuesta: 0 }, { texto: 'Falso', indiceRespuesta: 1 }] })));
     } else if (a.tipo === 'memorama') {
       const cartas = actBarajar(a.items.flatMap((p, k) => [{ k, t: p.a, lado: 'a' }, { k, t: p.b, lado: 'b' }]));
       let abiertas = [], hechas = 0, movs = 0, bloqueo = false;
@@ -5728,16 +5834,26 @@ const Sections = (function(){
       return;
     }
     const numClase = sesion.numero || (Number(indexClase) + 1);
+    if (!sesion.videoId) {
+      // Un enlace externo no puede protegerse como Bunny. Se permite solo en
+      // una clase expresamente gratuita; para clases VIP debe migrarse a Bunny.
+      if (!sesion.gratis) {
+        Toast.error('Video pendiente de protección', 'Esta clase debe vincularse a Bunny antes de poder abrirse.');
+        return;
+      }
+      window.abrirVisor(sesion.url || '', sesion.titulo || `Clase ${numClase}`, cursoId, numClase);
+      return;
+    }
     window.abrirVisor(
-      sesion.url || sesion.videoId || '',   // MODIFICADO: si el admin pegó un link, ese manda
+      sesion.videoId,
       sesion.titulo || `Clase ${numClase}`,
       cursoId,
       numClase,
-      { videoId: sesion.url ? '' : (sesion.videoId || '') }
+      { videoId: sesion.videoId }
     );
   };
 
-  window.abrirMaterialSentia = function(cursoId, indexMaterial) {
+  window.abrirMaterialSentia = async function(cursoId, indexMaterial) {
     const curso = cursos.find(c => c.id === cursoId);
     const material = curso?.materiales?.[Number(indexMaterial)];
     if (!curso || !material) return;
@@ -5746,8 +5862,20 @@ const Sections = (function(){
       mostrarPaywallCurso(curso);
       return;
     }
-
-    window.abrirVisor(material.url || '', material.titulo || 'Material del curso');
+    try {
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const response = await fetch(`${base}/api/materiales/acceso`, {
+        method: 'POST',
+        headers: await window.__authHeaders(),
+        body: JSON.stringify({ cursoId, indiceMaterial: Number(indexMaterial) })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.url) throw new Error(data.error || `HTTP ${response.status}`);
+      window.abrirVisor(data.url, data.titulo || material.titulo || 'Material del curso');
+    } catch (error) {
+      console.warn('[material seguro]', error.message);
+      Toast.error('No pudimos abrir el material', error.message || 'Intenta nuevamente.');
+    }
   };
 
   function progresoCursoPct(cursoId, totalClases) {
@@ -5760,67 +5888,15 @@ const Sections = (function(){
   // SPLASH DE CURSO COMPLETADO
   // ═══════════════════════════════════════════════════════════════
   // ═══════════════════════════════════════════════════════════════
-  // FOLIO ÚNICO + EMISIÓN DEL CERTIFICADO A FIRESTORE
-  // Folio determinista y único por (usuario, curso). El año se toma
-  // de la fecha de emisión para que sea estable en el tiempo.
+  // El certificado llega únicamente desde Railway después de que el servidor
+  // valida el avance. Esta función solo muestra esa respuesta oficial.
   // ═══════════════════════════════════════════════════════════════
-  function folioCert(cursoId, dateLike) {
-    const uid = window.UserState?.uid || 'demo';
-    const yr = (dateLike ? new Date(dateLike) : new Date()).getFullYear();
-    let h = 0; const s = uid + '|' + cursoId;
-    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
-    const code = Math.abs(h).toString(36).toUpperCase().padStart(6, '0').slice(-6);
-    return `SENTIA-${yr}-${code}`;
-  }
-  window.folioCert = folioCert;
-
-  async function emitirCertificadoFirestore(curso) {
-    try {
-      const fs = window.__fs;
-      const uid = window.UserState?.uid;
-      if (!fs || !fs.setDoc || !uid) return;
-      const prog = getProgresoCurso(curso.id);
-      const fecha = prog.fechaCompletado || new Date().toISOString();
-      const folio = folioCert(curso.id, fecha);
-      const nombre = window.UserState?.nombre || window.UserState?.displayName
-                   || (window.UserState?.email || '').split('@')[0] || 'Usuario VIP';
-      const sesiones = (curso.sesiones && curso.sesiones.length) || curso.totalClases || 0;
-      await fs.setDoc(fs.doc(fs.db, 'certificados', folio), {
-        folio, uid, nombre,
-        cursoId: curso.id,
-        curso: curso.titulo || '',
-        area: curso.area || 'Formación SENTIA',
-        horas: curso.horas || 0,
-        sesiones,
-        instructor: curso.instructor || 'Equipo SENTIA',
-        emitido: fecha,
-        year: new Date(fecha).getFullYear(),
-        createdAt: fs.serverTimestamp()
-      }, { merge: true });
-      console.log('[cert] emitido a Firestore:', folio);
-    } catch (e) { console.warn('[cert] no se pudo emitir a Firestore:', e); }
-  }
-  window.emitirCertificadoFirestore = emitirCertificadoFirestore;
-
-  function mostrarSplashCompletado(curso) {
+  function mostrarSplashCompletado(curso, certificado) {
     // Cerrar visor si está abierto
     if (typeof window.cerrarVisor === 'function') window.cerrarVisor();
     // Cerrar modal del curso si está abierto
     if (typeof Modal !== 'undefined' && Modal.closeAll) Modal.closeAll();
     ensureCertCSS();
-
-    const fecha = (getProgresoCurso(curso.id).fechaCompletado) || new Date().toISOString();
-    const folio = folioCert(curso.id, fecha);
-    const nombre = window.UserState?.nombre || window.UserState?.displayName || (window.UserState?.email||'').split('@')[0] || 'Usuario VIP';
-    // Objeto certificado real (mismos campos que en la sección Certificados)
-    const certObj = {
-      id: curso.id, titulo: curso.titulo, area: curso.area || 'Formación SENTIA',
-      horas: curso.horas || 0, sesiones: (curso.sesiones && curso.sesiones.length) || 0,
-      folio, emitido: fecha, instructor: curso.instructor || 'Equipo SENTIA'
-    };
-    // Registrar para que los botones del modal lo encuentren
-    window.__certsReales = window.__certsReales || [];
-    if (!window.__certsReales.some(x => x.id === certObj.id)) window.__certsReales.push(certObj);
 
     let splash = document.getElementById('splash-completado');
     if (splash) splash.remove();
@@ -5839,11 +5915,11 @@ const Sections = (function(){
         <div class="splash-cmp__icon"><svg class="ic"><use href="#i-certificate"/></svg></div>
         <div class="splash-cmp__kicker">CURSO COMPLETADO</div>
         <h1 class="splash-cmp__title">¡Felicidades${window.UserState?.nombre ? ', '+window.UserState.nombre : ''}!</h1>
-        <p class="splash-cmp__desc">Completaste el curso<br><strong>${escapeHtml(curso.titulo)}</strong><br>Este es tu certificado oficial SENTIA.</p>
-        <div class="splash-cmp__certreal">${buildCertPremium(certObj, nombre)}</div>
+        <p class="splash-cmp__desc">Completaste el curso<br><strong>${escapeHtml(curso.titulo)}</strong><br>Tu certificado oficial ya fue emitido por SENTIA.</p>
+        <div style="font-family:'Instrument Sans',monospace;font-size:12px;color:var(--primary);margin:12px 0 2px;letter-spacing:.04em;">${escapeHtml(certificado?.folio || '')}</div>
         <div class="splash-cmp__actions">
           <button class="splash-cmp__btn splash-cmp__btn--primary" id="splash-ver-cert">
-            Ver y descargar mi certificado →
+            Ver mis certificados
           </button>
           <button class="splash-cmp__btn splash-cmp__btn--ghost" onclick="document.getElementById('splash-completado').remove()">
             Seguir explorando
@@ -5852,18 +5928,11 @@ const Sections = (function(){
       </div>
     `;
     document.body.appendChild(splash);
-    // Escalar el certificado real al ancho de la caja del splash
-    const fitSplashCert = () => {
-      const stage = splash.querySelector('.splash-cmp__certreal .cp-stage');
-      fitOneCert(stage);
-    };
-    requestAnimationFrame(()=>{ fitSplashCert(); setTimeout(fitSplashCert, 300); });
     splash.querySelector('.splash-cmp__close').addEventListener('click', () => splash.remove());
     splash.querySelector('.splash-cmp__overlay').addEventListener('click', () => splash.remove());
     splash.querySelector('#splash-ver-cert').addEventListener('click', () => {
       splash.remove();
-      window.navigateToSection('certificados');
-      setTimeout(() => { try { openCertDetalleReal(certObj.id); } catch(e){} }, 350);
+      if (typeof window.navigateToSection === 'function') window.navigateToSection('certificados');
     });
   }
 
@@ -5911,10 +5980,11 @@ const Sections = (function(){
         if (window.__currentUser) {
           headers.Authorization = 'Bearer ' + await window.__currentUser.getIdToken();
         }
-        const response = await fetch(`${window.WEBHOOK_URL}/api/bunny/embed-token`, {
+        const webhookVideos = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+        const response = await fetch(`${webhookVideos}/api/bunny/embed-token`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ videoId })
+          body: JSON.stringify({ videoId, cursoId, numeroClase: numClase })
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.embedUrl) {
@@ -5990,17 +6060,18 @@ const Sections = (function(){
       }
     });
     // Handler del botón "Marcar como vista"
-    document.getElementById('visorMarkAsViewed')?.addEventListener('click', function() {
+    document.getElementById('visorMarkAsViewed')?.addEventListener('click', async function() {
       const cursoId = this.dataset.cursoId;
       const numClase = parseInt(this.dataset.numClase);
       if (!cursoId || !numClase) return;
-      window.marcarClaseVista(cursoId, numClase);
+      this.disabled = true;
+      const avance = await window.marcarClaseVista(cursoId, numClase);
+      if (!avance) { this.disabled = false; return; }
       // Feedback visual
       this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> ¡Marcada!';
       this.style.background = 'color-mix(in srgb, var(--success) 20%, transparent)';
       this.style.borderColor = 'color-mix(in srgb, var(--success) 50%, transparent)';
       this.style.color = 'var(--success)';
-      this.disabled = true;
       // Cerrar después de 1.2s y refrescar el DETALLE del curso (no solo la lista)
       // para que la siguiente clase se desbloquee al instante.
       setTimeout(() => {
@@ -6598,7 +6669,7 @@ const Sections = (function(){
 
         // Renderiza una tarjeta de material
         const matCard = (m, materialIndex) => {
-          const t = tipoMat(m.url);
+          const t = tipoMat(m.tipo || m.url);
           const muestraGratis = esMaterialGratis(id, materialIndex);
           const accesoMaterial = tieneAccesoVipCompleto() || muestraGratis;
           const estadoMaterial = tieneAccesoVipCompleto()
@@ -6774,50 +6845,21 @@ const Sections = (function(){
   // Genera lista REAL de certificados leyendo el progreso del usuario (localStorage)
   // + los cursos publicados en Firestore. NO usa el array hardcoded `certificados`.
   async function getCertificadosReales() {
-    const fs = window.__fs;
-    const uid = window.UserState?.uid;
     const lista = [];
-    // 1) Fuente real: Firestore (persistente, cross-device, verificable)
-    if (fs && fs.getDocs && fs.query && uid) {
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+    if (window.__currentUser && base) {
       try {
-        const qs = await fs.getDocs(fs.query(fs.collection(fs.db, 'certificados'), fs.where('uid', '==', uid)));
-        qs.forEach(d => {
-          const x = d.data();
-          lista.push({
-            id: x.cursoId || x.folio,
-            titulo: x.curso || 'Curso',
-            area: x.area || 'General',
-            horas: x.horas || 0,
-            sesiones: x.sesiones || 0,
-            calificacion: 100,
-            folio: x.folio || d.id,
-            emitido: x.emitido || (x.createdAt && x.createdAt.toDate ? x.createdAt.toDate().toISOString() : new Date().toISOString()),
-            instructor: x.instructor || 'Equipo SENTIA'
-          });
-        });
-      } catch (e) { console.warn('[cert] lectura Firestore falló, uso local:', e); }
-    }
-    // 2) Reconciliar con el progreso local: muestra TODOS los completados y
-    //    respalda en Firestore (backfill idempotente) los que aún no estén,
-    //    para que cualquier certificado sea verificable por folio.
-    const yaEnFs = new Set(lista.map(x => x.folio));
-    const progreso = getProgreso ? getProgreso() : {};
-    if (cursos && cursos.length) for (const c of cursos) {
-      const prog = progreso[c.id];
-      if (prog && prog.completado) {
-        const fecha = prog.fechaCompletado || new Date().toISOString();
-        const folio = folioCert(c.id, fecha);
-        if (!yaEnFs.has(folio)) {
-          try { emitirCertificadoFirestore(c); } catch (e) {}
-          lista.push({
-            id: c.id, titulo: c.titulo, area: c.area || 'General',
-            horas: c.horas || 8, sesiones: (c.sesiones && c.sesiones.length) || 0,
-            calificacion: 100, folio,
-            emitido: fecha, instructor: c.instructor || 'Equipo SENTIA'
-          });
-          yaEnFs.add(folio);
-        }
-      }
+        const r = await fetch(`${base}/api/certificados/mios`, { headers: await window.__authHeaders() });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+        (data.certificados || []).forEach(x => lista.push({
+          id: x.cursoId || x.folio,
+          titulo: x.curso || 'Curso', area: x.area || 'General',
+          horas: x.horas || 0, sesiones: x.sesiones || 0, calificacion: 100,
+          folio: x.folio, emitido: x.emitidoEn || new Date().toISOString(),
+          instructor: x.instructor || 'Equipo SENTIA', estado: x.estado || 'vigente'
+        }));
+      } catch (e) { console.warn('[cert] consulta segura falló:', e.message); }
     }
     return lista.sort((a, b) => new Date(b.emitido) - new Date(a.emitido));
   }
@@ -7736,7 +7778,8 @@ const Sections = (function(){
           cursoArea: c.area || 'General',
           cursoDisponibleSiempre: c.disponibleSiempre === true,
           titulo: m.titulo || 'Sin título',
-          url: m.url || '',
+          tipo: m.tipo || m.url || '',
+          indiceMaterial: idx,
           disponibleSiempre: m.disponibleSiempre === true,
           desbloquearEnDias: typeof m.desbloquearEnDias === 'number' ? m.desbloquearEnDias : null
         });
@@ -7801,7 +7844,7 @@ const Sections = (function(){
     const disponiblesAhora = materialesTodos.filter(m => _materialDisponible(m)).length;
     const proximos = total - disponiblesAhora;
     const tipos = { excel:0, pdf:0, ppt:0, doc:0 };
-    materialesTodos.forEach(m => { const t = _inferirTipoMaterial(m.url); tipos[t]++; });
+    materialesTodos.forEach(m => { const t = _inferirTipoMaterial(m.tipo || ''); tipos[t]++; });
     const textoAccesoMateriales = tieneAccesoVipCompleto()
       ? '<strong style="color:var(--primary);">Se desbloquean según tus días de membresía</strong>, igual que las clases.'
       : '<strong style="color:var(--success);">El primer material del primer curso es gratis.</strong> Activa tu membresía para abrir los demás.';
@@ -7885,11 +7928,7 @@ const Sections = (function(){
       // Click en cards: si disponible → abrir visor enbebed (igual que clases) · si no → toast con días restantes
       container.querySelectorAll('.pdf-card[data-disponible="true"]').forEach(card => {
         card.addEventListener('click', () => {
-          const url = card.dataset.url;
-          const titulo = card.dataset.titulo;
-          if (url && typeof window.abrirVisor === 'function') {
-            window.abrirVisor(url, titulo);
-          }
+          window.abrirMaterialSentia(card.dataset.cursoId, Number(card.dataset.materialIndex));
         });
       });
       container.querySelectorAll('.pdf-card[data-disponible="false"]').forEach(card => {
@@ -7917,7 +7956,7 @@ const Sections = (function(){
       'Psicología Educativa':'#0ea5e9','Desarrollo Infantil':'#ec4899','Neuropsicología':'#a855f7','General':'#1b5df0'
     };
     const c = colorMap[m.cursoArea] || '#1b5df0';
-    const tipo = _inferirTipoMaterial(m.url);
+    const tipo = _inferirTipoMaterial(m.tipo || '');
     const iconMap = { excel:'i-chart-bar', pdf:'i-news', ppt:'i-chart-bar', doc:'i-news' };
     const ic = iconMap[tipo] || 'i-news';
     const tipoLabel = { excel:'Excel', pdf:'PDF', ppt:'PPT', doc:'DOC' }[tipo] || 'Archivo';
@@ -7934,7 +7973,7 @@ const Sections = (function(){
         data-free="${muestraGratis}"
         data-requiere-membresia="${requiereMembresia}"
         data-curso-id="${m.cursoId}"
-        data-url="${(m.url||'').replace(/"/g,'&quot;')}"
+        data-material-index="${m.indiceMaterial}"
         data-dias-faltan="${diasFaltan}"
         data-titulo="${tituloEsc}"
         data-curso="${cursoEsc}"
@@ -7951,7 +7990,7 @@ const Sections = (function(){
           </div>
           <div class="pdf-card__tags">
             ${disponible
-              ? `<span class="tag tag--soon" style="color:#081225;border-color:#3DDC5A;background:#3DDC5A;font-weight:700;">${muestraGratis ? 'Gratis' : 'Disponible'}</span><button class="row-btn pdf-card__btn-soon" data-bypass-paywall="true" style="margin-left:auto;background:linear-gradient(135deg, var(--primary), var(--highlight));color:#081225;cursor:pointer;" onclick="event.stopPropagation();if(typeof window.abrirVisor==='function'){window.abrirVisor('${(m.url||'').replace(/'/g,'%27')}','${tituloEsc.replace(/'/g,'&apos;')}');}"><svg class="ic"><use href="#i-download"/></svg>Abrir</button>`
+              ? `<span class="tag tag--soon" style="color:#081225;border-color:#3DDC5A;background:#3DDC5A;font-weight:700;">${muestraGratis ? 'Gratis' : 'Disponible'}</span><button class="row-btn pdf-card__btn-soon" data-bypass-paywall="true" style="margin-left:auto;background:linear-gradient(135deg, var(--primary), var(--highlight));color:#081225;cursor:pointer;" onclick="event.stopPropagation();window.abrirMaterialSentia('${m.cursoId}',${m.indiceMaterial});"><svg class="ic"><use href="#i-download"/></svg>Abrir</button>`
               : (requiereMembresia
                 ? `<span class="tag tag--soon">Solo VIP</span><button class="row-btn pdf-card__btn-soon" style="margin-left:auto;"><svg class="ic"><use href="#i-crown"/></svg>Activa tu membresía</button>`
                 : `<span class="tag tag--soon">${diasFaltan === 1 ? 'Mañana' : 'En '+diasFaltan+' días'}</span><button class="row-btn pdf-card__btn-soon" style="margin-left:auto;opacity:.55;cursor:not-allowed;" disabled><svg class="ic"><use href="#i-clock"/></svg>Disponible pronto</button>`)
@@ -8236,10 +8275,16 @@ const Sections = (function(){
     const fs = window.__fs;
     if (!fs || !fs.onSnapshot){ const g=document.getElementById('dir-grid'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; return; }
     if (_dirUnsub){ _dirUnsub(); _dirUnsub=null; }
-    const q = fs.query(fs.collection(fs.db,'directorio'), fs.orderBy('updatedAt','desc'), fs.limit(300));
+    // Solo se solicitan fichas que su titular eligió publicar. Además de no
+    // mostrar las privadas, esto permite que las reglas bloqueen su lectura.
+    const q = fs.query(fs.collection(fs.db,'directorio'), fs.where('visible','==',true), fs.limit(300));
     _dirUnsub = fs.onSnapshot(q, (snap)=>{
       _dirCards = [];
-      snap.forEach(d=>{ const x=d.data(); x.id=d.id; if(x.visible!==false) _dirCards.push(x); });
+      snap.forEach(d=>{ const x=d.data(); x.id=d.id; _dirCards.push(x); });
+      _dirCards.sort((a,b) => {
+        const fecha = x => x.updatedAt?.toMillis ? x.updatedAt.toMillis() : 0;
+        return fecha(b) - fecha(a);
+      });
       dirPintar();
     }, (err)=>{ console.error('dir snap',err); const g=document.getElementById('dir-grid'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; });
   }
@@ -8259,14 +8304,18 @@ const Sections = (function(){
     const uid = window.UserState?.uid;
     grid.innerHTML = cards.map(c=>{
       const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
-      const foto = c.foto
-        ? `<img src="${c.foto}" alt="${escapeHtml(c.nombre||'')}" class="dir-card__foto">`
-        : `<div class="dir-card__foto dir-card__foto--ini" style="background:linear-gradient(135deg,${c.color||'#1b5df0'},${(c.color||'#1b5df0')}aa);">${escapeHtml(inicial)}</div>`;
+      const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
+      const colorSeguro = /^#[0-9a-f]{6}$/i.test(String(c.color||'')) ? c.color : '#1b5df0';
+      const linkedinSeguro = /^https:\/\//i.test(String(c.linkedin||'')) ? c.linkedin : '';
+      const webSeguro = /^https:\/\//i.test(String(c.web||'')) ? c.web : '';
+      const foto = fotoSegura
+        ? `<img src="${fotoSegura}" alt="${escapeHtml(c.nombre||'')}" class="dir-card__foto">`
+        : `<div class="dir-card__foto dir-card__foto--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${escapeHtml(inicial)}</div>`;
       const contactos = [];
       if (c.whatsapp) contactos.push(`<a class="dir-cta dir-cta--wa" href="https://wa.me/${(c.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" title="WhatsApp"><svg class="ic"><use href="#i-whatsapp"/></svg></a>`);
       if (c.email) contactos.push(`<button class="dir-cta dir-cta--mail" data-email="${escapeHtml(c.email)}" title="Copiar correo: ${escapeHtml(c.email)}"><svg class="ic"><use href="#i-mail"/></svg></button>`);
-      if (c.linkedin) contactos.push(`<a class="dir-cta dir-cta--li" href="${c.linkedin.startsWith('http')?c.linkedin:'https://'+c.linkedin}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
-      if (c.web) contactos.push(`<a class="dir-cta" href="${c.web.startsWith('http')?c.web:'https://'+c.web}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
+      if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
+      if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
       const esMia = c.id===uid;
       return `
       <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
@@ -8306,9 +8355,13 @@ const Sections = (function(){
     const uid = window.UserState?.uid;
     const esMia = c.id===uid;
     const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
-    const foto = c.foto
-      ? `<img src="${c.foto}" alt="" class="dir-det__foto">`
-      : `<div class="dir-det__foto dir-det__foto--ini" style="background:linear-gradient(135deg,${c.color||'#1b5df0'},${(c.color||'#1b5df0')}aa);">${escapeHtml(inicial)}</div>`;
+    const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
+    const colorSeguro = /^#[0-9a-f]{6}$/i.test(String(c.color||'')) ? c.color : '#1b5df0';
+    const linkedinSeguro = /^https:\/\//i.test(String(c.linkedin||'')) ? c.linkedin : '';
+    const webSeguro = /^https:\/\//i.test(String(c.web||'')) ? c.web : '';
+    const foto = fotoSegura
+      ? `<img src="${fotoSegura}" alt="" class="dir-det__foto">`
+      : `<div class="dir-det__foto dir-det__foto--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${escapeHtml(inicial)}</div>`;
     const row = (icon,label,val,href,extraClass='') => val
       ? `<a class="dir-det__row ${extraClass}" ${href?`href="${href}" target="_blank" rel="noopener"`:''}>
            <span class="dir-det__row-ic"><svg class="ic"><use href="#${icon}"/></svg></span>
@@ -8331,8 +8384,8 @@ const Sections = (function(){
              <span class="dir-det__row-ic"><svg class="ic"><use href="#i-mail"/></svg></span>
              <span class="dir-det__row-tx"><span class="dir-det__row-lbl">Correo · toca para copiar</span><span class="dir-det__row-val">${escapeHtml(c.email)}</span></span>
            </button>`:''}
-          ${row('i-linkedin','LinkedIn',c.linkedin, c.linkedin?(c.linkedin.startsWith('http')?c.linkedin:'https://'+c.linkedin):'', 'dir-det__row--li')}
-          ${row('i-link','Sitio web',c.web, c.web?(c.web.startsWith('http')?c.web:'https://'+c.web):'')}
+          ${row('i-linkedin','LinkedIn',linkedinSeguro, linkedinSeguro, 'dir-det__row--li')}
+          ${row('i-link','Sitio web',webSeguro, webSeguro)}
         </div>
         ${(!c.whatsapp&&!c.email&&!c.linkedin&&!c.web)?'<div class="dir-det__sincontacto">Este miembro no agregó datos de contacto.</div>':''}
       </div>
@@ -8407,7 +8460,7 @@ const Sections = (function(){
     document.getElementById('dirf-foto-btn').addEventListener('click', ()=> fileInput.click());
     fileInput.addEventListener('change', async (e)=>{
       const f=e.target.files[0]; if(!f) return;
-      if(!f.type.startsWith('image/')){ Toast.error('Solo imágenes',''); return; }
+      if(!['image/jpeg','image/png','image/webp'].includes(f.type) || f.size > 8 * 1024 * 1024){ Toast.error('Archivo inválido','Usa JPG, PNG o WebP de máximo 8 MB'); return; }
       try { _dirFotoTmp = await dirComprimirFoto(f); document.getElementById('dirf-foto-prev').innerHTML = `<img src="${_dirFotoTmp}" alt="">`; }
       catch(err){ console.error(err); Toast.error('No se pudo cargar la foto',''); }
       fileInput.value='';
@@ -8419,6 +8472,14 @@ const Sections = (function(){
     footer.querySelector('#dirf-guardar').addEventListener('click', async ()=>{
       const nombre = document.getElementById('dirf-nombre').value.trim();
       if (nombre.length<3){ Toast.error('Falta tu nombre','Escribe tu nombre completo'); return; }
+      const enlaceSeguro = valor => {
+        const limpio = String(valor || '').trim(); if (!limpio) return '';
+        try { const u = new URL(limpio.startsWith('http') ? limpio : 'https://' + limpio); return u.protocol === 'https:' ? u.href : null; }
+        catch (_) { return null; }
+      };
+      const linkedin = enlaceSeguro(document.getElementById('dirf-linkedin').value);
+      const web = enlaceSeguro(document.getElementById('dirf-web').value);
+      if (linkedin === null || web === null) { Toast.error('Enlace inválido','LinkedIn y sitio web deben usar HTTPS.'); return; }
       const btn = footer.querySelector('#dirf-guardar'); btn.disabled=true; btn.textContent='Guardando…';
       const payload = {
         uid,
@@ -8429,8 +8490,8 @@ const Sections = (function(){
         bio: document.getElementById('dirf-bio').value.trim(),
         whatsapp: document.getElementById('dirf-wa').value.trim(),
         email: document.getElementById('dirf-email').value.trim(),
-        linkedin: document.getElementById('dirf-linkedin').value.trim(),
-        web: document.getElementById('dirf-web').value.trim(),
+        linkedin,
+        web,
         visible: document.getElementById('dirf-visible').checked,
         color: dirColorFor(uid),
         updatedAt: fs.serverTimestamp()
@@ -8576,7 +8637,7 @@ const Sections = (function(){
       container.querySelector('#foro-add-img').addEventListener('click', ()=> fileInput.click());
       fileInput.addEventListener('change', async (e)=>{
         const f = e.target.files[0]; if(!f) return;
-        if (!f.type.startsWith('image/')) { Toast.error('Archivo inválido','Solo imágenes'); return; }
+        if (!['image/jpeg','image/png','image/webp'].includes(f.type) || f.size > 8 * 1024 * 1024) { Toast.error('Archivo inválido','Usa JPG, PNG o WebP de máximo 8 MB'); return; }
         try {
           _foroImg = await foroComprimirImagen(f);
           const pv = container.querySelector('#foro-img-preview');
@@ -8619,7 +8680,8 @@ const Sections = (function(){
         // Auto-borrado: si pasó la vida útil, lo eliminamos y no lo mostramos
         const cd = p.createdAt && p.createdAt.toDate ? p.createdAt.toDate().getTime() : null;
         if (cd && (ahora - cd) > FORO_DIAS_VIDA*86400000) {
-          try { fs.deleteDoc(fs.doc(fs.db,'posts',d.id)); } catch(e){}
+          // El cliente no borra contenido global. La depuración física se
+          // programa en backend; aquí solo se evita mostrar lo vencido.
           return;
         }
         _foroPosts.push(p);
@@ -8681,20 +8743,13 @@ const Sections = (function(){
     const btn = container.querySelector('#foro-publicar');
     const orig = btn.innerHTML; btn.disabled = true; btn.textContent = 'Publicando…';
     try {
-      const fs = window.__fs;
-      await fs.addDoc(fs.collection(fs.db,'posts'), {
-        uid: window.UserState.uid,
-        nombre: window.UserState?.nombre || window.UserState?.displayName || 'Miembro',
-        iniciales: window.UserState?.iniciales || 'IN',
-        color: foroColorFor(window.UserState?.uid),
-        esAdmin: esAdminReal(),
-        texto: contenido,
-        imagen: _foroImg || null,
-        likes: 0,
-        likedBy: {},
-        comentariosCount: 0,
-        createdAt: fs.serverTimestamp()
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const r = await fetch(`${base}/api/foro/publicaciones`, {
+        method: 'POST', headers: await window.__authHeaders(),
+        body: JSON.stringify({ texto: contenido, imagen: _foroImg || null })
       });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo publicar');
       txt.value = ''; container.querySelector('#foro-char').textContent = '0 / 1500';
       _foroImg = null; container.querySelector('#foro-img-preview').style.display = 'none';
       Toast.success('Publicado','Tu mensaje ya está en el foro');
@@ -8704,17 +8759,13 @@ const Sections = (function(){
 
   async function foroToggleLike(postId){
     if (!(window.UserState?.modo==='vip' || esAdminReal())) { Toast.info('Solo VIP','Activa tu membresía para reaccionar'); return; }
-    const fs = window.__fs;
-    const uid = window.UserState.uid;
-    const p = _foroPosts.find(x=>x.id===postId); if(!p) return;
-    const liked = p.likedBy && p.likedBy[uid];
     try {
-      const upd = {};
-      upd['likedBy.'+uid] = liked ? null : true;
-      upd.likes = (p.likes||0) + (liked?-1:1);
-      // Firestore: para borrar un campo del map usamos deleteField; aquí usamos merge con null y limpiamos al leer
-      if (liked) { upd['likedBy.'+uid] = fs.deleteField ? fs.deleteField() : null; }
-      await fs.updateDoc(fs.doc(fs.db,'posts',postId), upd);
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const r = await fetch(`${base}/api/foro/publicaciones/${encodeURIComponent(postId)}/like`, {
+        method: 'POST', headers: await window.__authHeaders()
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo reaccionar');
     } catch(e){ console.error(e); Toast.error('No se pudo reaccionar',''); }
   }
 
@@ -8722,8 +8773,12 @@ const Sections = (function(){
     const ok = await confirmModal('¿Eliminar esta publicación?','Esta acción no se puede deshacer.');
     if (!ok) return;
     try {
-      const fs = window.__fs;
-      await fs.deleteDoc(fs.doc(fs.db,'posts',postId));
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const r = await fetch(`${base}/api/foro/publicaciones/${encodeURIComponent(postId)}`, {
+        method: 'DELETE', headers: await window.__authHeaders()
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo eliminar');
       Toast.success('Publicación eliminada','');
     } catch(e){ console.error(e); Toast.error('No se pudo eliminar','Solo el autor o un admin puede'); }
   }
@@ -8784,24 +8839,22 @@ const Sections = (function(){
     const t = (inp.value||'').trim(); if(!t) return;
     inp.value = '';
     try {
-      const fs = window.__fs;
-      await fs.addDoc(fs.collection(fs.db,'posts',postId,'comentarios'), {
-        uid: window.UserState.uid,
-        nombre: window.UserState?.nombre || 'Miembro',
-        iniciales: window.UserState?.iniciales || 'IN',
-        color: foroColorFor(window.UserState?.uid),
-        texto: t,
-        createdAt: fs.serverTimestamp()
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const r = await fetch(`${base}/api/foro/publicaciones/${encodeURIComponent(postId)}/comentarios`, {
+        method: 'POST', headers: await window.__authHeaders(), body: JSON.stringify({ texto: t })
       });
-      // incrementar contador en el post
-      try { await fs.updateDoc(fs.doc(fs.db,'posts',postId), { comentariosCount: fs.increment(1) }); } catch(e){}
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo responder');
     } catch(e){ console.error(e); Toast.error('No se pudo responder',''); }
   }
   async function foroBorrarComentario(postId, comId){
     try {
-      const fs = window.__fs;
-      await fs.deleteDoc(fs.doc(fs.db,'posts',postId,'comentarios',comId));
-      try { await fs.updateDoc(fs.doc(fs.db,'posts',postId), { comentariosCount: fs.increment(-1) }); } catch(e){}
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+      const r = await fetch(`${base}/api/foro/publicaciones/${encodeURIComponent(postId)}/comentarios/${encodeURIComponent(comId)}`, {
+        method: 'DELETE', headers: await window.__authHeaders()
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo eliminar');
     } catch(e){ console.error(e); Toast.error('No se pudo eliminar','Solo el autor o un admin'); }
   }
 
@@ -10163,48 +10216,37 @@ function toggleNotifDropdown(){
   },50);
 }
 
-// Helper global para que admins puedan crear notificaciones desde la consola
+// Helper global de administración. Publica mediante el webhook, nunca con
+// escritura directa desde el navegador a Firestore.
 // Uso: crearNotificacion({titulo:'X', descripcion:'Y', tipo:'clase'})
 window.crearNotificacion = async function(opts) {
   if (!window.UserState?.isAdmin) {
     console.warn('Solo admins pueden crear notificaciones. Logueate con un correo admin.');
     return;
   }
-  const fs = window.__fs;
-  if (!fs || !fs.db || !fs.addDoc || !fs.collection || !fs.serverTimestamp) {
-    console.error('Firestore aún no está listo. Espera 3 segundos y vuelve a intentar.');
-    return;
-  }
   if (!opts || typeof opts !== 'object') {
     console.error('Pasa un objeto: crearNotificacion({titulo:"...", descripcion:"...", tipo:"clase"})');
     return;
   }
-  const TIPO_PRESETS = {
-    clase: { icono:'i-broadcast', color:'#1b5df0' },
-    certificado: { icono:'i-certificate', color:'#3DDC5A' },
-    logro: { icono:'i-trophy', color:'#FBBF24' },
-    sistema: { icono:'i-bell', color:'#60A5FA' },
-    general: { icono:'i-bell', color:'#1b5df0' }
-  };
-  const preset = TIPO_PRESETS[opts.tipo || 'general'] || TIPO_PRESETS.general;
   try {
-    const ref = await fs.addDoc(fs.collection(fs.db, 'notificaciones'), {
-      titulo: opts.titulo || 'Notificación',
-      descripcion: opts.descripcion || '',
-      tipo: opts.tipo || 'general',
-      icono: opts.icono || preset.icono,
-      color: opts.color || preset.color,
-      createdAt: fs.serverTimestamp(),
-      creadoPor: window.UserState?.email || 'admin'
+    const user = window._fb?.auth?.currentUser;
+    if (!user) throw new Error('Sesión no disponible');
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+    const respuesta = await fetch(`${base}/admin/notificaciones`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + await user.getIdToken(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(opts)
     });
-    console.log('Notificación creada:', ref.id);
+    const data = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok) throw new Error(data.error || 'No se pudo crear la notificación');
+    console.log('Notificación creada:', data.id);
     console.log('   Aparecerá en TODOS los usuarios en tiempo real');
-    return ref.id;
+    return data.id;
   } catch(e) {
     console.error('Error creando notificación:', e.message);
-    if (e.message.includes('permission')) {
-      console.error('   → Las Firestore Rules necesitan permitir write en col `notificaciones` para admins');
-    }
   }
 };
 

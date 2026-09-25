@@ -1,0 +1,189 @@
+rules_version = '2';
+
+// Reglas de acceso para el proyecto Firebase `sentia-academy`.
+// El rol de administrador se emite con Firebase Auth como custom claim:
+// { admin: true }. Los correos escritos en HTML no son un control de seguridad.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+    function isVip(uid) {
+      let miembro = get(/databases/$(database)/documents/miembros/$(uid)).data;
+      return signedIn() && (request.auth.token.admin == true ||
+        ((miembro.activo == true || miembro.activa == true)
+          && (!('expiraEn' in miembro) || miembro.expiraEn > request.time)));
+    }
+
+    match /miembros/{uid} {
+      allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow list: if isAdmin();
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        // Un perfil nuevo no puede sembrar campos de privilegio, membresía o
+        // notificaciones. Esos datos los gestiona el servidor o un admin.
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'nombre', 'displayName', 'activa', 'activo', 'plan',
+          'source', 'origen', 'fechaRegistro', 'createdAt', 'lastUpdatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
+        && (!('nombre' in request.resource.data) || (request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100))
+        && (!('displayName' in request.resource.data) || (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100))
+        && request.resource.data.activa == false
+        && (!('activo' in request.resource.data) || request.resource.data.activo == false);
+      // Los cambios de membresía, plan, vencimiento y eliminación pasan por
+      // Railway. Un navegador solo puede corregir su propio nombre.
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['nombre', 'displayName', 'lastUpdatedAt']);
+      allow delete: if false;
+    }
+
+    // El catálogo es visible para miembros autenticados. Solo admins lo editan.
+    match /cursos/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /webinars/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /portadas/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /config/{id} {
+      // La pantalla de acceso consulta el precio antes de iniciar sesión.
+      allow read: if true;
+      // El navegador no puede alterar precios ni enlaces globales; el panel
+      // admin los guarda mediante el webhook autenticado.
+      allow write: if false;
+    }
+
+    // La verificación pública y "mis certificados" pasan por Railway. Solo
+    // los administradores pueden consultar el catálogo desde su panel; ningún
+    // navegador puede emitir, cambiar o borrar certificados.
+    match /certificados/{folio} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // El avance que cuenta para certificación lo escribe Railway después de
+    // validar el token y el catálogo. El cliente puede consultar únicamente
+    // su propio documento, nunca modificarlo.
+    match /progreso_cursos/{id} {
+      allow get: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin();
+      allow write: if false;
+    }
+
+    // Las claves de respuestas jamás llegan al navegador. Railway usa Admin
+    // SDK, que no depende de estas reglas, para calificarlas.
+    match /claves_actividades/{id} {
+      allow read, write: if false;
+    }
+
+    // Se conserva lectura de solicitudes históricas mientras se migra al
+    // flujo automático. Ya no se permiten nuevas solicitudes desde cliente.
+    match /solicitudes_certificado/{id} {
+      allow get: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin();
+      allow create: if false;
+      allow update, delete: if isAdmin();
+    }
+
+    match /directorio/{uid} {
+      // Una ficha no visible solo la pueden leer su titular y los admins. La
+      // consulta pública del directorio debe filtrar `visible == true`.
+      allow get: if isAdmin() || (signedIn()
+        && (request.auth.uid == uid || resource.data.visible == true));
+      allow list: if isAdmin() || (signedIn() && resource.data.visible == true);
+      // Es información pública del perfil, no un documento libre donde un
+      // cliente pueda almacenar campos arbitrarios.
+      allow create: if isAdmin() || (signedIn()
+        && request.auth.uid == uid
+        && isVip(uid)
+        && request.resource.data.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
+        && request.resource.data.keys().hasOnly([
+          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
+          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
+        ])
+        && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
+        && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
+        && request.resource.data.empresa is string && request.resource.data.empresa.size() <= 100
+        && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
+        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
+        && request.resource.data.visible is bool
+        && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
+        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
+        && (!('linkedin' in request.resource.data) || request.resource.data.linkedin == '' || (request.resource.data.linkedin is string && request.resource.data.linkedin.matches('^https://.*')))
+        && (!('web' in request.resource.data) || request.resource.data.web == '' || (request.resource.data.web is string && request.resource.data.web.matches('^https://.*'))));
+      allow update: if isAdmin() || (signedIn()
+        && request.auth.uid == uid
+        && isVip(uid)
+        && request.resource.data.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
+        && request.resource.data.keys().hasOnly([
+          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
+          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
+        ])
+        && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
+        && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
+        && request.resource.data.empresa is string && request.resource.data.empresa.size() <= 100
+        && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
+        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
+        && request.resource.data.visible is bool
+        && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
+        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
+        && (!('linkedin' in request.resource.data) || request.resource.data.linkedin == '' || (request.resource.data.linkedin is string && request.resource.data.linkedin.matches('^https://.*')))
+        && (!('web' in request.resource.data) || request.resource.data.web == '' || (request.resource.data.web is string && request.resource.data.web.matches('^https://.*'))));
+      allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
+
+    match /posts/{postId} {
+      allow read: if signedIn();
+      // Publicaciones, reacciones y sus contadores pasan exclusivamente por
+      // Railway. Así no se pueden falsear desde DevTools.
+      allow create, update, delete: if false;
+
+      match /comentarios/{comentarioId} {
+        allow read: if signedIn();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /notificaciones/{id} {
+      allow read: if signedIn();
+      // La publicación global pasa por el webhook autenticado; ni siquiera
+      // una sesión admin del navegador tiene escritura directa.
+      allow write: if false;
+    }
+    match /noticias/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /noticias_auto/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Todo lo no declarado permanece bloqueado.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

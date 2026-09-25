@@ -438,7 +438,7 @@ window.setLoading = function(btn, isLoading, originalLabel){
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail, updateProfile, setPersistence, browserLocalPersistence,
+  sendPasswordResetEmail, sendEmailVerification, reload, updateProfile, setPersistence, browserLocalPersistence,
   onAuthStateChanged, GoogleAuthProvider, signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
@@ -455,15 +455,44 @@ const firebaseConfig = {
   measurementId: "G-N56E8NYP4K"
 };
 
-const ADMINS = [
-  "teccapitalweb@gmail.com",
-  "fisiotec25@gmail.com"
-];
-
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 setPersistence(auth, browserLocalPersistence);
+
+async function esAdministrador(user){
+  if (!user) return false;
+  const token = await user.getIdTokenResult(true);
+  return token.claims.admin === true;
+}
+
+async function redirigirSegunRol(user){
+  if (requiereVerificacionCorreo(user)) {
+    mostrarVerificacionPendiente(user);
+    return;
+  }
+  const destino = await esAdministrador(user) ? 'vip-admin.html' : 'vip-panel.html';
+  window.location.href = destino;
+}
+
+function requiereVerificacionCorreo(user) {
+  return !!user && user.emailVerified !== true
+    && (user.providerData || []).some(p => p.providerId === 'password');
+}
+
+function mostrarVerificacionPendiente(user) {
+  const z = document.getElementById('alert-zone');
+  const correo = String(user.email || '').replace(/[<>&"]/g, '');
+  z.innerHTML = `<div class="alert alert--error"><div class="alert__msg"><strong>Confirma tu correo para continuar</strong><br>Enviamos un enlace a ${correo}. Hasta confirmarlo no podrás entrar al panel ni obtener certificados.<br><br><button type="button" class="btn google" id="resend-verification" style="height:38px;min-height:38px;font-size:12px;">Reenviar enlace</button> <button type="button" class="btn google" id="check-verification" style="height:38px;min-height:38px;font-size:12px;">Ya confirmé</button></div></div>`;
+  z.querySelector('#resend-verification')?.addEventListener('click', async () => {
+    try { await sendEmailVerification(user); showAlert('success', 'Enlace reenviado', 'Revisa tu bandeja de entrada y spam.'); }
+    catch (e) { showAlert('error', 'No pudimos reenviar el enlace', translateError(e.code)); }
+  });
+  z.querySelector('#check-verification')?.addEventListener('click', async () => {
+    try { await reload(user); if (user.emailVerified) redirigirSegunRol(user); else mostrarVerificacionPendiente(user); }
+    catch (e) { showAlert('error', 'No pudimos comprobar el correo', translateError(e.code)); }
+  });
+}
 
 /* ══ MODIFICADO · Precio en vivo del hero (patrón SYNOVA) ══
    Lee config/club y actualiza los data-precio-* — el mismo documento que
@@ -535,10 +564,17 @@ onAuthStateChanged(auth, async (user) => {
   if (user){
     await ensureMiembroDoc(user, user.displayName, 'login-web');
     try{ localStorage.setItem('sentia_last_user', JSON.stringify({ email:user.email||'', nombre:user.displayName||'' })); }catch(e){}
-    const isAdmin = ADMINS.includes((user.email || '').toLowerCase());
-    window.location.href = isAdmin ? 'vip-admin.html' : 'vip-panel.html';
+    if (requiereVerificacionCorreo(user)) {
+      mostrarVerificacionPendiente(user);
+      return;
+    }
+    await redirigirSegunRol(user);
   }
 });
+
+if (new URLSearchParams(location.search).get('sesion') === 'expirada') {
+  showAlert('error', 'Sesión cerrada por inactividad', 'Por seguridad, inicia sesión nuevamente.');
+}
 
 function translateError(code){
   const map = {
@@ -570,9 +606,8 @@ document.getElementById('btn-login').addEventListener('click', async () => {
   setLoading(btn, true);
   try{
     await signInWithEmailAndPassword(auth, email, pass);
-    const isAdmin = ADMINS.includes(email);
     showAlert('success', 'Bienvenido!', 'Redirigiendo...');
-    setTimeout(() => { window.location.href = isAdmin ? 'vip-admin.html' : 'vip-panel.html'; }, 600);
+    setTimeout(() => { redirigirSegunRol(auth.currentUser); }, 600);
   }catch(e){
     setLoading(btn, false, 'Iniciar sesion');
     showAlert('error', 'No pudimos iniciar sesion', translateError(e.code));
@@ -594,8 +629,9 @@ document.getElementById('btn-register').addEventListener('click', async () => {
   try{
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: name });
+    await sendEmailVerification(cred.user);
     const docResult = await ensureMiembroDoc(cred.user, name, 'registro-web');
-    const isAdmin = ADMINS.includes(email);
+    const isAdmin = await esAdministrador(cred.user);
     if (docResult && docResult.ok === false){
       const motivo = docResult.reason || 'desconocido';
       console.error('DIAGNOSTICO: doc miembro NO se creo. Razon:', motivo);
@@ -603,13 +639,10 @@ document.getElementById('btn-register').addEventListener('click', async () => {
         ? 'Tu cuenta SI se creo, pero falta actualizar las reglas Firestore para guardar tu perfil. Entrando a tu panel...'
         : 'Tu cuenta se creo pero hubo un problema al guardar tu perfil (' + motivo + '). Entrando a tu panel...';
       showAlert('error', 'Cuenta creada - advertencia', txt);
-      setTimeout(() => { window.location.href = isAdmin ? 'vip-admin.html' : 'vip-panel.html'; }, 4000);
+      setTimeout(() => { redirigirSegunRol(cred.user); }, 4000);
       return;
     }
-    showAlert('success', 'Cuenta creada!',
-      isAdmin ? 'Redirigiendo al panel admin...'
-              : (docResult && docResult.action === 'created' ? 'Perfil guardado - entrando a tu panel...' : 'Entrando a tu panel...'));
-    setTimeout(() => { window.location.href = isAdmin ? 'vip-admin.html' : 'vip-panel.html'; }, 900);
+    mostrarVerificacionPendiente(cred.user);
   }catch(e){
     setLoading(btn, false, 'Crear cuenta');
     showAlert('error', 'No pudimos crear tu cuenta', translateError(e.code));
@@ -644,9 +677,11 @@ document.getElementById('forgot-link').addEventListener('click', async (e) => {
   }
   try{
     await sendPasswordResetEmail(auth, email);
-    showAlert('success', 'Enlace enviado', 'Revisa tu bandeja de entrada (y la carpeta de spam).');
+    // Respuesta deliberadamente genérica: no revela si el correo tiene cuenta.
+    showAlert('success', 'Revisa tu correo', 'Si existe una cuenta asociada, recibirás instrucciones para restablecer la contraseña. Revisa también spam.');
   }catch(e){
-    showAlert('error', 'No pudimos enviar el correo', translateError(e.code));
+    console.warn('[password-reset]', e.code);
+    showAlert('success', 'Revisa tu correo', 'Si existe una cuenta asociada, recibirás instrucciones para restablecer la contraseña. Revisa también spam.');
   }
 });
 

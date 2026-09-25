@@ -1,4 +1,6 @@
-const VERSION = 'sentia-v7';
+// Incrementar al cambiar archivos incluidos en SHELL_FILES. Sin esto, una PWA
+// existente puede seguir entregando HTML viejo desde caché tras una actualización.
+const VERSION = 'sentia-v9-auth-security';
 const CACHE_SHELL = VERSION + '-shell';
 const CACHE_RUNTIME = VERSION + '-runtime';
 
