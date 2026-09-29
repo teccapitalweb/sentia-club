@@ -1893,6 +1893,33 @@ body::after{
 .foro-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 
 .posts-list{display:flex;flex-direction:column;gap:10px}
+/* Foro SENTIA · comunidad cálida, pero con datos y acciones reales. */
+.foro-stage{max-width:1120px;margin:0 auto}
+.foro-welcome{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.75fr);gap:16px;margin-bottom:16px}
+.foro-welcome__hero{position:relative;min-height:205px;overflow:hidden;border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:24px;padding:28px 30px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 18%,var(--surface)),color-mix(in srgb,var(--highlight) 12%,var(--surface)) 60%,var(--surface));isolation:isolate}
+.foro-welcome__hero::before,.foro-welcome__hero::after{content:"";position:absolute;border-radius:50%;z-index:-1;filter:blur(.2px)}
+.foro-welcome__hero::before{width:260px;height:260px;right:-54px;bottom:-125px;background:color-mix(in srgb,var(--primary) 34%,transparent);border:1px solid color-mix(in srgb,var(--primary) 50%,transparent)}
+.foro-welcome__hero::after{width:178px;height:178px;right:106px;top:-105px;background:color-mix(in srgb,var(--highlight) 24%,transparent);border:1px solid color-mix(in srgb,var(--highlight) 46%,transparent)}
+.foro-welcome__eyebrow{display:inline-flex;align-items:center;gap:7px;font:700 10px 'Instrument Sans',sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--highlight);margin-bottom:12px}
+.foro-welcome__eyebrow .ic{width:15px;height:15px}
+.foro-welcome__title{font-family:'Sora',sans-serif;font-size:clamp(27px,4vw,42px);letter-spacing:-1.7px;line-height:1.04;margin:0 0 9px;max-width:520px}
+.foro-welcome__copy{font-size:14px;line-height:1.6;color:var(--text-2);max-width:480px;margin:0}
+.foro-live{border:1px solid var(--border-2);border-radius:24px;padding:21px;background:var(--surface);display:flex;flex-direction:column;justify-content:space-between;gap:17px}
+.foro-live__head{font-family:'Sora',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px}
+.foro-live__dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 5px color-mix(in srgb,var(--success) 13%,transparent)}
+.foro-avatars{display:flex;align-items:center;padding-left:7px;min-height:44px}
+.foro-avatar-stack{width:42px;height:42px;border-radius:50%;margin-left:-7px;border:3px solid var(--surface);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;background:var(--primary);overflow:hidden}
+.foro-avatar-stack:first-child{margin-left:0}.foro-avatar-stack--more{background:var(--surface-3);color:var(--primary);font-size:10px}
+.foro-live__meta{font-size:12.5px;color:var(--text-2);margin-top:-8px}.foro-live__meta strong{color:var(--text)}
+.foro-live__cta{display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:color-mix(in srgb,var(--primary) 10%,var(--surface));color:var(--primary);border-radius:14px;padding:12px 13px;font:700 12.5px 'Instrument Sans',sans-serif;cursor:pointer;text-align:left}.foro-live__cta:hover{background:color-mix(in srgb,var(--primary) 18%,var(--surface))}.foro-live__cta .ic{width:18px;height:18px}
+.foro-comunidad-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;align-items:start}
+.foro-side{display:flex;flex-direction:column;gap:12px}.foro-side__card{background:var(--surface);border:1px solid var(--border-2);border-radius:20px;padding:17px}.foro-side__title{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px;margin-bottom:13px}.foro-topic{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--text)}.foro-topic:first-of-type{border-top:0}.foro-topic__icon{width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--topic) 15%,var(--surface));color:var(--topic);display:grid;place-items:center}.foro-topic__icon .ic{width:16px;height:16px}.foro-topic__arrow{margin-left:auto;color:var(--text-3)}
+.foro-aviso--editorial{border-radius:15px;margin-bottom:13px;background:color-mix(in srgb,var(--highlight) 8%,var(--surface));border-color:color-mix(in srgb,var(--highlight) 26%,transparent)}.foro-aviso--editorial .ic,.foro-aviso--editorial strong{color:var(--highlight)}
+.foro-composer--editorial{border-radius:20px;padding:17px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 4%,var(--surface)))}
+.foro-tabs--editorial .tab{border-radius:999px;padding:9px 15px}
+.posts-list--editorial{gap:14px}.posts-list--editorial .post{border-radius:20px;padding:18px}.posts-list--editorial .post__img{max-width:640px;border-radius:15px}.posts-list--editorial .post__footer{margin-top:13px}
+@media(max-width:900px){.foro-welcome{grid-template-columns:1fr}.foro-comunidad-layout{grid-template-columns:1fr}.foro-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.foro-side__card:last-child{display:none}}
+@media(max-width:600px){.foro-welcome__hero{min-height:185px;padding:23px 20px;border-radius:20px}.foro-welcome__title{font-size:29px}.foro-live{border-radius:20px;padding:18px}.foro-side{grid-template-columns:1fr}.foro-side__card:last-child{display:block}.foro-composer--editorial{padding:14px}.posts-list--editorial .post{padding:15px}.foro-welcome__copy{font-size:13px}}
 /* ===== DIRECTORIO VIP ===== */
 .dir-bar{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .dir-search{flex:1;min-width:200px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;padding:0 14px}
@@ -4088,15 +4115,7 @@ window.__setDisplayName = async (nombre) => {
     </div>
 
     <div class="nav-section" data-tour="tools">
-      <div class="nav-label" id="sidebar-tools-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">Herramientas pro<span style="font-size:9px;font-weight:600;color:var(--primary);letter-spacing:.03em">Ver todo</span></div>
-      <a class="nav-item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-      <a class="nav-item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      <a class="nav-item" id="sidebar-tools-label" role="button"><svg class="ic"><use href="#i-ps-brain"/></svg>Herramientas pro<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
     </div>
 
     <div class="nav-section">
@@ -4317,15 +4336,7 @@ window.__setDisplayName = async (nombre) => {
       </div>
 
       <div class="mobile-drawer__section" data-tour="tools">
-        <div class="mobile-drawer__label">Herramientas pro</div>
-        <a class="mobile-drawer__item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
-        <a class="mobile-drawer__item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="mobile-drawer__item" id="drawer-tools-btn" role="button"><svg class="ic"><use href="#i-ps-brain"/></svg>Herramientas pro<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
       </div>
 
       <div class="mobile-drawer__section">
@@ -10049,8 +10060,13 @@ const Sections = (function(){
   // ═══════════════════════════════════════════════════════════════
   const FORO_DIAS_VIDA = 15;
   let _foroUnsub = null;
+  let _foroPresenciaUnsub = null;
+  let _foroPresenciaTimer = null;
+  let _foroMiembrosActivos = [];
   window.__foroCleanup = function(){
     try { if (typeof _foroUnsub === 'function') { _foroUnsub(); _foroUnsub = null; } } catch(e){}
+    try { if (typeof _foroPresenciaUnsub === 'function') { _foroPresenciaUnsub(); _foroPresenciaUnsub = null; } } catch(e){}
+    try { if (_foroPresenciaTimer) { clearInterval(_foroPresenciaTimer); _foroPresenciaTimer = null; } } catch(e){}
     try { Object.values(_comUnsub).forEach(u=>{ try{ u&&u(); }catch(e){} }); } catch(e){}
   };
   let _foroFiltro = 'recientes';
@@ -10061,6 +10077,42 @@ const Sections = (function(){
     const colores = ['#1b5df0','#2FBF2E','#60A5FA','#A78BFA','#F87171','#FBBF24','#38BDF8','#FB7185'];
     let h=0; const s=String(uid||'x'); for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0;
     return colores[Math.abs(h)%colores.length];
+  }
+  function foroAvataresActivos(){
+    const visibles = _foroMiembrosActivos.slice(0,4);
+    const html = visibles.map(m => `<span class="foro-avatar-stack" title="${escapeHtml(m.nombre||'Miembro')}" style="background:linear-gradient(135deg,${m.color||'#1b5df0'},${m.color||'#1b5df0'}aa)">${escapeHtml(m.iniciales||'?')}</span>`).join('');
+    const mas = _foroMiembrosActivos.length > 4 ? `<span class="foro-avatar-stack foro-avatar-stack--more">+${_foroMiembrosActivos.length-4}</span>` : '';
+    return (html + mas) || '<span class="foro-avatar-stack" style="background:linear-gradient(135deg,var(--primary),var(--primary-deep)">S</span>' + '<span class="foro-avatar-stack" style="background:linear-gradient(135deg,var(--highlight),var(--success))">+</span>';
+  }
+  function foroPintarPresencia(){
+    const avatars = document.getElementById('foro-active-avatars');
+    const count = document.getElementById('foro-active-count');
+    if (avatars) avatars.innerHTML = foroAvataresActivos();
+    if (count) {
+      const n = _foroMiembrosActivos.length;
+      count.innerHTML = n ? `<strong>${n} miembro${n===1?'':'s'} conectado${n===1?'':'s'}</strong> en la comunidad` : 'La comunidad está lista para conversar';
+    }
+  }
+  async function foroMarcarPresencia(){
+    if (!(window.UserState?.modo === 'vip' || esAdminReal()) || !window.__authHeaders || !window.WEBHOOK_URL) return;
+    try {
+      const headers = await window.__authHeaders();
+      await fetch(window.WEBHOOK_URL + '/api/foro/presencia', { method:'POST', headers, body:'{}' });
+    } catch(e) { console.warn('[foro-presencia]', e.message); }
+  }
+  function foroSuscribirPresencia(){
+    const fs = window.__fs;
+    if (!fs || !fs.onSnapshot) return;
+    try { if (typeof _foroPresenciaUnsub === 'function') _foroPresenciaUnsub(); } catch(e){}
+    const desde = fs.Timestamp.fromMillis(Date.now() - 5 * 60 * 1000);
+    const q = fs.query(fs.collection(fs.db,'presencia'), fs.where('ultimaActividad','>',desde), fs.orderBy('ultimaActividad','desc'), fs.limit(12));
+    _foroPresenciaUnsub = fs.onSnapshot(q, snap => {
+      _foroMiembrosActivos = snap.docs.map(d=>d.data());
+      foroPintarPresencia();
+    }, err => console.warn('[foro-presencia]', err.message));
+    foroMarcarPresencia();
+    try { if (_foroPresenciaTimer) clearInterval(_foroPresenciaTimer); } catch(e){}
+    _foroPresenciaTimer = setInterval(foroMarcarPresencia, 60000);
   }
   function foroTiempoRel(ts){
     if(!ts) return 'ahora';
@@ -10109,20 +10161,32 @@ const Sections = (function(){
     const miColor = foroColorFor(window.UserState?.uid);
 
     container.innerHTML = `
-      <div class="fade-up">
-        <div class="sec-hero">
-          <span class="sec-hero__eyebrow">Comunidad activa</span>
-          <h1 class="sec-hero__title">Foro VIP</h1>
-          <p class="sec-hero__sub">Comparte casos y experiencias, haz preguntas y conecta con la comunidad SENTIA. Publica texto e imágenes, comenta y reacciona.</p>
+      <div class="fade-up foro-stage">
+        <div class="foro-welcome">
+          <section class="foro-welcome__hero">
+            <span class="foro-welcome__eyebrow"><svg class="ic"><use href="#i-users"/></svg> Comunidad SENTIA</span>
+            <h1 class="foro-welcome__title">Foro SENTIA</h1>
+            <p class="foro-welcome__copy">Un espacio para aprender en comunidad, compartir experiencias y construir conversaciones que acompañen tu práctica.</p>
+          </section>
+          <aside class="foro-live">
+            <div>
+              <div class="foro-live__head"><span class="foro-live__dot"></span>Comunidad activa</div>
+              <div class="foro-avatars" id="foro-active-avatars">${foroAvataresActivos()}</div>
+              <div class="foro-live__meta" id="foro-active-count">La comunidad está lista para conversar</div>
+            </div>
+            <button class="foro-live__cta" id="foro-compose-cta">¿Qué quieres conversar hoy?<svg class="ic"><use href="#i-arrow-right"/></svg></button>
+          </aside>
         </div>
 
-        <div class="foro-aviso">
-          <svg class="ic"><use href="#i-clock"/></svg>
-          <span>Las publicaciones se eliminan automáticamente <strong>15 días</strong> después de publicarse.</span>
-        </div>
+        <div class="foro-comunidad-layout">
+          <main>
+            <div class="foro-aviso foro-aviso--editorial">
+              <svg class="ic"><use href="#i-clock"/></svg>
+              <span>Las publicaciones se eliminan automáticamente <strong>15 días</strong> después de publicarse.</span>
+            </div>
 
-        ${esVip ? `
-        <div class="foro-composer">
+            ${esVip ? `
+        <div class="foro-composer foro-composer--editorial">
           <div class="foro-composer__avatar" style="background:linear-gradient(135deg,${miColor},${miColor}aa);">${ini}</div>
           <div class="foro-composer__main">
             <textarea class="foro-composer__input" id="foro-text" placeholder="¿Qué caso traes hoy? Comparte un caso o haz una pregunta…" rows="2" maxlength="1500"></textarea>
@@ -10151,14 +10215,29 @@ const Sections = (function(){
         </div>
         `}
 
-        <div class="foro-tabs">
+        <div class="foro-tabs foro-tabs--editorial">
           <button class="tab is-active" data-foro-tab="recientes">Recientes</button>
           <button class="tab" data-foro-tab="populares">Más reacciones</button>
           <button class="tab" data-foro-tab="mios">Mis publicaciones</button>
         </div>
 
-        <div class="posts-list" id="foro-list">
+        <div class="posts-list posts-list--editorial" id="foro-list">
           <div class="foro-empty" id="foro-loading">Cargando publicaciones…</div>
+        </div>
+          </main>
+          <aside class="foro-side">
+            <section class="foro-side__card">
+              <div class="foro-side__title">Temas que nos conectan</div>
+              <div class="foro-topic" style="--topic:#2fbf2e"><span class="foro-topic__icon"><svg class="ic"><use href="#i-messages"/></svg></span>Casos y práctica<span class="foro-topic__arrow">›</span></div>
+              <div class="foro-topic" style="--topic:#1b5df0"><span class="foro-topic__icon"><svg class="ic"><use href="#i-book"/></svg></span>Educación<span class="foro-topic__arrow">›</span></div>
+              <div class="foro-topic" style="--topic:#8b5cf6"><span class="foro-topic__icon"><svg class="ic"><use href="#i-heart"/></svg></span>Bienestar profesional<span class="foro-topic__arrow">›</span></div>
+              <div class="foro-topic" style="--topic:#f59e0b"><span class="foro-topic__icon"><svg class="ic"><use href="#i-image"/></svg></span>Recursos y materiales<span class="foro-topic__arrow">›</span></div>
+            </section>
+            <section class="foro-side__card">
+              <div class="foro-side__title">Conversaciones con propósito</div>
+              <div style="font-size:12.5px;line-height:1.55;color:var(--text-2)">Comparte respetando la privacidad de las personas y evitando datos identificables.</div>
+            </section>
+          </aside>
         </div>
       </div>
     `;
@@ -10198,8 +10277,15 @@ const Sections = (function(){
       });
     });
 
+    container.querySelector('#foro-compose-cta').addEventListener('click', ()=>{
+      const input = container.querySelector('#foro-text');
+      if (input) { input.focus(); input.scrollIntoView({behavior:'smooth', block:'center'}); }
+      else Toast.info('Participa con membresía VIP','Activa tu membresía para publicar, comentar y reaccionar.');
+    });
+
     // Suscripción en tiempo real
     foroSuscribir();
+    if (esVip) foroSuscribirPresencia(); else foroPintarPresencia();
   }
 
   function foroSuscribir(){
@@ -11972,7 +12058,8 @@ function initNav(){
     }
   };
   if(toolsBtn) toolsBtn.addEventListener('click',e=>{e.preventDefault();abrirToolsCatalog();});
-  document.getElementById('sidebar-tools-label')?.addEventListener('click',()=>abrirToolsCatalog());
+  document.getElementById('sidebar-tools-label')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();abrirToolsCatalog();});
+  document.getElementById('drawer-tools-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();cerrarDrawerMovil();setTimeout(abrirToolsCatalog,250);});
   if(toolsCatalogOverlay) toolsCatalogOverlay.addEventListener('click',cerrarToolsCatalog);
   if(toolsCatalogClose) toolsCatalogClose.addEventListener('click',cerrarToolsCatalog);
   toolsCatalog?.querySelectorAll('[data-tool]').forEach(card=>{
