@@ -61,7 +61,18 @@ service cloud.firestore {
     }
     match /materiales/{id} {
       allow read: if signedIn();
-      allow write: if false;
+      allow create, update: if isAdmin()
+        && request.resource.data.titulo is string
+        && request.resource.data.titulo.size() >= 1
+        && request.resource.data.titulo.size() <= 200
+        && request.resource.data.tipo in ['PDF', 'Guía', 'Libro', 'Presentación']
+        && request.resource.data.estado in ['disponible', 'proximamente', 'oculto']
+        && request.resource.data.gratis is bool
+        && request.resource.data.autor is string
+        && request.resource.data.autor.size() <= 200
+        && request.resource.data.descripcion is string
+        && request.resource.data.descripcion.size() <= 2000;
+      allow delete: if isAdmin();
     }
     match /config/{id} {
       // La pantalla de acceso consulta el precio antes de iniciar sesión.
