@@ -2339,7 +2339,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    ========================================================= */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 /* En Inicio las noticias acompañan el avance sin competir con él. */
-.news-grid--home{grid-template-columns:repeat(3,minmax(0,1fr))}
+.news-grid--home{grid-template-columns:repeat(4,minmax(210px,1fr));overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity}
 .news-grid--full{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
 .news-card{
   background:var(--surface);
@@ -2428,16 +2428,19 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .news-card__more .ic{width:11px;height:11px}
 
 /* Portada editorial dinámica: aplica a toda nota nueva sin modificar la imagen de la fuente. */
-.news-card--editorial{border-radius:20px;background:var(--surface);overflow:visible;border-color:color-mix(in srgb,var(--cat-color,var(--primary)) 20%,var(--border));box-shadow:0 8px 22px rgba(12,30,85,.06)}
-.news-card--editorial .news-card__cover{height:154px;margin:10px 10px 0;border-radius:14px 14px 7px 7px;align-items:flex-end;justify-content:flex-start;background-position:center!important;isolation:isolate}
+.news-card--editorial{border-radius:20px;background:var(--surface);overflow:visible;border-color:color-mix(in srgb,var(--cat-color,var(--primary)) 20%,var(--border));box-shadow:0 8px 22px rgba(12,30,85,.06);scroll-snap-align:start}
+.news-card--editorial .news-card__cover{height:168px;margin:10px 10px 0;border-radius:14px 14px 7px 7px;align-items:flex-end;justify-content:flex-start;background-position:center!important;isolation:isolate}
 .news-card--editorial .news-card__cover::before{z-index:0;background:linear-gradient(135deg,color-mix(in srgb,var(--cat-color,var(--primary)) 48%,transparent),rgba(8,20,56,.14) 48%,rgba(8,20,56,.72));background-size:auto;-webkit-mask-image:none;mask-image:none}
 .news-card--editorial .news-card__cover::after{content:"";position:absolute;right:-18px;bottom:13px;width:112px;height:58px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);border-radius:9px;transform:rotate(-7deg);z-index:0}
 .news-card--editorial .news-card__date{top:10px;left:10px;z-index:2;background:rgba(7,22,60,.72);font-size:9px}
 .news-card--editorial .news-card__cat{top:10px;right:10px;z-index:2;font-size:8.5px}
 .news-card--editorial .news-card__cover svg{z-index:2;margin:0 0 17px 17px}
+.news-card--editorial .news-card__cover--fallback{background:linear-gradient(145deg,#0c2358,#2b63dd)!important}
+.news-card--editorial .news-card__cover--fallback::before{background:radial-gradient(circle at 72% 20%,rgba(80,241,167,.38),transparent 30%),linear-gradient(135deg,rgba(255,255,255,.08),transparent 58%)!important}
+.news-card__fallback-mark{position:relative;z-index:2;display:flex;flex-direction:column;gap:7px;align-items:flex-start;margin:0 0 17px 17px;color:#fff;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.news-card__fallback-mark .ic{width:35px;height:35px;margin:0;padding:8px;border:1px solid rgba(255,255,255,.3);border-radius:10px;background:rgba(255,255,255,.12)}
 .news-card--editorial .news-card__body{position:relative;z-index:3;margin:-28px 18px 10px;padding:13px 14px 12px;border:1px solid color-mix(in srgb,var(--cat-color,var(--primary)) 16%,var(--border));border-radius:10px 10px 14px 14px;background:var(--surface);box-shadow:0 8px 16px rgba(7,22,61,.09);gap:7px}
 .news-card--editorial .news-card__title{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;line-height:1.35;color:var(--text);-webkit-line-clamp:3}
-.news-card--editorial .news-card__title::before{content:"";display:block;width:26px;height:3px;margin-bottom:8px;border-radius:5px;background:var(--cat-color,var(--primary))}
 .news-card--editorial .news-card__excerpt{font-size:11.5px;-webkit-line-clamp:2}
 .news-card--editorial .news-card__footer{padding-top:9px}
 .news-card--editorial:nth-child(3n+2) .news-card__cover::before{background:linear-gradient(135deg,color-mix(in srgb,#35c77a 42%,transparent),rgba(7,40,55,.18) 48%,rgba(7,27,48,.76))}
@@ -6693,9 +6696,11 @@ const Sections = (function(){
           portada: d.portada || '',
           url: d.url || '',
           gratis: d.gratis === true,
+          categoria: d.categoria || '',
+          area: d.area || '',
           cursoId: d.cursoId || '',
           cursoTitulo: cursoRef ? cursoRef.titulo : '',
-          cursoArea: cursoRef ? cursoRef.area : '',
+          cursoArea: d.area || (cursoRef ? cursoRef.area : ''),
           estado: d.estado,
           source: 'biblioteca',
           indiceMaterial: -1,
@@ -8462,6 +8467,17 @@ const Sections = (function(){
 
   let _bibSeleccionado = null;
 
+  function _getGuardados() {
+    try { return JSON.parse(localStorage.getItem('sentia:guardados') || '[]'); } catch { return []; }
+  }
+  function _toggleGuardado(mid) {
+    const g = _getGuardados();
+    const idx = g.indexOf(mid);
+    if (idx >= 0) g.splice(idx, 1); else g.push(mid);
+    try { localStorage.setItem('sentia:guardados', JSON.stringify(g)); } catch {}
+    return idx < 0;
+  }
+
   function _getPortadaMaterial(m) {
     if (m.portada) return m.portada;
     const curso = (Array.isArray(cursos) ? cursos : []).find(c => c.id === m.cursoId);
@@ -8534,8 +8550,11 @@ const Sections = (function(){
     const descHTML = esBib && descEsc
       ? `<p class="bib-detalle__desc">${descEsc}</p>` : '';
 
+    const categoriaEsc = escapeHtml(m.categoria || '');
     let metaItems = `<div class="bib-detalle__meta-item"><label>Formato</label><span>${_bibTipoLabel(tipo)}</span></div>`;
+    if (esBib && categoriaEsc) metaItems += `<div class="bib-detalle__meta-item"><label>Categoría</label><span>${categoriaEsc}</span></div>`;
     if (esBib && m.paginas) metaItems += `<div class="bib-detalle__meta-item"><label>Páginas</label><span>${m.paginas}</span></div>`;
+    if (esBib && areaEsc && areaEsc !== 'General') metaItems += `<div class="bib-detalle__meta-item"><label>Área</label><span>${areaEsc}</span></div>`;
     if (cursoEsc) metaItems += `<div class="bib-detalle__meta-item"><label>Del curso</label><span>${cursoEsc}</span></div>`;
     metaItems += `<div class="bib-detalle__meta-item"><label>Estado</label><span>${estadoTexto}</span></div>`;
 
@@ -8552,6 +8571,9 @@ const Sections = (function(){
           ${descHTML}
           <div class="bib-detalle__actions">
             ${btnHTML}
+            <button class="bib-detalle__btn-icon" title="${_getGuardados().includes(m.id) ? 'Quitar de guardados' : 'Guardar'}" id="bib-btn-guardar" data-mid="${m.id}">
+              <svg viewBox="0 0 24 24" fill="${_getGuardados().includes(m.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
             <button class="bib-detalle__btn-icon" title="Compartir" id="bib-btn-share" data-titulo="${tituloEsc}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
@@ -8649,7 +8671,11 @@ const Sections = (function(){
         ` : `
           <div class="bib-tabs" id="bib-tabs">
             <button class="bib-tab is-active" data-filter="todo">Todo</button>
-            ${tiposConMats.map(([t]) => `<button class="bib-tab" data-filter="${t}">${_bibTipoLabel(t)}</button>`).join('')}
+            <button class="bib-tab" data-filter="guardados">Guardados</button>
+            <button class="bib-tab" data-filter="Guía">Guías</button>
+            <button class="bib-tab" data-filter="PDF">PDF</button>
+            <button class="bib-tab" data-filter="Libro">Libros</button>
+            <button class="bib-tab" data-filter="Presentación">Presentaciones</button>
           </div>
 
           ${sel ? _renderBibDetalle(sel) : ''}
@@ -8669,9 +8695,13 @@ const Sections = (function(){
 
       function aplicarFiltro() {
         if (!grid) return;
+        const guardados = currentFilter === 'guardados' ? _getGuardados() : [];
         grid.querySelectorAll('.bib-card').forEach(card => {
           const tipo = card.dataset.tipo || '';
-          card.style.display = (currentFilter === 'todo' || tipo === currentFilter) ? '' : 'none';
+          const mid = card.dataset.mid || '';
+          if (currentFilter === 'todo') card.style.display = '';
+          else if (currentFilter === 'guardados') card.style.display = guardados.includes(mid) ? '' : 'none';
+          else card.style.display = tipo === currentFilter ? '' : 'none';
         });
       }
 
@@ -8731,6 +8761,18 @@ const Sections = (function(){
         } else if (cursoId) {
           window.abrirMaterialSentia(cursoId, idx);
         }
+      });
+    }
+    const btnGuardar = container.querySelector('#bib-btn-guardar');
+    if (btnGuardar) {
+      btnGuardar.addEventListener('click', () => {
+        const mid = btnGuardar.dataset.mid;
+        if (!mid) return;
+        const ahora = _toggleGuardado(mid);
+        const svg = btnGuardar.querySelector('svg');
+        if (svg) svg.setAttribute('fill', ahora ? 'currentColor' : 'none');
+        btnGuardar.title = ahora ? 'Quitar de guardados' : 'Guardar';
+        if (Toast) Toast.ok(ahora ? 'Guardado' : 'Eliminado', ahora ? 'Material agregado a tus guardados.' : 'Material quitado de guardados.');
       });
     }
     const btnShare = container.querySelector('#bib-btn-share');
@@ -8889,7 +8931,7 @@ const Sections = (function(){
       const fs = window.__fs;
       if (fs && fs.getDocs) {
         try {
-          const snap = await fs.getDocs(fs.query(fs.collection(fs.db,'noticias_auto'), fs.orderBy('createdAt','desc'), fs.limit(3)));
+          const snap = await fs.getDocs(fs.query(fs.collection(fs.db,'noticias_auto'), fs.orderBy('createdAt','desc'), fs.limit(4)));
           snap.forEach(d => arts.push(d.data()));
         } catch (e) { /* sin permiso o sin datos: se usa el respaldo */ }
       }
@@ -8908,15 +8950,15 @@ const Sections = (function(){
         _noticiasCargadas = true;
         return;
       }
-      grid.innerHTML = arts.slice(0,3).map(n=>{
+      grid.innerHTML = arts.slice(0,4).map(n=>{
         const fecha = noticiaTiempoRel(n.createdAt || n.fechaPublicacion);
         const cover = (n.imagen && /^https:\/\//.test(n.imagen))
           ? `<div class="news-card__cover" style="background-image:url('${String(n.imagen).replace(/['"()\\\s<>]/g, c => encodeURIComponent(c))}');background-size:cover;background-position:center;">
                <span class="news-card__date">${fecha}</span>
                <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'Psicología')}</span>
              </div>`
-          : `<div class="news-card__cover">
-               <svg class="ic"><use href="#i-news"/></svg>
+          : `<div class="news-card__cover news-card__cover--fallback">
+               <span class="news-card__fallback-mark"><svg class="ic"><use href="#i-news"/></svg>Actualidad SENTIA</span>
                <span class="news-card__date">${fecha}</span>
                <span class="news-card__cat">${escapeHtml(n.categoriaNombre||n.categoria||'Psicología')}</span>
              </div>`;
@@ -8988,7 +9030,7 @@ const Sections = (function(){
         const imagen = n.imagen && /^https:\/\//.test(n.imagen);
         const cover = imagen
           ? `<div class="news-card__cover" style="background-image:url('${String(n.imagen).replace(/['\"()\\\\\s<>]/g, c => encodeURIComponent(c))}');background-size:cover;background-position:center;"><span class="news-card__date">${fecha}</span><span class="news-card__cat">${categoria}</span></div>`
-          : `<div class="news-card__cover"><svg class="ic"><use href="#i-news"/></svg><span class="news-card__date">${fecha}</span><span class="news-card__cat">${categoria}</span></div>`;
+          : `<div class="news-card__cover news-card__cover--fallback"><span class="news-card__fallback-mark"><svg class="ic"><use href="#i-news"/></svg>Actualidad SENTIA</span><span class="news-card__date">${fecha}</span><span class="news-card__cat">${categoria}</span></div>`;
         const link = /^https?:\/\//.test(n.link || '') ? escapeHtml(n.link) : '#';
         const extracto = String(n.extracto || '');
         return `<article class="news-card news-card--editorial" style="--cat-color:${color};">${cover}<div class="news-card__body"><h3 class="news-card__title">${escapeHtml(n.titulo || '')}</h3>${extracto ? `<p class="news-card__excerpt">${escapeHtml(extracto).slice(0,140)}${extracto.length > 140 ? '…' : ''}</p>` : ''}<div class="news-card__footer"><span class="news-card__source"><svg class="ic"><use href="#i-news"/></svg>${escapeHtml(n.fuente || 'Fuente')}</span><a class="news-card__more" href="${link}" target="_blank" rel="noopener noreferrer">Leer más<svg class="ic"><use href="#i-arrow-right"/></svg></a></div></div></article>`;

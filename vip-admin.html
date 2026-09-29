@@ -4342,7 +4342,7 @@ const Pages={
     const store = window.AdminStore;
     if (!store?.ready) { Toast.error('Espera a que carguen los datos'); return; }
 
-    let mat = { titulo:'', tipo:'PDF', autor:'', descripcion:'', estado:'disponible', gratis:false, cursoId:'', paginas:0, portada:'', url:'' };
+    let mat = { titulo:'', tipo:'PDF', categoria:'', autor:'', descripcion:'', estado:'disponible', gratis:false, cursoId:'', paginas:0, portada:'', url:'', area:'' };
     const esEdicion = !!editId;
     if (esEdicion) {
       try {
@@ -4359,12 +4359,35 @@ const Pages={
       <div class="form-grid">
         <div class="form-field form-field--full">
           <label class="label" for="bl-titulo">Título *</label>
-          <input type="text" class="input" id="bl-titulo" maxlength="200" value="${(mat.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Guía práctica de evaluación psicológica">
+          <input type="text" class="input" id="bl-titulo" maxlength="200" value="${(mat.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Alimentación de Ganado Bovino con Dietas Altas en Grano">
         </div>
         <div class="form-field">
           <label class="label" for="bl-tipo">Tipo *</label>
           <select class="select" id="bl-tipo">
             ${['PDF','Guía','Libro','Presentación'].map(t => `<option value="${t}" ${t===mat.tipo?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-categoria">Categoría</label>
+          <input type="text" class="input" id="bl-categoria" maxlength="100" value="${(mat.categoria||'').replace(/"/g,'&quot;')}" placeholder="Ej: Libro de texto, Manual, Atlas">
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-paginas">Páginas o láminas</label>
+          <input type="number" class="input" id="bl-paginas" min="0" max="9999" value="${mat.paginas||''}" placeholder="Ej: 278">
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-area">Área</label>
+          <input type="text" class="input" id="bl-area" maxlength="100" value="${(mat.area||'').replace(/"/g,'&quot;')}" placeholder="Ej: Bovinos, Equinos, General">
+        </div>
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-autor">Autor</label>
+          <input type="text" class="input" id="bl-autor" maxlength="200" value="${(mat.autor||'').replace(/"/g,'&quot;')}" placeholder="Ej: Mendoza Martínez, Ricalde Velasco">
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-curso">Curso relacionado</label>
+          <select class="select" id="bl-curso">
+            <option value="">Recurso general</option>
+            ${store.cursos.map(c => `<option value="${c.id}" ${c.id===mat.cursoId?'selected':''}>${(c.titulo||'').replace(/</g,'&lt;')}</option>`).join('')}
           </select>
         </div>
         <div class="form-field">
@@ -4374,19 +4397,28 @@ const Pages={
           </select>
         </div>
         <div class="form-field form-field--full">
-          <label class="label" for="bl-autor">Autor</label>
-          <input type="text" class="input" id="bl-autor" maxlength="200" value="${(mat.autor||'').replace(/"/g,'&quot;')}" placeholder="Ej: Dra. María López Hernández">
-        </div>
-        <div class="form-field form-field--full">
           <label class="label" for="bl-desc">Descripción</label>
           <textarea class="input" id="bl-desc" rows="3" maxlength="2000" placeholder="Breve descripción del contenido…" style="resize:vertical">${(mat.descripcion||'').replace(/</g,'&lt;')}</textarea>
         </div>
-        <div class="form-field">
-          <label class="label" for="bl-curso">Curso vinculado <span style="color:var(--text-3);font-weight:400;font-size:11px;">(opcional)</span></label>
-          <select class="select" id="bl-curso">
-            <option value="">— Ninguno —</option>
-            ${store.cursos.map(c => `<option value="${c.id}" ${c.id===mat.cursoId?'selected':''}>${(c.titulo||'').replace(/</g,'&lt;')}</option>`).join('')}
-          </select>
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-url">URL del material *</label>
+          <input type="url" class="input" id="bl-url" value="${(mat.url||'').replace(/"/g,'&quot;')}" placeholder="https://drive.google.com/file/d/…/view" required>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Enlace de Google Drive, Docs, Slides o cualquier URL pública.</div>
+        </div>
+        <div class="form-field form-field--full" style="padding:16px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:12px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Portada</div>
+            ${mat.portada ? '<span style="font-size:11px;color:var(--success);font-weight:600;">✓ Portada actual guardada</span>' : '<span style="font-size:11px;color:var(--text-3);">Opcional · imagen de tapa (proporción 3:4)</span>'}
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <label style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface-3);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-2);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Subir imagen
+              <input type="file" id="bl-portada" accept="image/webp,image/jpeg,image/png" style="display:none;">
+            </label>
+            <span id="bl-portada-nombre" style="font-size:11px;color:var(--text-3);"></span>
+          </div>
+          ${mat.portada ? '<img src="'+mat.portada+'" style="margin-top:10px;max-height:120px;border-radius:8px;border:1px solid var(--border);" alt="Portada actual">' : ''}
         </div>
         <div class="form-field">
           <label class="label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
@@ -4395,15 +4427,13 @@ const Pages={
           </label>
           <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Visible sin membresía VIP</div>
         </div>
-
-        <div class="form-field form-field--full">
-          <label class="label" for="bl-url">URL del material *</label>
-          <input type="url" class="input" id="bl-url" value="${(mat.url||'').replace(/"/g,'&quot;')}" placeholder="https://drive.google.com/file/d/…/view" required>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Enlace de Google Drive, Docs, Slides o cualquier URL pública. Los miembros lo abrirán directamente desde la biblioteca.</div>
-        </div>
-
       </div>
     `;
+
+    body.querySelector('#bl-portada').addEventListener('change', function() {
+      const name = this.files[0]?.name || '';
+      body.querySelector('#bl-portada-nombre').textContent = name;
+    });
 
     const footer = document.createElement('div');
     footer.innerHTML = `
@@ -4428,24 +4458,53 @@ const Pages={
       try {
         const titulo = document.getElementById('bl-titulo').value.trim();
         const tipo = document.getElementById('bl-tipo').value;
+        const categoria = document.getElementById('bl-categoria').value.trim();
+        const paginasVal = document.getElementById('bl-paginas').value.trim();
+        const area = document.getElementById('bl-area').value.trim();
         const autor = document.getElementById('bl-autor').value.trim();
         const desc = document.getElementById('bl-desc').value.trim();
         const estado = document.getElementById('bl-estado').value;
         const gratis = document.getElementById('bl-gratis').checked;
         const cursoId = document.getElementById('bl-curso').value;
         const url = document.getElementById('bl-url').value.trim();
+        const portadaFile = document.getElementById('bl-portada').files[0];
+        const paginas = paginasVal ? parseInt(paginasVal, 10) || 0 : (mat.paginas || 0);
 
         if (!titulo) { Toast.error('Falta el título'); document.getElementById('bl-titulo')?.focus(); throw new Error('skip'); }
         if (!url) { Toast.error('Falta la URL del material'); document.getElementById('bl-url')?.focus(); throw new Error('skip'); }
         try { new URL(url); } catch { Toast.error('URL inválida', 'Verifica el enlace'); throw new Error('skip'); }
         if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura.');
 
+        let portadaData = mat.portada || '';
+        if (portadaFile) {
+          portadaData = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            const img = new Image();
+            reader.onload = () => {
+              img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_W = 400, MAX_H = 540;
+                let w = img.width, h = img.height;
+                if (w > MAX_W) { h = h * MAX_W / w; w = MAX_W; }
+                if (h > MAX_H) { w = w * MAX_H / h; h = MAX_H; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/webp', 0.78));
+              };
+              img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+              img.src = reader.result;
+            };
+            reader.onerror = () => reject(new Error('Error al leer archivo'));
+            reader.readAsDataURL(portadaFile);
+          });
+        }
+
         const fb = window._fb;
         const slugify = t => t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,60);
         const materialId = esEdicion ? editId : (slugify(titulo) + '-' + Math.random().toString(36).slice(2,8));
         const datos = {
-          titulo, tipo, autor, descripcion:desc, estado, gratis,
-          cursoId, paginas:0, portada:mat.portada||'', url,
+          titulo, tipo, categoria, autor, descripcion:desc, estado, gratis,
+          cursoId, paginas, portada:portadaData, url, area,
           actualizadoEn: fb.serverTimestamp(),
         };
         if (!esEdicion) datos.creadoEn = fb.serverTimestamp();
