@@ -4347,7 +4347,7 @@ const Pages={
     if (esEdicion) {
       try {
         const user = window._fb?.auth?.currentUser; if (!user) throw new Error('Sesión no disponible');
-        const docSnap = await getDoc(doc(db, 'materiales', editId));
+        const docSnap = await window._fb.getDoc(window._fb.doc(window._fb.db, 'materiales', editId));
         if (!docSnap.exists()) throw new Error('No encontrado');
         const d = docSnap.data();
         mat = { ...mat, ...d, id: editId };
@@ -4440,15 +4440,16 @@ const Pages={
         try { new URL(url); } catch { Toast.error('URL inválida', 'Verifica el enlace'); throw new Error('skip'); }
         if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura.');
 
+        const fb = window._fb;
         const slugify = t => t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,60);
         const materialId = esEdicion ? editId : (slugify(titulo) + '-' + Math.random().toString(36).slice(2,8));
         const datos = {
           titulo, tipo, autor, descripcion:desc, estado, gratis,
           cursoId, paginas:0, portada:mat.portada||'', url,
-          actualizadoEn: serverTimestamp(),
+          actualizadoEn: fb.serverTimestamp(),
         };
-        if (!esEdicion) datos.creadoEn = serverTimestamp();
-        await setDoc(doc(db, 'materiales', materialId), datos, { merge: true });
+        if (!esEdicion) datos.creadoEn = fb.serverTimestamp();
+        await fb.setDoc(fb.doc(fb.db, 'materiales', materialId), datos, { merge: true });
 
         Toast.success(esEdicion ? 'Material actualizado' : 'Material agregado a biblioteca', titulo);
         Modal.close();
