@@ -3339,8 +3339,54 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .historia-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0a3d2e,#1a6b4a 55%,#2d8b5f);color:#fff;overflow:hidden;margin-bottom:22px}.historia-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 82% 18%,rgba(120,200,160,.22),transparent 50%);pointer-events:none}.historia-banner>*{position:relative;z-index:1}.historia-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a8ffbf;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.historia-banner__eyebrow .ic{width:15px;height:15px}.historia-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(32px,4vw,48px);letter-spacing:-.055em;line-height:1}.historia-banner h1 em{font-style:normal;color:#a8ffbf}.historia-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}.historia-banner__cta{display:inline-flex;align-items:center;gap:10px;margin-top:21px;padding:12px 18px;border:0;border-radius:999px;background:#fff;color:#0a3d2e;font:750 13px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.historia-banner__cta:hover{transform:scale(1.03)}.historia-banner__cta .ic{width:17px;height:17px}.historia-personajes{display:flex;gap:14px;align-self:center}.historia-pj{display:flex;flex-direction:column;align-items:center;gap:6px}.historia-pj__avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.4);background:var(--pj-color)}.historia-pj__name{font-size:11px;font-weight:700;color:rgba(255,255,255,.85)}.historia-pj__role{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
 @media(max-width:850px){.historia-banner{grid-template-columns:1fr;padding:27px 24px}.historia-personajes{justify-content:center}}@media(max-width:520px){.historia-banner{padding:22px 18px}.historia-banner h1{font-size:30px}}
 
-/* Mundos y niveles */
-.historia-mundos{margin:24px 0}.historia-mundo{margin-bottom:14px;border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden}.historia-mundo__head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;transition:background .15s}.historia-mundo__head:hover{background:var(--surface-2)}.historia-mundo__num{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#e7efff;color:#2156e8;font-size:18px;font-weight:800}.historia-mundo__info h3{margin:0;color:var(--text);font-size:16px;letter-spacing:-.02em}.historia-mundo__info small{display:block;margin-top:3px;color:var(--text-3);font-size:11px}.historia-mundo__pct{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--surface-2);color:var(--text-2);font-size:11px;font-weight:800}.historia-mundo__niveles{padding:0 20px 18px;display:grid;gap:10px}.historia-nivel-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .15s,box-shadow .15s}.historia-nivel-card:hover{border-color:color-mix(in srgb,var(--primary) 40%,var(--border));box-shadow:0 6px 18px rgba(6,20,93,.07)}.historia-nivel-card.is-locked{opacity:.55;cursor:not-allowed}.historia-nivel-card.is-done{border-color:color-mix(in srgb,var(--ok) 30%,var(--border))}.historia-nivel-card__dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}.historia-nivel-card.is-done .historia-nivel-card__dot{background:var(--ok)}.historia-nivel-card.is-locked .historia-nivel-card__dot{background:var(--text-3)}.historia-nivel-card__info{display:grid;gap:2px}.historia-nivel-card__id{color:var(--text-3);font-size:10px;font-weight:800;letter-spacing:.08em}.historia-nivel-card__name{color:var(--text);font-size:14px;font-weight:700}.historia-nivel-card__desc{color:var(--text-3);font-size:11px}.historia-nivel-card__meta{display:flex;gap:8px;align-items:center;color:var(--text-3);font-size:10px;font-weight:700}.historia-nivel-card__meta .ic{width:12px;height:12px}
+/* Mundos y niveles – layout zigzag tipo VP */
+.historia-mundos{margin:24px 0;display:flex;flex-direction:column;gap:0}
+.hm-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:24px 28px;border-radius:20px;color:#fff;position:relative;overflow:hidden}
+.hm-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.1),transparent 60%);pointer-events:none}
+.hm-banner>*{position:relative;z-index:1}
+.hm-banner__num{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);font-size:20px;font-weight:800}
+.hm-banner__info{min-width:0}
+.hm-banner__info small{display:block;font-size:10px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px}
+.hm-banner__info h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.hm-banner__info p{margin:6px 0 0;color:rgba(255,255,255,.65);font-size:12px;line-height:1.4}
+.hm-banner__pct{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);font-size:12px;font-weight:800;position:relative}
+.hm-banner__pct::before{content:'';position:absolute;inset:-2px;border-radius:50%;border:2px solid transparent;border-top-color:rgba(255,255,255,.7)}
+.hm-camino{display:flex;flex-direction:column;gap:28px;padding:32px 16px}
+.hm-nivel{display:grid;grid-template-columns:auto 1fr;gap:16px;max-width:380px;cursor:pointer;transition:transform .15s}
+.hm-nivel:hover:not(.is-locked){transform:translateY(-2px)}
+.hm-nivel:nth-child(odd){align-self:flex-start;margin-left:3%}
+.hm-nivel:nth-child(even){align-self:flex-end;margin-right:3%}
+.hm-nivel__icon{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#e6f7ef;color:#1a6b4a;font-size:20px;flex-shrink:0;border:2px solid #c8e6d7;transition:all .15s}
+.hm-nivel.is-locked .hm-nivel__icon{background:var(--surface-2);color:var(--text-3);border-color:var(--border-2)}
+.hm-nivel.is-done .hm-nivel__icon{background:#d4edda;color:#155724;border-color:#a3d5b3}
+.hm-nivel__card{padding:18px 20px;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 4px 14px rgba(6,20,93,.04);transition:border-color .15s,box-shadow .15s}
+.hm-nivel:hover:not(.is-locked) .hm-nivel__card{border-color:color-mix(in srgb,var(--primary) 40%,var(--border));box-shadow:0 8px 24px rgba(6,20,93,.08)}
+.hm-nivel.is-locked .hm-nivel__card{opacity:.55}
+.hm-nivel.is-done .hm-nivel__card{border-color:color-mix(in srgb,var(--ok) 30%,var(--border))}
+.hm-nivel__id{display:flex;align-items:center;gap:6px;color:var(--text-3);font-size:10px;font-weight:800;letter-spacing:.08em}
+.hm-nivel__id::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--primary)}
+.hm-nivel.is-done .hm-nivel__id::before{background:var(--ok)}
+.hm-nivel.is-locked .hm-nivel__id::before{background:var(--text-3)}
+.hm-nivel__card strong{display:block;margin:6px 0 4px;color:var(--text);font-size:15px;letter-spacing:-.02em}
+.hm-nivel.is-locked .hm-nivel__card strong{color:var(--text-3)}
+.hm-nivel__card>p{margin:0;color:var(--text-3);font-size:11.5px;line-height:1.4}
+.hm-nivel__foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:11px;font-weight:700;color:var(--text-3)}
+.hm-nivel__foot .ic{width:12px;height:12px}
+.hm-nivel__cta{color:#1a6b4a;font-weight:800}
+.hm-nivel.is-done .hm-nivel__cta{color:var(--ok)}
+.hm-insignia{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;margin:4px 0 28px;padding:18px 22px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.hm-insignia__icon{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#fef9c3,#fef08a);font-size:20px;border:2px solid #e9e3c8}
+.hm-insignia small{display:block;font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.hm-insignia strong{display:block;margin:3px 0 2px;color:var(--text);font-size:14px;font-weight:800}
+.hm-insignia p{margin:0;color:var(--text-3);font-size:11px;line-height:1.35}
+.hm-insignia__lock{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--text-3);font-size:14px}
+.hm-insignia.is-earned .hm-insignia__lock{background:#d4edda;color:#155724}
+@media(max-width:768px){
+  .hm-camino{padding:24px 8px}
+  .hm-nivel:nth-child(odd),.hm-nivel:nth-child(even){align-self:stretch;max-width:100%;margin:0}
+  .hm-banner{padding:20px 18px;gap:12px}.hm-banner__info h3{font-size:17px}
+  .hm-nivel__card{padding:14px 16px}
+}
 
 /* Scene Player overlay */
 .hp-overlay{position:fixed;inset:0;z-index:9999;background:#faf9f5;display:grid;grid-template-rows:auto 1fr;overflow:auto;animation:hpFadeUp .3s ease}
@@ -4042,7 +4088,7 @@ window.__setDisplayName = async (nombre) => {
     </div>
 
     <div class="nav-section" data-tour="tools">
-      <div class="nav-label">Herramientas pro</div>
+      <div class="nav-label" id="sidebar-tools-label" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">Herramientas pro<span style="font-size:9px;font-weight:600;color:var(--primary);letter-spacing:.03em">Ver todo</span></div>
       <a class="nav-item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
       <a class="nav-item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
       <a class="nav-item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
@@ -8118,6 +8164,8 @@ const Sections = (function(){
   const historiaMundos = [{
     id:0, nombre:'Fundamentos', subtitulo:'Tu primer día en la consulta',
     desc:'De observar sin prejuicios a formular tu primera pregunta clínica.',
+    color:['#0a3d2e','#1a6b4a'],
+    insignia:{nombre:'Observador Clínico',icono:'👁',desc:'Completa los cinco niveles y demuestra tu capacidad de observación.'},
     niveles:[{
       id:'0.1', nombre:'Observar antes de concluir',
       desc:'Tu primera habilidad no será diagnosticar: será observar con intención.',
@@ -8174,6 +8222,139 @@ const Sections = (function(){
           {texto:'"¿Por qué no quieres hablar?"',correcta:false}
         ],feedback:{correcto:'Las preguntas abiertas sin juicio invitan a compartir. El "por qué" puede sentirse como acusación.',incorrecto:'Las preguntas cerradas limitan la respuesta. El "por qué" puede sonar acusatorio.'}},
         {tipo:'resumen',texto:'Aprendiste a formular preguntas abiertas que invitan a la reflexión sin presionar.'}
+      ]
+    },{
+      id:'0.4', nombre:'Empatía sin absorción',
+      desc:'Conectar con el otro sin perder tu propio centro emocional.',
+      duracion:'6 min', xp:15,
+      escenas:[
+        {tipo:'dialogo',personaje:'alex',texto:'Ayer una persona lloró en consulta y yo también sentí ganas de llorar. ¿Eso está bien?'},
+        {tipo:'dialogo',personaje:'elena',texto:'Sentir algo es natural. Pero hay una diferencia entre empatía y absorción emocional.'},
+        {tipo:'dialogo',personaje:'luna',texto:'La empatía te acerca. La absorción te inunda.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'Una persona te cuenta que perdió a un familiar. ¿Cuál es la respuesta más empática?',opciones:[
+          {texto:'"No te preocupes, todo va a estar bien."',correcta:false},
+          {texto:'"Puedo imaginar que esto es muy difícil para ti. Estoy aquí."',correcta:true},
+          {texto:'"A mí también me pasó algo parecido."',correcta:false}
+        ],feedback:{correcto:'Reconocer el dolor sin minimizarlo ni hacerlo tuyo es la base de la empatía clínica.',incorrecto:'Minimizar o comparar con tu experiencia aleja de la escucha empática.'}},
+        {tipo:'clasificacion',titulo:'Empatía vs absorción',instruccion:'¿Esta reacción refleja empatía saludable o absorción emocional?',categorias:['Empatía','Absorción'],iconos:['💚','🌊'],descs:['Conexión con límite','Te inunda'],items:[
+          {texto:'Reconoces su dolor pero mantienes tu calma.',categoria:0},
+          {texto:'Piensas en su caso todo el fin de semana.',categoria:1},
+          {texto:'Validas su emoción sin intentar arreglarla.',categoria:0},
+          {texto:'Sientes que su problema es también tuyo.',categoria:1}
+        ]},
+        {tipo:'resumen',texto:'Aprendiste a diferenciar empatía de absorción emocional: conectar sin perderte.'}
+      ]
+    },{
+      id:'0.5', nombre:'Tu primera sesión',
+      desc:'Integra observación, escucha, preguntas y empatía en un encuentro.',
+      duracion:'7 min', xp:20,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'Hoy es tu primera sesión con una persona real. Recuerda todo lo que has aprendido.'},
+        {tipo:'dialogo',personaje:'alex',texto:'Estoy nervioso. ¿Y si no sé qué decir?'},
+        {tipo:'dialogo',personaje:'luna',texto:'No necesitas tener respuestas. Necesitas tener presencia.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'La persona entra al consultorio. ¿Qué haces primero?',opciones:[
+          {texto:'Le preguntas directamente cuál es su problema.',correcta:false},
+          {texto:'La recibes con calma, la invitas a sentarse y observas.',correcta:true},
+          {texto:'Le entregas un cuestionario para que lo llene.',correcta:false}
+        ],feedback:{correcto:'El primer momento es para generar confianza, no para recopilar datos.',incorrecto:'Ir demasiado rápido o demasiado formal puede cerrar la comunicación.'}},
+        {tipo:'opcion',personaje:'elena',pregunta:'La persona dice: "No sé ni por qué vine." ¿Cómo respondes?',opciones:[
+          {texto:'"Bueno, si no sabes, ¿para qué seguir?"',correcta:false},
+          {texto:'"A veces el primer paso es el más difícil. ¿Qué te hizo venir hoy?"',correcta:true},
+          {texto:'"Yo te voy a decir qué te pasa."',correcta:false}
+        ],feedback:{correcto:'Validar la dificultad y explorar la motivación abre el espacio terapéutico.',incorrecto:'Minimizar o imponer cierra la puerta al diálogo.'}},
+        {tipo:'resumen',texto:'Completaste tu primera sesión. Observaste, escuchaste, preguntaste y conectaste.'}
+      ]
+    }]
+  },{
+    id:1, nombre:'Comunicación Terapéutica', subtitulo:'Más allá de las palabras',
+    desc:'Domina las herramientas de comunicación que transforman una conversación en un espacio terapéutico.',
+    color:['#1a1a5e','#2e3fa8'],
+    insignia:{nombre:'Comunicador Terapéutico',icono:'🗣',desc:'Completa los cinco niveles y demuestra dominio en comunicación clínica.'},
+    niveles:[{
+      id:'1.1', nombre:'El lenguaje del cuerpo',
+      desc:'Lo que no se dice con palabras se grita con el cuerpo.',
+      duracion:'6 min', xp:15,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'Una persona puede decir "estoy bien" mientras su cuerpo dice todo lo contrario.'},
+        {tipo:'dialogo',personaje:'alex',texto:'¿Cómo sé en qué fijarme?'},
+        {tipo:'dialogo',personaje:'elena',texto:'Postura, manos, contacto visual, tono de voz. Son canales que nunca mienten.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'Dice "ya no me afecta" pero tiene brazos cruzados, mirada baja y voz temblorosa. ¿Qué haces?',opciones:[
+          {texto:'Le crees porque eso dijo.',correcta:false},
+          {texto:'Exploras con cuidado: "Noto que tu cuerpo dice algo distinto…"',correcta:true},
+          {texto:'Le dices que está mintiendo.',correcta:false}
+        ],feedback:{correcto:'Señalar con respeto la incongruencia abre espacio para una conversación más honesta.',incorrecto:'Ignorar señales no verbales o confrontar agresivamente cierra el diálogo.'}},
+        {tipo:'clasificacion',titulo:'Verbal vs No verbal',instruccion:'¿Esta señal es verbal o no verbal?',categorias:['Verbal','No verbal'],iconos:['💬','🤲'],descs:['Dicho con palabras','Expresado con el cuerpo'],items:[
+          {texto:'Dice que está tranquilo.',categoria:0},
+          {texto:'Evita el contacto visual.',categoria:1},
+          {texto:'Pide hablar de otro tema.',categoria:0},
+          {texto:'Mueve la pierna constantemente.',categoria:1}
+        ]},
+        {tipo:'resumen',texto:'Aprendiste a leer señales no verbales y a nombrarlas con respeto en sesión.'}
+      ]
+    },{
+      id:'1.2', nombre:'Reformular sin interpretar',
+      desc:'Devolver lo escuchado sin añadir tu propia historia.',
+      duracion:'5 min', xp:15,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'Reformular es como un espejo: devuelves lo que la persona dijo, no lo que tú crees.'},
+        {tipo:'dialogo',personaje:'alex',texto:'¿Cuál es la diferencia con interpretar?'},
+        {tipo:'dialogo',personaje:'luna',texto:'Reformular respeta. Interpretar supone.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'"Mi mamá siempre me critica." ¿Cuál es una buena reformulación?',opciones:[
+          {texto:'"Tu mamá es tóxica."',correcta:false},
+          {texto:'"Sientes que sus observaciones son constantes y te afectan."',correcta:true},
+          {texto:'"Todos los hijos sienten eso."',correcta:false}
+        ],feedback:{correcto:'La reformulación devuelve el contenido emocional sin juzgar ni generalizar.',incorrecto:'Etiquetar, diagnosticar o minimizar aleja de la escucha empática.'}},
+        {tipo:'resumen',texto:'Practicaste reformulación: devolver lo dicho con fidelidad, sin agregar ni quitar.'}
+      ]
+    },{
+      id:'1.3', nombre:'Silencios que hablan',
+      desc:'El silencio no es vacío. Es espacio para que algo emerja.',
+      duracion:'5 min', xp:15,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'¿Qué haces cuando hay un silencio largo en sesión?'},
+        {tipo:'dialogo',personaje:'alex',texto:'Me pongo nervioso y digo algo para llenarlo.'},
+        {tipo:'dialogo',personaje:'elena',texto:'El silencio no es un error. A veces es justo lo que la persona necesita.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'Después de una pregunta profunda, la persona guarda silencio 20 segundos. ¿Qué haces?',opciones:[
+          {texto:'Repites la pregunta de otra forma.',correcta:false},
+          {texto:'Esperas con calma, manteniendo contacto visual suave.',correcta:true},
+          {texto:'Cambias de tema para que no se sienta incómoda.',correcta:false}
+        ],feedback:{correcto:'Sostener el silencio comunica que hay espacio seguro para pensar y sentir.',incorrecto:'Llenar el silencio puede interrumpir un proceso importante que estaba naciendo.'}},
+        {tipo:'resumen',texto:'Descubriste que el silencio es una herramienta, no un problema.'}
+      ]
+    },{
+      id:'1.4', nombre:'Barreras de la comunicación',
+      desc:'Identifica qué bloquea el diálogo antes de construirlo.',
+      duracion:'6 min', xp:15,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'A veces la comunicación no fluye. No por falta de voluntad, sino por barreras invisibles.'},
+        {tipo:'dialogo',personaje:'luna',texto:'Juzgar, aconsejar, minimizar, comparar… todas son barreras disfrazadas de ayuda.'},
+        {tipo:'clasificacion',titulo:'¿Barrera o puente?',instruccion:'¿Esta frase abre o cierra la comunicación?',categorias:['Puente','Barrera'],iconos:['🌉','🧱'],descs:['Abre el diálogo','Cierra el diálogo'],items:[
+          {texto:'"Cuéntame más sobre eso."',categoria:0},
+          {texto:'"No deberías sentirte así."',categoria:1},
+          {texto:'"Entiendo que es importante para ti."',categoria:0},
+          {texto:'"Eso no es para tanto."',categoria:1}
+        ]},
+        {tipo:'opcion',personaje:'elena',pregunta:'"Nadie me entiende." ¿Qué barrera cometen más los adultos?',opciones:[
+          {texto:'Minimizar: "No exageres, todos pasamos por eso."',correcta:true},
+          {texto:'Preguntar: "¿Qué quieres decir con nadie?"',correcta:false},
+          {texto:'Validar: "Eso suena solitario."',correcta:false}
+        ],feedback:{correcto:'Minimizar es la barrera más común. Las opciones B y C son buenas respuestas terapéuticas.',incorrecto:'Esa respuesta es terapéutica, pero la pregunta era sobre la barrera más común.'}},
+        {tipo:'resumen',texto:'Aprendiste a identificar las barreras que bloquean la comunicación y a evitarlas.'}
+      ]
+    },{
+      id:'1.5', nombre:'El cierre de sesión',
+      desc:'Cerrar bien es tan importante como abrir bien.',
+      duracion:'6 min', xp:20,
+      escenas:[
+        {tipo:'dialogo',personaje:'elena',texto:'El cierre no es solo decir "se acabó el tiempo". Es un momento terapéutico en sí mismo.'},
+        {tipo:'dialogo',personaje:'alex',texto:'¿Qué debería incluir un buen cierre?'},
+        {tipo:'dialogo',personaje:'elena',texto:'Resumen de lo trabajado, validación del esfuerzo, y una pregunta para llevar.'},
+        {tipo:'opcion',personaje:'elena',pregunta:'La sesión fue intensa. La persona compartió algo difícil. ¿Cómo cierras?',opciones:[
+          {texto:'"Se acabó el tiempo. Nos vemos."',correcta:false},
+          {texto:'"Hoy compartiste algo importante. ¿Hay algo que te gustaría llevarte de hoy?"',correcta:true},
+          {texto:'"No te preocupes, todo se va a solucionar."',correcta:false}
+        ],feedback:{correcto:'Un buen cierre reconoce el esfuerzo, valida lo compartido y deja algo para reflexionar.',incorrecto:'Cerrar abruptamente o con falsas promesas no honra lo que la persona compartió.'}},
+        {tipo:'resumen',texto:'Completaste la ruta de comunicación terapéutica. Sabes abrir, sostener y cerrar un espacio seguro.'}
       ]
     }]
   }];
@@ -8268,22 +8449,29 @@ const Sections = (function(){
 
     function completarNivel(){
       _guardarHistoriaNivel(nivel.id);
+      const isLastInWorld=nivelIdx>=mundo.niveles.length-1;
+      const hasNextWorld=mundoIdx+1<historiaMundos.length;
+      let nextBtnHTML;
+      if(!isLastInWorld){
+        nextBtnHTML='<button type="button" id="hp-sig-nivel">Siguiente nivel<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>';
+      } else if(hasNextWorld){
+        nextBtnHTML='<button type="button" id="hp-sig-mundo">Siguiente mundo<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>';
+      } else {
+        nextBtnHTML='<button type="button" id="hp-volver">Volver a retos<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>';
+      }
+      const insigniaHTML=isLastInWorld&&mundo.insignia?`<div style="margin:12px 0 0;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#fefce8,#fef9c3);border:1px solid #e9e3c8;text-align:center"><span style="font-size:28px">${mundo.insignia.icono}</span><div style="margin-top:6px;font-size:13px;font-weight:800;color:#78350f">Insignia: ${escapeHtml(mundo.insignia.nombre)}</div><div style="font-size:11px;color:#92400e;margin-top:2px">¡Desbloqueada!</div></div>`:'';
       body.innerHTML=`
         <div class="hp-resumen">
           <div class="hp-resumen__icon">🎉</div>
-          <h2 class="hp-resumen__title">¡Nivel completado!</h2>
+          <h2 class="hp-resumen__title">${isLastInWorld?'¡Mundo completado!':'¡Nivel completado!'}</h2>
           <p class="hp-resumen__text">${escapeHtml(nivel.nombre)}</p>
           <div class="hp-resumen__xp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+${nivel.xp} XP</div>
+          ${insigniaHTML}
         </div>
-        <div class="hp-next">
-          ${nivelIdx<mundo.niveles.length-1
-            ?'<button type="button" id="hp-sig-nivel">Siguiente nivel<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>'
-            :'<button type="button" id="hp-volver">Volver a retos<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>'}
-        </div>`;
-      const sigBtn=body.querySelector('#hp-sig-nivel');
-      if(sigBtn) sigBtn.addEventListener('click',()=>{abrirHistoriaNivel(mundoIdx,nivelIdx+1);});
-      const volBtn=body.querySelector('#hp-volver');
-      if(volBtn) volBtn.addEventListener('click',()=>{if(_retosContainer)_renderHistoriaView(_retosContainer);});
+        <div class="hp-next">${nextBtnHTML}</div>`;
+      body.querySelector('#hp-sig-nivel')?.addEventListener('click',()=>{abrirHistoriaNivel(mundoIdx,nivelIdx+1);});
+      body.querySelector('#hp-sig-mundo')?.addEventListener('click',()=>{abrirHistoriaNivel(mundoIdx+1,0);});
+      body.querySelector('#hp-volver')?.addEventListener('click',()=>{if(_retosContainer)_renderHistoriaView(_retosContainer);});
     }
 
     function renderEscena(){
@@ -8424,33 +8612,52 @@ const Sections = (function(){
       const nivelesM=mundo.niveles;
       const completosMundo=nivelesM.filter(n=>historiaProg[n.id]).length;
       const pctMundo=nivelesM.length>0?Math.round((completosMundo/nivelesM.length)*100):0;
-      return `
-        <div class="historia-mundo" data-mundo="${mi}">
-          <div class="historia-mundo__head">
-            <div class="historia-mundo__num">${mundo.id}</div>
-            <div class="historia-mundo__info"><h3>${escapeHtml(mundo.nombre)}</h3><small>${escapeHtml(mundo.subtitulo)} · ${completosMundo}/${nivelesM.length} completados</small></div>
-            <div class="historia-mundo__pct">${pctMundo}%</div>
-          </div>
-          <div class="historia-mundo__niveles">
-            ${nivelesM.map((nivel,ni)=>{
-              const done=!!historiaProg[nivel.id];
-              const unlocked=_nivelDesbloqueado(mi,ni);
-              const cls=done?'is-done':unlocked?'':'is-locked';
-              return `<div class="historia-nivel-card ${cls}" data-mundi="${mi}" data-nivi="${ni}" ${!unlocked?'aria-disabled="true"':''}>
-                <div class="historia-nivel-card__dot"></div>
-                <div class="historia-nivel-card__info">
-                  <span class="historia-nivel-card__id">${nivel.id}</span>
-                  <span class="historia-nivel-card__name">${escapeHtml(nivel.nombre)}</span>
-                  <span class="historia-nivel-card__desc">${escapeHtml(nivel.desc)}</span>
-                </div>
-                <div class="historia-nivel-card__meta">
-                  <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${nivel.duracion}</span>
-                  <span>${done?'✓':'+'+nivel.xp+' XP'}</span>
-                </div>
-              </div>`;
-            }).join('')}
+      const mundoCompleto=completosMundo===nivelesM.length && nivelesM.length>0;
+      const [c1,c2]=mundo.color||['#0a3d2e','#1a6b4a'];
+
+      const nivelesHTML=nivelesM.map((nivel,ni)=>{
+        const done=!!historiaProg[nivel.id];
+        const unlocked=_nivelDesbloqueado(mi,ni);
+        const cls=done?'is-done':unlocked?'':'is-locked';
+        const iconContent=done?'✓':unlocked?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+        const ctaText=done?'Repetir':unlocked?'▷ Comenzar':'';
+        return `<div class="hm-nivel ${cls}" data-mundi="${mi}" data-nivi="${ni}">
+          <div class="hm-nivel__icon">${iconContent}</div>
+          <div class="hm-nivel__card">
+            <span class="hm-nivel__id">${nivel.id}</span>
+            <strong>${escapeHtml(nivel.nombre)}</strong>
+            <p>${escapeHtml(nivel.desc)}</p>
+            <div class="hm-nivel__foot">
+              <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${nivel.duracion}</span>
+              <span class="hm-nivel__cta">${ctaText}</span>
+            </div>
           </div>
         </div>`;
+      }).join('');
+
+      const insigniaHTML=mundo.insignia?`
+        <div class="hm-insignia ${mundoCompleto?'is-earned':''}">
+          <div class="hm-insignia__icon">${mundo.insignia.icono}</div>
+          <div>
+            <small>INSIGNIA DEL MUNDO</small>
+            <strong>${escapeHtml(mundo.insignia.nombre)}</strong>
+            <p>${escapeHtml(mundo.insignia.desc)}</p>
+          </div>
+          <div class="hm-insignia__lock">${mundoCompleto?'✓':'🔒'}</div>
+        </div>`:'';
+
+      return `
+        <div class="hm-banner" style="background:linear-gradient(135deg,${c1},${c2})">
+          <div class="hm-banner__num">${mundo.id}</div>
+          <div class="hm-banner__info">
+            <small>${escapeHtml(mundo.nombre)}</small>
+            <h3>${escapeHtml(mundo.subtitulo)}</h3>
+            <p>${escapeHtml(mundo.desc)} ${completosMundo} de ${nivelesM.length} niveles completados.</p>
+          </div>
+          <div class="hm-banner__pct"><span>${pctMundo}%</span></div>
+        </div>
+        <div class="hm-camino">${nivelesHTML}</div>
+        ${insigniaHTML}`;
     }).join('');
 
     container.innerHTML=`
@@ -8459,9 +8666,9 @@ const Sections = (function(){
           <div>
             <span class="historia-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Modo Historia · Ruta Psicología</span>
             <h1>Aprende a leer <em>la mente.</em></h1>
-            <p>Recorre consultas, analiza casos y entrena tu criterio clínico paso a paso. Cada nivel te enseña por sí mismo.</p>
+            <p>Recorre consultas, analiza casos y entrena tu criterio clínico paso a paso.</p>
             <button type="button" class="historia-banner__cta" id="btn-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
-            <small style="display:block;margin-top:10px;color:rgba(255,255,255,.6);font-size:11px">${nivelesCompletos}/${totalNiveles} niveles disponibles · Mundo ${historiaMundos.length>0?historiaMundos[0].id:0}</small>
+            <small style="display:block;margin-top:10px;color:rgba(255,255,255,.6);font-size:11px">${nivelesCompletos}/${totalNiveles} niveles · ${historiaMundos.length} mundos</small>
           </div>
           <div class="historia-personajes">
             <div style="text-align:right;margin-bottom:8px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7)">Tu equipo</span><br><span style="font-size:10px;color:rgba(255,255,255,.45)">Te acompañará sin darte respuestas fáciles.</span></div>
@@ -8481,7 +8688,7 @@ const Sections = (function(){
     `;
 
     container.querySelector('#btn-volver-retos')?.addEventListener('click',()=>renderRetos(container));
-    container.querySelectorAll('.historia-nivel-card:not(.is-locked)').forEach(card=>{
+    container.querySelectorAll('.hm-nivel:not(.is-locked)').forEach(card=>{
       card.addEventListener('click',()=>abrirHistoriaNivel(Number(card.dataset.mundi),Number(card.dataset.nivi)));
     });
   }
@@ -11765,6 +11972,7 @@ function initNav(){
     }
   };
   if(toolsBtn) toolsBtn.addEventListener('click',e=>{e.preventDefault();abrirToolsCatalog();});
+  document.getElementById('sidebar-tools-label')?.addEventListener('click',()=>abrirToolsCatalog());
   if(toolsCatalogOverlay) toolsCatalogOverlay.addEventListener('click',cerrarToolsCatalog);
   if(toolsCatalogClose) toolsCatalogClose.addEventListener('click',cerrarToolsCatalog);
   toolsCatalog?.querySelectorAll('[data-tool]').forEach(card=>{
