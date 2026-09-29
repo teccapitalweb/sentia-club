@@ -3884,6 +3884,10 @@ const Pages={
               <svg class="ic"><use href="#i-plus"/></svg>
               Nuevo material
             </button>
+            <button class="btn btn--primary" id="new-libro-btn" style="gap:7px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Subir libro a biblioteca
+            </button>
           </div>
         </div>
 
@@ -3949,6 +3953,9 @@ const Pages={
     // Botón nuevo material
     p.querySelector('#new-material-btn')?.addEventListener('click', () => {
       Pages._abrirModalMaterial(null);
+    });
+    p.querySelector('#new-libro-btn')?.addEventListener('click', () => {
+      Pages._abrirModalBiblioteca(null);
     });
   },
 
@@ -4326,6 +4333,134 @@ const Pages={
         }
       } finally {
         btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+      }
+    });
+  },
+
+  // ─── Modal SUBIR LIBRO a la colección 'materiales' (biblioteca nueva) ───
+  async _abrirModalBiblioteca(editId) {
+    const store = window.AdminStore;
+    if (!store?.ready) { Toast.error('Espera a que carguen los datos'); return; }
+
+    let mat = { titulo:'', tipo:'PDF', autor:'', descripcion:'', estado:'disponible', gratis:false, cursoId:'', paginas:0, portada:'', url:'' };
+    const esEdicion = !!editId;
+    if (esEdicion) {
+      try {
+        const user = window._fb?.auth?.currentUser; if (!user) throw new Error('Sesión no disponible');
+        const fs = window.__fs; const db = window.__db;
+        const docSnap = await fs.getDoc(fs.doc(db, 'materiales', editId));
+        if (!docSnap.exists()) throw new Error('No encontrado');
+        const d = docSnap.data();
+        mat = { ...mat, ...d, id: editId };
+      } catch (e) { Toast.error('No se pudo cargar', e.message); return; }
+    }
+
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <div class="form-grid">
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-titulo">Título *</label>
+          <input type="text" class="input" id="bl-titulo" maxlength="200" value="${(mat.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Guía práctica de evaluación psicológica">
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-tipo">Tipo *</label>
+          <select class="select" id="bl-tipo">
+            ${['PDF','Guía','Libro','Presentación'].map(t => `<option value="${t}" ${t===mat.tipo?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-estado">Estado *</label>
+          <select class="select" id="bl-estado">
+            ${['disponible','proximamente','oculto'].map(e => `<option value="${e}" ${e===mat.estado?'selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-autor">Autor</label>
+          <input type="text" class="input" id="bl-autor" maxlength="200" value="${(mat.autor||'').replace(/"/g,'&quot;')}" placeholder="Ej: Dra. María López Hernández">
+        </div>
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-desc">Descripción</label>
+          <textarea class="input" id="bl-desc" rows="3" maxlength="2000" placeholder="Breve descripción del contenido…" style="resize:vertical">${(mat.descripcion||'').replace(/</g,'&lt;')}</textarea>
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-curso">Curso vinculado <span style="color:var(--text-3);font-weight:400;font-size:11px;">(opcional)</span></label>
+          <select class="select" id="bl-curso">
+            <option value="">— Ninguno —</option>
+            ${store.cursos.map(c => `<option value="${c.id}" ${c.id===mat.cursoId?'selected':''}>${(c.titulo||'').replace(/</g,'&lt;')}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="bl-gratis" ${mat.gratis?'checked':''}>
+            Material gratuito
+          </label>
+          <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Visible sin membresía VIP</div>
+        </div>
+
+        <div class="form-field form-field--full">
+          <label class="label" for="bl-url">URL del material *</label>
+          <input type="url" class="input" id="bl-url" value="${(mat.url||'').replace(/"/g,'&quot;')}" placeholder="https://drive.google.com/file/d/…/view" required>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Enlace de Google Drive, Docs, Slides o cualquier URL pública. Los miembros lo abrirán directamente desde la biblioteca.</div>
+        </div>
+
+      </div>
+    `;
+
+    const footer = document.createElement('div');
+    footer.innerHTML = `
+      <button class="btn btn--ghost" id="bl-cancel">Cancelar</button>
+      <button class="btn btn--accent" id="bl-save">
+        <svg class="ic"><use href="#i-check"/></svg>
+        ${esEdicion ? 'Guardar cambios' : 'Agregar material'}
+      </button>
+    `;
+
+    Modal.open({
+      title: esEdicion ? 'Editar material de biblioteca' : 'Agregar material a biblioteca',
+      subtitle: 'Agrega PDFs, guías, presentaciones u otros recursos con un enlace externo',
+      icon: 'i-news', body, footer, wide: true,
+    });
+
+    footer.querySelector('#bl-cancel').addEventListener('click', () => Modal.close());
+    footer.querySelector('#bl-save').addEventListener('click', async () => {
+      const btn = footer.querySelector('#bl-save');
+      btn.disabled = true; btn.style.opacity = '.65';
+
+      try {
+        const titulo = document.getElementById('bl-titulo').value.trim();
+        const tipo = document.getElementById('bl-tipo').value;
+        const autor = document.getElementById('bl-autor').value.trim();
+        const desc = document.getElementById('bl-desc').value.trim();
+        const estado = document.getElementById('bl-estado').value;
+        const gratis = document.getElementById('bl-gratis').checked;
+        const cursoId = document.getElementById('bl-curso').value;
+        const url = document.getElementById('bl-url').value.trim();
+
+        if (!titulo) { Toast.error('Falta el título'); document.getElementById('bl-titulo')?.focus(); throw new Error('skip'); }
+        if (!url) { Toast.error('Falta la URL del material'); document.getElementById('bl-url')?.focus(); throw new Error('skip'); }
+        try { new URL(url); } catch { Toast.error('URL inválida', 'Verifica el enlace'); throw new Error('skip'); }
+        if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura.');
+
+        const user = window._fb?.auth?.currentUser;
+        if (!user) throw new Error('Sesión admin no disponible');
+        const authH = { 'Content-Type':'application/json', 'Authorization':'Bearer '+await user.getIdToken() };
+        const webhookUrl = Pages._webhookUrl;
+
+        const matBody = { titulo, tipo, autor, descripcion:desc, estado, gratis, cursoId, paginas:0, portada:mat.portada||'', url };
+        if (esEdicion) matBody.id = editId;
+        const saveResp = await fetch(`${webhookUrl}/admin/materiales`, { method:'POST', headers:authH, body:JSON.stringify(matBody) });
+        const saveData = await saveResp.json().catch(()=>({}));
+        if (!saveResp.ok) throw new Error(saveData.error || 'No se pudo guardar');
+
+        Toast.success(esEdicion ? 'Material actualizado' : 'Material agregado a biblioteca', titulo);
+        Modal.close();
+      } catch (err) {
+        if (err.message !== 'skip') {
+          console.error('[biblioteca submit]', err);
+          Toast.error('Error', err.message || 'Intenta de nuevo');
+        }
+      } finally {
+        btn.disabled = false; btn.style.opacity = '1';
       }
     });
   },

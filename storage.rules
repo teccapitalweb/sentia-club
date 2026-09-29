@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Portadas de materiales: lectura pública (se muestran en la biblioteca).
+    // Solo el servidor (Admin SDK) las escribe mediante URLs firmadas.
+    match /materiales/portadas/{filename} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Páginas del visor (WebP por página) y PDFs originales: lectura solo
+    // mediante URL firmada generada por el servidor tras verificar VIP.
+    // El Admin SDK sube las páginas con la URL firmada de escritura.
+    match /materiales/{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Todo lo demás permanece bloqueado.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

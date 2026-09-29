@@ -59,6 +59,10 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if false;
     }
+    match /materiales/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
     match /config/{id} {
       // La pantalla de acceso consulta el precio antes de iniciar sesión.
       allow read: if true;
