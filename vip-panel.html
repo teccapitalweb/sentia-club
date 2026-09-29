@@ -8338,20 +8338,10 @@ const Sections = (function(){
   }
 
   /* ============================ RETOS ============================ */
-  function renderRetos(container){
-    evaluarLogros();
-    const nivelActual=getNivel(usuario.xp);
-    const pct=Math.round(((usuario.xp-nivelActual.desde)/(nivelActual.hasta-nivelActual.desde))*100);
-    const xpRest=nivelActual.hasta-usuario.xp;
-    const proxNivel=niveles[nivelActual.id]?.nombre||'Maestro';
-    const progresoReal=(typeof getProgreso==='function') ? getProgreso() : {};
-    const clasesVistas=Object.values(progresoReal).reduce((n,p)=>n+((p&&p.clasesVistas)?p.clasesVistas.length:0),0);
-    const actividadesAprobadas=Object.values(progresoReal).flatMap(p=>Object.values((p&&p.actividades)||{})).filter(a=>a&&a.aprobada).length;
-    const retoDiario=retosPractica.diario[retoIndiceDelDia(retosPractica.diario)];
+  function _renderHistoriaView(container){
     const historiaProg=_getHistoriaProgreso();
     const totalNiveles=historiaMundos.reduce((s,m)=>s+m.niveles.length,0);
     const nivelesCompletos=Object.keys(historiaProg).length;
-    const minutoHoy=minutoRetos[retoIndiceDelDia(minutoRetos)];
 
     const mundosHTML=historiaMundos.map((mundo,mi)=>{
       const nivelesM=mundo.niveles;
@@ -8390,11 +8380,74 @@ const Sections = (function(){
       <div class="fade-up">
         <div class="historia-banner">
           <div>
-            <span class="historia-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Modo Historia</span>
+            <span class="historia-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Modo Historia · Ruta Psicología</span>
             <h1>Aprende a leer <em>la mente.</em></h1>
             <p>Recorre consultas, analiza casos y entrena tu criterio clínico paso a paso. Cada nivel te enseña por sí mismo.</p>
-            <button type="button" class="historia-banner__cta" id="btn-comenzar-historia">Comenzar recorrido<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
-            <small style="display:block;margin-top:10px;color:rgba(255,255,255,.6);font-size:11px">${nivelesCompletos}/${totalNiveles} niveles completados · Mundo ${historiaMundos.length>0?historiaMundos[0].id:0}</small>
+            <button type="button" class="historia-banner__cta" id="btn-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+            <small style="display:block;margin-top:10px;color:rgba(255,255,255,.6);font-size:11px">${nivelesCompletos}/${totalNiveles} niveles disponibles · Mundo ${historiaMundos.length>0?historiaMundos[0].id:0}</small>
+          </div>
+          <div class="historia-personajes">
+            <div style="text-align:right;margin-bottom:8px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7)">Tu equipo</span><br><span style="font-size:10px;color:rgba(255,255,255,.45)">Te acompañará sin darte respuestas fáciles.</span></div>
+            ${Object.entries(historiaPersonajes).map(([id,pj])=>`
+              <div class="historia-pj">
+                <div class="historia-pj__avatar" style="--pj-color:${pj.color}">${pj.iniciales}</div>
+                <span class="historia-pj__name">${pj.nombre}</span>
+                <span class="historia-pj__role">${pj.rol}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <section class="historia-mundos">
+          ${mundosHTML}
+        </section>
+      </div>
+    `;
+
+    container.querySelector('#btn-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    container.querySelectorAll('.historia-nivel-card:not(.is-locked)').forEach(card=>{
+      card.addEventListener('click',()=>abrirHistoriaNivel(Number(card.dataset.mundi),Number(card.dataset.nivi)));
+    });
+  }
+
+  function renderRetos(container){
+    evaluarLogros();
+    const nivelActual=getNivel(usuario.xp);
+    const pct=Math.round(((usuario.xp-nivelActual.desde)/(nivelActual.hasta-nivelActual.desde))*100);
+    const xpRest=nivelActual.hasta-usuario.xp;
+    const proxNivel=niveles[nivelActual.id]?.nombre||'Maestro';
+    const progresoReal=(typeof getProgreso==='function') ? getProgreso() : {};
+    const clasesVistas=Object.values(progresoReal).reduce((n,p)=>n+((p&&p.clasesVistas)?p.clasesVistas.length:0),0);
+    const actividadesAprobadas=Object.values(progresoReal).flatMap(p=>Object.values((p&&p.actividades)||{})).filter(a=>a&&a.aprobada).length;
+    const retoDiario=retosPractica.diario[retoIndiceDelDia(retosPractica.diario)];
+    const historiaProg=_getHistoriaProgreso();
+    const totalNiveles=historiaMundos.reduce((s,m)=>s+m.niveles.length,0);
+    const nivelesCompletos=Object.keys(historiaProg).length;
+    const minutoHoy=minutoRetos[retoIndiceDelDia(minutoRetos)];
+
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="retos-hero">
+          <div class="retos-hero__main">
+            <span class="retos-hero__eyebrow"><svg class="ic"><use href="#i-trophy"/></svg>Retos</span>
+            <h1>Tu avance también <em>cuenta.</em></h1>
+            <p>Convierte tu formación, actividades y práctica profesional en avances verificables para ti.</p>
+            <button type="button" class="retos-hero__cta" data-practice="diario">Resolver reto diario<svg class="ic"><use href="#i-arrow-right"/></svg></button>
+          </div>
+          <aside class="retos-hero__summary">
+            <span>Tu avance actual</span>
+            <strong>Nivel ${nivelActual.id} · ${nivelActual.nombre}</strong>
+            <div class="retos-hero__bar"><i style="width:${pct}%"></i></div>
+            <small>${usuario.xp} puntos de avance${xpRest>0?' · '+xpRest+' para '+proxNivel:''}</small>
+            <div class="retos-hero__numbers"><div><b>${clasesVistas}</b><span>clases</span></div><div><b>${actividadesAprobadas}</b><span>actividades</span></div><div><b>${usuario.racha}</b><span>racha</span></div></div>
+          </aside>
+        </div>
+
+        <div class="historia-banner" style="cursor:pointer" id="historia-teaser">
+          <div>
+            <span class="historia-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Nueva experiencia · Modo Historia</span>
+            <h1>Aprende a leer <em>la mente.</em></h1>
+            <p>Avanza por mundos, toma decisiones clínicas y domina cada habilidad desde lo básico.</p>
+            <button type="button" class="historia-banner__cta" id="btn-comenzar-historia">Comenzar historia<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
           </div>
           <div class="historia-personajes">
             ${Object.entries(historiaPersonajes).map(([id,pj])=>`
@@ -8416,13 +8469,9 @@ const Sections = (function(){
           <button type="button" id="btn-minuto" aria-label="Resolver reto"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
         </section>
 
-        <section class="historia-mundos" id="historia-mundos">
-          ${mundosHTML}
-        </section>
-
         <section class="reto-next">
           <div class="reto-next__icon"><svg class="ic"><use href="#i-ps-target"/></svg></div>
-          <div><span>Quiz diario</span><h2>${retoDiario.pregunta}</h2><p>Una pregunta breve para entrenar tu criterio profesional.</p></div>
+          <div><span>Reto diario</span><h2>${retoDiario.pregunta}</h2><p>Una pregunta breve para entrenar tu criterio profesional.</p></div>
           <button type="button" data-practice="diario" aria-label="Resolver reto diario"><svg class="ic"><use href="#i-arrow-right"/></svg></button>
         </section>
 
@@ -8435,37 +8484,16 @@ const Sections = (function(){
           </div>
         </section>
 
-        <div class="retos-hero" style="margin-top:28px">
-          <div class="retos-hero__main">
-            <span class="retos-hero__eyebrow"><svg class="ic"><use href="#i-trophy"/></svg>Tu avance</span>
-            <h1>Tu avance también <em>cuenta.</em></h1>
-            <p>Convierte tu formación, actividades y práctica profesional en avances verificables para ti.</p>
-          </div>
-          <aside class="retos-hero__summary">
-            <span>Tu avance actual</span>
-            <strong>Nivel ${nivelActual.id} · ${nivelActual.nombre}</strong>
-            <div class="retos-hero__bar"><i style="width:${pct}%"></i></div>
-            <small>${usuario.xp} puntos de avance${xpRest>0?' · '+xpRest+' para '+proxNivel:''}</small>
-            <div class="retos-hero__numbers"><div><b>${clasesVistas}</b><span>clases</span></div><div><b>${actividadesAprobadas}</b><span>actividades</span></div><div><b>${usuario.racha}</b><span>racha</span></div></div>
-          </aside>
-        </div>
+        <section class="retos-mini-grid retos-mini-grid--solo">
+          <article class="retos-mini-card retos-mini-card--ritmo"><span>Tu ritmo</span><h2>${usuario.racha} día${usuario.racha===1?'':'s'} de racha</h2><p>La racha aumenta al completar una práctica, actividad o clase.</p><div><b>${usuario.diasActivos}</b> días con avance registrado</div></article>
+        </section>
       </div>
     `;
 
-    container.querySelector('#btn-comenzar-historia')?.addEventListener('click',()=>{
-      const el=container.querySelector('#historia-mundos');
-      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-    });
+    container.querySelector('#btn-comenzar-historia')?.addEventListener('click',()=>_renderHistoriaView(container));
+    container.querySelector('#historia-teaser')?.addEventListener('click',e=>{if(!e.target.closest('button'))_renderHistoriaView(container);});
     container.querySelector('#btn-minuto')?.addEventListener('click',abrirMinutoReto);
     container.querySelector('#minuto-reto-card')?.addEventListener('click',e=>{if(!e.target.closest('button'))abrirMinutoReto();});
-
-    container.querySelectorAll('.historia-nivel-card:not(.is-locked)').forEach(card=>{
-      card.addEventListener('click',()=>{
-        const mi=Number(card.dataset.mundi);
-        const ni=Number(card.dataset.nivi);
-        abrirHistoriaNivel(mi,ni);
-      });
-    });
 
     container.querySelectorAll('[data-practice]').forEach(el=>el.addEventListener('click',()=>{
       const tipo=el.dataset.practice;
