@@ -107,6 +107,12 @@ body::after{
 
 .nav-section{padding:0 10px;margin-top:10px}
 .nav-label{font-size:9px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--text-3);padding:8px 10px 6px}
+.nav-label--toggle{cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-radius:8px;transition:background .15s}
+.nav-label--toggle:hover{background:var(--surface-2)}
+.nav-section--tools .nav-label--toggle .ic{color:var(--text-3);transition:transform .25s ease}
+.nav-section--tools.is-expanded .nav-label--toggle .ic{transform:rotate(180deg)}
+.nav-tools-list{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.nav-section--tools.is-expanded .nav-tools-list{max-height:400px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
 .nav-item:hover{background:var(--surface-2);color:var(--text)}
 .nav-item.is-active{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font-weight:600}
@@ -4114,8 +4120,18 @@ window.__setDisplayName = async (nombre) => {
       <a class="nav-item" data-section="certificados"><svg class="ic"><use href="#i-certificate"/></svg>Certificados</a>
     </div>
 
-    <div class="nav-section" data-tour="tools">
-      <a class="nav-item" id="sidebar-tools-label" role="button"><svg class="ic"><use href="#i-ps-brain"/></svg>Herramientas pro<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+    <div class="nav-section nav-section--tools" data-tour="tools">
+      <div class="nav-label nav-label--toggle" id="sidebar-tools-toggle">Herramientas pro<svg class="ic" style="width:14px;height:14px;transition:transform .25s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="nav-tools-list" id="sidebar-tools-list">
+        <a class="nav-item" data-tool="nota"><svg class="ic"><use href="#i-ps-note"/></svg>Nota de sesión<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="plan"><svg class="ic"><use href="#i-ps-target"/></svg>Plan de intervención<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="puntajes"><svg class="ic"><use href="#i-ps-bell"/></svg>Puntajes T · z · percentil<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="consentimiento"><svg class="ic"><use href="#i-ps-sign"/></svg>Consentimiento informado<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="riesgo"><svg class="ic"><use href="#i-ps-pulse"/></svg>Semáforo de riesgo<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="seguimiento"><svg class="ic"><use href="#i-ps-trend"/></svg>Seguimiento de avance<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="psicosocial"><svg class="ic"><use href="#i-ps-briefcase"/></svg>Riesgo psicosocial laboral<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+        <a class="nav-item" data-tool="informe"><svg class="ic"><use href="#i-ps-scale"/></svg>Informe psicológico<svg class="ic nav-item__lock"><use href="#i-lock"/></svg></a>
+      </div>
     </div>
 
     <div class="nav-section">
@@ -12058,7 +12074,7 @@ function initNav(){
     }
   };
   if(toolsBtn) toolsBtn.addEventListener('click',e=>{e.preventDefault();abrirToolsCatalog();});
-  document.getElementById('sidebar-tools-label')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();abrirToolsCatalog();});
+  document.getElementById('sidebar-tools-toggle')?.addEventListener('click',()=>{document.querySelector('.nav-section--tools')?.classList.toggle('is-expanded');});
   document.getElementById('drawer-tools-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();cerrarDrawerMovil();setTimeout(abrirToolsCatalog,250);});
   if(toolsCatalogOverlay) toolsCatalogOverlay.addEventListener('click',cerrarToolsCatalog);
   if(toolsCatalogClose) toolsCatalogClose.addEventListener('click',cerrarToolsCatalog);
@@ -12066,7 +12082,8 @@ function initNav(){
     card.addEventListener('click',()=>{
       cerrarToolsCatalog();
       const tool=card.dataset.tool;
-      if(typeof navigateToSection==='function') navigateToSection(tool);
+      const sectionMap={nota:'tool-nota',plan:'tool-plan',puntajes:'tool-puntajes',consentimiento:'tool-consentimiento',riesgo:'tool-riesgo',seguimiento:'tool-seguimiento',psicosocial:'tool-psicosocial',informe:'tool-informe'};
+      if(typeof navigateToSection==='function') navigateToSection(sectionMap[tool]||tool);
     });
   });
 
