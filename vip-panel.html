@@ -7311,7 +7311,20 @@ const Sections = (function(){
       let dias = []; try{ dias = JSON.parse(localStorage.getItem('sentia:dias')||'[]'); }catch(e){}
       const hoy = new Date(); const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       const hoyIso = iso(hoy); const set = new Set(dias);
-      if(!set.has(hoyIso)){ dias.push(hoyIso); set.add(hoyIso); try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){} }
+      if(!set.has(hoyIso)){ dias.push(hoyIso); set.add(hoyIso); }
+      if(!localStorage.getItem('sentia:dias-migrated')){
+        try{
+          const acc=JSON.parse(localStorage.getItem('sentia:retos:acciones')||'{}');
+          Object.keys(acc).forEach(f=>{ if(!set.has(f)){dias.push(f);set.add(f);} });
+          const lg=JSON.parse(localStorage.getItem('sentia:logros')||'{}');
+          Object.values(lg).forEach(ts=>{ if(ts){const dd=new Date(ts);if(!isNaN(dd)){const f=iso(dd);if(!set.has(f)){dias.push(f);set.add(f);}}} });
+          if(clases>0 && dias.length<clases){
+            for(let i=1;i<=Math.min(clases,7);i++){const dd=new Date(hoy);dd.setDate(dd.getDate()-i);const f=iso(dd);if(!set.has(f)){dias.push(f);set.add(f);}}
+          }
+          localStorage.setItem('sentia:dias-migrated','1');
+        }catch(e){}
+      }
+      try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){}
       let racha = 0; const d = new Date(hoy);
       while(set.has(iso(d))){ racha++; d.setDate(d.getDate()-1); }
       const vip = (typeof toolEsVIP==='function') && toolEsVIP();
