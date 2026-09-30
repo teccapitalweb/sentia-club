@@ -124,8 +124,8 @@ body::after{
 .nav-item:hover{background:var(--surface-2);color:var(--text)}
 .nav-item.is-active{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font-weight:600}
 .nav-item .ic{width:15px;height:15px}
-.nav-item__icon{width:20px;height:20px;object-fit:contain;flex-shrink:0;filter:grayscale(30%) opacity(.75)}
-.nav-item.is-active .nav-item__icon,.nav-item:hover .nav-item__icon{filter:none;opacity:1}
+.nav-item__icon{width:24px;height:24px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.75}
+.nav-item.is-active .nav-item__icon,.nav-item:hover .nav-item__icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
 .nav-item__badge{margin-left:auto;font-size:9px;font-weight:600;padding:1px 7px;border-radius:100px;background:var(--surface-3);color:var(--text-2);letter-spacing:.3px;min-width:20px;text-align:center}
 .nav-item__badge.is-new{background:var(--primary);color:#fff}
 .nav-item__dot{width:7px;height:7px;border-radius:50%;background:var(--danger);margin-left:auto;animation:pulse 1.4s infinite}
@@ -2967,8 +2967,8 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   .mobile-nav__item{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text-3);padding:5px 8px;border-radius:8px;font-size:9.5px;font-weight:500;letter-spacing:.3px}
   .mobile-nav__item.is-active{color:var(--primary)}
   .mobile-nav__item .ic{width:18px;height:18px}
-  .mobile-nav__icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;filter:grayscale(40%) opacity(.7)}
-  .mobile-nav__item.is-active .mobile-nav__icon{filter:none;opacity:1}
+  .mobile-nav__icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.7}
+  .mobile-nav__item.is-active .mobile-nav__icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
 
   /* Secciones internas mobile */
   .sec-hero{padding:4px 0 14px;margin-bottom:16px}
@@ -14220,8 +14220,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     color:var(--primary);
   }
   .mobile-drawer__item .ic{width:18px;height:18px;flex-shrink:0}
-  .drawer-icon{width:22px;height:22px;object-fit:contain;flex-shrink:0;filter:grayscale(30%) opacity(.75)}
-  .mobile-drawer__item.is-active .drawer-icon,.mobile-drawer__item:hover .drawer-icon{filter:none;opacity:1}
+  .drawer-icon{width:22px;height:22px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.75}
+  .mobile-drawer__item.is-active .drawer-icon,.mobile-drawer__item:hover .drawer-icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
 }
 
 /* Catálogo de Herramientas Pro */
