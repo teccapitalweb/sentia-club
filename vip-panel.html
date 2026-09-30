@@ -88,6 +88,13 @@ body::after{
 
 /* LAYOUT 3 COLUMNAS */
 .app{display:grid;grid-template-columns:208px 1fr 300px;min-height:100vh}
+/* El Foro es una experiencia editorial propia: aprovecha el ancho que en las
+   demás secciones pertenece a los widgets generales del panel. */
+.app.app--foro-focus{grid-template-columns:208px minmax(0,1fr)}
+.app.app--foro-focus>.aside{display:none}
+.app.app--foro-focus .main{padding-right:34px}
+.app.app--foro-focus .foro-stage{max-width:1380px}
+@media(max-width:1080px){.app.app--foro-focus{grid-template-columns:1fr}.app.app--foro-focus .main{padding-right:20px}}
 
 /* SIDEBAR */
 .sidebar{
@@ -1910,6 +1917,7 @@ body::after{
 .foro-welcome__eyebrow .ic{width:15px;height:15px}
 .foro-welcome__title{font-family:'Sora',sans-serif;font-size:clamp(27px,4vw,42px);letter-spacing:-1.7px;line-height:1.04;margin:0 0 9px;max-width:520px}
 .foro-welcome__copy{font-size:14px;line-height:1.6;color:var(--text-2);max-width:480px;margin:0}
+.foro-people{position:absolute;right:26px;bottom:0;width:285px;height:152px;pointer-events:none;opacity:.95}.foro-person{position:absolute;bottom:0;width:84px;height:112px;border-radius:48px 48px 16px 16px;background:var(--person);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}.foro-person::before{content:"";position:absolute;width:45px;height:45px;border-radius:50%;background:color-mix(in srgb,var(--person) 68%,#fff);top:-25px;left:19px}.foro-person::after{content:"";position:absolute;width:112px;height:62px;border-radius:55% 55% 0 0;background:color-mix(in srgb,var(--person) 76%,#0f172a);bottom:0;left:-14px;opacity:.55}.foro-person--one{right:114px;height:95px;--person:#71c6b2}.foro-person--two{right:52px;height:123px;--person:#799ff0}.foro-person--three{right:-9px;height:88px;--person:#2fbf2e}
 .foro-live{border:1px solid var(--border-2);border-radius:24px;padding:21px;background:var(--surface);display:flex;flex-direction:column;justify-content:space-between;gap:17px}
 .foro-live__head{font-family:'Sora',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px}
 .foro-live__dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 5px color-mix(in srgb,var(--success) 13%,transparent)}
@@ -1919,13 +1927,13 @@ body::after{
 .foro-live__meta{font-size:12.5px;color:var(--text-2);margin-top:-8px}.foro-live__meta strong{color:var(--text)}
 .foro-live__cta{display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:color-mix(in srgb,var(--primary) 10%,var(--surface));color:var(--primary);border-radius:14px;padding:12px 13px;font:700 12.5px 'Instrument Sans',sans-serif;cursor:pointer;text-align:left}.foro-live__cta:hover{background:color-mix(in srgb,var(--primary) 18%,var(--surface))}.foro-live__cta .ic{width:18px;height:18px}
 .foro-comunidad-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;align-items:start}
-.foro-side{display:flex;flex-direction:column;gap:12px}.foro-side__card{background:var(--surface);border:1px solid var(--border-2);border-radius:20px;padding:17px}.foro-side__title{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px;margin-bottom:13px}.foro-topic{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--text)}.foro-topic:first-of-type{border-top:0}.foro-topic__icon{width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--topic) 15%,var(--surface));color:var(--topic);display:grid;place-items:center}.foro-topic__icon .ic{width:16px;height:16px}.foro-topic__arrow{margin-left:auto;color:var(--text-3)}
+.foro-side{display:flex;flex-direction:column;gap:12px}.foro-side__card{background:var(--surface);border:1px solid var(--border-2);border-radius:20px;padding:17px}.foro-side__title{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px;margin-bottom:13px}.foro-topic{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;border:0;border-top:1px solid var(--border);background:transparent;font:700 12.5px 'Instrument Sans',sans-serif;color:var(--text);text-align:left;cursor:pointer}.foro-topic:hover{color:var(--primary)}.foro-topic:first-of-type{border-top:0}.foro-topic__icon{width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--topic) 15%,var(--surface));color:var(--topic);display:grid;place-items:center}.foro-topic__icon .ic{width:16px;height:16px}.foro-topic__arrow{margin-left:auto;color:var(--text-3);font-size:18px}
 .foro-aviso--editorial{border-radius:15px;margin-bottom:13px;background:color-mix(in srgb,var(--highlight) 8%,var(--surface));border-color:color-mix(in srgb,var(--highlight) 26%,transparent)}.foro-aviso--editorial .ic,.foro-aviso--editorial strong{color:var(--highlight)}
 .foro-composer--editorial{border-radius:20px;padding:17px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 4%,var(--surface)))}
 .foro-tabs--editorial .tab{border-radius:999px;padding:9px 15px}
-.posts-list--editorial{gap:14px}.posts-list--editorial .post{border-radius:20px;padding:18px}.posts-list--editorial .post__img{max-width:640px;border-radius:15px}.posts-list--editorial .post__footer{margin-top:13px}
-@media(max-width:900px){.foro-welcome{grid-template-columns:1fr}.foro-comunidad-layout{grid-template-columns:1fr}.foro-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.foro-side__card:last-child{display:none}}
-@media(max-width:600px){.foro-welcome__hero{min-height:185px;padding:23px 20px;border-radius:20px}.foro-welcome__title{font-size:29px}.foro-live{border-radius:20px;padding:18px}.foro-side{grid-template-columns:1fr}.foro-side__card:last-child{display:block}.foro-composer--editorial{padding:14px}.posts-list--editorial .post{padding:15px}.foro-welcome__copy{font-size:13px}}
+.posts-list--editorial{gap:14px}.posts-list--editorial .post{position:relative;border-radius:22px;padding:19px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 3%,var(--surface)));border-color:color-mix(in srgb,var(--primary) 16%,var(--border));box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 7%,transparent)}.posts-list--editorial .post::before{content:"";position:absolute;left:0;top:22px;bottom:22px;width:3px;border-radius:0 6px 6px 0;background:color-mix(in srgb,var(--primary) 55%,transparent)}.posts-list--editorial .post__img{max-width:640px;border-radius:15px}.posts-list--editorial .post__footer{margin-top:13px}
+@media(max-width:1080px){.foro-welcome{grid-template-columns:1fr}.foro-comunidad-layout{grid-template-columns:1fr}.foro-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.foro-side__card:last-child{display:none}}
+@media(max-width:600px){.foro-welcome__hero{min-height:185px;padding:23px 20px;border-radius:20px}.foro-welcome__title{font-size:29px}.foro-people{right:-20px;transform:scale(.72);transform-origin:bottom right}.foro-live{border-radius:20px;padding:18px}.foro-side{grid-template-columns:1fr}.foro-side__card:last-child{display:block}.foro-composer--editorial{padding:14px}.posts-list--editorial .post{padding:15px}.foro-welcome__copy{font-size:13px}}
 /* ===== DIRECTORIO VIP ===== */
 .dir-bar{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .dir-search{flex:1;min-width:200px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;padding:0 14px}
@@ -2874,7 +2882,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   .app{grid-template-columns:208px 1fr}
   .aside{display:none}
 }
-@media (max-width:880px){
+@media (max-width:1080px){
   .app{grid-template-columns:1fr}
   .sidebar{display:none}
   .main{padding:calc(14px + env(safe-area-inset-top)) 14px 140px}
@@ -3364,9 +3372,68 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .retos-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(285px,365px);gap:36px;padding:34px 38px;border-radius:24px;background:linear-gradient(120deg,#06145d,#1236ad 63%,#245cf4);color:#fff;overflow:hidden;position:relative}.retos-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 84% 12%,rgba(143,179,255,.3),transparent 24%),linear-gradient(117deg,transparent 48%,rgba(255,255,255,.06) 48.2%,transparent 48.7%);pointer-events:none}.retos-hero>*{position:relative;z-index:1}.retos-hero__main{max-width:570px}.retos-hero__eyebrow{display:flex;align-items:center;gap:7px;color:#a8ffbf;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.retos-hero__eyebrow .ic{width:15px;height:15px}.retos-hero h1{max-width:490px;margin:13px 0 12px;color:#fff;font-size:clamp(35px,4vw,54px);letter-spacing:-.055em;line-height:1}.retos-hero h1 em{font-style:normal;color:#91aaff}.retos-hero p{margin:0;max-width:500px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}.retos-hero__cta{display:inline-flex;align-items:center;gap:10px;margin-top:21px;padding:10px 13px 10px 17px;border:0;border-radius:999px;background:#fff;color:#10255f;font:750 13px 'Instrument Sans',sans-serif;cursor:pointer}.retos-hero__cta .ic{width:17px;height:17px}.retos-hero__summary{align-self:center;padding:23px 23px 18px;border:1px solid rgba(255,255,255,.25);border-radius:19px;background:rgba(5,14,73,.25);backdrop-filter:blur(8px)}.retos-hero__summary>span{display:block;color:rgba(255,255,255,.67);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.retos-hero__summary>strong{display:block;margin:8px 0 15px;font-size:21px;line-height:1.1}.retos-hero__bar{height:6px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden}.retos-hero__bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#60e9ff,#90aaff,#42f52d)}.retos-hero__summary>small{display:block;margin-top:8px;color:rgba(255,255,255,.72);font-size:11px}.retos-hero__numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.18)}.retos-hero__numbers div{display:grid;gap:3px}.retos-hero__numbers b{font-size:19px;line-height:1}.retos-hero__numbers span{font-size:10px;color:rgba(255,255,255,.72)}
 .reto-next{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:15px;margin:22px 0;padding:18px 20px;border:1px solid #dce4f2;border-radius:18px;background:#fff;box-shadow:0 5px 20px rgba(6,20,93,.05)}.reto-next__icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#e7efff;color:#2156e8}.reto-next__icon .ic{width:21px;height:21px}.reto-next span{display:block;margin-bottom:4px;color:#317b55;font-size:10px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}.reto-next h2{margin:0;color:#10255f;font-size:18px;letter-spacing:-.025em}.reto-next p{margin:4px 0 0;color:#71809a;font-size:12px;line-height:1.45}.reto-next>button{display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:#103587;color:#fff;cursor:pointer}.reto-next>button .ic{width:18px;height:18px}.retos-level-card{margin-top:0!important}
 @media (max-width:850px){.retos-hero{grid-template-columns:1fr;padding:27px 24px;gap:23px}.retos-hero__summary{width:min(100%,500px)}.reto-next{padding:16px}}@media (max-width:520px){.retos-hero{padding:24px 19px}.retos-hero h1{font-size:38px}.retos-hero__numbers{gap:6px}.reto-next{grid-template-columns:auto 1fr;padding:15px}.reto-next>button{grid-column:2;justify-self:end}.reto-next h2{font-size:16px}}
-.retos-legacy{display:none!important}.practice-experiences{margin-top:30px}.practice-experiences__head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:14px}.practice-experiences__head span,.retos-mini-card>span{display:block;color:#71809a;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.practice-experiences__head h2{margin:5px 0 0;color:#10255f;font-size:24px;letter-spacing:-.04em}.practice-experiences__head small{color:#7886a0;font-size:11px}.practice-experiences__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.practice-card{min-height:205px;padding:21px;border:1px solid #dce4f2;border-radius:18px;background:#fff;color:#10255f;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.practice-card:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(6,20,93,.1)}.practice-card__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#e7efff;color:#2156e8}.practice-card--case .practice-card__icon{background:#e6f7f1;color:#118261}.practice-card--flash .practice-card__icon{background:#eef0ff;color:#6658df}.practice-card__icon .ic{width:23px;height:23px}.practice-card strong{display:block;margin-top:24px;font-size:18px;letter-spacing:-.03em}.practice-card small{display:block;min-height:36px;margin-top:7px;color:#71809a;font-size:12px;line-height:1.45}.practice-card b{display:flex;align-items:center;justify-content:space-between;margin-top:20px;color:#2156e8;font-size:11px;text-transform:uppercase;letter-spacing:.04em}.practice-card--case b{color:#118261}.practice-card--flash b{color:#6658df}.practice-card b .ic{width:16px;height:16px}.retos-mini-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:18px}.retos-mini-card{padding:21px;border:1px solid #dce4f2;border-radius:18px;background:#fff;color:#10255f;text-align:left}.retos-mini-card h2{margin:7px 0;color:#10255f;font-size:21px;letter-spacing:-.035em}.retos-mini-card p{margin:0;color:#71809a;font-size:12px;line-height:1.5}.retos-mini-card--ritmo{background:linear-gradient(125deg,#071957,#153cae);border:0;color:#fff}.retos-mini-card--ritmo>span,.retos-mini-card--ritmo h2,.retos-mini-card--ritmo p{color:#fff}.retos-mini-card--ritmo p{opacity:.74}.retos-mini-card--ritmo div{margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.2);font-size:11px;opacity:.86}.retos-mini-card--ritmo div b{font-size:18px;margin-right:5px}.retos-mini-card--insignias{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.retos-mini-card--insignias:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(6,20,93,.08)}.retos-mini-card--insignias p b{color:#237a51}.retos-mini-card--insignias i{display:flex;align-items:center;gap:5px;margin-top:15px;color:#2156e8;font-size:12px;font-style:normal;font-weight:800}.retos-mini-card--insignias i .ic{width:15px;height:15px}.reto-modal__notice{display:block;color:#2e7e58;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.reto-modal h2{margin:10px 0 18px;color:#10255f;font-size:19px;line-height:1.3;letter-spacing:-.025em}.reto-modal__answers{display:grid;gap:9px}.reto-modal__answers button{padding:12px 14px;border:1px solid #dce4f2;border-radius:11px;background:#fff;color:#273855;text-align:left;font:600 13px 'Instrument Sans',sans-serif;cursor:pointer}.reto-modal__answers button:hover{border-color:#3970ee}.reto-modal__answers button.is-correct{background:#ecfbf1;border-color:#55bd7d;color:#17633d}.reto-modal__answers button.is-incorrect{background:#fff1f1;border-color:#e68888;color:#a83c3c}.reto-modal__feedback{margin:14px 0 0;padding:11px 12px;border-radius:10px;background:#eef3ff;color:#40516f;font-size:12px;line-height:1.5}.flashcard-practice{min-height:165px;padding:22px;border:1px solid #dce4f2;border-radius:16px;background:linear-gradient(145deg,#f9fbff,#eef3ff);text-align:center}.flashcard-practice span{display:block;color:#71809a;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.flashcard-practice strong{display:block;margin-top:25px;color:#10255f;font-size:23px;letter-spacing:-.04em}.flashcard-practice p{margin:20px 0 0;color:#40516f;font-size:13px;line-height:1.55}.reto-modal>.btn{margin-top:12px}.reto-modal>.btn+.btn{margin-left:8px}.insignias-modal{display:grid;gap:7px;max-height:430px;overflow:auto;padding-right:3px}.insignias-modal__item{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid #e3e8f2;border-radius:11px;color:#8b97ae}.insignias-modal__item>span{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#f0f3f8;font-size:12px}.insignias-modal__item.is-earned{color:#1d754b;background:#f2fbf5;border-color:#b8e2c6}.insignias-modal__item.is-earned>span{background:#d7f3e0}.insignias-modal__item b{display:block;color:inherit;font-size:13px}.insignias-modal__item small{display:block;margin-top:2px;color:#74819a;font-size:11px}@media (max-width:760px){.practice-experiences__grid,.retos-mini-grid{grid-template-columns:1fr}.practice-card{min-height:180px}.practice-experiences__head{align-items:start;flex-direction:column}.practice-card strong{margin-top:17px}}
+.retos-legacy{display:none!important}.practice-experiences{margin-top:30px}.practice-experiences__head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:14px}.practice-experiences__head span,.retos-mini-card>span{display:block;color:#71809a;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.practice-experiences__head h2{margin:5px 0 0;color:#10255f;font-size:24px;letter-spacing:-.04em}.practice-experiences__head small{color:#7886a0;font-size:11px}.practice-experiences__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.practice-card{min-height:205px;padding:21px;border:1px solid #dce4f2;border-radius:18px;background:#fff;color:#10255f;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.practice-card:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(6,20,93,.1)}.practice-card__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#e7efff;color:#2156e8}.practice-card--caso .practice-card__icon{background:#e6f7f1;color:#118261}.practice-card--mapa .practice-card__icon{background:#fef3e2;color:#c2710c}.practice-experiences__grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}.practice-card--case .practice-card__icon{background:#e6f7f1;color:#118261}.practice-card--flash .practice-card__icon{background:#eef0ff;color:#6658df}.practice-card__icon .ic{width:23px;height:23px}.practice-card strong{display:block;margin-top:24px;font-size:18px;letter-spacing:-.03em}.practice-card small{display:block;min-height:36px;margin-top:7px;color:#71809a;font-size:12px;line-height:1.45}.practice-card b{display:flex;align-items:center;justify-content:space-between;margin-top:20px;color:#2156e8;font-size:11px;text-transform:uppercase;letter-spacing:.04em}.practice-card--caso b{color:#118261}.practice-card--mapa b{color:#c2710c}.practice-card--case b{color:#118261}.practice-card--flash b{color:#6658df}.practice-card b .ic{width:16px;height:16px}.retos-mini-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:18px}.retos-mini-card{padding:21px;border:1px solid #dce4f2;border-radius:18px;background:#fff;color:#10255f;text-align:left}.retos-mini-card h2{margin:7px 0;color:#10255f;font-size:21px;letter-spacing:-.035em}.retos-mini-card p{margin:0;color:#71809a;font-size:12px;line-height:1.5}.retos-mini-card--ritmo{background:linear-gradient(125deg,#071957,#153cae);border:0;color:#fff}.retos-mini-card--ritmo>span,.retos-mini-card--ritmo h2,.retos-mini-card--ritmo p{color:#fff}.retos-mini-card--ritmo p{opacity:.74}.retos-mini-card--ritmo div{margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.2);font-size:11px;opacity:.86}.retos-mini-card--ritmo div b{font-size:18px;margin-right:5px}.retos-mini-card--insignias{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.retos-mini-card--insignias:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(6,20,93,.08)}.retos-mini-card--insignias p b{color:#237a51}.retos-mini-card--insignias i{display:flex;align-items:center;gap:5px;margin-top:15px;color:#2156e8;font-size:12px;font-style:normal;font-weight:800}.retos-mini-card--insignias i .ic{width:15px;height:15px}.reto-modal__notice{display:block;color:#2e7e58;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.reto-modal h2{margin:10px 0 18px;color:#10255f;font-size:19px;line-height:1.3;letter-spacing:-.025em}.reto-modal__answers{display:grid;gap:9px}.reto-modal__answers button{padding:12px 14px;border:1px solid #dce4f2;border-radius:11px;background:#fff;color:#273855;text-align:left;font:600 13px 'Instrument Sans',sans-serif;cursor:pointer}.reto-modal__answers button:hover{border-color:#3970ee}.reto-modal__answers button.is-correct{background:#ecfbf1;border-color:#55bd7d;color:#17633d}.reto-modal__answers button.is-incorrect{background:#fff1f1;border-color:#e68888;color:#a83c3c}.reto-modal__feedback{margin:14px 0 0;padding:11px 12px;border-radius:10px;background:#eef3ff;color:#40516f;font-size:12px;line-height:1.5}.flashcard-practice{min-height:165px;padding:22px;border:1px solid #dce4f2;border-radius:16px;background:linear-gradient(145deg,#f9fbff,#eef3ff);text-align:center}.flashcard-practice span{display:block;color:#71809a;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.flashcard-practice strong{display:block;margin-top:25px;color:#10255f;font-size:23px;letter-spacing:-.04em}.flashcard-practice p{margin:20px 0 0;color:#40516f;font-size:13px;line-height:1.55}.reto-modal>.btn{margin-top:12px}.reto-modal>.btn+.btn{margin-left:8px}.caso-clinico__ficha{display:grid;gap:0;border:1px solid #e3e8f2;border-radius:14px;overflow:hidden;margin-top:14px}.caso-clinico__row{display:grid;grid-template-columns:100px 1fr;gap:0;font-size:13px;line-height:1.5;border-bottom:1px solid #eef1f7}.caso-clinico__row:last-child{border-bottom:0}.caso-clinico__row b{padding:10px 12px;background:#f5f7fb;color:#40516f;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}.caso-clinico__row span{padding:10px 12px;color:#273855}.hp-cat-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 12px;border:2px solid #e0e5f0;border-radius:16px;background:#fff;cursor:pointer;transition:border-color .15s,background .15s}.hp-cat-btn:hover{border-color:#5a8df5;background:#f4f7ff}.hp-cat-btn.is-correct{border-color:#55bd7d;background:#ecfbf1}.hp-cat-btn.is-wrong{border-color:#e68888;background:#fff1f1}.hp-cat-btn__icon{font-size:28px}.hp-cat-btn__name{font-size:14px;font-weight:700;color:#273855;letter-spacing:-.01em}
+.insignias-modal{display:grid;gap:7px;max-height:430px;overflow:auto;padding-right:3px}.insignias-modal__item{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid #e3e8f2;border-radius:11px;color:#8b97ae}.insignias-modal__item>span{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#f0f3f8;font-size:12px}.insignias-modal__item.is-earned{color:#1d754b;background:#f2fbf5;border-color:#b8e2c6}.insignias-modal__item.is-earned>span{background:#d7f3e0}.insignias-modal__item b{display:block;color:inherit;font-size:13px}.insignias-modal__item small{display:block;margin-top:2px;color:#74819a;font-size:11px}@media (max-width:760px){.practice-experiences__grid,.practice-experiences__grid--2,.retos-mini-grid{grid-template-columns:1fr}.practice-card{min-height:180px}.practice-experiences__head{align-items:start;flex-direction:column}.practice-card strong{margin-top:17px}}
 
 .retos-mini-grid--solo{grid-template-columns:minmax(0,460px)}
+
+/* Tarjetas hero con gradiente */
+.pcard-hero{border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;border:1px solid #dce4f2;background:#fff}.pcard-hero:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(6,20,93,.1)}
+.pcard-hero__visual{position:relative;padding:22px 20px 18px;min-height:160px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.pcard-hero__visual--caso{background:linear-gradient(145deg,#e1f5ee 0%,#9fe1cb 55%,#5dcaa5 100%)}
+.pcard-hero__visual--mapa{background:linear-gradient(145deg,#eeedfe 0%,#cecbf6 55%,#afa9ec 100%)}
+.pcard-hero__eyebrow{display:block;font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;margin-bottom:auto}
+.pcard-hero__visual--caso .pcard-hero__eyebrow{color:#085041}
+.pcard-hero__visual--mapa .pcard-hero__eyebrow{color:#3C3489}
+.pcard-hero__float{position:absolute;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.82);width:44px;height:44px}
+.pcard-hero__float .ic{width:22px;height:22px}
+.pcard-hero__visual--caso .pcard-hero__float{color:#085041}
+.pcard-hero__visual--mapa .pcard-hero__float{color:#3C3489}
+.pcard-hero__float--1{top:14px;right:16px;transform:rotate(-6deg)}
+.pcard-hero__float--2{top:58px;right:54px;width:38px;height:38px;transform:rotate(8deg)}.pcard-hero__float--2 .ic{width:18px;height:18px}
+.pcard-hero__float--3{bottom:44px;right:14px;width:40px;height:40px;transform:rotate(-4deg)}.pcard-hero__float--3 .ic{width:19px;height:19px}
+.pcard-hero__tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(255,255,255,.7);width:fit-content;margin-top:8px}
+.pcard-hero__visual--caso .pcard-hero__tag{color:#085041}
+.pcard-hero__visual--mapa .pcard-hero__tag{color:#3C3489}
+.pcard-hero__body{padding:16px 20px 18px}
+.pcard-hero__title{margin:0 0 6px;font-size:18px;font-weight:800;color:#10255f;letter-spacing:-.03em}
+.pcard-hero__desc{margin:0 0 12px;color:#71809a;font-size:12px;line-height:1.45}
+.pcard-hero__cta{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.pcard-hero__cta--caso{color:#118261}
+.pcard-hero__cta--mapa{color:#534AB7}
+@media(max-width:760px){.pcard-hero__visual{min-height:130px}}
+
+/* Panel Caso Clínico */
+.cc-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0f5132,#1a8c5a 55%,#30b070);color:#fff;overflow:hidden;margin-bottom:22px}
+.cc-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a8ffbf;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.cc-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.cc-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.cc-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#0f5132;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.cc-panel-banner__back:hover{transform:scale(1.03)}.cc-panel-banner__back .ic{width:15px;height:15px}
+.cc-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.cc-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}.cc-panel-banner__float .ic{width:24px;height:24px}
+.cc-panel-ficha{margin-bottom:24px}.cc-panel-ficha__head{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#10255f;font-size:15px;font-weight:800}.cc-panel-ficha__head small{margin-left:auto;color:#71809a;font-size:11px;font-weight:400}
+.cc-panel-pregunta{max-width:560px;margin:0 auto}.cc-panel-pregunta__num{display:block;color:#1a8c5a;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.cc-panel-pregunta h2{margin:0 0 16px;color:#10255f;font-size:19px;line-height:1.35;letter-spacing:-.02em}
+.cc-panel-resultado{text-align:center;padding:30px 0}.cc-panel-resultado__icon{color:#1a8c5a;margin-bottom:12px}.cc-panel-resultado h2{margin:0 0 6px;color:#10255f;font-size:22px;letter-spacing:-.03em}.cc-panel-resultado p{color:#71809a;font-size:13px}
+
+/* Panel Mapa Emocional */
+.me-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#2d1f6e,#5a42c6 55%,#8070e0);color:#fff;overflow:hidden;margin-bottom:22px}
+.me-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#d4ccff;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.me-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.me-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.me-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#2d1f6e;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.me-panel-banner__back:hover{transform:scale(1.03)}.me-panel-banner__back .ic{width:15px;height:15px}
+.me-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.me-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}.me-panel-banner__float .ic{width:24px;height:24px}
+.me-panel-escenario{padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,#fefce8,#fef9c3);border:1px solid #e9e3c8;margin-bottom:24px}
+.me-panel-escenario__label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:850;color:#a16207;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.me-panel-escenario p{margin:0;color:#78350f;font-size:14px;line-height:1.6}
+.me-panel-emocion{max-width:480px;margin:0 auto;text-align:center}
+.me-panel-emocion__num{display:block;color:#534AB7;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.me-panel-emocion__card{padding:24px;border:1px solid #dce4f2;border-radius:18px;background:#fff;margin-bottom:18px}
+.me-panel-emocion__card h2{margin:0 0 6px;color:#10255f;font-size:26px;letter-spacing:-.03em}
+.me-panel-emocion__card p{margin:0;color:#71809a;font-size:13px}
+.me-panel-emocion__btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.cc-panel-banner,.me-panel-banner{grid-template-columns:1fr;padding:27px 22px}.cc-panel-banner__icons,.me-panel-banner__icons{flex-direction:row;justify-content:center}.cc-panel-banner h1,.me-panel-banner h1{font-size:28px}}
 
 /* Modo Historia */
 .historia-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0a3d2e,#1a6b4a 55%,#2d8b5f);color:#fff;overflow:hidden;margin-bottom:22px}.historia-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 82% 18%,rgba(120,200,160,.22),transparent 50%);pointer-events:none}.historia-banner>*{position:relative;z-index:1}.historia-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a8ffbf;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.historia-banner__eyebrow .ic{width:15px;height:15px}.historia-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(32px,4vw,48px);letter-spacing:-.055em;line-height:1}.historia-banner h1 em{font-style:normal;color:#a8ffbf}.historia-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}.historia-banner__cta{display:inline-flex;align-items:center;gap:10px;margin-top:21px;padding:12px 18px;border:0;border-radius:999px;background:#fff;color:#0a3d2e;font:750 13px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.historia-banner__cta:hover{transform:scale(1.03)}.historia-banner__cta .ic{width:17px;height:17px}.historia-personajes{display:flex;gap:14px;align-self:center}.historia-pj{display:flex;flex-direction:column;align-items:center;gap:6px}.historia-pj__avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.4);background:var(--pj-color)}.historia-pj__name{font-size:11px;font-weight:700;color:rgba(255,255,255,.85)}.historia-pj__role{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
@@ -4138,7 +4205,6 @@ window.__setDisplayName = async (nombre) => {
       <div class="nav-label">Comunidad</div>
       <a class="nav-item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
       <a class="nav-item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
-      <a class="nav-item" data-section="canal"><svg class="ic"><use href="#i-whatsapp"/></svg>Canal WhatsApp</a>
     </div>
 
     <div class="nav-section">
@@ -4260,18 +4326,11 @@ window.__setDisplayName = async (nombre) => {
       <div id="widget-actividades-list"></div>
     </div>
 
-    <div class="widget widget--wa">
-      <div class="widget__label"><svg class="ic"><use href="#i-whatsapp"/></svg>Comunidad SENTIA</div>
-      <div class="widget__count" id="com-count" style="display:none"></div><!-- MODIFICADO: cifra desde admin (config/club.miembrosComunidad) -->
-      <div class="widget__count-sub">Profesionales de psicología y educación compartiendo experiencias</div>
-      <button class="btn btn--wa btn--block btn--sm" id="btn-wa"><svg class="ic"><use href="#i-whatsapp"/></svg><span id="btn-wa-lbl">Unirme al canal</span></button>
-    </div>
-
     <div class="widget widget--disc" id="widget-disc">
-      <div class="widget__label">Tu descuento VIP</div>
-      <div class="widget__pct">20%</div>
-      <div class="widget__count-sub">En cursos de certificación con folio oficial SENTIA</div>
-      <button class="btn btn--primary btn--block btn--sm" id="btn-disc-wa"><svg class="ic"><use href="#i-whatsapp"/></svg>Solicitar mi 20% por WhatsApp</button>
+      <div class="widget__label">Tu membresía</div>
+      <div class="widget__pct">VIP</div>
+      <div class="widget__count-sub">Tu acceso, cursos y beneficios reunidos en un solo lugar.</div>
+      <button class="btn btn--primary btn--block btn--sm" data-section="suscripcion">Ver mi membresía</button>
     </div>
 
     <div class="widget">
@@ -4359,7 +4418,6 @@ window.__setDisplayName = async (nombre) => {
         <div class="mobile-drawer__label">Comunidad</div>
         <a class="mobile-drawer__item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
         <a class="mobile-drawer__item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
-        <a class="mobile-drawer__item" data-section="canal"><svg class="ic"><use href="#i-whatsapp"/></svg>Canal WhatsApp</a>
       </div>
 
       <div class="mobile-drawer__section">
@@ -5431,6 +5489,7 @@ function navigateToSection(section, opts){
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
+  document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
   document.querySelectorAll(`[data-section="${section}"]`).forEach(ni => ni.classList.add('is-active'));
 
@@ -8181,6 +8240,199 @@ const Sections = (function(){
     setTimeout(()=>{const show=document.getElementById(id+'-show'),answer=document.getElementById(id+'-answer'),done=document.getElementById(id+'-done');show?.addEventListener('click',()=>{answer.hidden=false;show.hidden=true;done.hidden=false;});done?.addEventListener('click',()=>{registrarAccionProgreso('flashcards');done.disabled=true;done.textContent='Repaso registrado';});},40);
   }
 
+  /* ═══ CASO CLÍNICO ═══ */
+  const casosClinicos=[
+    {titulo:'Ansiedad en adolescente',paciente:'Sofía, 16 años',motivo:'Referida por la escuela por bajo rendimiento y ausentismo.',contexto:'Vive con su madre y hermano menor. Padres separados hace 8 meses. Antes era alumna destacada.',observacion:'Callada, evita contacto visual, juega con las mangas de su sudadera. Responde con frases cortas.',preguntas:[
+      {pregunta:'¿Qué es lo primero que harías en esta primera sesión?',opciones:['Aplicar un inventario de ansiedad estandarizado','Generar rapport y explorar cómo se siente ella respecto a estar ahí','Preguntar directamente por la separación de sus padres','Hablar con la madre para obtener información'],correcta:1,explicacion:'Lo prioritario es generar confianza y que se sienta escuchada, antes de cualquier evaluación formal.'},
+      {pregunta:'Sofía dice: "No sé por qué me mandaron aquí, yo estoy bien." ¿Cómo respondes?',opciones:['"Tu escuela dice que no estás bien."','"Entiendo. A veces es raro que otros decidan por ti. ¿Qué sientes al estar aquí?"','"Entonces no hay problema, podemos terminar."','"Cuéntame sobre tus calificaciones."'],correcta:1,explicacion:'Validar su experiencia y explorar sus sentimientos abre espacio para que comparta a su ritmo.'}
+    ]},
+    {titulo:'Duelo complicado',paciente:'Roberto, 45 años',motivo:'Acude por cuenta propia. Dice que "ya no puede más" desde la muerte de su esposa hace un año.',contexto:'Contador. Dos hijos adolescentes. Ha perdido 8 kg sin intentarlo. Duerme 3-4 horas.',observacion:'Ojeras marcadas, tono bajo pero articulado. Dice que sus hijos "ya están grandes y no lo necesitan."',preguntas:[
+      {pregunta:'¿Qué señal requiere exploración prioritaria?',opciones:['La pérdida de peso','La frase "ya no puede más" junto con "no lo necesitan"','El insomnio','Que haya tardado un año en buscar ayuda'],correcta:1,explicacion:'La combinación de "ya no puedo más" con sentirse innecesario puede indicar ideación suicida que requiere valoración inmediata.'},
+      {pregunta:'¿Cómo explorarías esta señal de forma segura?',opciones:['Evitar el tema para no darle ideas','"Roberto, cuando dices que ya no puedes más, ¿has pensado en hacerte daño?"','"No digas eso, tus hijos te necesitan"','Referirlo sin hablar más'],correcta:1,explicacion:'Preguntar directamente sobre ideación suicida no la provoca. Es la forma más segura de evaluar el riesgo.'}
+    ]},
+    {titulo:'Conflicto parental',paciente:'Familia Morales: padres y Valentina, 8 años',motivo:'Consultan porque Valentina "se porta mal". La escuela reportó conducta agresiva.',contexto:'Padres trabajan turnos largos. Valentina queda con la abuela. Nació un hermano hace 6 meses.',observacion:'Valentina dibuja mientras los padres hablan. Dibuja una casa con puerta muy pequeña y un sol negro.',preguntas:[
+      {pregunta:'¿Qué hipótesis explorarías primero?',opciones:['Valentina tiene un trastorno de conducta','La conducta puede ser respuesta a cambios familiares significativos','Los padres son negligentes','La abuela la malcría'],correcta:1,explicacion:'Antes de etiquetar, conviene entender la conducta como comunicación. El hermano nuevo y la ausencia de los padres son cambios importantes.'},
+      {pregunta:'¿Qué harías con el dibujo de Valentina?',opciones:['Ignorarlo, es solo un dibujo','Interpretarlo como indicador de abuso','Usarlo como puente: "Cuéntame sobre tu dibujo, ¿quién vive ahí?"','Mostrarlo a los padres y pedirles que lo expliquen'],correcta:2,explicacion:'El dibujo es herramienta de comunicación con niños. Invitar a narrar abre espacio para que exprese su mundo interno.'}
+    ]}
+  ];
+  /* ═══ MAPA EMOCIONAL — data ═══ */
+  const mapasEmocionales=[
+    {titulo:'Primera sesión con adolescente',escenario:'Un adolescente llega a consulta obligado por sus padres. Cruza los brazos, mira al piso y dice: "Yo no tengo ningún problema, son ellos los que deberían estar aquí."',emociones:[
+      {nombre:'Enojo',correcta:'Paciente',desc:'Postura defensiva y reclamo hacia los padres'},
+      {nombre:'Miedo',correcta:'Paciente',desc:'Detrás del enojo: miedo a ser juzgado'},
+      {nombre:'Frustración',correcta:'Terapeuta',desc:'Natural al sentir rechazo, se debe regular'},
+      {nombre:'Curiosidad',correcta:'Terapeuta',desc:'¿Qué hay detrás de esa resistencia?'},
+      {nombre:'Vergüenza',correcta:'Paciente',desc:'Estar en terapia puede sentirse como señal de "estar mal"'},
+      {nombre:'Empatía',correcta:'Terapeuta',desc:'La resistencia es protección, no ataque'}
+    ],reflexion:'La resistencia del adolescente no es obstáculo, es información. Mapear emociones de ambos ayuda a conectar con lo que hay debajo del enojo.'},
+    {titulo:'Noticia difícil en sesión',escenario:'Una persona que lleva meses en terapia dice: "Me diagnosticaron una enfermedad crónica. No sé si tiene caso seguir viniendo."',emociones:[
+      {nombre:'Tristeza',correcta:'Paciente',desc:'Duelo por la pérdida de salud y el futuro imaginado'},
+      {nombre:'Impotencia',correcta:'Paciente',desc:'Pérdida de control sobre su vida'},
+      {nombre:'Sorpresa',correcta:'Terapeuta',desc:'No esperabas este giro en el proceso'},
+      {nombre:'Preocupación',correcta:'Terapeuta',desc:'Genuina por el bienestar de la persona'},
+      {nombre:'Desesperanza',correcta:'Paciente',desc:'Cuestionar la terapia refleja desesperanza'},
+      {nombre:'Compromiso',correcta:'Terapeuta',desc:'Renovar el acompañamiento en este nuevo contexto'}
+    ],reflexion:'Cuando la vida cambia el rumbo de la terapia, mapear emociones ayuda a no perderse en la sorpresa y a reformular el acompañamiento.'},
+    {titulo:'Transferencia en terapia',escenario:'Una persona dice: "Usted es la única que me entiende. Me gustaría que fuera mi amigo, no solo mi terapeuta."',emociones:[
+      {nombre:'Idealización',correcta:'Paciente',desc:'Percepción del terapeuta como figura salvadora'},
+      {nombre:'Soledad',correcta:'Paciente',desc:'Carencia de vínculos significativos'},
+      {nombre:'Halago',correcta:'Terapeuta',desc:'Natural, pero debe reconocerse sin actuar'},
+      {nombre:'Incomodidad',correcta:'Terapeuta',desc:'Señal de que los límites necesitan atención'},
+      {nombre:'Necesidad de pertenecer',correcta:'Paciente',desc:'Búsqueda legítima de conexión humana'},
+      {nombre:'Claridad',correcta:'Terapeuta',desc:'Reafirmar el encuadre con calidez'}
+    ],reflexion:'La transferencia es material terapéutico valioso. Reconocer emociones de ambos lados permite abordarla sin rechazar ni cruzar límites.'}
+  ];
+
+  /* ═══ CASO CLÍNICO — panel view ═══ */
+  function _renderCasoClinicoView(container){
+    _retosContainer=container;
+    const caso=casosClinicos[retoIndiceDelDia(casosClinicos)];
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="cc-panel-banner">
+          <div>
+            <span class="cc-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 14l2 2 4-4"/></svg>Práctica clínica · Caso del día</span>
+            <h1>${escapeHtml(caso.titulo)}</h1>
+            <p>Analiza el caso, observa las señales y decide la mejor intervención clínica.</p>
+            <button type="button" class="cc-panel-banner__back" id="cc-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="cc-panel-banner__icons">
+            <div class="cc-panel-banner__float" style="transform:rotate(-8deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/><path d="M9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M16 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div>
+            <div class="cc-panel-banner__float" style="transform:rotate(6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+            <div class="cc-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg></div>
+          </div>
+        </div>
+
+        <section class="cc-panel-ficha">
+          <div class="cc-panel-ficha__head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg> Ficha del caso<small>Contenido educativo ficticio</small></div>
+          <div class="caso-clinico__ficha">
+            <div class="caso-clinico__row"><b>Paciente</b><span>${escapeHtml(caso.paciente)}</span></div>
+            <div class="caso-clinico__row"><b>Motivo</b><span>${escapeHtml(caso.motivo)}</span></div>
+            <div class="caso-clinico__row"><b>Contexto</b><span>${escapeHtml(caso.contexto)}</span></div>
+            <div class="caso-clinico__row"><b>Observación</b><span>${escapeHtml(caso.observacion)}</span></div>
+          </div>
+        </section>
+
+        <section class="cc-panel-preguntas" id="cc-preguntas-area"></section>
+
+        <div style="text-align:center;margin-top:24px">
+          <button type="button" class="btn btn--primary" id="cc-comenzar" style="padding:14px 32px;font-size:14px;border-radius:999px">Comenzar análisis<svg class="ic" style="width:16px;height:16px;margin-left:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+    `;
+    container.querySelector('#cc-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    let paso=0;
+    const area=container.querySelector('#cc-preguntas-area');
+    container.querySelector('#cc-comenzar')?.addEventListener('click',function(){this.remove();avanzarCaso();});
+    function avanzarCaso(){
+      if(paso>=caso.preguntas.length){
+        area.innerHTML=`
+          <div class="cc-panel-resultado">
+            <div class="cc-panel-resultado__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <h2>Caso completado</h2>
+            <p>${escapeHtml(caso.titulo)} — ${escapeHtml(caso.paciente)}</p>
+            <div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div>
+            <button type="button" class="btn btn--ghost" style="margin-top:20px" id="cc-volver-fin">Volver a retos</button>
+          </div>`;
+        registrarAccionProgreso('caso-clinico');
+        try{localStorage.setItem('sentia:retos:caso-clinico:'+new Date().toISOString().slice(0,10),'1');}catch{}
+        container.querySelector('#cc-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+        return;
+      }
+      const p=caso.preguntas[paso];
+      area.innerHTML=`
+        <div class="cc-panel-pregunta fade-up">
+          <span class="cc-panel-pregunta__num">Pregunta ${paso+1} de ${caso.preguntas.length}</span>
+          <h2>${escapeHtml(p.pregunta)}</h2>
+          <div class="reto-modal__answers">${p.opciones.map((o,i)=>`<button type="button" data-cc-opt="${i}">${escapeHtml(o)}</button>`).join('')}</div>
+          <p class="reto-modal__feedback" id="cc-fb"></p>
+        </div>`;
+      area.querySelectorAll('[data-cc-opt]').forEach(btn=>btn.addEventListener('click',()=>{
+        const ok=Number(btn.dataset.ccOpt)===p.correcta;
+        area.querySelectorAll('[data-cc-opt]').forEach(b=>{b.disabled=true;if(Number(b.dataset.ccOpt)===p.correcta)b.classList.add('is-correct');});
+        if(!ok)btn.classList.add('is-incorrect');
+        const fb=document.getElementById('cc-fb');if(fb)fb.textContent=(ok?'Correcto. ':'Para repasar: ')+p.explicacion;
+        setTimeout(()=>{paso++;avanzarCaso();},2500);
+      }));
+    }
+  }
+
+  /* ═══ MAPA EMOCIONAL — panel view ═══ */
+  function _renderMapaEmocionalView(container){
+    _retosContainer=container;
+    const mapa=mapasEmocionales[retoIndiceDelDia(mapasEmocionales)];
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="me-panel-banner">
+          <div>
+            <span class="me-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Inteligencia emocional · Mapa del día</span>
+            <h1>${escapeHtml(mapa.titulo)}</h1>
+            <p>Identifica y clasifica las emociones de paciente y terapeuta.</p>
+            <button type="button" class="me-panel-banner__back" id="me-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="me-panel-banner__icons">
+            <div class="me-panel-banner__float" style="transform:rotate(-8deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="me-panel-banner__float" style="transform:rotate(6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="me-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+          </div>
+        </div>
+
+        <section class="me-panel-escenario">
+          <div class="me-panel-escenario__label"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Escenario</div>
+          <p>${escapeHtml(mapa.escenario)}</p>
+        </section>
+
+        <section class="me-panel-ejercicio" id="me-ejercicio-area"></section>
+      </div>
+    `;
+    container.querySelector('#me-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    let idx=0,aciertos=0;
+    const emociones=mapa.emociones.slice();
+    const area=container.querySelector('#me-ejercicio-area');
+    renderEmocion();
+    function renderEmocion(){
+      if(idx>=emociones.length){
+        area.innerHTML=`
+          <div class="cc-panel-resultado fade-up">
+            <div class="cc-panel-resultado__icon" style="color:#534AB7"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <h2>Mapa completado</h2>
+            <p>${aciertos}/${emociones.length} emociones clasificadas correctamente</p>
+            <div style="margin:18px auto;padding:16px;border-radius:14px;background:linear-gradient(135deg,#eeedfe,#ddd8f8);text-align:left;max-width:420px">
+              <div style="font-size:11px;font-weight:800;color:#534AB7;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Reflexión</div>
+              <p style="font-size:13px;line-height:1.55;color:#3C3489;margin:0">${escapeHtml(mapa.reflexion)}</p>
+            </div>
+            <div class="hp-resumen__xp" style="margin-top:10px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div>
+            <button type="button" class="btn btn--ghost" style="margin-top:20px" id="me-volver-fin">Volver a retos</button>
+          </div>`;
+        registrarAccionProgreso('mapa-emocional');
+        try{localStorage.setItem('sentia:retos:mapa:'+new Date().toISOString().slice(0,10),'1');}catch{}
+        container.querySelector('#me-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+        return;
+      }
+      const em=emociones[idx];
+      area.innerHTML=`
+        <div class="me-panel-emocion fade-up">
+          <span class="me-panel-emocion__num">${idx+1} de ${emociones.length} emociones</span>
+          <div class="me-panel-emocion__card">
+            <h2>${escapeHtml(em.nombre)}</h2>
+            <p>¿Quién experimenta esta emoción en este escenario?</p>
+          </div>
+          <div class="me-panel-emocion__btns">
+            <button type="button" class="hp-cat-btn" data-me-cat="Paciente"><div class="hp-cat-btn__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:28px;height:28px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="hp-cat-btn__name">Paciente</div></button>
+            <button type="button" class="hp-cat-btn" data-me-cat="Terapeuta"><div class="hp-cat-btn__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:28px;height:28px"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/><path d="M9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M14 4.5V4a2 2 0 0 1 4 0v1a2 2 0 0 1-4 0z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div><div class="hp-cat-btn__name">Terapeuta</div></button>
+          </div>
+          <p class="reto-modal__feedback" id="me-fb"></p>
+        </div>`;
+      area.querySelectorAll('[data-me-cat]').forEach(btn=>btn.addEventListener('click',()=>{
+        const ok=btn.dataset.meCat===em.correcta;
+        if(ok){aciertos++;btn.classList.add('is-correct');}else btn.classList.add('is-wrong');
+        area.querySelectorAll('[data-me-cat]').forEach(b=>{b.style.pointerEvents='none';if(b.dataset.meCat===em.correcta)b.classList.add('is-correct');});
+        const fb=document.getElementById('me-fb');if(fb)fb.textContent=(ok?'Correcto. ':'Era '+em.correcta+'. ')+em.desc;
+        setTimeout(()=>{idx++;renderEmocion();},1800);
+      }));
+    }
+  }
+
   /* ============================ MODO HISTORIA ============================ */
   const historiaPersonajes = {
     elena: { nombre:'Dra. Elena', color:'#2D7A5F', iniciales:'DE', rol:'Mentora' },
@@ -8789,15 +9041,36 @@ const Sections = (function(){
 
         <section class="practice-experiences">
           <div class="practice-experiences__head"><div><span>Práctica profesional</span><h2>Elige cómo quieres entrenar</h2></div><small>Casos ficticios · contenido educativo</small></div>
-          <div class="practice-experiences__grid">
-            <button type="button" class="practice-card practice-card--quiz" data-practice="diario"><span class="practice-card__icon"><svg class="ic"><use href="#i-bolt"/></svg></span><strong>Quiz profesional</strong><small>Una pregunta breve para poner a prueba tu criterio.</small><b>Reto diario <svg class="ic"><use href="#i-arrow-right"/></svg></b></button>
-            <button type="button" class="practice-card practice-card--case" data-practice="casos"><span class="practice-card__icon"><svg class="ic"><use href="#i-ps-compass"/></svg></span><strong>Casos guiados</strong><small>Analiza escenarios ficticios paso a paso.</small><b>${retosPractica.casos.length} casos <svg class="ic"><use href="#i-arrow-right"/></svg></b></button>
-            <button type="button" class="practice-card practice-card--flash" data-practice="flashcards"><span class="practice-card__icon"><svg class="ic"><use href="#i-ps-brain"/></svg></span><strong>Flashcards</strong><small>Repasa conceptos y lenguaje profesional esencial.</small><b>${retosPractica.flashcards.length} conceptos <svg class="ic"><use href="#i-arrow-right"/></svg></b></button>
+          <div class="practice-experiences__grid practice-experiences__grid--2">
+            <div class="pcard-hero" data-practice="caso-clinico">
+              <div class="pcard-hero__visual pcard-hero__visual--caso">
+                <span class="pcard-hero__eyebrow">Práctica clínica</span>
+                <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M16 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div>
+                <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 14l2 2 4-4"/></svg></div>
+                <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+                <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${casosClinicos.length} casos disponibles</div>
+              </div>
+              <div class="pcard-hero__body">
+                <h3 class="pcard-hero__title">Caso clínico</h3>
+                <p class="pcard-hero__desc">Analiza un caso completo paso a paso: observa, evalúa y decide la intervención.</p>
+                <span class="pcard-hero__cta pcard-hero__cta--caso">Comenzar análisis<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+              </div>
+            </div>
+            <div class="pcard-hero" data-practice="mapa-emocional">
+              <div class="pcard-hero__visual pcard-hero__visual--mapa">
+                <span class="pcard-hero__eyebrow">Inteligencia emocional</span>
+                <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${mapasEmocionales.length} mapas disponibles</div>
+              </div>
+              <div class="pcard-hero__body">
+                <h3 class="pcard-hero__title">Mapa emocional</h3>
+                <p class="pcard-hero__desc">Identifica y clasifica las emociones de paciente y terapeuta en escenarios clínicos.</p>
+                <span class="pcard-hero__cta pcard-hero__cta--mapa">Explorar mapa<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+              </div>
+            </div>
           </div>
-        </section>
-
-        <section class="retos-mini-grid retos-mini-grid--solo">
-          <article class="retos-mini-card retos-mini-card--ritmo"><span>Tu ritmo</span><h2>${usuario.racha} día${usuario.racha===1?'':'s'} de racha</h2><p>La racha aumenta al completar una práctica, actividad o clase.</p><div><b>${usuario.diasActivos}</b> días con avance registrado</div></article>
         </section>
       </div>
     `;
@@ -8810,8 +9083,8 @@ const Sections = (function(){
     container.querySelectorAll('[data-practice]').forEach(el=>el.addEventListener('click',()=>{
       const tipo=el.dataset.practice;
       if(tipo==='diario') abrirPreguntaReto(retoDiario,'diario');
-      if(tipo==='casos') abrirPreguntaReto(retosPractica.casos[retoIndiceDelDia(retosPractica.casos)],'caso');
-      if(tipo==='flashcards') abrirFlashcards();
+      if(tipo==='caso-clinico') _renderCasoClinicoView(container);
+      if(tipo==='mapa-emocional') _renderMapaEmocionalView(container);
     }));
   }
   function renderLogros(container){
@@ -10183,6 +10456,7 @@ const Sections = (function(){
             <span class="foro-welcome__eyebrow"><svg class="ic"><use href="#i-users"/></svg> Comunidad SENTIA</span>
             <h1 class="foro-welcome__title">Foro SENTIA</h1>
             <p class="foro-welcome__copy">Un espacio para aprender en comunidad, compartir experiencias y construir conversaciones que acompañen tu práctica.</p>
+            <div class="foro-people" aria-hidden="true"><i class="foro-person foro-person--one"></i><i class="foro-person foro-person--two"></i><i class="foro-person foro-person--three"></i></div>
           </section>
           <aside class="foro-live">
             <div>
@@ -10244,10 +10518,10 @@ const Sections = (function(){
           <aside class="foro-side">
             <section class="foro-side__card">
               <div class="foro-side__title">Temas que nos conectan</div>
-              <div class="foro-topic" style="--topic:#2fbf2e"><span class="foro-topic__icon"><svg class="ic"><use href="#i-messages"/></svg></span>Casos y práctica<span class="foro-topic__arrow">›</span></div>
-              <div class="foro-topic" style="--topic:#1b5df0"><span class="foro-topic__icon"><svg class="ic"><use href="#i-book"/></svg></span>Educación<span class="foro-topic__arrow">›</span></div>
-              <div class="foro-topic" style="--topic:#8b5cf6"><span class="foro-topic__icon"><svg class="ic"><use href="#i-heart"/></svg></span>Bienestar profesional<span class="foro-topic__arrow">›</span></div>
-              <div class="foro-topic" style="--topic:#f59e0b"><span class="foro-topic__icon"><svg class="ic"><use href="#i-image"/></svg></span>Recursos y materiales<span class="foro-topic__arrow">›</span></div>
+              <button class="foro-topic" data-foro-topic="Casos y práctica" style="--topic:#2fbf2e"><span class="foro-topic__icon"><svg class="ic"><use href="#i-messages"/></svg></span>Casos y práctica<span class="foro-topic__arrow">›</span></button>
+              <button class="foro-topic" data-foro-topic="Educación" style="--topic:#1b5df0"><span class="foro-topic__icon"><svg class="ic"><use href="#i-book"/></svg></span>Educación<span class="foro-topic__arrow">›</span></button>
+              <button class="foro-topic" data-foro-topic="Bienestar profesional" style="--topic:#8b5cf6"><span class="foro-topic__icon"><svg class="ic"><use href="#i-heart"/></svg></span>Bienestar profesional<span class="foro-topic__arrow">›</span></button>
+              <button class="foro-topic" data-foro-topic="Recursos y materiales" style="--topic:#f59e0b"><span class="foro-topic__icon"><svg class="ic"><use href="#i-image"/></svg></span>Recursos y materiales<span class="foro-topic__arrow">›</span></button>
             </section>
             <section class="foro-side__card">
               <div class="foro-side__title">Conversaciones con propósito</div>
@@ -10298,6 +10572,14 @@ const Sections = (function(){
       if (input) { input.focus(); input.scrollIntoView({behavior:'smooth', block:'center'}); }
       else Toast.info('Participa con membresía VIP','Activa tu membresía para publicar, comentar y reaccionar.');
     });
+    container.querySelectorAll('[data-foro-topic]').forEach(topic => topic.addEventListener('click', ()=>{
+      const input = container.querySelector('#foro-text');
+      const tema = topic.dataset.foroTopic;
+      if (!input) { Toast.info('Participa con membresía VIP','Activa tu membresía para conversar sobre ' + tema + '.'); return; }
+      input.placeholder = 'Comparte tu experiencia sobre ' + tema + '…';
+      input.focus();
+      input.scrollIntoView({behavior:'smooth', block:'center'});
+    }));
 
     // Suscripción en tiempo real
     foroSuscribir();
@@ -12228,7 +12510,7 @@ function init(){
   // dejar al usuario en Inicio después de un F5.
   setTimeout(() => { window.__restaurarSeccionPanel && window.__restaurarSeccionPanel(); }, 2500);
   loadProfileFromLS();
-  injectSupportFAB();
+  // WhatsApp ya no forma parte de la navegación principal del Club.
   window.Modal=Modal;window.Tools=Tools;window.Toast=Toast;window.navigateToSection=navigateToSection;
   window.openReferralModal=openReferralModal;
 }
