@@ -2455,11 +2455,11 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    NOTICIAS DIARIAS · estilo ICADEM/Sinergia
    ========================================================= */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-/* Carrusel 3D de noticias en Inicio */
-.news-grid--home{display:flex!important;gap:0;overflow-x:auto;padding:20px 40px 30px;perspective:1200px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+/* Carrusel horizontal de noticias en Inicio */
+.news-grid--home{display:flex!important;gap:18px;overflow-x:auto;padding:6px 4px 18px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .news-grid--home::-webkit-scrollbar{display:none}
-.news-grid--home .news-card{flex:0 0 260px;scroll-snap-align:center;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.25,.8,.25,1),box-shadow .4s,opacity .4s;border-radius:20px;margin:0 -8px}
-.news-grid--home .news-card:hover{transform:scale(1.06) rotateY(0deg)!important;z-index:10;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.news-grid--home .news-card{flex:0 0 min(340px,80vw);scroll-snap-align:start;border-radius:20px;transition:transform .25s ease,box-shadow .25s}
+.news-grid--home .news-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 18px 40px rgba(0,0,0,.2)}
 .news-grid--full{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
 .news-card{
   background:var(--surface);
@@ -10728,29 +10728,12 @@ const Sections = (function(){
     }
   };
   function _initNews3D(grid) {
-    const cards = grid.querySelectorAll('.news-card');
-    if (!cards.length) return;
-    function applyPerspective() {
-      const rect = grid.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      cards.forEach(card => {
-        const cr = card.getBoundingClientRect();
-        const cardCx = cr.left + cr.width / 2;
-        const dist = (cardCx - cx) / (rect.width / 2);
-        const rotY = dist * -18;
-        const scale = 1 - Math.abs(dist) * 0.08;
-        const z = -Math.abs(dist) * 40;
-        card.style.transform = `rotateY(${rotY}deg) scale(${Math.max(scale, 0.85)}) translateZ(${z}px)`;
-        card.style.opacity = 1 - Math.abs(dist) * 0.15;
-        card.style.zIndex = Math.round((1 - Math.abs(dist)) * 10);
-      });
-    }
-    applyPerspective();
-    grid.addEventListener('scroll', applyPerspective, { passive: true });
-    let dragStart = null, scrollStart = 0;
-    grid.addEventListener('mousedown', e => { dragStart = e.pageX; scrollStart = grid.scrollLeft; grid.style.cursor = 'grabbing'; });
-    window.addEventListener('mousemove', e => { if (dragStart !== null) { grid.scrollLeft = scrollStart - (e.pageX - dragStart); } });
-    window.addEventListener('mouseup', () => { dragStart = null; grid.style.cursor = ''; });
+    let dragStart = null, scrollStart = 0, moved = false;
+    grid.style.cursor = 'grab';
+    grid.addEventListener('mousedown', e => { dragStart = e.pageX; scrollStart = grid.scrollLeft; moved = false; grid.style.cursor = 'grabbing'; e.preventDefault(); });
+    window.addEventListener('mousemove', e => { if (dragStart !== null) { const dx = e.pageX - dragStart; if (Math.abs(dx) > 3) moved = true; grid.scrollLeft = scrollStart - dx; } });
+    window.addEventListener('mouseup', () => { if (dragStart !== null) { dragStart = null; grid.style.cursor = 'grab'; } });
+    grid.querySelectorAll('a').forEach(a => a.addEventListener('click', e => { if (moved) e.preventDefault(); }));
   }
   async function renderNoticias(container){
     container.innerHTML = `
