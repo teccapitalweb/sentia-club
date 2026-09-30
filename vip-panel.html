@@ -2456,18 +2456,19 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    ========================================================= */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 /* Noticias en Inicio — layout editorial tipo periódico */
-.news-grid--home{grid-template-columns:1fr 1fr!important;grid-template-rows:auto auto;gap:16px!important;padding:0}
-.news-grid--home .news-card:first-child{grid-row:1/3;min-height:380px}
-.news-grid--home .news-card:first-child .news-card__cover{height:220px}
+.news-grid--home{grid-template-columns:1.2fr 1fr!important;grid-template-rows:repeat(3,1fr);gap:14px!important;padding:0}
+.news-grid--home .news-card:first-child{grid-row:1/-1;display:flex;flex-direction:column;min-height:420px}
+.news-grid--home .news-card:first-child .news-card__cover{height:240px;flex-shrink:0}
+.news-grid--home .news-card:first-child .news-card__body{flex:1}
 .news-grid--home .news-card:first-child .news-card__title{font-size:18px;-webkit-line-clamp:3}
 .news-grid--home .news-card:first-child .news-card__excerpt{-webkit-line-clamp:3}
-.news-grid--home .news-card:not(:first-child){display:grid;grid-template-columns:140px 1fr;min-height:0}
-.news-grid--home .news-card:not(:first-child) .news-card__cover{height:100%;min-height:120px;border-radius:18px 0 0 18px}
-.news-grid--home .news-card:not(:first-child) .news-card__title{font-size:13px;-webkit-line-clamp:2}
+.news-grid--home .news-card:not(:first-child){display:grid;grid-template-columns:130px 1fr;min-height:0;align-items:stretch}
+.news-grid--home .news-card:not(:first-child) .news-card__cover{height:100%;min-height:110px;border-radius:18px 0 0 18px}
+.news-grid--home .news-card:not(:first-child) .news-card__body{padding:10px 14px 6px;display:flex;flex-direction:column;justify-content:center}
+.news-grid--home .news-card:not(:first-child) .news-card__title{font-size:13.5px;-webkit-line-clamp:2;margin:0}
 .news-grid--home .news-card:not(:first-child) .news-card__excerpt{display:none}
-.news-grid--home .news-card:not(:first-child) .news-card__body{padding:12px 14px 10px}
-.news-grid--home .news-card:not(:first-child) .news-card__footer{padding:0 14px 10px;border:0}
-@media(max-width:760px){.news-grid--home{grid-template-columns:1fr!important}.news-grid--home .news-card:first-child{grid-row:auto;min-height:auto}.news-grid--home .news-card:first-child .news-card__cover{height:160px}.news-grid--home .news-card:not(:first-child){grid-template-columns:110px 1fr}.news-grid--home .news-card:not(:first-child) .news-card__cover{min-height:100px}}
+.news-grid--home .news-card:not(:first-child) .news-card__footer{padding:4px 14px 8px;border:0}
+@media(max-width:760px){.news-grid--home{grid-template-columns:1fr!important;grid-template-rows:auto!important}.news-grid--home .news-card:first-child{grid-row:auto;min-height:auto}.news-grid--home .news-card:first-child .news-card__cover{height:180px}.news-grid--home .news-card:not(:first-child){grid-template-columns:120px 1fr}.news-grid--home .news-card:not(:first-child) .news-card__cover{min-height:100px}}
 .news-grid--full{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
 .news-card{
   background:var(--surface);
@@ -2978,6 +2979,8 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   .mobile-nav__item{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text-3);padding:5px 8px;border-radius:8px;font-size:9.5px;font-weight:500;letter-spacing:.3px}
   .mobile-nav__item.is-active{color:var(--primary)}
   .mobile-nav__item .ic{width:18px;height:18px}
+  .mobile-nav__icon{width:26px;height:26px;object-fit:contain;flex-shrink:0;filter:grayscale(40%) opacity(.7)}
+  .mobile-nav__item.is-active .mobile-nav__icon{filter:none;opacity:1}
 
   /* Secciones internas mobile */
   .sec-hero{padding:4px 0 14px;margin-bottom:16px}
@@ -4564,11 +4567,11 @@ window.__setDisplayName = async (nombre) => {
 </div>
 
 <nav class="mobile-nav">
-  <a class="mobile-nav__item is-active" data-section="inicio"><svg class="ic"><use href="#i-home"/></svg>Inicio</a>
-  <a class="mobile-nav__item" data-section="cursos"><svg class="ic"><use href="#i-book"/></svg>Cursos</a>
-  <a class="mobile-nav__item" data-section="webinars"><svg class="ic"><use href="#i-broadcast"/></svg>Vivo</a>
-  <a class="mobile-nav__item" id="mobile-nav-tools" role="button"><svg class="ic"><use href="#i-ps-brain"/></svg>Herramientas</a>
-  <a class="mobile-nav__item" id="mobile-nav-more" role="button"><svg class="ic"><use href="#i-menu"/></svg>Más</a>
+  <a class="mobile-nav__item is-active" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="mobile-nav__icon">Inicio</a>
+  <a class="mobile-nav__item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="mobile-nav__icon">Cursos</a>
+  <a class="mobile-nav__item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="mobile-nav__icon">Vivo</a>
+  <a class="mobile-nav__item" id="mobile-nav-tools" role="button"><img src="assets/icon-nav-herramientas.png" alt="" class="mobile-nav__icon">Herramientas</a>
+  <a class="mobile-nav__item" id="mobile-nav-more" role="button"><img src="assets/icon-nav-mas.webp" alt="" class="mobile-nav__icon">Más</a>
 </nav>
 
 <!-- Drawer móvil con TODAS las opciones · se abre al tocar "Más" -->
