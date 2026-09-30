@@ -126,6 +126,9 @@ body::after{
 .nav-item .ic{width:15px;height:15px}
 .nav-item__icon{width:24px;height:24px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.75}
 .nav-item.is-active .nav-item__icon,.nav-item:hover .nav-item__icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
+.nav-item__icon--color{filter:none!important;opacity:1!important}
+.nav-item__icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(.6)!important}
+.nav-item.is-active .nav-item__icon--invert,.nav-item:hover .nav-item__icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(.5)!important}
 .nav-item__badge{margin-left:auto;font-size:9px;font-weight:600;padding:1px 7px;border-radius:100px;background:var(--surface-3);color:var(--text-2);letter-spacing:.3px;min-width:20px;text-align:center}
 .nav-item__badge.is-new{background:var(--primary);color:#fff}
 .nav-item__dot{width:7px;height:7px;border-radius:50%;background:var(--danger);margin-left:auto;animation:pulse 1.4s infinite}
@@ -4363,10 +4366,10 @@ window.__setDisplayName = async (nombre) => {
       <a class="nav-item is-active" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="nav-item__icon">Inicio</a>
       <a class="nav-item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="nav-item__icon">Cursos</a>
       <a class="nav-item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="nav-item__icon">Clases en vivo<span class="nav-item__dot" id="nav-live-dot" style="display:none"></span></a>
-      <a class="nav-item" data-section="pdfs"><img src="assets/icon-nav-materiales.png" alt="" class="nav-item__icon">Materiales</a>
-      <a class="nav-item" data-section="retos"><img src="assets/icon-nav-retos.png" alt="" class="nav-item__icon">Retos</a>
-      <a class="nav-item" data-section="logros"><img src="assets/icon-nav-logros.png" alt="" class="nav-item__icon">Logros</a>
-      <a class="nav-item" data-section="certificados"><svg class="ic"><use href="#i-certificate"/></svg>Certificados</a>
+      <a class="nav-item" data-section="pdfs"><svg class="ic"><use href="#i-news"/></svg>Materiales</a>
+      <a class="nav-item" data-section="retos"><svg class="ic"><use href="#i-trophy"/></svg>Retos</a>
+      <a class="nav-item" data-section="logros"><svg class="ic"><use href="#i-crown"/></svg>Logros</a>
+      <a class="nav-item" data-section="certificados"><img src="assets/icon-nav-certificados.png" alt="" class="nav-item__icon nav-item__icon--invert">Certificados</a>
     </div>
 
     <div class="nav-section nav-section--tools" data-tour="tools">
@@ -4385,14 +4388,14 @@ window.__setDisplayName = async (nombre) => {
 
     <div class="nav-section">
       <div class="nav-label">Comunidad</div>
-      <a class="nav-item" data-section="foro"><img src="assets/icon-nav-foro.png" alt="" class="nav-item__icon">Foro VIP</a>
-      <a class="nav-item" data-section="directorio"><img src="assets/icon-nav-directorio.png" alt="" class="nav-item__icon">Directorio VIP</a>
+      <a class="nav-item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
+      <a class="nav-item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
       <a class="nav-item" data-section="red-profesional"><svg class="ic"><use href="#i-network"/></svg>Red Profesional</a>
     </div>
 
     <div class="nav-section">
       <div class="nav-label">Mi cuenta</div>
-      <a class="nav-item" data-section="perfil"><img src="assets/icon-nav-perfil.webp" alt="" class="nav-item__icon">Mi perfil</a>
+      <a class="nav-item" data-section="perfil"><img src="assets/icon-nav-perfil.webp" alt="" class="nav-item__icon nav-item__icon--color">Mi perfil</a>
       <a class="nav-item" data-section="suscripcion"><svg class="ic"><use href="#i-credit-card"/></svg>Suscripción</a>
       <a class="nav-item" id="btn-instalar"><svg class="ic"><use href="#i-download"/></svg>Descargar SENTIA</a>
   <a class="nav-item" id="btn-logout"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
@@ -4587,10 +4590,10 @@ window.__setDisplayName = async (nombre) => {
         <a class="mobile-drawer__item" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="drawer-icon">Inicio</a>
         <a class="mobile-drawer__item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="drawer-icon">Cursos</a>
         <a class="mobile-drawer__item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="drawer-icon">Clases en vivo</a>
-        <a class="mobile-drawer__item" data-section="pdfs"><img src="assets/icon-nav-materiales.png" alt="" class="drawer-icon">Materiales</a>
-        <a class="mobile-drawer__item" data-section="retos"><img src="assets/icon-nav-retos.png" alt="" class="drawer-icon">Retos</a>
-        <a class="mobile-drawer__item" data-section="logros"><img src="assets/icon-nav-logros.png" alt="" class="drawer-icon">Logros</a>
-        <a class="mobile-drawer__item" data-section="certificados"><svg class="ic"><use href="#i-certificate"/></svg>Certificados</a>
+        <a class="mobile-drawer__item" data-section="pdfs"><svg class="ic"><use href="#i-news"/></svg>Materiales</a>
+        <a class="mobile-drawer__item" data-section="retos"><svg class="ic"><use href="#i-trophy"/></svg>Retos</a>
+        <a class="mobile-drawer__item" data-section="logros"><svg class="ic"><use href="#i-crown"/></svg>Logros</a>
+        <a class="mobile-drawer__item" data-section="certificados"><img src="assets/icon-nav-certificados.png" alt="" class="drawer-icon drawer-icon--invert">Certificados</a>
       </div>
 
       <div class="mobile-drawer__section" data-tour="tools">
@@ -4599,14 +4602,14 @@ window.__setDisplayName = async (nombre) => {
 
       <div class="mobile-drawer__section">
         <div class="mobile-drawer__label">Comunidad</div>
-        <a class="mobile-drawer__item" data-section="foro"><img src="assets/icon-nav-foro.png" alt="" class="drawer-icon">Foro VIP</a>
-        <a class="mobile-drawer__item" data-section="directorio"><img src="assets/icon-nav-directorio.png" alt="" class="drawer-icon">Directorio VIP</a>
+        <a class="mobile-drawer__item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
+        <a class="mobile-drawer__item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
         <a class="mobile-drawer__item" data-section="red-profesional"><svg class="ic"><use href="#i-network"/></svg>Red Profesional</a>
       </div>
 
       <div class="mobile-drawer__section">
         <div class="mobile-drawer__label">Mi cuenta</div>
-        <a class="mobile-drawer__item" data-section="perfil"><img src="assets/icon-nav-perfil.webp" alt="" class="drawer-icon">Mi perfil</a>
+        <a class="mobile-drawer__item" data-section="perfil"><img src="assets/icon-nav-perfil.webp" alt="" class="drawer-icon drawer-icon--color">Mi perfil</a>
         <a class="mobile-drawer__item" data-section="suscripcion"><svg class="ic"><use href="#i-credit-card"/></svg>Suscripción</a>
         <a class="mobile-drawer__item" id="drawer-instalar"><svg class="ic"><use href="#i-download"/></svg>Descargar SENTIA</a>
         <a class="mobile-drawer__item" id="drawer-logout-btn" style="color:#EF4444;"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
@@ -14222,6 +14225,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   .mobile-drawer__item .ic{width:18px;height:18px;flex-shrink:0}
   .drawer-icon{width:22px;height:22px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.75}
   .mobile-drawer__item.is-active .drawer-icon,.mobile-drawer__item:hover .drawer-icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
+  .drawer-icon--color{filter:none!important;opacity:1!important}
+  .drawer-icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(.6)!important}
+  .mobile-drawer__item.is-active .drawer-icon--invert,.mobile-drawer__item:hover .drawer-icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(.5)!important}
 }
 
 /* Catálogo de Herramientas Pro */
