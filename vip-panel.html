@@ -2052,6 +2052,55 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .dir-form__checks{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:4px}
 .dir-form__check-inline{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);cursor:pointer}
 .dir-form__check-inline input{width:15px;height:15px;accent-color:var(--primary)}
+
+/* ===== RED PROFESIONAL ===== */
+.red-hero{position:relative;display:grid;grid-template-columns:1fr auto;gap:30px;padding:38px 42px;border-radius:24px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#2563eb 100%);color:#fff;overflow:hidden;margin-bottom:24px}
+.red-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(59,130,246,.3),transparent 50%);pointer-events:none}
+.red-hero__content{position:relative;z-index:1}
+.red-hero__eyebrow{display:flex;align-items:center;gap:7px;color:#93c5fd;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.red-hero h1{margin:14px 0 12px;font-size:clamp(32px,4vw,48px);letter-spacing:-.055em;line-height:1}
+.red-hero p{margin:0;max-width:480px;color:rgba(255,255,255,.75);font-size:14px;line-height:1.55}
+.red-hero__stats{display:flex;flex-direction:column;gap:14px;align-self:center;position:relative;z-index:1}
+.red-hero__stat{display:flex;flex-direction:column;align-items:center;padding:14px 20px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);min-width:120px}
+.red-hero__stat-num{font-family:'Sora',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.red-hero__stat-lbl{font-size:10px;color:rgba(255,255,255,.7);text-align:center;margin-top:2px}
+@media(max-width:700px){.red-hero{grid-template-columns:1fr;padding:28px 22px}.red-hero__stats{flex-direction:row;justify-content:center}.red-hero h1{font-size:30px}}
+.red-tabs{display:flex;gap:6px;margin-bottom:18px}
+.red-tab{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface);color:var(--text-2);font:700 13px 'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
+.red-tab:hover{border-color:var(--primary);color:var(--primary)}
+.red-tab.is-active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.red-tab .ic{flex-shrink:0}
+.red-filtros{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center}
+.red-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+@media(max-width:700px){.red-grid{grid-template-columns:1fr}}
+.red-card{border-radius:18px;overflow:hidden;border:1px solid var(--border-2);background:var(--surface);transition:transform .18s,box-shadow .18s}
+.red-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.1)}
+.red-card--mia{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.red-card__banda{padding:14px 18px 12px;background:var(--banda);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.red-card__cat{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.red-card__sup-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.25);color:#fff}
+.red-card__body{padding:18px 20px 16px}
+.red-card__head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.red-card__foto{width:50px;height:50px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--surface)}
+.red-card__foto--ini{display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800;font-family:'Sora',sans-serif}
+.red-card__name{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.03em;color:var(--text)}
+.red-card__name small{font-size:11px;font-weight:600;color:var(--primary)}
+.red-card__puesto{font-size:12.5px;color:var(--text-2);margin-top:1px}
+.red-card__empresa{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-3);margin-bottom:8px}
+.red-card__metas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.red-card__meta{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--surface-2);font-size:11px;font-weight:600;color:var(--text-2)}
+.red-card__bio{margin:0 0 12px;font-size:12.5px;color:var(--text-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.red-card__footer{display:flex;gap:8px;flex-wrap:wrap}
+.red-card__cta{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font:700 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s;text-decoration:none;border:1px solid var(--border-2);background:var(--surface-2);color:var(--text)}
+.red-card__cta .ic{width:15px;height:15px}
+.red-card__cta--wa{color:#25d366;border-color:#25d366}.red-card__cta--wa:hover{background:#25d366;color:#fff}
+.red-card__cta--mail:hover{border-color:var(--primary);color:var(--primary)}
+.red-card__sin{font-size:11px;color:var(--text-3);font-style:italic;padding:8px 0}
+.red-cta-box{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:28px;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 8%,transparent),color-mix(in srgb,var(--primary) 16%,transparent));border:1px solid color-mix(in srgb,var(--primary) 22%,transparent)}
+.red-cta-box__text strong{display:block;font-size:15px;color:var(--text);margin-bottom:4px}
+.red-cta-box__text p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.5}
+@media(max-width:600px){.red-cta-box{flex-direction:column;text-align:center}}
+
 /* ===== FORO funcional ===== */
 .foro-aviso{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--primary) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary) 22%,transparent);border-radius:12px;padding:11px 15px;margin-bottom:16px;font-size:13px;color:var(--text-2)}
 .foro-aviso .ic{width:16px;height:16px;color:var(--primary);flex-shrink:0}
@@ -4281,6 +4330,7 @@ window.__setDisplayName = async (nombre) => {
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></symbol>
 <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.7 8.7l6.6 6.6"/><path d="M8.7 15.3l6.6-6.6"/></symbol>
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4v12"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10"/></symbol>
@@ -4336,6 +4386,7 @@ window.__setDisplayName = async (nombre) => {
       <div class="nav-label">Comunidad</div>
       <a class="nav-item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
       <a class="nav-item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
+      <a class="nav-item" data-section="red-profesional"><svg class="ic"><use href="#i-network"/></svg>Red Profesional</a>
     </div>
 
     <div class="nav-section">
@@ -4549,6 +4600,7 @@ window.__setDisplayName = async (nombre) => {
         <div class="mobile-drawer__label">Comunidad</div>
         <a class="mobile-drawer__item" data-section="foro"><svg class="ic"><use href="#i-messages"/></svg>Foro VIP</a>
         <a class="mobile-drawer__item" data-section="directorio"><svg class="ic"><use href="#i-users"/></svg>Directorio VIP</a>
+        <a class="mobile-drawer__item" data-section="red-profesional"><svg class="ic"><use href="#i-network"/></svg>Red Profesional</a>
       </div>
 
       <div class="mobile-drawer__section">
@@ -5605,7 +5657,7 @@ const ToolInforme = psFormTool({
    ═══════════════════════════════════════════════════════════════════ */
 const SECCIONES_VALIDAS_PANEL = [
   'inicio','cursos','certificados','retos','logros','webinars','pdfs','foro',
-  'directorio','canal','perfil','suscripcion',
+  'directorio','red-profesional','canal','perfil','suscripcion',
   'tool-nota','tool-plan','tool-puntajes','tool-consentimiento',
   'tool-riesgo','tool-seguimiento','tool-psicosocial','tool-informe'
 ];
@@ -10779,19 +10831,6 @@ const Sections = (function(){
           ${SECTORES.map(s=>`<button class="dir-chip" data-sector="${s}">${s}</button>`).join('')}
         </div>
 
-        <div class="dir-filtros-extra">
-          <div class="dir-filtro-grupo">
-            <select class="dir-filtro-select" id="dir-filtro-modalidad">
-              <option value="todas">Modalidad: Todas</option>
-              ${MODALIDADES.map(m=>`<option value="${m}">${m}</option>`).join('')}
-            </select>
-          </div>
-          <label class="dir-filtro-toggle" id="dir-filtro-deriv">
-            <input type="checkbox" id="dir-deriv-check">
-            <span class="dir-filtro-toggle__pill"></span>
-            <span>Disponible para derivaciones</span>
-          </label>
-        </div>
 
         <div class="dir-grid" id="dir-grid">
           <div class="foro-empty">Cargando directorio…</div>
@@ -10810,16 +10849,6 @@ const Sections = (function(){
         _dirFiltroSector = c.dataset.sector;
         dirPintar();
       });
-    });
-    // Modalidad
-    container.querySelector('#dir-filtro-modalidad')?.addEventListener('change', (e)=>{
-      _dirFiltroModalidad = e.target.value;
-      dirPintar();
-    });
-    // Derivaciones
-    container.querySelector('#dir-deriv-check')?.addEventListener('change', (e)=>{
-      _dirFiltroDeriv = e.target.checked;
-      dirPintar();
     });
     // Mi tarjeta
     if (esVip) container.querySelector('#dir-mi-tarjeta').addEventListener('click', dirEditarMiTarjeta);
@@ -10849,8 +10878,6 @@ const Sections = (function(){
     const grid = document.getElementById('dir-grid'); if(!grid) return;
     let cards = _dirCards.slice();
     if (_dirFiltroSector!=='todos') cards = cards.filter(c=>c.sector===_dirFiltroSector);
-    if (_dirFiltroModalidad!=='todas') cards = cards.filter(c=>c.modalidad===_dirFiltroModalidad||c.modalidad==='Ambas');
-    if (_dirFiltroDeriv) cards = cards.filter(c=>c.derivaciones===true);
     if (_dirBusqueda) cards = cards.filter(c=>{
       const blob = ((c.nombre||'')+' '+(c.empresa||'')+' '+(c.puesto||'')+' '+(c.sector||'')+' '+(c.enfoque||'')+' '+((c.publico||[]).join(' '))).toLowerCase();
       return blob.includes(_dirBusqueda);
@@ -11118,6 +11145,175 @@ const Sections = (function(){
         m.close();
       } catch(e){ console.error(e); Toast.error('No se pudo guardar', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; }
     });
+  }
+
+  /* ============================ RED PROFESIONAL ============================ */
+  const RED_COLORES_ENFOQUE = {
+    'Cognitivo-Conductual':'#1565c0','Psicoanálisis':'#6a1b9a','Gestalt':'#2e7d32','Sistémica':'#00838f',
+    'Humanista':'#ef6c00','EMDR':'#ad1457','Integrativa':'#4527a0','Breve / Estratégica':'#00695c',
+    'Neurociencias':'#283593','Otro':'#546e7a'
+  };
+  const RED_COLORES_SECTOR = {
+    'Psicología Clínica':'#1565c0','Psicología Educativa':'#2e7d32','Psicología Forense':'#4e342e',
+    'Psicología Laboral':'#ef6c00','Neuropsicología':'#283593','Salud Mental':'#00838f',
+    'Educación / Docencia':'#558b2f','Trabajo Social':'#ad1457','Desarrollo Humano':'#6a1b9a','Otro':'#546e7a'
+  };
+
+  function renderRedProfesional(container){
+    const esVip = window.UserState?.modo==='vip' || esAdminReal();
+    container.innerHTML = `
+      <div class="fade-up">
+        <div class="red-hero">
+          <div class="red-hero__content">
+            <span class="red-hero__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.7 8.7l6.6 6.6"/><path d="M8.7 15.3l6.6-6.6"/></svg>Exclusivo membresía VIP</span>
+            <h1>Red Profesional</h1>
+            <p>Encuentra colegas para derivaciones, supervisión clínica y mentoría. Una red construida por y para profesionales de la salud mental.</p>
+          </div>
+          <div class="red-hero__stats">
+            <div class="red-hero__stat"><span class="red-hero__stat-num" id="red-stat-deriv">—</span><span class="red-hero__stat-lbl">Disponibles para derivar</span></div>
+            <div class="red-hero__stat"><span class="red-hero__stat-num" id="red-stat-super">—</span><span class="red-hero__stat-lbl">Ofrecen supervisión</span></div>
+          </div>
+        </div>
+
+        <div class="red-tabs">
+          <button class="red-tab is-active" data-red-tab="derivaciones"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Derivaciones</button>
+          <button class="red-tab" data-red-tab="supervision"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 7a3 3 0 1 0 0 6a3 3 0 0 0 0 -6"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>Supervisión</button>
+        </div>
+
+        <div class="red-filtros" id="red-filtros">
+          <div class="dir-search" style="max-width:320px">
+            <svg class="ic"><use href="#i-search"/></svg>
+            <input type="text" id="red-buscar" placeholder="Buscar por nombre, enfoque o ciudad…">
+          </div>
+          <select class="dir-filtro-select" id="red-filtro-modalidad">
+            <option value="todas">Modalidad: Todas</option>
+            ${MODALIDADES.map(m=>`<option value="${m}">${m}</option>`).join('')}
+          </select>
+          <select class="dir-filtro-select" id="red-filtro-enfoque">
+            <option value="todos">Enfoque: Todos</option>
+            ${ENFOQUES.map(e=>`<option value="${e}">${e}</option>`).join('')}
+          </select>
+          <select class="dir-filtro-select" id="red-filtro-publico">
+            <option value="todos">Público: Todos</option>
+            ${PUBLICOS.map(p=>`<option value="${p}">${p}</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="red-grid" id="red-grid">
+          <div class="foro-empty">Cargando red profesional…</div>
+        </div>
+
+        ${esVip?`<div class="red-cta-box">
+          <div class="red-cta-box__text">
+            <strong>¿Quieres aparecer aquí?</strong>
+            <p>Activa "Disponible para derivaciones" o indica tu supervisión en tu tarjeta del directorio.</p>
+          </div>
+          <button class="btn btn--accent" id="red-editar-tarjeta"><svg class="ic"><use href="#i-edit"/></svg>Editar mi tarjeta</button>
+        </div>`:''}
+      </div>
+    `;
+
+    let _redTab = 'derivaciones';
+    let _redBusqueda = '';
+    let _redFiltroMod = 'todas';
+    let _redFiltroEnf = 'todos';
+    let _redFiltroPub = 'todos';
+
+    container.querySelectorAll('[data-red-tab]').forEach(t=>t.addEventListener('click',()=>{
+      container.querySelectorAll('[data-red-tab]').forEach(x=>x.classList.remove('is-active'));
+      t.classList.add('is-active');
+      _redTab = t.dataset.redTab;
+      redPintar();
+    }));
+    container.querySelector('#red-buscar')?.addEventListener('input',(e)=>{_redBusqueda=e.target.value.toLowerCase().trim();redPintar();});
+    container.querySelector('#red-filtro-modalidad')?.addEventListener('change',(e)=>{_redFiltroMod=e.target.value;redPintar();});
+    container.querySelector('#red-filtro-enfoque')?.addEventListener('change',(e)=>{_redFiltroEnf=e.target.value;redPintar();});
+    container.querySelector('#red-filtro-publico')?.addEventListener('change',(e)=>{_redFiltroPub=e.target.value;redPintar();});
+    container.querySelector('#red-editar-tarjeta')?.addEventListener('click',()=>dirEditarMiTarjeta());
+
+    redCargarDatos();
+
+    async function redCargarDatos(){
+      const fs = window.__fs;
+      if (!fs||!fs.getDocs){ redPintarVacio('No se pudo conectar.'); return; }
+      try {
+        const snap = await fs.getDocs(fs.query(fs.collection(fs.db,'directorio'), fs.where('visible','==',true), fs.limit(300)));
+        const all = [];
+        snap.forEach(d=>{ const x=d.data(); x.id=d.id; all.push(x); });
+        const derivCount = all.filter(c=>c.derivaciones).length;
+        const superCount = all.filter(c=>c.supervision==='Ofrezco supervisión').length;
+        const statD=document.getElementById('red-stat-deriv');if(statD)statD.textContent=derivCount;
+        const statS=document.getElementById('red-stat-super');if(statS)statS.textContent=superCount;
+        window._redAllCards = all;
+        redPintar();
+      } catch(e){ console.error('red prof',e); redPintarVacio('No se pudo cargar la red profesional.'); }
+    }
+
+    function redPintarVacio(msg){
+      const g=document.getElementById('red-grid');if(g) g.innerHTML=`<div class="foro-empty">${msg}</div>`;
+    }
+
+    function redPintar(){
+      const grid=document.getElementById('red-grid');if(!grid) return;
+      let cards = (window._redAllCards||[]).slice();
+      if(_redTab==='derivaciones') cards = cards.filter(c=>c.derivaciones===true);
+      else cards = cards.filter(c=>c.supervision==='Ofrezco supervisión'||c.supervision==='Busco supervisor');
+      if(_redFiltroMod!=='todas') cards = cards.filter(c=>c.modalidad===_redFiltroMod||c.modalidad==='Ambas');
+      if(_redFiltroEnf!=='todos') cards = cards.filter(c=>c.enfoque===_redFiltroEnf);
+      if(_redFiltroPub!=='todos') cards = cards.filter(c=>Array.isArray(c.publico)&&c.publico.includes(_redFiltroPub));
+      if(_redBusqueda) cards = cards.filter(c=>{
+        const blob = ((c.nombre||'')+' '+(c.enfoque||'')+' '+(c.ciudad||'')+' '+(c.sector||'')+' '+((c.publico||[]).join(' '))).toLowerCase();
+        return blob.includes(_redBusqueda);
+      });
+      if(!cards.length){
+        grid.innerHTML = `<div class="foro-empty">${_redTab==='derivaciones'?'No hay profesionales disponibles para derivaciones con estos filtros.<br>Invita a tus colegas a activar esta opción en su tarjeta.':'No hay profesionales con supervisión registrada aún.'}</div>`;
+        return;
+      }
+      const uid = window.UserState?.uid;
+      grid.innerHTML = cards.map(c=>{
+        const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
+        const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
+        const bandaColor = RED_COLORES_ENFOQUE[c.enfoque] || RED_COLORES_SECTOR[c.sector] || '#546e7a';
+        const foto = fotoSegura
+          ? `<img src="${fotoSegura}" alt="${escapeHtml(c.nombre||'')}" class="red-card__foto">`
+          : `<div class="red-card__foto red-card__foto--ini" style="background:${bandaColor}">${escapeHtml(inicial)}</div>`;
+        const waNum = (c.whatsapp||'').replace(/[^0-9]/g,'');
+        const esMia = c.id===uid;
+        const publicoTxt = Array.isArray(c.publico)&&c.publico.length ? c.publico.join(' · ') : '';
+        return `
+        <article class="red-card${esMia?' red-card--mia':''}" style="--banda:${bandaColor}">
+          <div class="red-card__banda">
+            <span class="red-card__cat">${escapeHtml(c.enfoque||c.sector||'Profesional')}</span>
+            ${_redTab==='supervision'&&c.supervision?`<span class="red-card__sup-badge">${c.supervision==='Ofrezco supervisión'?'Ofrece supervisión':'Busca supervisor'}</span>`:''}
+          </div>
+          <div class="red-card__body">
+            <div class="red-card__head">
+              ${foto}
+              <div>
+                <div class="red-card__name">${escapeHtml(c.nombre||'Miembro VIP')}${esMia?' <small>(tú)</small>':''}</div>
+                ${c.puesto?`<div class="red-card__puesto">${escapeHtml(c.puesto)}</div>`:''}
+              </div>
+            </div>
+            ${c.empresa?`<div class="red-card__empresa"><svg class="ic" style="width:12px;height:12px"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
+            <div class="red-card__metas">
+              ${c.modalidad?`<span class="red-card__meta">${c.modalidad==='Online'?'💻':'📍'} ${escapeHtml(c.modalidad)}${c.modalidad!=='Online'&&c.ciudad?' · '+escapeHtml(c.ciudad):''}</span>`:''}
+              ${publicoTxt?`<span class="red-card__meta">👥 ${escapeHtml(publicoTxt)}</span>`:''}
+            </div>
+            ${c.bio?`<p class="red-card__bio">${escapeHtml(c.bio)}</p>`:''}
+            <div class="red-card__footer">
+              ${waNum?`<a class="red-card__cta red-card__cta--wa" href="https://wa.me/${waNum}" target="_blank" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg>WhatsApp</a>`:''}
+              ${c.email?`<button class="red-card__cta red-card__cta--mail" data-redemail="${escapeHtml(c.email)}"><svg class="ic"><use href="#i-mail"/></svg>Correo</button>`:''}
+              ${!waNum&&!c.email?'<span class="red-card__sin">Sin contacto registrado</span>':''}
+            </div>
+          </div>
+        </article>`;
+      }).join('');
+
+      grid.querySelectorAll('.red-card__cta--mail').forEach(b=>b.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        dirAbrirCorreo(b.dataset.redemail);
+      }));
+    }
   }
 
   /* ============================ FORO VIP ============================ */
@@ -12355,6 +12551,7 @@ const Sections = (function(){
       pdfs:renderPDFs,
       foro:renderForo,
       directorio:renderDirectorio,
+      'red-profesional':renderRedProfesional,
       canal:renderCanal,
       perfil:renderPerfil,
       suscripcion:renderSuscripcion,
