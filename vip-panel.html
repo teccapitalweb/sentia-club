@@ -129,6 +129,10 @@ body::after{
 .nav-item__icon--color{filter:none!important;opacity:1!important}
 .nav-item__icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(.6)!important}
 .nav-item.is-active .nav-item__icon--invert,.nav-item:hover .nav-item__icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(.5)!important}
+:root[data-theme="night"] .nav-item__icon{filter:sepia(1) saturate(2) hue-rotate(175deg) brightness(1.6);opacity:.8}
+:root[data-theme="night"] .nav-item.is-active .nav-item__icon,:root[data-theme="night"] .nav-item:hover .nav-item__icon{filter:sepia(1) saturate(4) hue-rotate(105deg) brightness(1.3);opacity:1}
+:root[data-theme="night"] .nav-item__icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(1.3)!important}
+:root[data-theme="night"] .nav-item.is-active .nav-item__icon--invert,:root[data-theme="night"] .nav-item:hover .nav-item__icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(1.1)!important}
 .nav-item__badge{margin-left:auto;font-size:9px;font-weight:600;padding:1px 7px;border-radius:100px;background:var(--surface-3);color:var(--text-2);letter-spacing:.3px;min-width:20px;text-align:center}
 .nav-item__badge.is-new{background:var(--primary);color:#fff}
 .nav-item__dot{width:7px;height:7px;border-radius:50%;background:var(--danger);margin-left:auto;animation:pulse 1.4s infinite}
@@ -2972,6 +2976,8 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   .mobile-nav__item .ic{width:18px;height:18px}
   .mobile-nav__icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.7}
   .mobile-nav__item.is-active .mobile-nav__icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
+  :root[data-theme="night"] .mobile-nav__icon{filter:sepia(1) saturate(2) hue-rotate(175deg) brightness(1.6);opacity:.8}
+  :root[data-theme="night"] .mobile-nav__item.is-active .mobile-nav__icon{filter:sepia(1) saturate(4) hue-rotate(105deg) brightness(1.3);opacity:1}
 
   /* Secciones internas mobile */
   .sec-hero{padding:4px 0 14px;margin-bottom:16px}
@@ -3543,6 +3549,26 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .pcard-hero__visual--arbol .pcard-hero__eyebrow,.pcard-hero__visual--arbol .pcard-hero__tag{color:#004d40}
 .pcard-hero__visual--arbol .pcard-hero__float--1{background:#e0f2f1;color:#004d40}
 .pcard-hero__cta--arbol{color:#00695c}
+:root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__float--1{background:var(--surface-3);color:#5ec4a8}
+:root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__float--1{background:var(--surface-3);color:#9b93e8}
+:root[data-theme="night"] .pcard-hero__visual--intervencion .pcard-hero__float--1{background:var(--surface-3);color:#64b5f6}
+:root[data-theme="night"] .pcard-hero__visual--error .pcard-hero__float--1{background:var(--surface-3);color:#ef9a9a}
+:root[data-theme="night"] .pcard-hero__visual--simulador .pcard-hero__float--1{background:var(--surface-3);color:#ffb74d}
+:root[data-theme="night"] .pcard-hero__visual--arbol .pcard-hero__float--1{background:var(--surface-3);color:#80cbc4}
+:root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__float{color:#5ec4a8}
+:root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__float{color:#9b93e8}
+:root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__tag{color:#5ec4a8}
+:root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__tag{color:#9b93e8}
+:root[data-theme="night"] .pcard-hero__visual--intervencion .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--intervencion .pcard-hero__tag{color:#64b5f6}
+:root[data-theme="night"] .pcard-hero__visual--error .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--error .pcard-hero__tag{color:#ef9a9a}
+:root[data-theme="night"] .pcard-hero__visual--simulador .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--simulador .pcard-hero__tag{color:#ffb74d}
+:root[data-theme="night"] .pcard-hero__visual--arbol .pcard-hero__eyebrow,:root[data-theme="night"] .pcard-hero__visual--arbol .pcard-hero__tag{color:#80cbc4}
+:root[data-theme="night"] .pcard-hero__cta--caso{color:#5ec4a8}
+:root[data-theme="night"] .pcard-hero__cta--mapa{color:#9b93e8}
+:root[data-theme="night"] .pcard-hero__cta--intervencion{color:#64b5f6}
+:root[data-theme="night"] .pcard-hero__cta--error{color:#ef9a9a}
+:root[data-theme="night"] .pcard-hero__cta--simulador{color:#ffb74d}
+:root[data-theme="night"] .pcard-hero__cta--arbol{color:#80cbc4}
 
 /* Panel Construye la Intervención */
 .ci-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0d47a1,#1976d2 55%,#42a5f5);color:#fff;overflow:hidden;margin-bottom:22px}
@@ -14234,6 +14260,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   .drawer-icon--color{filter:none!important;opacity:1!important}
   .drawer-icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(.6)!important}
   .mobile-drawer__item.is-active .drawer-icon--invert,.mobile-drawer__item:hover .drawer-icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(.5)!important}
+  :root[data-theme="night"] .drawer-icon{filter:sepia(1) saturate(2) hue-rotate(175deg) brightness(1.6);opacity:.8}
+  :root[data-theme="night"] .mobile-drawer__item.is-active .drawer-icon,:root[data-theme="night"] .mobile-drawer__item:hover .drawer-icon{filter:sepia(1) saturate(4) hue-rotate(105deg) brightness(1.3);opacity:1}
+  :root[data-theme="night"] .drawer-icon--invert{filter:invert(1) sepia(1) saturate(2) hue-rotate(175deg) brightness(1.3)!important}
+  :root[data-theme="night"] .mobile-drawer__item.is-active .drawer-icon--invert,:root[data-theme="night"] .mobile-drawer__item:hover .drawer-icon--invert{filter:invert(1) sepia(1) saturate(4) hue-rotate(105deg) brightness(1.1)!important}
 }
 
 /* Catálogo de Herramientas Pro */
