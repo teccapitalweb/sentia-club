@@ -3433,7 +3433,111 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .me-panel-emocion__card h2{margin:0 0 6px;color:#10255f;font-size:26px;letter-spacing:-.03em}
 .me-panel-emocion__card p{margin:0;color:#71809a;font-size:13px}
 .me-panel-emocion__btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:760px){.cc-panel-banner,.me-panel-banner{grid-template-columns:1fr;padding:27px 22px}.cc-panel-banner__icons,.me-panel-banner__icons{flex-direction:row;justify-content:center}.cc-panel-banner h1,.me-panel-banner h1{font-size:28px}}
+@media(max-width:760px){.cc-panel-banner,.me-panel-banner,.ci-panel-banner,.sim-panel-banner,.ec-panel-banner,.arb-panel-banner{grid-template-columns:1fr;padding:27px 22px}.cc-panel-banner__icons,.me-panel-banner__icons,.ci-panel-banner__icons,.sim-panel-banner__icons,.ec-panel-banner__icons,.arb-panel-banner__icons{flex-direction:row;justify-content:center}.cc-panel-banner h1,.me-panel-banner h1,.ci-panel-banner h1,.sim-panel-banner h1,.ec-panel-banner h1,.arb-panel-banner h1{font-size:28px}}
+
+/* Level badges */
+.retos-level{margin-top:28px}.retos-level:first-child{margin-top:0}
+.retos-level__head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.retos-level__badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.retos-level__badge--express{background:#fff3e0;color:#e65100}
+.retos-level__badge--aplicacion{background:#e8f5e9;color:#2e7d32}
+.retos-level__badge--simulacion{background:#ede7f6;color:#4527a0}
+.retos-level__head small{color:#7886a0;font-size:11px}
+
+/* Hero card color variants */
+.pcard-hero__visual--intervencion{background:linear-gradient(145deg,#e3f2fd 0%,#90caf9 55%,#64b5f6 100%)}
+.pcard-hero__visual--intervencion .pcard-hero__eyebrow,.pcard-hero__visual--intervencion .pcard-hero__float,.pcard-hero__visual--intervencion .pcard-hero__tag{color:#0d47a1}
+.pcard-hero__cta--intervencion{color:#1565c0}
+.pcard-hero__visual--error{background:linear-gradient(145deg,#fce4ec 0%,#ef9a9a 55%,#e57373 100%)}
+.pcard-hero__visual--error .pcard-hero__eyebrow,.pcard-hero__visual--error .pcard-hero__float,.pcard-hero__visual--error .pcard-hero__tag{color:#b71c1c}
+.pcard-hero__cta--error{color:#c62828}
+.pcard-hero__visual--simulador{background:linear-gradient(145deg,#fff3e0 0%,#ffcc80 55%,#ffb74d 100%)}
+.pcard-hero__visual--simulador .pcard-hero__eyebrow,.pcard-hero__visual--simulador .pcard-hero__float,.pcard-hero__visual--simulador .pcard-hero__tag{color:#e65100}
+.pcard-hero__cta--simulador{color:#e65100}
+.pcard-hero__visual--arbol{background:linear-gradient(145deg,#e0f2f1 0%,#80cbc4 55%,#4db6ac 100%)}
+.pcard-hero__visual--arbol .pcard-hero__eyebrow,.pcard-hero__visual--arbol .pcard-hero__float,.pcard-hero__visual--arbol .pcard-hero__tag{color:#004d40}
+.pcard-hero__cta--arbol{color:#00695c}
+
+/* Panel Construye la Intervención */
+.ci-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0d47a1,#1976d2 55%,#42a5f5);color:#fff;overflow:hidden;margin-bottom:22px}
+.ci-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#bbdefb;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.ci-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.ci-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.ci-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#0d47a1;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.ci-panel-banner__back:hover{transform:scale(1.03)}.ci-panel-banner__back .ic{width:15px;height:15px}
+.ci-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.ci-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}.ci-panel-banner__float .ic{width:24px;height:24px}
+.ci-panel-contexto{padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:1px solid #90caf9;margin-bottom:24px}
+.ci-panel-contexto__label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:850;color:#0d47a1;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.ci-panel-contexto p{margin:0;color:#1a237e;font-size:14px;line-height:1.6}
+.ci-panel-sorteo{max-width:600px}.ci-panel-sorteo__inst{color:#71809a;font-size:13px;margin:0 0 14px}
+.ci-paso{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #dce4f2;border-radius:12px;background:#fff;margin-bottom:8px;cursor:grab;transition:border-color .2s,background .2s;user-select:none}
+.ci-paso:active{cursor:grabbing}
+.ci-paso__num{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e3f2fd;color:#1565c0;font-size:13px;font-weight:800;flex-shrink:0}
+.ci-paso__txt{flex:1;font-size:13px;color:#273855;line-height:1.4}
+.ci-paso__arrows{display:flex;flex-direction:column;gap:2px;flex-shrink:0}.ci-paso__arrows button{border:0;background:none;cursor:pointer;font-size:10px;color:#90a4ae;padding:2px 6px;border-radius:4px}.ci-paso__arrows button:hover{background:#e3f2fd;color:#1565c0}
+.ci-paso--ok{border-color:#66bb6a;background:#e8f5e9}.ci-paso--ok .ci-paso__num{background:#66bb6a;color:#fff}
+.ci-paso--wrong{border-color:#ef5350;background:#ffebee}.ci-paso--wrong .ci-paso__num{background:#ef5350;color:#fff}
+.ci-panel-resultado{text-align:center;padding:24px 0;margin-top:16px}
+
+/* Panel Simulador de Sesión */
+.sim-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#e65100,#fb8c00 55%,#ffa726);color:#fff;overflow:hidden;margin-bottom:22px}
+.sim-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#fff3e0;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.sim-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.sim-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.85);font-size:14px;line-height:1.55}
+.sim-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#e65100;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.sim-panel-banner__back:hover{transform:scale(1.03)}.sim-panel-banner__back .ic{width:15px;height:15px}
+.sim-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.sim-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}.sim-panel-banner__float .ic{width:24px;height:24px}
+.sim-panel-chat{max-width:600px}
+.sim-bubble{display:flex;gap:10px;margin-bottom:14px}.sim-bubble__avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#e65100;color:#fff;font-size:13px;font-weight:800;flex-shrink:0}
+.sim-bubble--terapeuta .sim-bubble__avatar{background:#1565c0}
+.sim-bubble__text{flex:1;padding:12px 16px;border-radius:14px;background:#fff;border:1px solid #e3e8f2;font-size:13px;line-height:1.55;color:#273855}
+.sim-bubble--terapeuta .sim-bubble__text{background:#e3f2fd;border-color:#90caf9}
+.sim-opciones{margin:8px 0 18px;padding-left:46px}.sim-opciones__label{color:#71809a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px}
+.sim-opcion{display:block;width:100%;padding:12px 16px;border:1px solid #dce4f2;border-radius:12px;background:#fff;color:#273855;text-align:left;font:600 13px 'Instrument Sans',sans-serif;cursor:pointer;margin-bottom:8px;transition:border-color .15s,background .15s}.sim-opcion:hover{border-color:#fb8c00;background:#fff8e1}
+.sim-feedback{display:flex;gap:8px;align-items:flex-start;margin:0 0 18px 46px;padding:10px 14px;border-radius:10px;background:#fff3e0;color:#bf360c;font-size:12px;line-height:1.5}
+
+/* Panel Detecta el Error Clínico */
+.ec-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#b71c1c,#e53935 55%,#ef5350);color:#fff;overflow:hidden;margin-bottom:22px}
+.ec-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#ffcdd2;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.ec-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.ec-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.ec-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#b71c1c;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.ec-panel-banner__back:hover{transform:scale(1.03)}.ec-panel-banner__back .ic{width:15px;height:15px}
+.ec-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.ec-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}.ec-panel-banner__float .ic{width:24px;height:24px}
+.ec-panel-contexto{padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,#fce4ec,#f8bbd0);border:1px solid #f48fb1;margin-bottom:24px}
+.ec-panel-contexto__label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:850;color:#880e4f;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.ec-panel-contexto p{margin:0;color:#880e4f;font-size:14px;line-height:1.6}
+.ec-panel-transcript{max-width:640px}
+.ec-panel-transcript__inst{display:flex;align-items:center;gap:6px;color:#71809a;font-size:12px;font-weight:600;margin:0 0 8px}
+.ec-panel-transcript__score{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fce4ec;color:#c62828;font-size:12px;font-weight:700;margin-bottom:16px}
+.ec-panel-transcript__score b{font-size:15px}
+.ec-lineas{display:grid;gap:0}
+.ec-linea{padding:10px 14px;border-bottom:1px solid #f0f2f5;font-size:13px;line-height:1.55;color:#273855;transition:background .2s}
+.ec-linea--clickable{cursor:pointer}.ec-linea--clickable:hover{background:#fff8e1}
+.ec-linea--found{background:#ffebee;border-left:3px solid #e53935}
+.ec-linea--miss{background:#fff9c4;animation:ec-shake .4s ease}
+@keyframes ec-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.ec-linea__feedback{margin-top:8px;padding:8px 12px;border-radius:8px;background:#fff;border:1px solid #ffcdd2;color:#c62828;font-size:12px;line-height:1.45}
+
+/* Panel Árbol de Decisiones */
+.arb-panel-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#004d40,#00897b 55%,#26a69a);color:#fff;overflow:hidden;margin-bottom:22px}
+.arb-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a7ffeb;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.arb-panel-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.arb-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.arb-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#004d40;font:750 12px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.arb-panel-banner__back:hover{transform:scale(1.03)}.arb-panel-banner__back .ic{width:15px;height:15px}
+.arb-panel-banner__icons{display:flex;flex-direction:column;gap:10px;align-self:center}
+.arb-panel-banner__float{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}.arb-panel-banner__float .ic{width:24px;height:24px}
+.arb-panel-flow{max-width:600px}
+.arb-step{margin-bottom:20px}
+.arb-situacion{padding:16px 18px;border-radius:14px;background:#fff;border:1px solid #e0e5f0;font-size:14px;line-height:1.6;color:#273855;margin-bottom:12px}
+.arb-situacion__num{display:block;color:#00897b;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.arb-situacion--final{background:#e0f2f1;border-color:#80cbc4;display:flex;gap:10px;align-items:flex-start}
+.arb-opciones{display:grid;gap:8px}
+.arb-opcion{display:block;width:100%;padding:14px 16px;border:1px solid #dce4f2;border-radius:12px;background:#fff;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.arb-opcion:hover{border-color:#26a69a;background:#e0f2f1}
+.arb-opcion--chosen{border-color:#26a69a;background:#e0f2f1}
+.arb-opcion__txt{font:600 13px 'Instrument Sans',sans-serif;color:#273855;line-height:1.45}
+.arb-consecuencia{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 14px;border-radius:10px;background:#e0f2f1;color:#004d40;font-size:12px;line-height:1.5}
 
 /* Modo Historia */
 .historia-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#0a3d2e,#1a6b4a 55%,#2d8b5f);color:#fff;overflow:hidden;margin-bottom:22px}.historia-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 82% 18%,rgba(120,200,160,.22),transparent 50%);pointer-events:none}.historia-banner>*{position:relative;z-index:1}.historia-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a8ffbf;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.historia-banner__eyebrow .ic{width:15px;height:15px}.historia-banner h1{max-width:500px;margin:13px 0 12px;color:#fff;font-size:clamp(32px,4vw,48px);letter-spacing:-.055em;line-height:1}.historia-banner h1 em{font-style:normal;color:#a8ffbf}.historia-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}.historia-banner__cta{display:inline-flex;align-items:center;gap:10px;margin-top:21px;padding:12px 18px;border:0;border-radius:999px;background:#fff;color:#0a3d2e;font:750 13px 'Instrument Sans',sans-serif;cursor:pointer;transition:transform .15s}.historia-banner__cta:hover{transform:scale(1.03)}.historia-banner__cta .ic{width:17px;height:17px}.historia-personajes{display:flex;gap:14px;align-self:center}.historia-pj{display:flex;flex-direction:column;align-items:center;gap:6px}.historia-pj__avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.4);background:var(--pj-color)}.historia-pj__name{font-size:11px;font-weight:700;color:rgba(255,255,255,.85)}.historia-pj__role{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
@@ -8319,6 +8423,199 @@ const Sections = (function(){
     ],reflexion:'Cuando los padres debaten frente al hijo, el terapeuta debe proteger al niño y redirigir. Mapear emociones revela que todos buscan lo mismo con caminos distintos.'}
   ];
 
+  /* ═══ CONSTRUYE LA INTERVENCIÓN — data ═══ */
+  const intervencionesData=[
+    {titulo:'Adolescente con autolesiones',contexto:'Primera sesión con Daniela, 15 años. Su madre la trajo porque descubrió marcas en sus brazos. Daniela no quiere estar ahí.',pasos:[
+      {id:'a',texto:'Agradecer que esté ahí y aclarar que la sesión es un espacio seguro, no un castigo'},
+      {id:'b',texto:'Preguntar abiertamente cómo se siente hoy, sin mencionar aún las marcas'},
+      {id:'c',texto:'Validar sus emociones: "Tiene sentido que no quieras estar aquí, esto no es fácil"'},
+      {id:'d',texto:'Explorar juntas qué función cumple la autolesión para ella, sin juzgar'},
+      {id:'e',texto:'Cerrar resumiendo lo que compartió y acordar si quiere regresar'}
+    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'La secuencia apertura → exploración → validación → técnica → cierre respeta el ritmo del paciente. Con adolescentes resistentes, validar antes de explorar el síntoma es clave para no perder la alianza.'},
+    {titulo:'Paciente en crisis suicida',contexto:'Marcos, 38 años, llega a sesión diciendo: "Ya no quiero estar aquí. No tiene sentido nada." Detectas indicadores de riesgo.',pasos:[
+      {id:'a',texto:'Mantener la calma y preguntar directamente: "¿Estás pensando en hacerte daño?"'},
+      {id:'b',texto:'Escuchar sin interrumpir y validar el dolor: "Escucho que estás sufriendo mucho"'},
+      {id:'c',texto:'Evaluar plan, medio y temporalidad para determinar nivel de riesgo'},
+      {id:'d',texto:'Construir un plan de seguridad con números de emergencia y red de apoyo'},
+      {id:'e',texto:'Cerrar con acuerdo de no-daño y cita de seguimiento en 24-48 horas'}
+    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'En crisis suicida: preguntar directamente (no evitar el tema), validar, evaluar riesgo con protocolo, crear plan de seguridad, y asegurar seguimiento inmediato. Nunca dejar ir sin un plan.'},
+    {titulo:'Pareja con comunicación rota',contexto:'Ana y Luis llevan 12 años juntos. Ella dice que él "nunca escucha". Él dice que ella "siempre grita". Ambos se interrumpen.',pasos:[
+      {id:'a',texto:'Establecer reglas de sesión: turnos para hablar, sin interrumpir, usar "yo siento" en lugar de "tú siempre"'},
+      {id:'b',texto:'Pedir a cada uno que describa un momento reciente de conflicto desde su perspectiva'},
+      {id:'c',texto:'Reflejar lo que cada uno dijo y señalar el patrón: "Noto que ambos se sienten no escuchados"'},
+      {id:'d',texto:'Practicar escucha activa: uno habla 2 minutos, el otro parafrasea lo que entendió'},
+      {id:'e',texto:'Cerrar con una tarea: esta semana, un momento al día para preguntarse "¿cómo estuvo tu día?" sin celular'}
+    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'En terapia de pareja: primero contener (reglas), luego explorar (perspectivas), validar el patrón compartido, aplicar técnica (escucha activa) y cerrar con tarea concreta para generalizar fuera de sesión.'},
+    {titulo:'Niño con miedo escolar',contexto:'Tomás, 7 años, llora cada mañana y dice que le duele la panza. La escuela reporta que se aísla. Los padres están desesperados.',pasos:[
+      {id:'a',texto:'Recibir a Tomás con juego libre: "Puedes usar lo que quieras de aquí, este es tu espacio"'},
+      {id:'b',texto:'Observar su juego y hacer preguntas suaves: "¿Este muñeco va a la escuela? ¿Le gusta?"'},
+      {id:'c',texto:'Nombrar la emoción que aparece: "Parece que este personaje siente algo feo en la panza cuando va a la escuela"'},
+      {id:'d',texto:'Crear juntos un "amuleto de valentía" (objeto transicional) que pueda llevar a la escuela'},
+      {id:'e',texto:'Hablar con los padres sobre rutinas de despedida breves y predecibles'}
+    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'Con niños: el juego es la puerta de entrada. No se pregunta directamente, se observa y se nombra en tercera persona. El objeto transicional reduce ansiedad y el trabajo con padres asegura consistencia fuera de sesión.'}
+  ];
+
+  /* ═══ SIMULADOR DE SESIÓN — data ═══ */
+  const simuladoresData=[
+    {titulo:'Paciente que quiere dejar la terapia',intro:'Llevas 4 meses atendiendo a Fernanda, 29 años, por ansiedad. Hoy entra y dice: "Creo que ya no necesito venir. Me siento bien."',nodos:{
+      inicio:{dialogo:'Fernanda: "Creo que ya no necesito venir. Me siento bien. Además sale caro."',opciones:[
+        {texto:'Me alegra que te sientas mejor. ¿Qué cosas han cambiado para ti?',siguiente:'buena1',feedback:'Buena elección. Explorar los cambios sin presionar valida su percepción y abre espacio para evaluar juntos.'},
+        {texto:'Pero aún no hemos terminado el proceso. Todavía hay cosas que trabajar.',siguiente:'mala1',feedback:'Cuidado. Esto puede sonar como que tú sabes más que ella sobre su bienestar. La alianza se debilita.'},
+        {texto:'¿Hay algo que te incomode de la terapia o de mí como terapeuta?',siguiente:'directa1',feedback:'Válido pero arriesgado tan pronto. Puede sentirlo como que la cuestionas en lugar de escucharla.'}
+      ]},
+      buena1:{dialogo:'Fernanda: "Pues ya no tengo tantos ataques de pánico. Duermo mejor. Siento que puedo manejar las cosas sola."',opciones:[
+        {texto:'Eso es un avance real. ¿Te parece si hacemos un cierre planificado en 2-3 sesiones?',siguiente:'final_bueno',feedback:'Excelente. Un cierre planificado consolida lo aprendido, previene recaídas y respeta la autonomía del paciente.'},
+        {texto:'¿Y qué pasa cuando algo difícil aparece? ¿Cómo lo manejas?',siguiente:'final_neutro',feedback:'Buena pregunta exploratoria. La ayuda a evaluar sus recursos sin invalidar su progreso.'}
+      ]},
+      mala1:{dialogo:'Fernanda (se cruza de brazos): "Es que siento que me quieres retener. Yo ya estoy bien."',opciones:[
+        {texto:'Tienes razón, tu percepción importa. ¿Qué te parece si evaluamos juntos dónde estás?',siguiente:'recupera1',feedback:'Buena recuperación. Devuelves el control y te corriges sin perder autoridad clínica.'},
+        {texto:'No es retenerte, es que hay patrones que pueden regresar si no los trabajamos.',siguiente:'final_malo',feedback:'Esto confirma su sensación de ser retenida. La relación terapéutica se daña más.'}
+      ]},
+      directa1:{dialogo:'Fernanda: "No, no es eso... es que siento que ya di lo que podía y no quiero depender de venir aquí."',opciones:[
+        {texto:'Entiendo. La independencia es justamente una señal de progreso. ¿Hacemos un cierre formal?',siguiente:'final_bueno',feedback:'Perfecto. Reencuadras su deseo de independencia como fortaleza y propones estructura.'},
+        {texto:'Depender de la terapia no es lo mismo que usarla como herramienta.',siguiente:'final_neutro',feedback:'Correcto pero puede sonar como corrección. El tono importa tanto como el contenido.'}
+      ]},
+      recupera1:{dialogo:'Fernanda (se relaja): "Bueno, sí. Podemos ver qué falta. Pero no quiero que se alargue."',opciones:[
+        {texto:'De acuerdo. Hagamos un balance hoy y tú decides. ¿Te parece?',siguiente:'final_bueno',feedback:'Perfecto. Devuelves agencia, acuerdas un marco temporal y mantienes la alianza.'}
+      ]},
+      final_bueno:{dialogo:'Fernanda sonríe: "Sí, me parece bien. Gracias por no presionarme."',opciones:[]},
+      final_neutro:{dialogo:'Fernanda asiente: "Ok, lo pensaré. ¿La siguiente semana?"',opciones:[]},
+      final_malo:{dialogo:'Fernanda: "Bueno, ya veré. Déjame pensarlo." (Se nota distante el resto de la sesión.)',opciones:[]}
+    }},
+    {titulo:'Padre que minimiza el problema del hijo',intro:'Sesión con la familia López. El hijo Emilio, 12 años, tiene problemas de conducta en la escuela. El padre dice que "los niños son así" y no ve necesidad de terapia.',nodos:{
+      inicio:{dialogo:'Padre: "Yo a su edad era igual y salí bien. Los chamacos necesitan mano dura, no un psicólogo."',opciones:[
+        {texto:'Entiendo su perspectiva. ¿Me puede contar cómo era usted a esa edad?',siguiente:'buena1',feedback:'Excelente. Valida sin confrontar y explora su historia para entender el marco de referencia.'},
+        {texto:'Los estudios muestran que la conducta disruptiva puede escalar si no se atiende.',siguiente:'mala1',feedback:'Datos vs emociones. El padre se siente corregido por un "experto" y se cierra más.'},
+        {texto:'Emilio, ¿tú qué piensas de lo que dice tu papá?',siguiente:'directa1',feedback:'Riesgoso. Triangular al hijo puede ponerlo en una posición incómoda frente a su padre.'}
+      ]},
+      buena1:{dialogo:'Padre: "Pues sí me metía en problemas, pero mi papá me ponía en orden. Un par de coscorrones y ya."',opciones:[
+        {texto:'¿Y cómo se sentía usted cuando eso pasaba?',siguiente:'profunda1',feedback:'Perfecto. Lo llevas a conectar con su propia experiencia emocional sin juzgar a su padre.'},
+        {texto:'¿Y cree que eso es lo que Emilio necesita?',siguiente:'final_neutro',feedback:'Puede funcionar pero suena a trampa retórica. El padre puede sentir que lo están guiando.'}
+      ]},
+      mala1:{dialogo:'Padre (molesto): "¿Y usted tiene hijos? Porque una cosa es la teoría y otra la vida real."',opciones:[
+        {texto:'No necesito tener hijos para entender que usted quiere lo mejor para Emilio. Eso es evidente.',siguiente:'recupera1',feedback:'Buena recuperación. Desvías la confrontación y regresas al terreno común: el bienestar del hijo.'},
+        {texto:'Tiene razón, cada familia es diferente. Cuénteme más sobre cómo maneja las situaciones difíciles.',siguiente:'final_neutro',feedback:'Válida pero algo evasiva. Funciona para bajar la tensión.'}
+      ]},
+      directa1:{dialogo:'Emilio (mirando al piso): "No sé... a veces sí me gustaría que me escucharan más."',opciones:[
+        {texto:'Gracias por compartir eso, Emilio. (Al padre:) ¿Qué escucha usted en lo que dijo su hijo?',siguiente:'profunda1',feedback:'Muy bueno. Usas las palabras del hijo como puente sin confrontar al padre directamente.'}
+      ]},
+      profunda1:{dialogo:'Padre (pausa larga): "... Pues la verdad sí me sentía solo. Pero así eran las cosas."',opciones:[
+        {texto:'Y usted no quiere que Emilio se sienta así. Por eso está aquí, aunque no esté seguro de que funcione.',siguiente:'final_bueno',feedback:'Perfecto. Conectas su dolor pasado con su amor presente. La resistencia se disuelve desde adentro.'}
+      ]},
+      recupera1:{dialogo:'Padre: "Bueno, sí. Yo solo quiero que le vaya bien."',opciones:[
+        {texto:'Eso es exactamente lo que vamos a trabajar juntos. ¿Qué le preocupa más de Emilio ahora?',siguiente:'final_bueno',feedback:'Excelente. Alineas la terapia con su objetivo y le devuelves el rol de padre involucrado.'}
+      ]},
+      final_bueno:{dialogo:'Padre: "Ok... vamos a darle una oportunidad. Pero si no veo cambios, yo le digo."',opciones:[]},
+      final_neutro:{dialogo:'Padre: "Bueno, vamos a ver. Pero yo sigo pensando que exageran en la escuela."',opciones:[]},
+      final_malo:{dialogo:'Padre se levanta: "Ya me tengo que ir. Ustedes háganle como quieran."',opciones:[]}
+    }}
+  ];
+
+  /* ═══ DETECTA EL ERROR CLÍNICO — data ═══ */
+  const erroresClinicosData=[
+    {titulo:'Sesión con paciente en duelo',contexto:'María, 52 años, perdió a su esposo hace 3 meses. Es su cuarta sesión.',transcripcion:[
+      {id:1,texto:'T: Hola María, qué gusto verte. ¿Cómo te fue esta semana?',esError:false},
+      {id:2,texto:'P: Mal. No puedo dejar de pensar en Jorge. Todo me lo recuerda.',esError:false},
+      {id:3,texto:'T: Te entiendo perfectamente. Cuando yo perdí a mi abuela sentí lo mismo, así que sé exactamente por lo que estás pasando.',esError:true,error:'Auto-revelación inapropiada y equiparación de experiencias. Decir "sé exactamente lo que sientes" invalida la singularidad de su dolor.'},
+      {id:4,texto:'P: (llora) Es que siento que nunca voy a estar bien...',esError:false},
+      {id:5,texto:'T: No digas eso. Vas a estar bien, ya verás. El tiempo lo cura todo.',esError:true,error:'Minimización del dolor con frase cliché. "El tiempo lo cura todo" invalida el proceso de duelo y corta la expresión emocional.'},
+      {id:6,texto:'P: Mi hija me dice que ya debería superarlo, que ya pasaron 3 meses.',esError:false},
+      {id:7,texto:'T: Cada persona tiene su propio tiempo. No hay una fecha para dejar de extrañar a alguien que amas.',esError:false},
+      {id:8,texto:'P: ¿Y si nunca puedo? ¿Y si me quedo así para siempre?',esError:false},
+      {id:9,texto:'T: Mira, lo que necesitas es mantenerte ocupada. ¿Por qué no te inscribes en un curso o sales más con amigas?',esError:true,error:'Consejo prematuro y evitación del dolor. Sugerir "mantenerse ocupada" envía el mensaje de que sentir es improductivo. Primero hay que validar y sostener.'},
+      {id:10,texto:'P: No tengo ganas de nada...',esError:false},
+      {id:11,texto:'T: Entiendo que ahora no tengas ganas, pero es importante que intentes. ¿Quieres que lo dejemos como tarea para la siguiente sesión?',esError:false}
+    ],totalErrores:3},
+    {titulo:'Primera sesión con adolescente',contexto:'Diego, 16 años, fue traído por sus padres. No quiere estar en terapia.',transcripcion:[
+      {id:1,texto:'T: Hola Diego, tus papás me contaron todo lo que ha pasado. Vamos a trabajar en eso.',esError:true,error:'Rompe confidencialidad implícita y asume el motivo sin preguntar al paciente. El adolescente siente que el terapeuta ya está "del lado" de los padres.'},
+      {id:2,texto:'P: (brazos cruzados) Yo no quiero estar aquí.',esError:false},
+      {id:3,texto:'T: Entiendo que no quieras estar aquí. No es fácil que te traigan a un lugar así. ¿Qué es lo que más te molesta?',esError:false},
+      {id:4,texto:'P: Que mis papás creen que estoy loco.',esError:false},
+      {id:5,texto:'T: No estás loco. Venir aquí no significa eso. ¿Hay algo que te preocupe a ti, no a tus papás?',esError:false},
+      {id:6,texto:'P: Pues... a veces me siento muy enojado y no sé por qué.',esError:false},
+      {id:7,texto:'T: ¿Y qué haces cuando te enojas? ¿Les pegas a tus compañeros?',esError:true,error:'Pregunta sugestiva y prejuiciosa. Asume conducta violenta sin evidencia. La pregunta debería ser abierta: "¿Qué haces cuando sientes ese enojo?"'},
+      {id:8,texto:'P: No... solo me encierro en mi cuarto.',esError:false},
+      {id:9,texto:'T: Ah bueno, eso no es tan grave. Hay adolescentes que hacen cosas peores.',esError:true,error:'Minimización y comparación con otros. Que el paciente se aísle es significativo clínicamente. Comparar invalida su experiencia.'},
+      {id:10,texto:'P: ¿Entonces estoy bien?',esError:false},
+      {id:11,texto:'T: Lo que sientes es importante, aunque se exprese de formas que no parecen graves por fuera. ¿Me cuentas más sobre esos momentos?',esError:false}
+    ],totalErrores:3},
+    {titulo:'Sesión de pareja con infidelidad',contexto:'Carmen y Andrés. Ella descubrió mensajes de él con otra persona hace 2 semanas. Sesión conjunta.',transcripcion:[
+      {id:1,texto:'T: Buenas tardes. Sé que están pasando un momento difícil. Este es un espacio para que ambos se expresen con respeto.',esError:false},
+      {id:2,texto:'Carmen: No puedo creer que me haya hecho esto. 15 años juntos para nada.',esError:false},
+      {id:3,texto:'T: Carmen, entiendo tu dolor. Andrés, ¿por qué lo hiciste?',esError:true,error:'Preguntar "¿por qué lo hiciste?" en tono directo frente a la pareja suena como interrogatorio judicial, no exploración terapéutica. Fuerza justificación en vez de explorar.'},
+      {id:4,texto:'Andrés: Yo... no sé. Me sentía solo. No es excusa pero...',esError:false},
+      {id:5,texto:'T: Carmen, ¿escuchaste lo que dijo? Él se sentía solo. ¿Crees que tú contribuiste a eso?',esError:true,error:'Culpabilización de la víctima. Implica que Carmen es corresponsable de la infidelidad. El foco se desvía del que tomó la decisión.'},
+      {id:6,texto:'Carmen: ¿Me estás diciendo que es mi culpa?',esError:false},
+      {id:7,texto:'T: No, no es culpa de nadie. Hay patrones en la relación que podemos explorar juntos sin buscar culpables.',esError:false},
+      {id:8,texto:'Andrés: Yo sé que la regué. Quiero arreglarlo.',esError:false},
+      {id:9,texto:'T: Bien. Lo importante es que ambos quieran intentarlo. Carmen, ¿tú quieres seguir con la relación?',esError:false},
+      {id:10,texto:'Carmen: No sé. Un día sí y otro no.',esError:false},
+      {id:11,texto:'T: Es normal. No tienes que decidir hoy. Pero te recomiendo que si decides quedarte, ya no revises su teléfono porque eso no ayuda.',esError:true,error:'Consejo directivo prematuro que minimiza la necesidad de transparencia. En fase de reconstrucción, la verificación puede ser parte del proceso acordado. No se prohíbe.'},
+      {id:12,texto:'Carmen: ¿Entonces qué hago con la desconfianza?',esError:false},
+      {id:13,texto:'T: La confianza se reconstruye con acciones, no con vigilancia. Vamos a trabajar en eso juntos.',esError:false}
+    ],totalErrores:3}
+  ];
+
+  /* ═══ ÁRBOL DE DECISIONES — data ═══ */
+  const arbolesData=[
+    {titulo:'Reportar o no reportar',intro:'Atiendes a un niño de 9 años. En sesión de juego, hace un dibujo donde un adulto le pega. Cuando le preguntas, dice: "A veces mi papá se enoja mucho." No hay marcas visibles.',nodos:{
+      inicio:{situacion:'Tienes indicios de posible maltrato pero no evidencia física. ¿Qué haces primero?',opciones:[
+        {texto:'Reportar inmediatamente a las autoridades',siguiente:'reporte_rapido',consecuencia:'Actúas por protocolo, pero sin explorar más podrías generar un reporte sin fundamento suficiente que dañe la familia y tu relación terapéutica.'},
+        {texto:'Explorar más con el niño usando lenguaje apropiado para su edad',siguiente:'explorar',consecuencia:'Buena decisión. Recoges más información para tener un panorama más claro antes de actuar.'},
+        {texto:'Hablar con el padre directamente sobre lo que dijo el niño',siguiente:'hablar_padre',consecuencia:'Riesgoso. Alertar al posible agresor puede poner al niño en más peligro y contaminar la evidencia.'}
+      ]},
+      explorar:{situacion:'Le preguntas: "Cuéntame más sobre cuando tu papá se enoja." El niño dice: "Me grita y a veces me avienta cosas. Una vez me pegó con el cinturón." ¿Qué haces?',opciones:[
+        {texto:'Ahora sí reportar: hay una revelación directa del niño',siguiente:'reporte_informado',consecuencia:'Correcto. Con una revelación verbal directa, tienes obligación ética y legal de reportar, aunque no haya marcas visibles.'},
+        {texto:'Seguir recabando información en las próximas sesiones',siguiente:'esperar',consecuencia:'Peligroso. Una vez que hay revelación directa de violencia física, retrasar el reporte puede poner al niño en riesgo. La ley exige reporte oportuno.'}
+      ]},
+      reporte_rapido:{situacion:'Reportaste con poca información. La autoridad investiga, no encuentra evidencia suficiente, y el padre retira al niño de terapia. ¿Qué aprendes?',opciones:[
+        {texto:'Debí explorar más antes de reportar, sin comprometer la seguridad del niño',siguiente:'final_aprendizaje',consecuencia:'Correcto. El protocolo dice reportar ante sospecha fundada. Un dibujo solo no es suficiente, pero una revelación verbal sí lo sería.'}
+      ]},
+      hablar_padre:{situacion:'El padre se muestra molesto: "Mi hijo inventa cosas. ¿Usted le va a creer a un niño de 9 años?" Siguiente sesión, el niño llega callado y no quiere jugar.',opciones:[
+        {texto:'Reportar ahora: el cambio de conducta del niño sugiere que fue presionado',siguiente:'reporte_informado',consecuencia:'Ahora tienes más indicadores. Pero la alerta al padre pudo haber puesto al niño en riesgo. En el futuro: nunca alertar al posible agresor antes de reportar.'}
+      ]},
+      reporte_informado:{situacion:'Reportas con la información recabada. Las autoridades investigan con protocolo. Independientemente del resultado, cumpliste tu obligación. ¿Qué es fundamental después?',opciones:[
+        {texto:'Mantener el espacio terapéutico seguro para el niño, sea cual sea el resultado de la investigación',siguiente:'final_bueno',consecuencia:'Correcto. Tu rol es clínico, no investigador. Mantener la alianza y el espacio seguro es tu prioridad después de reportar.'}
+      ]},
+      esperar:{situacion:'En la siguiente sesión, el niño llega con un moretón en el brazo. Dice que se cayó. Ahora ¿qué haces?',opciones:[
+        {texto:'Reportar de inmediato con toda la información acumulada',siguiente:'final_tarde',consecuencia:'Reportas, pero el daño ya ocurrió. Si hubieras reportado con la primera revelación verbal, podrías haber prevenido este episodio.'}
+      ]},
+      final_bueno:{situacion:'Has manejado un caso éticamente complejo siguiendo el protocolo: explorar con cuidado, reportar ante revelación directa, y mantener el espacio terapéutico.',opciones:[]},
+      final_aprendizaje:{situacion:'Aprendiste que el timing del reporte importa. Ni tan pronto que no tengas fundamento, ni tan tarde que pongas en riesgo. La revelación verbal del niño es el punto de acción.',opciones:[]},
+      final_tarde:{situacion:'Lección difícil: retrasar un reporte ante revelación directa puede tener consecuencias reales. El "quiero estar seguro" no justifica la espera cuando un menor está en riesgo.',opciones:[]}
+    }},
+    {titulo:'Confidencialidad vs seguridad',intro:'Tu paciente adulto, Raúl, 34 años, te confiesa en sesión: "A veces cuando bebo, manejo. La semana pasada iba tan borracho que casi choco contra una familia." No muestra arrepentimiento.',nodos:{
+      inicio:{situacion:'Raúl pone en riesgo a terceros cuando bebe y maneja. No es un menor ni tiene ideación suicida. ¿Cómo abordas esto?',opciones:[
+        {texto:'Explorar la conducta: frecuencia, contexto, y si reconoce el riesgo',siguiente:'explorar',consecuencia:'Buena primera acción. Necesitas evaluar la gravedad y recurrencia antes de decidir qué hacer.'},
+        {texto:'Romper confidencialidad y avisar a las autoridades',siguiente:'romper',consecuencia:'Prematuro. La confidencialidad solo se rompe ante riesgo inminente y grave. Primero debes evaluar y agotar opciones clínicas.'},
+        {texto:'Ignorarlo — lo que haga fuera de sesión no es tu responsabilidad',siguiente:'ignorar',consecuencia:'Incorrecto. Tienes responsabilidad ética cuando un paciente representa un peligro claro para terceros. Ignorar no es neutral.'}
+      ]},
+      explorar:{situacion:'Raúl dice: "Lo hago cada fin de semana. No me va a pasar nada, yo controlo." No tiene disposición a cambiar. ¿Qué haces?',opciones:[
+        {texto:'Confrontar con empatía: "Me preocupa que alguien salga lastimado, incluyéndote a ti"',siguiente:'confrontar',consecuencia:'Buena intervención. Nombras el riesgo sin juzgar y le devuelves la reflexión.'},
+        {texto:'Poner un límite terapéutico: no puedes seguir la terapia si hay riesgo activo a terceros',siguiente:'limite',consecuencia:'Válido pero arriesgado. Si lo pierdes como paciente, pierdes la oportunidad de influir en su conducta.'}
+      ]},
+      confrontar:{situacion:'Raúl se molesta: "¿Ahora tú también me vas a sermonear? Para eso tengo a mi esposa." ¿Cómo continúas?',opciones:[
+        {texto:'No es un sermón. Es que si algo pasa, yo sabía y no dije nada. Hablemos de qué opciones tienes.',siguiente:'opciones',consecuencia:'Excelente. Transparentas tu posición ética sin ser punitivo y le devuelves la agencia.'},
+        {texto:'Documentar la sesión y consultar con un supervisor o comité de ética',siguiente:'final_consulta',consecuencia:'Muy buena práctica. Ante dilemas éticos complejos, la consulta con colegas o supervisores protege al paciente y a ti.'}
+      ]},
+      romper:{situacion:'Rompes confidencialidad. Raúl se entera y abandona terapia. Legalmente no había fundamento suficiente para la ruptura. ¿Qué aprendes?',opciones:[
+        {texto:'La confidencialidad se rompe ante riesgo inminente verificado, no ante conductas de riesgo crónicas. La vía es clínica primero.',siguiente:'final_aprendizaje',consecuencia:'Correcto. La conducta de riesgo crónica se aborda clínicamente. La ruptura de confidencialidad es último recurso ante peligro inminente identificable.'}
+      ]},
+      ignorar:{situacion:'Dos semanas después, Raúl tiene un accidente. Atropella a un peatón. Tú sabías del patrón. ¿Qué aprendes?',opciones:[
+        {texto:'Debí haber abordado la conducta activamente, no ignorarla',siguiente:'final_aprendizaje',consecuencia:'Correcto. Ignorar no es neutralidad. Tenías información y herramientas clínicas para intervenir.'}
+      ]},
+      limite:{situacion:'Le dices que no puedes continuar si pone en riesgo a otros. Raúl dice: "Entonces me voy." Pierdes al paciente.',opciones:[
+        {texto:'Referir a otro profesional y documentar el caso completamente',siguiente:'final_consulta',consecuencia:'Buena práctica. Si pones un límite, asegúrate de que haya una referencia. Nunca dejar al paciente sin opciones.'}
+      ]},
+      opciones:{situacion:'Raúl lo piensa: "¿Y qué propones?" Le planteas: usar Uber cuando beba, darle las llaves a alguien, o trabajar el consumo. Acepta intentar. ¿Qué más haces?',opciones:[
+        {texto:'Documentar, establecer revisión del acuerdo cada 2 semanas, y consultar con supervisor',siguiente:'final_bueno',consecuencia:'Perfecto. Abordaje clínico completo: intervención, acuerdo, seguimiento y respaldo ético.'}
+      ]},
+      final_bueno:{situacion:'Manejaste un dilema ético complejo: exploraste, confrontaste con empatía, ofreciste opciones y documentaste. La vía clínica primero, siempre.',opciones:[]},
+      final_consulta:{situacion:'La consulta con supervisor o comité de ética es una herramienta que protege al paciente, a terceros y a ti. Úsala siempre ante dilemas.',opciones:[]},
+      final_aprendizaje:{situacion:'Cada extremo tiene riesgos: ignorar puede causar daño, romper confidencialidad sin fundamento puede destruir la alianza. El camino es el abordaje clínico activo.',opciones:[]}
+    }}
+  ];
+
   /* ═══ CASO CLÍNICO — panel view ═══ */
   function _renderCasoClinicoView(container){
     _retosContainer=container;
@@ -8466,6 +8763,262 @@ const Sections = (function(){
         const fb=document.getElementById('me-fb');if(fb)fb.textContent=(ok?'Correcto. ':'Era '+em.correcta+'. ')+em.desc;
         setTimeout(()=>{idx++;renderEmocion();},1800);
       }));
+    }
+  }
+
+  /* ═══ CONSTRUYE LA INTERVENCIÓN — panel view ═══ */
+  function _renderIntervencionView(container){
+    _retosContainer=container;
+    const data=intervencionesData[retoIndiceDelDia(intervencionesData)];
+    const shuffled=data.pasos.slice().sort(()=>Math.random()-.5);
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="ci-panel-banner">
+          <div>
+            <span class="ci-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Habilidad clínica · Intervención del día</span>
+            <h1>${escapeHtml(data.titulo)}</h1>
+            <p>Ordena los pasos de la intervención terapéutica en la secuencia correcta.</p>
+            <button type="button" class="ci-panel-banner__back" id="ci-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="ci-panel-banner__icons">
+            <div class="ci-panel-banner__float" style="transform:rotate(-6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+            <div class="ci-panel-banner__float" style="transform:rotate(5deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+            <div class="ci-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          </div>
+        </div>
+        <section class="ci-panel-contexto">
+          <div class="ci-panel-contexto__label"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Contexto del caso</div>
+          <p>${escapeHtml(data.contexto)}</p>
+        </section>
+        <section class="ci-panel-sorteo">
+          <p class="ci-panel-sorteo__inst">Arrastra o usa las flechas para ordenar los 5 pasos:</p>
+          <div class="ci-panel-sorteo__list" id="ci-sortable">
+            ${shuffled.map((p,i)=>`<div class="ci-paso" data-paso-id="${p.id}"><span class="ci-paso__num">${i+1}</span><span class="ci-paso__txt">${escapeHtml(p.texto)}</span><span class="ci-paso__arrows"><button type="button" data-dir="up" title="Subir">▲</button><button type="button" data-dir="down" title="Bajar">▼</button></span></div>`).join('')}
+          </div>
+          <button type="button" class="btn btn--primary" id="ci-verificar" style="margin-top:18px;padding:12px 28px;border-radius:999px">Verificar orden<svg class="ic" style="width:16px;height:16px;margin-left:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        </section>
+      </div>
+    `;
+    container.querySelector('#ci-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    const list=container.querySelector('#ci-sortable');
+    list.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-dir]');if(!btn)return;
+      const paso=btn.closest('.ci-paso');
+      if(btn.dataset.dir==='up'&&paso.previousElementSibling)list.insertBefore(paso,paso.previousElementSibling);
+      else if(btn.dataset.dir==='down'&&paso.nextElementSibling)list.insertBefore(paso.nextElementSibling,paso);
+      list.querySelectorAll('.ci-paso__num').forEach((n,i)=>n.textContent=i+1);
+    });
+    let dragEl=null;
+    list.querySelectorAll('.ci-paso').forEach(el=>{
+      el.draggable=true;
+      el.addEventListener('dragstart',e=>{dragEl=el;el.style.opacity='.5';});
+      el.addEventListener('dragend',()=>{if(dragEl)dragEl.style.opacity='';dragEl=null;list.querySelectorAll('.ci-paso__num').forEach((n,i)=>n.textContent=i+1);});
+      el.addEventListener('dragover',e=>e.preventDefault());
+      el.addEventListener('drop',e=>{e.preventDefault();if(dragEl&&dragEl!==el){const rect=el.getBoundingClientRect();const mid=rect.top+rect.height/2;if(e.clientY<mid)list.insertBefore(dragEl,el);else list.insertBefore(dragEl,el.nextSibling);}});
+    });
+    container.querySelector('#ci-verificar')?.addEventListener('click',function(){
+      this.disabled=true;
+      const items=[...list.querySelectorAll('.ci-paso')];
+      const userOrder=items.map(el=>el.dataset.pasoId);
+      let correct=0;
+      items.forEach((el,i)=>{
+        const isRight=userOrder[i]===data.ordenCorrecto[i];
+        if(isRight){correct++;el.classList.add('ci-paso--ok');}else el.classList.add('ci-paso--wrong');
+        el.querySelector('.ci-paso__arrows').style.display='none';
+      });
+      const score=Math.round(correct/data.pasos.length*100);
+      const area=container.querySelector('.ci-panel-sorteo');
+      const fb=document.createElement('div');fb.className='ci-panel-resultado fade-up';
+      if(score===100){
+        fb.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#1565c0"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Orden perfecto!</h2><p>${escapeHtml(data.explicacion)}</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ci-volver-fin">Volver a retos</button>`;
+        registrarAccionProgreso('intervencion');
+      }else{
+        fb.innerHTML=`<h2>${correct} de ${data.pasos.length} en orden correcto</h2><p>${escapeHtml(data.explicacion)}</p><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ci-volver-fin">Volver a retos</button>`;
+      }
+      area.appendChild(fb);
+      container.querySelector('#ci-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+    });
+  }
+
+  /* ═══ SIMULADOR DE SESIÓN — panel view ═══ */
+  function _renderSimuladorView(container){
+    _retosContainer=container;
+    const sim=simuladoresData[retoIndiceDelDia(simuladoresData)];
+    let nodoActual='inicio';
+    let historial=[];
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="sim-panel-banner">
+          <div>
+            <span class="sim-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Simulación clínica · Sesión del día</span>
+            <h1>${escapeHtml(sim.titulo)}</h1>
+            <p>${escapeHtml(sim.intro)}</p>
+            <button type="button" class="sim-panel-banner__back" id="sim-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="sim-panel-banner__icons">
+            <div class="sim-panel-banner__float" style="transform:rotate(-8deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="sim-panel-banner__float" style="transform:rotate(6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="sim-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+          </div>
+        </div>
+        <section class="sim-panel-chat" id="sim-chat-area"></section>
+      </div>
+    `;
+    container.querySelector('#sim-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    renderNodo();
+    function renderNodo(){
+      const nodo=sim.nodos[nodoActual];if(!nodo)return;
+      const area=container.querySelector('#sim-chat-area');
+      if(nodo.dialogo){
+        const bubble=document.createElement('div');bubble.className='sim-bubble sim-bubble--paciente fade-up';
+        bubble.innerHTML=`<div class="sim-bubble__avatar">P</div><div class="sim-bubble__text">${escapeHtml(nodo.dialogo)}</div>`;
+        area.appendChild(bubble);
+      }
+      if(nodo.opciones.length===0){
+        const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
+        fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c2710c"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>Simulación completada</h2><p>Tomaste ${historial.length} decisiones en esta sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="sim-volver-fin">Volver a retos</button>`;
+        area.appendChild(fin);
+        registrarAccionProgreso('simulador');
+        container.querySelector('#sim-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+        return;
+      }
+      const opts=document.createElement('div');opts.className='sim-opciones fade-up';
+      opts.innerHTML=`<p class="sim-opciones__label">¿Cómo respondes?</p>${nodo.opciones.map((o,i)=>`<button type="button" class="sim-opcion" data-sim-opt="${i}">${escapeHtml(o.texto)}</button>`).join('')}`;
+      area.appendChild(opts);
+      opts.querySelectorAll('[data-sim-opt]').forEach(btn=>btn.addEventListener('click',()=>{
+        const opt=nodo.opciones[Number(btn.dataset.simOpt)];
+        historial.push(opt);
+        opts.querySelectorAll('.sim-opcion').forEach(b=>{b.disabled=true;if(b!==btn)b.style.opacity='.4';});
+        const resp=document.createElement('div');resp.className='sim-bubble sim-bubble--terapeuta fade-up';
+        resp.innerHTML=`<div class="sim-bubble__avatar" style="background:#1565c0">T</div><div class="sim-bubble__text">${escapeHtml(opt.texto)}</div>`;
+        area.appendChild(resp);
+        const fb=document.createElement('div');fb.className='sim-feedback fade-up';
+        fb.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>${escapeHtml(opt.feedback)}`;
+        area.appendChild(fb);
+        nodoActual=opt.siguiente;
+        setTimeout(()=>{renderNodo();area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});},1200);
+      }));
+      setTimeout(()=>opts.scrollIntoView({behavior:'smooth',block:'end'}),100);
+    }
+  }
+
+  /* ═══ DETECTA EL ERROR CLÍNICO — panel view ═══ */
+  function _renderErrorClinicoView(container){
+    _retosContainer=container;
+    const data=erroresClinicosData[retoIndiceDelDia(erroresClinicosData)];
+    let encontrados=0;
+    let revelados=new Set();
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="ec-panel-banner">
+          <div>
+            <span class="ec-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Análisis crítico · Error del día</span>
+            <h1>${escapeHtml(data.titulo)}</h1>
+            <p>Lee la transcripción e identifica los ${data.totalErrores} errores clínicos.</p>
+            <button type="button" class="ec-panel-banner__back" id="ec-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="ec-panel-banner__icons">
+            <div class="ec-panel-banner__float" style="transform:rotate(-6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="ec-panel-banner__float" style="transform:rotate(5deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+            <div class="ec-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+        </div>
+        <section class="ec-panel-contexto">
+          <div class="ec-panel-contexto__label"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Contexto</div>
+          <p>${escapeHtml(data.contexto)}</p>
+        </section>
+        <section class="ec-panel-transcript">
+          <p class="ec-panel-transcript__inst"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Toca las líneas donde detectes un error clínico</p>
+          <div class="ec-panel-transcript__score" id="ec-score">Errores encontrados: <b>0</b> de ${data.totalErrores}</div>
+          <div class="ec-lineas" id="ec-lineas">
+            ${data.transcripcion.map(l=>`<div class="ec-linea${l.esError?' ec-linea--clickable':''}" data-ec-id="${l.id}" data-es-error="${l.esError}">${escapeHtml(l.texto)}</div>`).join('')}
+          </div>
+        </section>
+      </div>
+    `;
+    container.querySelector('#ec-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    container.querySelectorAll('.ec-linea').forEach(el=>el.addEventListener('click',()=>{
+      const id=Number(el.dataset.ecId);
+      if(revelados.has(id))return;
+      revelados.add(id);
+      const linea=data.transcripcion.find(l=>l.id===id);
+      if(linea.esError){
+        encontrados++;
+        el.classList.add('ec-linea--found');
+        const fb=document.createElement('div');fb.className='ec-linea__feedback fade-up';
+        fb.textContent=linea.error;
+        el.appendChild(fb);
+        container.querySelector('#ec-score b').textContent=encontrados;
+        if(encontrados>=data.totalErrores){
+          setTimeout(()=>{
+            const area=container.querySelector('.ec-panel-transcript');
+            const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
+            fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c62828"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Todos los errores encontrados!</h2><p>Detectaste los ${data.totalErrores} errores clínicos en la sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ec-volver-fin">Volver a retos</button>`;
+            area.appendChild(fin);
+            registrarAccionProgreso('error-clinico');
+            container.querySelector('#ec-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+          },600);
+        }
+      }else{
+        el.classList.add('ec-linea--miss');
+        setTimeout(()=>el.classList.remove('ec-linea--miss'),800);
+        revelados.delete(id);
+      }
+    }));
+  }
+
+  /* ═══ ÁRBOL DE DECISIONES — panel view ═══ */
+  function _renderArbolView(container){
+    _retosContainer=container;
+    const arbol=arbolesData[retoIndiceDelDia(arbolesData)];
+    let nodoActual='inicio';
+    let decisiones=0;
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="arb-panel-banner">
+          <div>
+            <span class="arb-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg>Toma de decisiones · Dilema del día</span>
+            <h1>${escapeHtml(arbol.titulo)}</h1>
+            <p>${escapeHtml(arbol.intro)}</p>
+            <button type="button" class="arb-panel-banner__back" id="arb-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+          </div>
+          <div class="arb-panel-banner__icons">
+            <div class="arb-panel-banner__float" style="transform:rotate(-6deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg></div>
+            <div class="arb-panel-banner__float" style="transform:rotate(5deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+            <div class="arb-panel-banner__float" style="transform:rotate(-3deg)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          </div>
+        </div>
+        <section class="arb-panel-flow" id="arb-flow-area"></section>
+      </div>
+    `;
+    container.querySelector('#arb-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+    renderDecision();
+    function renderDecision(){
+      const nodo=arbol.nodos[nodoActual];if(!nodo)return;
+      const area=container.querySelector('#arb-flow-area');
+      const step=document.createElement('div');step.className='arb-step fade-up';
+      if(nodo.opciones.length===0){
+        step.innerHTML=`<div class="arb-situacion arb-situacion--final"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#2e7d32"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${escapeHtml(nodo.situacion)}</div>
+          <div class="cc-panel-resultado" style="padding-top:18px"><h2>Dilema completado</h2><p>Tomaste ${decisiones} decisiones en este caso.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="arb-volver-fin">Volver a retos</button></div>`;
+        area.appendChild(step);
+        registrarAccionProgreso('arbol-decisiones');
+        container.querySelector('#arb-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+        return;
+      }
+      step.innerHTML=`<div class="arb-situacion"><span class="arb-situacion__num">Decisión ${decisiones+1}</span>${escapeHtml(nodo.situacion)}</div><div class="arb-opciones">${nodo.opciones.map((o,i)=>`<button type="button" class="arb-opcion" data-arb-opt="${i}"><span class="arb-opcion__txt">${escapeHtml(o.texto)}</span></button>`).join('')}</div>`;
+      area.appendChild(step);
+      step.querySelectorAll('[data-arb-opt]').forEach(btn=>btn.addEventListener('click',()=>{
+        const opt=nodo.opciones[Number(btn.dataset.arbOpt)];
+        decisiones++;
+        step.querySelectorAll('.arb-opcion').forEach(b=>{b.disabled=true;if(b!==btn)b.style.opacity='.4';});
+        btn.classList.add('arb-opcion--chosen');
+        const cons=document.createElement('div');cons.className='arb-consecuencia fade-up';
+        cons.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${escapeHtml(opt.consecuencia)}`;
+        step.appendChild(cons);
+        nodoActual=opt.siguiente;
+        setTimeout(()=>{renderDecision();area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});},1200);
+      }));
+      setTimeout(()=>step.scrollIntoView({behavior:'smooth',block:'end'}),100);
     }
   }
 
@@ -9077,33 +9630,105 @@ const Sections = (function(){
 
         <section class="practice-experiences">
           <div class="practice-experiences__head"><div><span>Práctica profesional</span><h2>Elige cómo quieres entrenar</h2></div><small>Casos ficticios · contenido educativo</small></div>
-          <div class="practice-experiences__grid practice-experiences__grid--2">
-            <div class="pcard-hero" data-practice="caso-clinico">
-              <div class="pcard-hero__visual pcard-hero__visual--caso">
-                <span class="pcard-hero__eyebrow">Práctica clínica</span>
-                <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M16 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div>
-                <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 14l2 2 4-4"/></svg></div>
-                <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
-                <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${casosClinicos.length} casos disponibles</div>
+
+          <div class="retos-level">
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--express"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Express</span><small>3–5 min</small></div>
+            <div class="practice-experiences__grid practice-experiences__grid--2">
+              <div class="pcard-hero" data-practice="mapa-emocional">
+                <div class="pcard-hero__visual pcard-hero__visual--mapa">
+                  <span class="pcard-hero__eyebrow">Inteligencia emocional</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${mapasEmocionales.length} mapas</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Mapa emocional</h3>
+                  <p class="pcard-hero__desc">Clasifica emociones de paciente y terapeuta en escenarios clínicos.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--mapa">Explorar mapa<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
               </div>
-              <div class="pcard-hero__body">
-                <h3 class="pcard-hero__title">Caso clínico</h3>
-                <p class="pcard-hero__desc">Analiza un caso completo paso a paso: observa, evalúa y decide la intervención.</p>
-                <span class="pcard-hero__cta pcard-hero__cta--caso">Comenzar análisis<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+              <div class="pcard-hero" data-practice="intervencion">
+                <div class="pcard-hero__visual pcard-hero__visual--intervencion">
+                  <span class="pcard-hero__eyebrow">Habilidad clínica</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${intervencionesData.length} ejercicios</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Construye la intervención</h3>
+                  <p class="pcard-hero__desc">Ordena los pasos terapéuticos: apertura, exploración, validación, técnica y cierre.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--intervencion">Ordenar pasos<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
               </div>
             </div>
-            <div class="pcard-hero" data-practice="mapa-emocional">
-              <div class="pcard-hero__visual pcard-hero__visual--mapa">
-                <span class="pcard-hero__eyebrow">Inteligencia emocional</span>
-                <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-                <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-                <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-                <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${mapasEmocionales.length} mapas disponibles</div>
+          </div>
+
+          <div class="retos-level">
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--aplicacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Aplicación</span><small>10–15 min</small></div>
+            <div class="practice-experiences__grid practice-experiences__grid--2">
+              <div class="pcard-hero" data-practice="caso-clinico">
+                <div class="pcard-hero__visual pcard-hero__visual--caso">
+                  <span class="pcard-hero__eyebrow">Práctica clínica</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M16 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 14l2 2 4-4"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${casosClinicos.length} casos</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Caso clínico</h3>
+                  <p class="pcard-hero__desc">Analiza un caso completo paso a paso: observa, evalúa y decide la intervención.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--caso">Comenzar análisis<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
               </div>
-              <div class="pcard-hero__body">
-                <h3 class="pcard-hero__title">Mapa emocional</h3>
-                <p class="pcard-hero__desc">Identifica y clasifica las emociones de paciente y terapeuta en escenarios clínicos.</p>
-                <span class="pcard-hero__cta pcard-hero__cta--mapa">Explorar mapa<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+              <div class="pcard-hero" data-practice="error-clinico">
+                <div class="pcard-hero__visual pcard-hero__visual--error">
+                  <span class="pcard-hero__eyebrow">Análisis crítico</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>${erroresClinicosData.length} sesiones</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Detecta el error clínico</h3>
+                  <p class="pcard-hero__desc">Lee una transcripción de sesión y señala los errores del terapeuta.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--error">Buscar errores<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="retos-level">
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--simulacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Simulación</span><small>15+ min</small></div>
+            <div class="practice-experiences__grid practice-experiences__grid--2">
+              <div class="pcard-hero" data-practice="simulador">
+                <div class="pcard-hero__visual pcard-hero__visual--simulador">
+                  <span class="pcard-hero__eyebrow">Sesión simulada</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${simuladoresData.length} simulaciones</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Simulador de sesión</h3>
+                  <p class="pcard-hero__desc">Diálogo ramificado: tus respuestas cambian el rumbo de la sesión.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--simulador">Iniciar sesión<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
+              </div>
+              <div class="pcard-hero" data-practice="arbol">
+                <div class="pcard-hero__visual pcard-hero__visual--arbol">
+                  <span class="pcard-hero__eyebrow">Toma de decisiones</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/></svg>${arbolesData.length} dilemas</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Árbol de decisiones</h3>
+                  <p class="pcard-hero__desc">Cada elección abre una consecuencia distinta. Explora dilemas éticos y clínicos.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--arbol">Explorar dilema<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
               </div>
             </div>
           </div>
@@ -9121,6 +9746,10 @@ const Sections = (function(){
       if(tipo==='diario') abrirPreguntaReto(retoDiario,'diario');
       if(tipo==='caso-clinico') _renderCasoClinicoView(container);
       if(tipo==='mapa-emocional') _renderMapaEmocionalView(container);
+      if(tipo==='intervencion') _renderIntervencionView(container);
+      if(tipo==='simulador') _renderSimuladorView(container);
+      if(tipo==='error-clinico') _renderErrorClinicoView(container);
+      if(tipo==='arbol') _renderArbolView(container);
     }));
   }
   function renderLogros(container){
