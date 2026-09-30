@@ -3225,6 +3225,17 @@ body.has-fomo .main{padding-top:18px}
 }
 @keyframes slideInRight{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
 
+/* ─── Certificados hero ─── */
+.cert-hero{position:relative;padding:30px 38px;border-radius:24px;background:linear-gradient(120deg,#06145d,#1236ad 55%,#245cf4);color:#fff;overflow:hidden;margin-bottom:22px}
+.cert-hero::before{content:"";position:absolute;inset:0;background:url('assets/bg-hero-panel.webp') no-repeat right center / contain;opacity:.12;pointer-events:none}
+.cert-hero>*{position:relative;z-index:1}
+.cert-hero__eyebrow{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(5,14,73,.24);color:#a8ffbf;font-size:10px;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
+.cert-hero h1{margin:14px 0 8px;font-size:clamp(32px,3.5vw,48px);letter-spacing:-.055em;line-height:1;color:#fff}
+.cert-hero h1 em{font-style:normal;color:#91aaff}
+.cert-hero p{margin:0;max-width:550px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.cert-hero p strong{color:#fff}
+@media(max-width:600px){.cert-hero{padding:25px 20px}.cert-hero h1{font-size:30px}}
+
 /* ─── Sección suscripción hero ─── */
 .sub-hero{position:relative;padding:30px 38px;border-radius:24px;background:linear-gradient(120deg,#06145d,#1236ad 55%,#245cf4);color:#fff;overflow:hidden;margin-bottom:22px}
 .sub-hero::before{content:"";position:absolute;inset:0;background:url('assets/bg-hero-panel.webp') no-repeat right center / contain;opacity:.12;pointer-events:none}
@@ -5717,6 +5728,7 @@ function navigateToSection(section, opts){
   opts = opts || {};
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  if (section === 'certificados' && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
@@ -7296,10 +7308,11 @@ const Sections = (function(){
       const usado = k => { try{ return !!localStorage.getItem('sentia:'+k); }catch(e){ return false; } };
       const nTools = keys.filter(usado).length;
       let pdfs = 0; try{ pdfs = parseInt(localStorage.getItem('sentia:pdfs')||'0')||0; }catch(e){}
-      // Días activos y racha: únicamente cuentan acciones terminadas, no una visita al panel.
       let dias = []; try{ dias = JSON.parse(localStorage.getItem('sentia:dias')||'[]'); }catch(e){}
       const hoy = new Date(); const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      let racha = 0; const set = new Set(dias); const d = new Date(hoy);
+      const hoyIso = iso(hoy); const set = new Set(dias);
+      if(!set.has(hoyIso)){ dias.push(hoyIso); set.add(hoyIso); try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){} }
+      let racha = 0; const d = new Date(hoy);
       while(set.has(iso(d))){ racha++; d.setDate(d.getDate()-1); }
       const vip = (typeof toolEsVIP==='function') && toolEsVIP();
       const cond = {
@@ -7990,6 +8003,8 @@ const Sections = (function(){
   window.__actualizarWidgetsActividad = actualizarWidgetsActividad;
 
   async function renderCertificados(container){
+    const esVip = window.UserState?.modo==='vip' || (typeof esAdminReal==='function' && esAdminReal());
+    if(!esVip){ window.__irASuscripcion(); return; }
     container.innerHTML = '<div class="fade-up" style="padding:64px 24px;text-align:center;color:var(--text-2);font-size:14px;">Cargando tus certificados…</div>';
     const certs = await getCertificadosReales();
     const totalHoras = certs.reduce((s,c)=>s + (c.horas || 0), 0);
@@ -8000,16 +8015,10 @@ const Sections = (function(){
     if (certs.length === 0) {
       container.innerHTML = `
         <div class="fade-up">
-          <div class="sec-hero">
-            <span class="sec-hero__eyebrow">Tu trayectoria</span>
-            <h1 class="sec-hero__title">Mis certificados</h1>
-            <p class="sec-hero__sub">Cada certificado SENTIA incluye <strong style="color:var(--primary);">folio único, código QR verificable y firma del instructor</strong>. Se otorgan al completar el 100% de las clases de un curso VIP.</p>
-          </div>
-          <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-card__label">Certificados</div><div class="kpi-card__value">0</div></div>
-            <div class="kpi-card"><div class="kpi-card__label">Horas certificadas</div><div class="kpi-card__value">0</div></div>
-            <div class="kpi-card"><div class="kpi-card__label">Áreas dominadas</div><div class="kpi-card__value">0</div></div>
-            <div class="kpi-card"><div class="kpi-card__label">Verificables</div><div class="kpi-card__value">100<span class="kpi-card__value-sub">%</span></div></div>
+          <div class="cert-hero">
+            <span class="cert-hero__eyebrow">Tu trayectoria</span>
+            <h1>Mis certificados</h1>
+            <p>Cada certificado SENTIA incluye <strong>folio único, código QR verificable y firma del instructor</strong>. Se otorgan al completar el 100% de las clases de un curso VIP.</p>
           </div>
           <div style="background:linear-gradient(160deg, var(--surface-2), var(--surface));border:1px solid var(--border-2);border-radius:18px;padding:48px 32px;text-align:center;margin-top:24px;">
             <div style="width:88px;height:88px;border-radius:50%;background:color-mix(in srgb, var(--primary) 14%, transparent);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">
@@ -8038,16 +8047,10 @@ const Sections = (function(){
     // Render real cuando SÍ hay certificados
     container.innerHTML = `
       <div class="fade-up">
-        <div class="sec-hero">
-          <span class="sec-hero__eyebrow">Tu trayectoria</span>
-          <h1 class="sec-hero__title">Mis certificados</h1>
-          <p class="sec-hero__sub">Cada certificado tiene un folio único <strong style="color:var(--primary);font-family:'Montserrat',monospace;">SENTIA-2026-XXXXXX</strong> y código QR verificable. Compártelos en LinkedIn o descárgalos en PDF.</p>
-        </div>
-        <div class="kpi-grid">
-          <div class="kpi-card"><div class="kpi-card__label">Certificados</div><div class="kpi-card__value">${certs.length}</div></div>
-          <div class="kpi-card"><div class="kpi-card__label">Horas certificadas</div><div class="kpi-card__value">${totalHoras}</div></div>
-          <div class="kpi-card"><div class="kpi-card__label">Áreas dominadas</div><div class="kpi-card__value">${areas}</div></div>
-          <div class="kpi-card"><div class="kpi-card__label">Verificables</div><div class="kpi-card__value">100<span class="kpi-card__value-sub">%</span></div></div>
+        <div class="cert-hero">
+          <span class="cert-hero__eyebrow">Tu trayectoria</span>
+          <h1>Mis certificados</h1>
+          <p>Cada certificado tiene un folio único <strong>SENTIA-2026-XXXXXX</strong> y código QR verificable. Compártelos en LinkedIn o descárgalos en PDF.</p>
         </div>
         <div class="section-header"><h2 class="section-header__title">Tus ${certs.length} certificado${certs.length!==1?'s':''}<span class="section-header__badge">${certs.length} activo${certs.length!==1?'s':''}</span></h2></div>
         <div class="certs-list">${certs.map(c=>`
