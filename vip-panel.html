@@ -2025,6 +2025,33 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .dir-det__row-lbl{font-size:11px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .dir-det__row-val{font-size:13.5px;color:var(--text);font-weight:600;word-break:break-word}
 .dir-det__sincontacto{font-size:12.5px;color:var(--text-3);font-style:italic;margin-top:16px}
+/* Tags del directorio */
+.dir-card__tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.dir-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.3px}
+.dir-tag--mod{background:color-mix(in srgb,#3b82f6 12%,transparent);color:#1d4ed8}
+.dir-tag--enf{background:color-mix(in srgb,#8b5cf6 12%,transparent);color:#6d28d9}
+.dir-tag--pub{background:color-mix(in srgb,#f59e0b 12%,transparent);color:#b45309}
+.dir-tag--deriv{background:color-mix(in srgb,#22c55e 14%,transparent);color:#15803d}
+.dir-tag .ic{flex-shrink:0}
+/* Filtros extra */
+.dir-filtros-extra{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.dir-filtro-select{background:var(--surface-2);border:1px solid var(--border-2);border-radius:10px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;cursor:pointer}.dir-filtro-select:focus{border-color:var(--primary)}
+.dir-filtro-toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);cursor:pointer;user-select:none}
+.dir-filtro-toggle input{display:none}
+.dir-filtro-toggle__pill{position:relative;width:36px;height:20px;border-radius:999px;background:var(--border-2);transition:background .2s;flex-shrink:0}
+.dir-filtro-toggle__pill::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.dir-filtro-toggle input:checked~.dir-filtro-toggle__pill{background:#22c55e}
+.dir-filtro-toggle input:checked~.dir-filtro-toggle__pill::after{transform:translateX(16px)}
+/* Detalle meta */
+.dir-det__meta{width:100%;display:grid;gap:6px;margin:14px 0 4px;text-align:left}
+.dir-det__meta-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:var(--surface-2);font-size:13px}
+.dir-det__meta-lbl{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;min-width:72px;flex-shrink:0}
+.dir-det__meta-val{display:flex;align-items:center;gap:5px;color:var(--text);font-weight:600}
+.dir-det__meta-row--deriv{background:color-mix(in srgb,#22c55e 10%,transparent)}
+/* Form checks inline */
+.dir-form__checks{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:4px}
+.dir-form__check-inline{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);cursor:pointer}
+.dir-form__check-inline input{width:15px;height:15px;accent-color:var(--primary)}
 /* ===== FORO funcional ===== */
 .foro-aviso{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--primary) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary) 22%,transparent);border-radius:12px;padding:11px 15px;margin-bottom:16px;font-size:13px;color:var(--text-2)}
 .foro-aviso .ic{width:16px;height:16px;color:var(--primary);flex-shrink:0}
@@ -10541,12 +10568,17 @@ const Sections = (function(){
   // Firestore: colección `directorio/{uid}` · foto base64 optimizada
   // ═══════════════════════════════════════════════════════════════
   const SECTORES = ['Psicología Clínica','Psicología Educativa','Psicología Forense','Psicología Laboral','Neuropsicología','Salud Mental','Educación / Docencia','Trabajo Social','Desarrollo Humano','Otro'];
+  const ENFOQUES = ['Cognitivo-Conductual','Psicoanálisis','Gestalt','Sistémica','Humanista','EMDR','Integrativa','Breve / Estratégica','Neurociencias','Otro'];
+  const PUBLICOS = ['Niños','Adolescentes','Adultos','Parejas','Familias','Tercera edad','Empresas / Organizaciones'];
+  const MODALIDADES = ['Online','Presencial','Ambas'];
   let _dirUnsub = null;
   window.__dirCleanup = function(){ try{ if(typeof _dirUnsub==='function'){ _dirUnsub(); _dirUnsub=null; } }catch(e){} };
   window.__dirEditar = function(){ return dirEditarMiTarjeta(); };
   let _dirCards = [];
   let _dirFiltroSector = 'todos';
   let _dirBusqueda = '';
+  let _dirFiltroModalidad = 'todas';
+  let _dirFiltroDeriv = false;
   let _dirFotoTmp = undefined; // undefined=sin cambio, null=quitar, string=nueva
 
   function dirColorFor(uid){
@@ -10747,6 +10779,20 @@ const Sections = (function(){
           ${SECTORES.map(s=>`<button class="dir-chip" data-sector="${s}">${s}</button>`).join('')}
         </div>
 
+        <div class="dir-filtros-extra">
+          <div class="dir-filtro-grupo">
+            <select class="dir-filtro-select" id="dir-filtro-modalidad">
+              <option value="todas">Modalidad: Todas</option>
+              ${MODALIDADES.map(m=>`<option value="${m}">${m}</option>`).join('')}
+            </select>
+          </div>
+          <label class="dir-filtro-toggle" id="dir-filtro-deriv">
+            <input type="checkbox" id="dir-deriv-check">
+            <span class="dir-filtro-toggle__pill"></span>
+            <span>Disponible para derivaciones</span>
+          </label>
+        </div>
+
         <div class="dir-grid" id="dir-grid">
           <div class="foro-empty">Cargando directorio…</div>
         </div>
@@ -10764,6 +10810,16 @@ const Sections = (function(){
         _dirFiltroSector = c.dataset.sector;
         dirPintar();
       });
+    });
+    // Modalidad
+    container.querySelector('#dir-filtro-modalidad')?.addEventListener('change', (e)=>{
+      _dirFiltroModalidad = e.target.value;
+      dirPintar();
+    });
+    // Derivaciones
+    container.querySelector('#dir-deriv-check')?.addEventListener('change', (e)=>{
+      _dirFiltroDeriv = e.target.checked;
+      dirPintar();
     });
     // Mi tarjeta
     if (esVip) container.querySelector('#dir-mi-tarjeta').addEventListener('click', dirEditarMiTarjeta);
@@ -10793,8 +10849,10 @@ const Sections = (function(){
     const grid = document.getElementById('dir-grid'); if(!grid) return;
     let cards = _dirCards.slice();
     if (_dirFiltroSector!=='todos') cards = cards.filter(c=>c.sector===_dirFiltroSector);
+    if (_dirFiltroModalidad!=='todas') cards = cards.filter(c=>c.modalidad===_dirFiltroModalidad||c.modalidad==='Ambas');
+    if (_dirFiltroDeriv) cards = cards.filter(c=>c.derivaciones===true);
     if (_dirBusqueda) cards = cards.filter(c=>{
-      const blob = ((c.nombre||'')+' '+(c.empresa||'')+' '+(c.puesto||'')+' '+(c.sector||'')).toLowerCase();
+      const blob = ((c.nombre||'')+' '+(c.empresa||'')+' '+(c.puesto||'')+' '+(c.sector||'')+' '+(c.enfoque||'')+' '+((c.publico||[]).join(' '))).toLowerCase();
       return blob.includes(_dirBusqueda);
     });
     if (!cards.length){
@@ -10817,6 +10875,11 @@ const Sections = (function(){
       if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
       if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
       const esMia = c.id===uid;
+      const tags = [];
+      if (c.modalidad) tags.push(`<span class="dir-tag dir-tag--mod">${c.modalidad==='Online'?'<svg class="ic" style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>':c.modalidad==='Presencial'?'<svg class="ic" style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>':'<svg class="ic" style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>'}${escapeHtml(c.modalidad)}${c.modalidad==='Presencial'&&c.ciudad?' · '+escapeHtml(c.ciudad):''}</span>`);
+      if (c.enfoque) tags.push(`<span class="dir-tag dir-tag--enf">${escapeHtml(c.enfoque)}</span>`);
+      if (c.derivaciones) tags.push(`<span class="dir-tag dir-tag--deriv"><svg class="ic" style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Derivaciones</span>`);
+      const publicos = Array.isArray(c.publico)&&c.publico.length ? c.publico.map(p=>`<span class="dir-tag dir-tag--pub">${escapeHtml(p)}</span>`).join('') : '';
       return `
       <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
         ${esMia?'<span class="dir-card__badge-mia">Tú</span>':''}
@@ -10828,6 +10891,7 @@ const Sections = (function(){
           ${c.puesto?`<div class="dir-card__puesto">${escapeHtml(c.puesto)}</div>`:''}
           ${c.empresa?`<div class="dir-card__empresa"><svg class="ic"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
           ${c.sector?`<span class="dir-card__sector">${escapeHtml(c.sector)}</span>`:''}
+          ${tags.length||publicos?`<div class="dir-card__tags">${tags.join('')}${publicos}</div>`:''}
           ${c.bio?`<div class="dir-card__bio">${escapeHtml(c.bio)}</div>`:''}
           ${contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>'}
         </div>
@@ -10877,6 +10941,13 @@ const Sections = (function(){
           ${c.empresa?`<div class="dir-det__empresa"><svg class="ic"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
           ${c.sector?`<span class="dir-det__sector">${escapeHtml(c.sector)}</span>`:''}
         </div>
+        ${(c.modalidad||c.enfoque||(Array.isArray(c.publico)&&c.publico.length)||c.derivaciones)?`<div class="dir-det__meta">
+          ${c.modalidad?`<div class="dir-det__meta-row"><span class="dir-det__meta-lbl">Modalidad</span><span class="dir-det__meta-val">${escapeHtml(c.modalidad)}${c.modalidad==='Presencial'&&c.ciudad?' · '+escapeHtml(c.ciudad):''}</span></div>`:''}
+          ${c.enfoque?`<div class="dir-det__meta-row"><span class="dir-det__meta-lbl">Enfoque</span><span class="dir-det__meta-val">${escapeHtml(c.enfoque)}</span></div>`:''}
+          ${Array.isArray(c.publico)&&c.publico.length?`<div class="dir-det__meta-row"><span class="dir-det__meta-lbl">Público</span><span class="dir-det__meta-val">${c.publico.map(p=>escapeHtml(p)).join(', ')}</span></div>`:''}
+          ${c.derivaciones?`<div class="dir-det__meta-row dir-det__meta-row--deriv"><span class="dir-det__meta-lbl">Derivaciones</span><span class="dir-det__meta-val"><svg class="ic" style="width:12px;height:12px;color:#2e7d32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Disponible para recibir derivaciones</span></div>`:''}
+          ${c.supervision?`<div class="dir-det__meta-row"><span class="dir-det__meta-lbl">Supervisión</span><span class="dir-det__meta-val">${escapeHtml(c.supervision)}</span></div>`:''}
+        </div>`:''}
         ${c.bio?`<div class="dir-det__bio">${escapeHtml(c.bio)}</div>`:''}
         <div class="dir-det__rows">
           ${row('i-whatsapp','WhatsApp',c.whatsapp, waNum?`https://wa.me/${waNum}`:'', 'dir-det__row--wa')}
@@ -10939,6 +11010,36 @@ const Sections = (function(){
         </select>
         <label class="dir-form__lbl">Bio breve <span class="dir-form__opt">(opcional)</span></label>
         <textarea class="dir-form__in" id="dirf-bio" maxlength="160" rows="2" placeholder="Una línea sobre tu experiencia…">${escapeHtml(data.bio||'')}</textarea>
+
+        <div class="dir-form__sep">Perfil profesional</div>
+        <label class="dir-form__lbl">Modalidad de atención</label>
+        <select class="dir-form__in" id="dirf-modalidad">
+          <option value="">Selecciona…</option>
+          ${MODALIDADES.map(m=>`<option value="${m}" ${data.modalidad===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+        <div id="dirf-ciudad-wrap" style="display:${data.modalidad==='Presencial'||data.modalidad==='Ambas'?'block':'none'}">
+          <label class="dir-form__lbl">Ciudad / Estado</label>
+          <input class="dir-form__in" id="dirf-ciudad" maxlength="50" value="${(data.ciudad||'').replace(/"/g,'&quot;')}" placeholder="Ej. Puebla, Pue.">
+        </div>
+        <label class="dir-form__lbl">Enfoque o corriente terapéutica</label>
+        <select class="dir-form__in" id="dirf-enfoque">
+          <option value="">Selecciona…</option>
+          ${ENFOQUES.map(e=>`<option value="${e}" ${data.enfoque===e?'selected':''}>${e}</option>`).join('')}
+        </select>
+        <label class="dir-form__lbl">Público que atiendes <span class="dir-form__opt">(selecciona uno o más)</span></label>
+        <div class="dir-form__checks" id="dirf-publicos">
+          ${PUBLICOS.map(p=>`<label class="dir-form__check-inline"><input type="checkbox" value="${p}" ${(data.publico||[]).includes(p)?'checked':''}>${p}</label>`).join('')}
+        </div>
+
+        <div class="dir-form__sep">Derivaciones y supervisión</div>
+        <label class="dir-form__check"><input type="checkbox" id="dirf-derivaciones" ${data.derivaciones?'checked':''}> Disponible para recibir derivaciones de pacientes</label>
+        <label class="dir-form__lbl">Supervisión clínica <span class="dir-form__opt">(opcional)</span></label>
+        <select class="dir-form__in" id="dirf-supervision">
+          <option value="">No aplica</option>
+          <option value="Ofrezco supervisión" ${data.supervision==='Ofrezco supervisión'?'selected':''}>Ofrezco supervisión clínica</option>
+          <option value="Busco supervisor" ${data.supervision==='Busco supervisor'?'selected':''}>Busco supervisor/mentoría</option>
+        </select>
+
         <div class="dir-form__sep">Contacto <span class="dir-form__opt">(todos opcionales)</span></div>
         <label class="dir-form__lbl">WhatsApp</label>
         <input class="dir-form__in" id="dirf-wa" maxlength="20" value="${(data.whatsapp||'').replace(/"/g,'&quot;')}" placeholder="Ej. 52 238 123 4567">
@@ -10968,6 +11069,12 @@ const Sections = (function(){
     const btnQuitar = document.getElementById('dirf-foto-quitar');
     if (btnQuitar) btnQuitar.addEventListener('click', ()=>{ _dirFotoTmp = null; document.getElementById('dirf-foto-prev').innerHTML = `<svg class="ic"><use href="#i-user"/></svg>`; });
 
+    // Mostrar/ocultar ciudad según modalidad
+    document.getElementById('dirf-modalidad')?.addEventListener('change', (e)=>{
+      const w=document.getElementById('dirf-ciudad-wrap');
+      if(w) w.style.display=(e.target.value==='Presencial'||e.target.value==='Ambas')?'block':'none';
+    });
+
     footer.querySelector('#dirf-cancel').addEventListener('click', ()=> m.close());
     footer.querySelector('#dirf-guardar').addEventListener('click', async ()=>{
       const nombre = document.getElementById('dirf-nombre').value.trim();
@@ -10981,6 +11088,7 @@ const Sections = (function(){
       const web = enlaceSeguro(document.getElementById('dirf-web').value);
       if (linkedin === null || web === null) { Toast.error('Enlace inválido','LinkedIn y sitio web deben usar HTTPS.'); return; }
       const btn = footer.querySelector('#dirf-guardar'); btn.disabled=true; btn.textContent='Guardando…';
+      const publicoChecks = [...document.querySelectorAll('#dirf-publicos input:checked')].map(i=>i.value);
       const payload = {
         uid,
         nombre,
@@ -10988,6 +11096,12 @@ const Sections = (function(){
         empresa: document.getElementById('dirf-empresa').value.trim(),
         sector: document.getElementById('dirf-sector').value,
         bio: document.getElementById('dirf-bio').value.trim(),
+        modalidad: document.getElementById('dirf-modalidad').value,
+        ciudad: document.getElementById('dirf-ciudad')?.value.trim()||'',
+        enfoque: document.getElementById('dirf-enfoque').value,
+        publico: publicoChecks,
+        derivaciones: document.getElementById('dirf-derivaciones').checked,
+        supervision: document.getElementById('dirf-supervision').value,
         whatsapp: document.getElementById('dirf-wa').value.trim(),
         email: document.getElementById('dirf-email').value.trim(),
         linkedin,
