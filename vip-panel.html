@@ -8253,6 +8253,18 @@ const Sections = (function(){
     {titulo:'Conflicto parental',paciente:'Familia Morales: padres y Valentina, 8 años',motivo:'Consultan porque Valentina "se porta mal". La escuela reportó conducta agresiva.',contexto:'Padres trabajan turnos largos. Valentina queda con la abuela. Nació un hermano hace 6 meses.',observacion:'Valentina dibuja mientras los padres hablan. Dibuja una casa con puerta muy pequeña y un sol negro.',preguntas:[
       {pregunta:'¿Qué hipótesis explorarías primero?',opciones:['Valentina tiene un trastorno de conducta','La conducta puede ser respuesta a cambios familiares significativos','Los padres son negligentes','La abuela la malcría'],correcta:1,explicacion:'Antes de etiquetar, conviene entender la conducta como comunicación. El hermano nuevo y la ausencia de los padres son cambios importantes.'},
       {pregunta:'¿Qué harías con el dibujo de Valentina?',opciones:['Ignorarlo, es solo un dibujo','Interpretarlo como indicador de abuso','Usarlo como puente: "Cuéntame sobre tu dibujo, ¿quién vive ahí?"','Mostrarlo a los padres y pedirles que lo expliquen'],correcta:2,explicacion:'El dibujo es herramienta de comunicación con niños. Invitar a narrar abre espacio para que exprese su mundo interno.'}
+    ]},
+    {titulo:'Adicción y recaída',paciente:'Laura, 32 años',motivo:'Lleva 6 meses en tratamiento por consumo de alcohol. Llegó hoy diciendo que recayó el fin de semana.',contexto:'Madre soltera con una hija de 5 años. Trabaja como mesera. Su expareja la presiona por la custodia.',observacion:'Evita mirarte, tiene los ojos rojos. Dice: "Ya sabía que iba a fallar, siempre pasa lo mismo."',preguntas:[
+      {pregunta:'¿Cuál es la prioridad terapéutica en este momento?',opciones:['Confrontar la recaída para que tome conciencia','Evaluar el estado emocional actual y riesgo antes de hablar de la recaída','Revisar si cumplió el plan de prevención de recaídas','Programar una sesión con psiquiatría'],correcta:1,explicacion:'Antes de abordar la recaída, es fundamental evaluar cómo se siente ahora y si hay riesgo. La alianza terapéutica se protege al priorizar la persona sobre la conducta.'},
+      {pregunta:'Laura dice: "Ya no tiene caso, siempre voy a ser así." ¿Cómo respondes?',opciones:['"No digas eso, tú puedes salir adelante."','"La recaída no borra tu proceso. Llevabas 6 meses. ¿Qué fue diferente esta vez?"','"Piensa en tu hija, hazlo por ella."','"Si sigues así vas a perder la custodia."'],correcta:1,explicacion:'Reconocer el avance previo y explorar qué cambió valida su esfuerzo sin minimizar la recaída. La recaída es parte del proceso, no un fracaso definitivo.'}
+    ]},
+    {titulo:'Crisis de pánico en consultorio',paciente:'Miguel, 28 años',motivo:'Primera sesión. Fue referido por su médico por ataques de pánico recurrentes.',contexto:'Ingeniero de software, trabaja remoto. Vive solo. Los ataques empezaron hace 3 meses después de un asalto.',observacion:'A mitad de la sesión comienza a hiperventilar, se agarra el pecho y dice que se va a morir.',preguntas:[
+      {pregunta:'¿Qué haces primero?',opciones:['Llamar a emergencias inmediatamente','Pedirle que respire profundo y guiarlo con técnica de respiración mientras mantienes la calma','Darle un vaso de agua y esperar a que pase','Terminar la sesión y referirlo a psiquiatría'],correcta:1,explicacion:'Una crisis de pánico requiere contención inmediata. Guiar la respiración diafragmática con voz calmada ayuda a regular la respuesta fisiológica. Emergencias se llama solo si hay síntomas médicos reales.'},
+      {pregunta:'Después de estabilizarse, Miguel dice: "Perdón, qué vergüenza." ¿Cómo respondes?',opciones:['"No te preocupes, le pasa a mucha gente."','"No hay nada de qué disculparse. Esto que pasó es exactamente por lo que estamos aquí, y lo manejaste bien."','"Deberías considerar medicación para que no pase de nuevo."','"¿Ya te había pasado antes en público?"'],correcta:1,explicacion:'Normalizar sin minimizar y devolver agencia ("lo manejaste bien") reduce la vergüenza y fortalece la alianza. Eso convierte la crisis en una oportunidad terapéutica.'}
+    ]},
+    {titulo:'Burnout profesional',paciente:'Andrea, 40 años',motivo:'Directora de escuela. Dice que llora en el estacionamiento antes de entrar a trabajar.',contexto:'15 años en educación. Recién le aumentaron la carga administrativa. Duerme 4 horas. No ha tomado vacaciones en 2 años.',observacion:'Habla rápido, minimiza todo. Dice: "No es tan grave, hay gente que está peor."',preguntas:[
+      {pregunta:'¿Qué le dirías ante "hay gente que está peor"?',opciones:['"Es verdad, hay casos peores, pero lo tuyo también importa."','"Que otros sufran no invalida lo que tú sientes. Llorar antes de trabajar es una señal importante."','"¿Quién te dijo que tu sufrimiento no es válido?"','"Necesitas aprender a poner límites."'],correcta:1,explicacion:'Validar su experiencia sin comparar con otros rompe el patrón de minimización. Nombrar la señal concreta (llorar en el estacionamiento) la ayuda a reconocer la gravedad.'},
+      {pregunta:'Andrea pregunta: "¿Pero es burnout o solo estoy exagerando?" ¿Cómo respondes?',opciones:['Aplicar un inventario de burnout inmediatamente','Explicarle los criterios diagnósticos del burnout','Explorar con ella qué ha cambiado en su vida y desde cuándo, antes de poner etiquetas','Decirle que sí es burnout para que se tome en serio'],correcta:2,explicacion:'Explorar antes de diagnosticar. Construir la narrativa juntos ayuda a que ella misma reconozca el patrón, lo que tiene más impacto que una etiqueta impuesta.'}
     ]}
   ];
   /* ═══ MAPA EMOCIONAL — data ═══ */
@@ -8280,7 +8292,31 @@ const Sections = (function(){
       {nombre:'Incomodidad',correcta:'Terapeuta',desc:'Señal de que los límites necesitan atención'},
       {nombre:'Necesidad de pertenecer',correcta:'Paciente',desc:'Búsqueda legítima de conexión humana'},
       {nombre:'Claridad',correcta:'Terapeuta',desc:'Reafirmar el encuadre con calidez'}
-    ],reflexion:'La transferencia es material terapéutico valioso. Reconocer emociones de ambos lados permite abordarla sin rechazar ni cruzar límites.'}
+    ],reflexion:'La transferencia es material terapéutico valioso. Reconocer emociones de ambos lados permite abordarla sin rechazar ni cruzar límites.'},
+    {titulo:'Recaída de un paciente',escenario:'Una persona con trastorno por consumo de sustancias que llevaba 8 meses limpia llega diciendo: "Volví a consumir el viernes. Ni siquiera sé por qué."',emociones:[
+      {nombre:'Culpa',correcta:'Paciente',desc:'Sensación de haber fallado consigo mismo y con quienes confían en él'},
+      {nombre:'Frustración',correcta:'Terapeuta',desc:'Cuestionamiento sobre la eficacia del tratamiento y las decisiones terapéuticas'},
+      {nombre:'Vergüenza',correcta:'Paciente',desc:'Temor a ser juzgado por el terapeuta después de la recaída'},
+      {nombre:'Impotencia',correcta:'Terapeuta',desc:'Sensación de no poder controlar lo que pasa fuera de sesión'},
+      {nombre:'Desesperanza',correcta:'Paciente',desc:'Creencia de que el cambio no es posible: "siempre voy a ser así"'},
+      {nombre:'Compasión',correcta:'Terapeuta',desc:'Deseo genuino de sostener al paciente sin juzgarlo'}
+    ],reflexion:'La recaída no es un fracaso, es parte del proceso. Separar las emociones de cada uno evita que la frustración del terapeuta se confunda con un juicio al paciente.'},
+    {titulo:'Silencio prolongado en sesión',escenario:'Llevas 10 minutos de sesión y la persona no ha dicho nada. Mira al piso, mueve las manos. Tú tampoco has hablado.',emociones:[
+      {nombre:'Ansiedad',correcta:'Terapeuta',desc:'Urgencia de llenar el silencio o "hacer algo útil" con el tiempo'},
+      {nombre:'Protección',correcta:'Paciente',desc:'El silencio como mecanismo para evitar tocar algo doloroso'},
+      {nombre:'Incomodidad',correcta:'Terapeuta',desc:'Sensación de que el silencio significa que algo está mal en el vínculo'},
+      {nombre:'Procesamiento',correcta:'Paciente',desc:'Está organizando internamente algo que aún no tiene palabras'},
+      {nombre:'Confianza',correcta:'Paciente',desc:'Sentirse lo suficientemente seguro como para no tener que llenar el espacio'},
+      {nombre:'Paciencia',correcta:'Terapeuta',desc:'Capacidad de sostener el silencio como espacio terapéutico'}
+    ],reflexion:'El silencio no es vacío. Puede ser el momento más productivo de una sesión. Mapear qué siente cada uno ayuda a decidir si romperlo o sostenerlo.'},
+    {titulo:'Padres en desacuerdo sobre el hijo',escenario:'En sesión familiar, la madre dice que su hijo de 10 años "necesita mano dura" y el padre dice que "solo necesita más cariño". El niño está presente y escucha todo.',emociones:[
+      {nombre:'Miedo',correcta:'Paciente',desc:'El niño teme ser la causa del conflicto entre sus padres'},
+      {nombre:'Preocupación',correcta:'Terapeuta',desc:'Alerta por el impacto que la discusión tiene en el niño presente'},
+      {nombre:'Enojo',correcta:'Paciente',desc:'Frustración del niño por ser hablado "en tercera persona" frente a él'},
+      {nombre:'Tensión',correcta:'Terapeuta',desc:'Necesidad de mediar sin tomar partido ni invalidar a ningún padre'},
+      {nombre:'Lealtad dividida',correcta:'Paciente',desc:'El niño siente que apoyar a uno es traicionar al otro'},
+      {nombre:'Empatía',correcta:'Terapeuta',desc:'Comprensión de que ambos padres actúan desde el amor, con herramientas diferentes'}
+    ],reflexion:'Cuando los padres debaten frente al hijo, el terapeuta debe proteger al niño y redirigir. Mapear emociones revela que todos buscan lo mismo con caminos distintos.'}
   ];
 
   /* ═══ CASO CLÍNICO — panel view ═══ */
@@ -13185,7 +13221,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <style>
 /* ═══ Drawer móvil · menú completo con todas las opciones ═══ */
 .mobile-drawer{display:none}
-@media (max-width:768px){
+@media (max-width:1080px){
   .mobile-drawer{display:block}
   .mobile-drawer{position:fixed;inset:0;z-index:9500;visibility:hidden;pointer-events:none}
   .mobile-drawer.is-open{visibility:visible;pointer-events:auto}
