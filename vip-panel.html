@@ -124,6 +124,8 @@ body::after{
 .nav-item:hover{background:var(--surface-2);color:var(--text)}
 .nav-item.is-active{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font-weight:600}
 .nav-item .ic{width:15px;height:15px}
+.nav-item__icon{width:20px;height:20px;object-fit:contain;flex-shrink:0;filter:grayscale(30%) opacity(.75)}
+.nav-item.is-active .nav-item__icon,.nav-item:hover .nav-item__icon{filter:none;opacity:1}
 .nav-item__badge{margin-left:auto;font-size:9px;font-weight:600;padding:1px 7px;border-radius:100px;background:var(--surface-3);color:var(--text-2);letter-spacing:.3px;min-width:20px;text-align:center}
 .nav-item__badge.is-new{background:var(--primary);color:#fff}
 .nav-item__dot{width:7px;height:7px;border-radius:50%;background:var(--danger);margin-left:auto;animation:pulse 1.4s infinite}
@@ -2468,7 +2470,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .news-grid--home .news-card:not(:first-child) .news-card__title{font-size:13.5px;-webkit-line-clamp:2;margin:0}
 .news-grid--home .news-card:not(:first-child) .news-card__excerpt{display:none}
 .news-grid--home .news-card:not(:first-child) .news-card__footer{padding:4px 14px 8px;border:0}
-@media(max-width:760px){.news-grid--home{grid-template-columns:1fr!important;grid-template-rows:auto!important}.news-grid--home .news-card:first-child{grid-row:auto;min-height:auto}.news-grid--home .news-card:first-child .news-card__cover{height:180px}.news-grid--home .news-card:not(:first-child){grid-template-columns:120px 1fr}.news-grid--home .news-card:not(:first-child) .news-card__cover{min-height:100px}}
+@media(max-width:760px){.news-grid--home{display:flex!important;flex-direction:column;gap:14px!important}.news-grid--home .news-card:first-child{min-height:auto}.news-grid--home .news-card:first-child .news-card__cover{height:180px}.news-grid--home .news-card:not(:first-child){display:flex;flex-direction:column;grid-template-columns:none}.news-grid--home .news-card:not(:first-child) .news-card__cover{height:140px;min-height:auto;border-radius:18px 18px 0 0}.news-grid--home .news-card:not(:first-child) .news-card__body{padding:12px 16px 8px}.news-grid--home .news-card:not(:first-child) .news-card__title{font-size:15px;-webkit-line-clamp:3}.news-grid--home .news-card:not(:first-child) .news-card__excerpt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.news-grid--home .news-card:not(:first-child) .news-card__footer{padding:4px 16px 12px;border:0}}
 .news-grid--full{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
 .news-card{
   background:var(--surface);
@@ -4372,9 +4374,9 @@ window.__setDisplayName = async (nombre) => {
 
     <div class="nav-section">
       <div class="nav-label">Principal</div>
-      <a class="nav-item is-active" data-section="inicio"><svg class="ic"><use href="#i-home"/></svg>Inicio</a>
-      <a class="nav-item" data-section="cursos"><svg class="ic"><use href="#i-book"/></svg>Mis cursos</a>
-      <a class="nav-item" data-section="webinars"><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo<span class="nav-item__dot" id="nav-live-dot" style="display:none"></span></a>
+      <a class="nav-item is-active" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="nav-item__icon">Inicio</a>
+      <a class="nav-item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="nav-item__icon">Cursos</a>
+      <a class="nav-item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="nav-item__icon">Clases en vivo<span class="nav-item__dot" id="nav-live-dot" style="display:none"></span></a>
       <a class="nav-item" data-section="pdfs"><svg class="ic"><use href="#i-news"/></svg>Materiales</a>
       <a class="nav-item" data-section="retos"><svg class="ic"><use href="#i-trophy"/></svg>Retos</a>
       <a class="nav-item" data-section="logros"><svg class="ic"><use href="#i-crown"/></svg>Logros</a>
