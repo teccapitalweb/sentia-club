@@ -7313,9 +7313,9 @@ const Sections = (function(){
       const ayerIso = (()=>{const a=new Date(hoy);a.setDate(a.getDate()-1);return iso(a);})();
       let rObj; try{ rObj=JSON.parse(localStorage.getItem('sentia:racha')||'null'); }catch(e){}
       if(!rObj||typeof rObj!=='object'){
-        rObj={ultimo:hoyIso,valor:Math.max(1,Math.min(clases||1,7))};
+        rObj={ultimo:hoyIso,valor:1};
       } else if(rObj.ultimo===hoyIso){
-        if(clases>0 && rObj.valor<clases) rObj.valor=Math.min(clases,7);
+        /* ya se contó hoy */
       } else if(rObj.ultimo===ayerIso){
         rObj.valor=(rObj.valor||0)+1; rObj.ultimo=hoyIso;
       } else { rObj.valor=1; rObj.ultimo=hoyIso; }
@@ -7323,9 +7323,7 @@ const Sections = (function(){
       let racha = rObj.valor;
       let dias = []; try{ dias=JSON.parse(localStorage.getItem('sentia:dias')||'[]'); }catch(e){}
       const set = new Set(dias);
-      if(!set.has(hoyIso)){dias.push(hoyIso);set.add(hoyIso);}
-      for(let i=1;i<racha&&i<=7;i++){const dd=new Date(hoy);dd.setDate(dd.getDate()-i);const f=iso(dd);if(!set.has(f)){dias.push(f);set.add(f);}}
-      try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){}
+      if(!set.has(hoyIso)){dias.push(hoyIso);set.add(hoyIso);try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){}}
       const vip = (typeof toolEsVIP==='function') && toolEsVIP();
       const cond = {
         pp1: vip, pp2: clases>=1, pp3: hechos.length>=1,
@@ -9905,7 +9903,9 @@ const Sections = (function(){
     const cursosTerminados=Object.values(progresoReal).filter(p=>p&&p.completado).length;
     const ganados=logros.filter(l=>l.unlock).length;
     const diaActual=(new Date().getDay()+6)%7;
-    const semana=['L','M','M','J','V','S','D'].map((d,i)=>`<span class="${i===diaActual?'is-today':(i<diaActual&&usuario.racha>(diaActual-i)?'is-done':'')}">${d}</span>`).join('');
+    let diasVisita; try{ diasVisita=new Set(JSON.parse(localStorage.getItem('sentia:dias')||'[]')); }catch(e){ diasVisita=new Set(); }
+    const lunesISO=(()=>{const m=new Date();m.setDate(m.getDate()-diaActual);return m;})();
+    const semana=['L','M','M','J','V','S','D'].map((d,i)=>{const dd=new Date(lunesISO);dd.setDate(dd.getDate()+i);const f=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');const esHoy=i===diaActual;const visitado=diasVisita.has(f);return `<span class="${esHoy?'is-today':(visitado?'is-done':'')}">${d}</span>`;}).join('');
     const grupos=[
       {nombre:'Inicio en SENTIA',ids:['pp1','pp2','pp3']},
       {nombre:'Práctica profesional',ids:['ev2','in2','he1']},
