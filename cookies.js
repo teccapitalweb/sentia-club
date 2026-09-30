@@ -30,7 +30,7 @@
       '#sentia-cookies .sc-btn{flex:0 0 auto;border:0;border-radius:10px;padding:10px 20px;font-size:13.5px;font-weight:700;cursor:pointer;' +
         'background:linear-gradient(135deg,#1b5df0,#3aa0ff);color:#fff}' +
       '#sentia-cookies .sc-btn:hover{filter:brightness(1.07)}' +
-      '@media(max-width:520px){#sentia-cookies .sc-btn{width:100%}}';
+      '@media(max-width:520px){#sentia-cookies{padding:9px}#sentia-cookies .sc-box{flex-wrap:nowrap;gap:9px;padding:10px 11px;border-radius:12px}#sentia-cookies .sc-txt{min-width:0;font-size:11px;line-height:1.35}#sentia-cookies .sc-btn{width:auto;padding:9px 12px;font-size:12px;white-space:nowrap}}';
 
     document.head.appendChild(st);
     document.body.appendChild(wrap);

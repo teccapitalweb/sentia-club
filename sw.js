@@ -3,7 +3,7 @@
 //    hay conexión, se usa la copia en caché (modo offline).
 //  - Otros recursos (css, imágenes): CACHÉ PRIMERO (rápido), con respaldo de red.
 // Sube VERSION al cambiar archivos del shell para limpiar cachés viejas.
-const VERSION = 'sentia-v10-net-first';
+const VERSION = 'sentia-v34-foro-responsive';
 const CACHE_SHELL = VERSION + '-shell';
 const CACHE_RUNTIME = VERSION + '-runtime';
 

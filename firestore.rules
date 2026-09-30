@@ -181,6 +181,14 @@ service cloud.firestore {
       }
     }
 
+    // Presencia efímera del Foro. El navegador solo puede leer el nombre
+    // público, iniciales y última actividad; Railway es el único que escribe
+    // para impedir que alguien suplante a otro miembro o infle el contador.
+    match /presencia/{uid} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     match /notificaciones/{id} {
       allow read: if signedIn();
       // La publicación global pasa por el webhook autenticado; ni siquiera
