@@ -1983,13 +1983,11 @@ const Pages={
       try {
         const user = window._fb?.auth?.currentUser;
         if (!user) throw new Error('Sesión admin no disponible');
-        const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + await user.getIdToken() },
-          body: JSON.stringify({ titulo, descripcion, tipo: tipoSeleccionado, icono: iconoSeleccionado, color: colorSeleccionado })
+        const fb = window._fb;
+        await fb.addDoc(fb.collection(fb.db, 'notificaciones'), {
+          titulo, descripcion, tipo: tipoSeleccionado, icono: iconoSeleccionado, color: colorSeleccionado,
+          creadoPor: user.uid, createdAt: fb.serverTimestamp()
         });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data.error || 'No se pudo enviar la notificación');
         Toast.success('¡Notificación enviada!', 'Aparecerá en la campanita de todos los miembros VIP');
         // Limpiar form
         inputTitulo.value = '';
@@ -2034,11 +2032,8 @@ const Pages={
           }
           const user = window._fb?.auth?.currentUser;
           if (!user) throw new Error('Sesión admin no disponible');
-          const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones/${encodeURIComponent(id)}`, {
-            method: 'DELETE', headers: { 'Authorization': 'Bearer ' + await user.getIdToken() }
-          });
-          const data = await r.json().catch(() => ({}));
-          if (!r.ok) throw new Error(data.error || 'No se pudo eliminar');
+          const fb = window._fb;
+          await fb.deleteDoc(fb.doc(fb.db, 'notificaciones', id));
           Toast.success('Notificación eliminada');
           // El listener auto re-renderea
         } catch (err) {

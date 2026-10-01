@@ -13006,6 +13006,56 @@ function loadProfileFromLS(){
 // Cache global de notificaciones (se actualiza con onSnapshot)
 window.__notifsState = { items: [], unsubscribe: null, loaded: false };
 
+// ─── Dato curioso del día · rota automáticamente, uno distinto cada día del año ───
+// No depende de Firestore ni de Railway: se calcula en el navegador de cada usuario.
+const DATOS_CURIOSOS = [
+  'El cerebro humano procesa una imagen completa en tan solo 13 milisegundos, más rápido que un parpadeo.',
+  'La "amnesia infantil" hace que casi nadie recuerde eventos antes de los 3-4 años: el hipocampo aún está madurando.',
+  'Escribir a mano activa más áreas cerebrales que teclear, y mejora la retención de lo aprendido.',
+  'El efecto placebo puede activar los mismos circuitos de alivio del dolor que un analgésico real.',
+  'Dormir mal una sola noche reduce hasta un 40% la capacidad de formar nuevos recuerdos al día siguiente.',
+  'La sonrisa genuina (Duchenne) activa los músculos alrededor de los ojos; la fingida, no.',
+  'El 90% de la serotonina del cuerpo se produce en el intestino, no en el cerebro.',
+  'El sesgo de confirmación nos hace buscar información que ya confirma lo que creemos, y descartar lo contrario.',
+  'Multitarear en realidad no existe como tal: el cerebro alterna rápido entre tareas y pierde eficiencia cada vez.',
+  'El contacto visual prolongado puede aumentar la sensación de cercanía emocional entre dos personas en minutos.',
+  'La música con 60 BPM puede sincronizarse con el ritmo cardíaco en reposo y inducir relajación.',
+  'El estrés crónico puede encoger físicamente el hipocampo, la zona clave para la memoria.',
+  'Reír libera endorfinas y reduce el cortisol, el mismo efecto hormonal que un breve ejercicio físico.',
+  'La "parálisis del sueño" ocurre cuando el cerebro despierta antes que el cuerpo salga del estado REM.',
+  'Los bebés reconocen la voz de su madre desde el útero, incluso antes de nacer.',
+  'El efecto Zeigarnik explica por qué recordamos mejor las tareas inconclusas que las terminadas.',
+  'Oler un aroma familiar puede disparar recuerdos más vívidos que una foto, por la cercanía entre olfato y memoria.',
+  'La empatía tiene una base neuronal: las "neuronas espejo" se activan al ver a otra persona sentir algo.',
+  'El silencio incomodo en una conversación suele sentirse más largo de lo que realmente dura.',
+  'Tomar decisiones todo el día agota un recurso mental limitado, un fenómeno llamado fatiga de decisión.',
+  'Las personas bilingües suelen tardar más en mostrar signos de deterioro cognitivo relacionados con la edad.',
+  'El color azul en un espacio se asocia con mayor calma; el rojo, con mayor activación y urgencia.',
+  'Escribir sobre una emoción difícil durante 15 minutos puede reducir su intensidad percibida al día siguiente.',
+  'El llamado "efecto espectador" hace que, entre más gente presencie una emergencia, menos probable es que alguien actúe.',
+  'La gratitud practicada por escrito, de forma regular, se asocia con mejoras medibles en el estado de ánimo.',
+  'El cerebro adolescente no termina de madurar la corteza prefrontal (control de impulsos) hasta cerca de los 25 años.',
+  'Un abrazo de más de 20 segundos puede elevar los niveles de oxitocina y reducir la sensación de estrés.',
+  'La memoria no es como una grabación: cada vez que recordamos algo, lo "reescribimos" un poco.',
+  'El ejercicio aeróbico regular estimula la producción de nuevas neuronas en el hipocampo.',
+  'Las primeras impresiones se forman en menos de un segundo, y luego cuesta mucho esfuerzo cambiarlas.'
+];
+function datoCuriosoDeHoy(){
+  const inicio = new Date(new Date().getFullYear(), 0, 0);
+  const hoy = new Date();
+  const idx = Math.floor((hoy - inicio) / 86400000) % DATOS_CURIOSOS.length;
+  const iso = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
+  return {
+    id: 'curioso-' + iso,
+    tipo: 'curioso',
+    icono: 'i-bolt',
+    color: '#F5A623',
+    titulo: '¿Sabías qué?',
+    descripcion: DATOS_CURIOSOS[idx],
+    createdAtMs: hoy.setHours(8,0,0,0)
+  };
+}
+
 // Notificaciones de fallback para modo demo/sin-membresia (sin Firebase auth)
 const NOTIFS_DEMO = [
   {id:'demo-1', tipo:'clase', icono:'i-broadcast', color:'#1b5df0', titulo:'Próxima clase en vivo', descripcion:'Hemograma: interpretación de la BH · Dr. Mauricio León · 28 mayo 19:00 hrs', createdAtMs: Date.now()-3600000},
@@ -13026,7 +13076,7 @@ function setupNotificacionesListener(intento = 0) {
     }
     // Después de 10s sin Firebase = modo demo (sin login o sin internet)
     console.warn('[notif] Firebase no disponible después de 10s · usando notif demo');
-    window.__notifsState.items = NOTIFS_DEMO;
+    window.__notifsState.items = [datoCuriosoDeHoy(), ...NOTIFS_DEMO];
     window.__notifsState.loaded = true;
     window.__notifsState.source = 'fallback-timeout';
     actualizarBadgeNotif();
@@ -13057,22 +13107,23 @@ function setupNotificacionesListener(intento = 0) {
           createdAtMs: data.createdAt?.toDate?.()?.getTime?.() || data.createdAt?.toMillis?.() || Date.now()
         };
       });
-      // Usar SIEMPRE las notif reales de Firestore (aunque esté vacío · ahí el empty state se ve)
-      window.__notifsState.items = items;
+      // Usar SIEMPRE las notif reales de Firestore (aunque esté vacío · ahí el empty state se ve),
+      // más el dato curioso del día (se calcula en el navegador, no depende de Firestore/Railway)
+      window.__notifsState.items = [datoCuriosoDeHoy(), ...items];
       window.__notifsState.loaded = true;
       window.__notifsState.source = 'firestore';
       actualizarBadgeNotif();
       console.log(`[notif] ${items.length} notificaciones reales cargadas de Firestore`);
     }, (err) => {
       console.warn('[notif] Error leyendo Firestore:', err.message, '· usando notif demo de respaldo');
-      window.__notifsState.items = NOTIFS_DEMO;
+      window.__notifsState.items = [datoCuriosoDeHoy(), ...NOTIFS_DEMO];
       window.__notifsState.loaded = true;
       window.__notifsState.source = 'fallback-error';
       actualizarBadgeNotif();
     });
   } catch(e) {
     console.warn('[notif] No se pudo iniciar listener:', e.message);
-    window.__notifsState.items = NOTIFS_DEMO;
+    window.__notifsState.items = [datoCuriosoDeHoy(), ...NOTIFS_DEMO];
     window.__notifsState.loaded = true;
     window.__notifsState.source = 'fallback-exception';
     actualizarBadgeNotif();
