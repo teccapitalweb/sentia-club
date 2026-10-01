@@ -13100,17 +13100,22 @@ const DATOS_CURIOSOS = [
   'El "efecto espejo" en bebés, imitar gestos faciales, puede observarse desde las primeras horas de vida.',
   'La supervisión clínica no es solo control de calidad: también protege la salud mental del propio terapeuta.'
 ];
+// Emojis de salud mental/psicología que rotan junto con el dato, para que no se sienta
+// siempre igual (uno distinto cada día, independiente del dato que le toque)
+const EMOJIS_CURIOSOS = ['🧠','💭','🫂','💡','😌','🧩','💛','🌱','😴','✨'];
 function datoCuriosoDeHoy(){
   const inicio = new Date(new Date().getFullYear(), 0, 0);
   const hoy = new Date();
-  const idx = Math.floor((hoy - inicio) / 86400000) % DATOS_CURIOSOS.length;
+  const diaDelAnio = Math.floor((hoy - inicio) / 86400000);
+  const idx = diaDelAnio % DATOS_CURIOSOS.length;
+  const emoji = EMOJIS_CURIOSOS[diaDelAnio % EMOJIS_CURIOSOS.length];
   const iso = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
   return {
     id: 'curioso-' + iso,
     tipo: 'curioso',
     icono: 'i-bolt',
     color: '#F5A623',
-    titulo: '¿Sabías qué?',
+    titulo: emoji + ' ¿Sabías qué?',
     descripcion: DATOS_CURIOSOS[idx],
     createdAtMs: hoy.setHours(8,0,0,0)
   };
