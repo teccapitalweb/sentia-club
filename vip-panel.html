@@ -5764,7 +5764,7 @@ function navigateToSection(section, opts){
   opts = opts || {};
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
-  if (['certificados','directorio','red-profesional'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  if (['certificados','directorio','red-profesional','foro'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
