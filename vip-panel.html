@@ -2071,11 +2071,8 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .red-hero p{margin:0;max-width:480px;color:rgba(255,255,255,.75);font-size:14px;line-height:1.55}
 .red-hero__stats{display:flex;flex-direction:column;gap:14px;align-self:center;position:relative;z-index:1}
 .red-hero__stat{display:flex;flex-direction:column;align-items:center;padding:14px 20px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);min-width:120px}
-.red-hero__stat-num{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:8px}
+.red-hero__stat-num{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.03em}
 .red-hero__stat-lbl{font-size:10px;color:rgba(255,255,255,.7);text-align:center;margin-top:2px}
-.red-hero__stat--vivo{background:rgba(120,243,158,.14);border:1px solid rgba(120,243,158,.3)}
-.red-hero__dot{width:9px;height:9px;border-radius:50%;background:#78f39e;box-shadow:0 0 0 0 rgba(120,243,158,.6);animation:redHeroPulse 1.8s infinite}
-@keyframes redHeroPulse{0%{box-shadow:0 0 0 0 rgba(120,243,158,.55)}70%{box-shadow:0 0 0 8px rgba(120,243,158,0)}100%{box-shadow:0 0 0 0 rgba(120,243,158,0)}}
 @media(max-width:700px){.red-hero{grid-template-columns:1fr;padding:28px 22px}.red-hero__stats{flex-direction:row;justify-content:center}.red-hero h1{font-size:30px}}
 .red-tabs{display:flex;gap:6px;margin-bottom:18px}
 .red-tab{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface);color:var(--text-2);font:700 13px 'Montserrat',sans-serif;cursor:pointer;transition:all .15s}
@@ -3948,10 +3945,6 @@ window.__rtdb = rtdb;
 
 // ═══ Presencia en vivo (Realtime Database) · cuenta personas activas ahora ═══
 window.__personasActivas = 0;
-window.__actualizarPersonasActivas = function(n){
-  const el = document.getElementById('red-stat-activos');
-  if (el) el.textContent = n;
-};
 window.__initPresencia = function(uid){
   if (!uid || window.__presenciaInit) return;
   window.__presenciaInit = true;
@@ -3961,15 +3954,24 @@ window.__initPresencia = function(uid){
     rtdbOnValue(conectadoRef, (snap) => {
       if (snap.val() === true) {
         onDisconnect(miPresencia).remove();
-        rtdbSet(miPresencia, { online: true, desde: rtdbServerTimestamp() });
+        rtdbSet(miPresencia, {
+          online: true,
+          desde: rtdbServerTimestamp(),
+          nombre: window.UserState?.displayName || window.UserState?.nombre || '',
+          iniciales: window.calcIniciales ? window.calcIniciales(window.UserState?.displayName || window.UserState?.email || '') : ''
+        });
       }
     });
     rtdbOnValue(rtdbRef(rtdb, 'presence'), (snap) => {
       const val = snap.val();
       window.__personasActivas = val ? Object.keys(val).length : 0;
-      if (typeof window.__actualizarPersonasActivas === 'function') window.__actualizarPersonasActivas(window.__personasActivas);
     });
   } catch(e) { console.warn('[SENTIA] presencia:', e.message); }
+};
+// Expone una suscripción genérica al nodo de presencia para que el Foro (script clásico) la use
+window.__suscribirPresenciaForo = function(cb){
+  try { return rtdbOnValue(rtdbRef(rtdb, 'presence'), (snap) => cb(snap.val() || {})); }
+  catch(e) { console.warn('[SENTIA] suscripcion presencia foro:', e.message); return null; }
 };
 // Exponer funciones de Firestore para que el script no-module pueda usarlas
 window.__fs = { collection, doc, getDoc, getDocs, query, orderBy, onSnapshot, limit, where, addDoc, setDoc, updateDoc, deleteDoc, deleteField, increment, serverTimestamp, Timestamp, db };
@@ -11268,7 +11270,6 @@ const Sections = (function(){
             <p>Encuentra colegas para derivaciones, supervisión clínica y mentoría. Una red construida por y para profesionales de la salud mental.</p>
           </div>
           <div class="red-hero__stats">
-            <div class="red-hero__stat red-hero__stat--vivo"><span class="red-hero__stat-num"><span class="red-hero__dot"></span><span id="red-stat-activos">—</span></span><span class="red-hero__stat-lbl">Activos ahora</span></div>
             <div class="red-hero__stat"><span class="red-hero__stat-num" id="red-stat-deriv">—</span><span class="red-hero__stat-lbl">Disponibles para derivar</span></div>
             <div class="red-hero__stat"><span class="red-hero__stat-num" id="red-stat-super">—</span><span class="red-hero__stat-lbl">Ofrecen supervisión</span></div>
           </div>
@@ -11343,7 +11344,6 @@ const Sections = (function(){
         const superCount = all.filter(c=>c.supervision==='Ofrezco supervisión').length;
         const statD=document.getElementById('red-stat-deriv');if(statD)statD.textContent=derivCount;
         const statS=document.getElementById('red-stat-super');if(statS)statS.textContent=superCount;
-        window.__actualizarPersonasActivas && window.__actualizarPersonasActivas(window.__personasActivas);
         window._redAllCards = all;
         redPintar();
       } catch(e){ console.error('red prof',e); redPintarVacio('No se pudo cargar la red profesional.'); }
@@ -11425,12 +11425,10 @@ const Sections = (function(){
   const FORO_DIAS_VIDA = 15;
   let _foroUnsub = null;
   let _foroPresenciaUnsub = null;
-  let _foroPresenciaTimer = null;
   let _foroMiembrosActivos = [];
   window.__foroCleanup = function(){
     try { if (typeof _foroUnsub === 'function') { _foroUnsub(); _foroUnsub = null; } } catch(e){}
     try { if (typeof _foroPresenciaUnsub === 'function') { _foroPresenciaUnsub(); _foroPresenciaUnsub = null; } } catch(e){}
-    try { if (_foroPresenciaTimer) { clearInterval(_foroPresenciaTimer); _foroPresenciaTimer = null; } } catch(e){}
     try { Object.values(_comUnsub).forEach(u=>{ try{ u&&u(); }catch(e){} }); } catch(e){}
   };
   let _foroFiltro = 'recientes';
@@ -11444,7 +11442,7 @@ const Sections = (function(){
   }
   function foroAvataresActivos(){
     const visibles = _foroMiembrosActivos.slice(0,4);
-    const html = visibles.map(m => `<span class="foro-avatar-stack" title="${escapeHtml(m.nombre||'Miembro')}" style="background:linear-gradient(135deg,${m.color||'#1b5df0'},${m.color||'#1b5df0'}aa)">${escapeHtml(m.iniciales||'?')}</span>`).join('');
+    const html = visibles.map(m => { const c = m.color || foroColorFor(m.uid); return `<span class="foro-avatar-stack" title="${escapeHtml(m.nombre||'Miembro')}" style="background:linear-gradient(135deg,${c},${c}aa)">${escapeHtml(m.iniciales||'?')}</span>`; }).join('');
     const mas = _foroMiembrosActivos.length > 4 ? `<span class="foro-avatar-stack foro-avatar-stack--more">+${_foroMiembrosActivos.length-4}</span>` : '';
     return (html + mas) || '<span class="foro-avatar-stack" style="background:linear-gradient(135deg,var(--primary),var(--primary-deep)">S</span>' + '<span class="foro-avatar-stack" style="background:linear-gradient(135deg,var(--highlight),var(--success))">+</span>';
   }
@@ -11457,26 +11455,13 @@ const Sections = (function(){
       count.innerHTML = n ? `<strong>${n} miembro${n===1?'':'s'} conectado${n===1?'':'s'}</strong> en la comunidad` : 'La comunidad está lista para conversar';
     }
   }
-  async function foroMarcarPresencia(){
-    if (!(window.UserState?.modo === 'vip' || esAdminReal()) || !window.__authHeaders || !window.WEBHOOK_URL) return;
-    try {
-      const headers = await window.__authHeaders();
-      await fetch(window.WEBHOOK_URL + '/api/foro/presencia', { method:'POST', headers, body:'{}' });
-    } catch(e) { console.warn('[foro-presencia]', e.message); }
-  }
   function foroSuscribirPresencia(){
-    const fs = window.__fs;
-    if (!fs || !fs.onSnapshot) return;
     try { if (typeof _foroPresenciaUnsub === 'function') _foroPresenciaUnsub(); } catch(e){}
-    const desde = fs.Timestamp.fromMillis(Date.now() - 5 * 60 * 1000);
-    const q = fs.query(fs.collection(fs.db,'presencia'), fs.where('ultimaActividad','>',desde), fs.orderBy('ultimaActividad','desc'), fs.limit(12));
-    _foroPresenciaUnsub = fs.onSnapshot(q, snap => {
-      _foroMiembrosActivos = snap.docs.map(d=>d.data());
+    if (typeof window.__suscribirPresenciaForo !== 'function') { foroPintarPresencia(); return; }
+    _foroPresenciaUnsub = window.__suscribirPresenciaForo((val) => {
+      _foroMiembrosActivos = Object.keys(val).map(uid => ({ uid, nombre: val[uid].nombre, iniciales: val[uid].iniciales }));
       foroPintarPresencia();
-    }, err => console.warn('[foro-presencia]', err.message));
-    foroMarcarPresencia();
-    try { if (_foroPresenciaTimer) clearInterval(_foroPresenciaTimer); } catch(e){}
-    _foroPresenciaTimer = setInterval(foroMarcarPresencia, 60000);
+    });
   }
   function foroTiempoRel(ts){
     if(!ts) return 'ahora';
@@ -11658,7 +11643,7 @@ const Sections = (function(){
 
     // Suscripción en tiempo real
     foroSuscribir();
-    if (esVip) foroSuscribirPresencia(); else foroPintarPresencia();
+    foroSuscribirPresencia();
   }
 
   function foroSuscribir(){
