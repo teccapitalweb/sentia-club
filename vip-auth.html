@@ -700,15 +700,18 @@ document.getElementById('btn-register').addEventListener('click', async () => {
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
-// App instalada (PWA en Android/iOS) · el popup de Google no logra devolver el
-// resultado a la ventana standalone, así que ahí usamos redirección de página completa.
+// App instalada (PWA) o navegador de celular · el popup de Google no logra devolver el
+// resultado de forma confiable en ninguno de los dos casos, así que ahí usamos
+// redirección de página completa. Solo el navegador de escritorio usa popup.
 const esAppInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const usarRedireccion = esAppInstalada || esMovil;
 document.querySelectorAll('[data-google]').forEach(btn => {
   btn.addEventListener('click', async () => {
     clearAlert();
     btn.disabled = true;
     try{
-      if (esAppInstalada) {
+      if (usarRedireccion) {
         await signInWithRedirect(auth, googleProvider);
         return; // la página navega a Google; el resultado se procesa al volver
       }
@@ -722,7 +725,7 @@ document.querySelectorAll('[data-google]').forEach(btn => {
   });
 });
 
-// Procesa el resultado si acabamos de volver de la redirección de Google (app instalada)
+// Procesa el resultado si acabamos de volver de la redirección de Google (celular o app instalada)
 getRedirectResult(auth).catch((e) => {
   showAlert('error', 'No pudimos entrar con Google', translateError(e.code));
 });
