@@ -5773,7 +5773,7 @@ function navigateToSection(section, opts){
   opts = opts || {};
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
-  if (['directorio','red-profesional','foro','retos'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  if (['directorio','red-profesional','foro'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
@@ -8057,6 +8057,16 @@ const Sections = (function(){
   }
   window.__actualizarWidgetsActividad = actualizarWidgetsActividad;
 
+  // Curso que debe continuar el usuario (el más avanzado sin terminar, o el primero sin iniciar)
+  function cursoAContinuarId(){
+    try {
+      const lista=(Array.isArray(cursos)?cursos:[]).filter(c=>Array.isArray(c.sesiones)&&c.sesiones.length&&c.status!=='proximamente'&&!c.marcarProximamente);
+      const datos=lista.map(c=>{ const pc=getProgresoCurso(c.id); const total=c.sesiones.length; return { c, pc, pct: total?pc.clasesVistas.length/total:0, vistas:pc.clasesVistas.length }; });
+      const enCurso=datos.filter(d=>d.vistas>0&&!d.pc.completado).sort((x,y)=>y.pct-x.pct)[0];
+      const d=enCurso||datos.find(x=>!x.pc.completado)||datos[0];
+      return d?d.c.id:null;
+    } catch(e){ return null; }
+  }
   function certHeroHTML(){
     return `
       <div class="cert-hero">
@@ -8078,12 +8088,22 @@ const Sections = (function(){
   }
   window.__abrirCertMuestra = function(){
     ensureCertCSS();
-    const demo = { titulo:'Fundamentos de Psicología Clínica', folio:'SENTIA-2026-000000', horas:40, sesiones:12, area:'Psicología Clínica', emitido:new Date().toISOString() };
+    // Datos ficticios: folio, QR y resto de campos no corresponden a ningún registro real
+    const demo = { titulo:'Fundamentos de Psicología Clínica', folio:'SENTIA-MUESTRA-000000', horas:40, sesiones:12, area:'Psicología Clínica', emitido:new Date().toISOString() };
     const nombre = window.UserState?.nombre || window.UserState?.displayName || 'Tu Nombre Aquí';
-    const body = buildCertPremium(demo, nombre);
+    let body = buildCertPremium(demo, nombre);
+    // Quitamos la imagen de la firma real (solo dejamos el nombre/cargo de quien firma)
+    body = body.replace(/<div class="im"><img[^>]*><\/div>/, '<div class="im"></div>');
+    // Marca de agua para que quede claro que es una muestra, no un certificado real
+    body = body.replace('<div class="cp-body">', '<div class="cp-watermark">MUESTRA</div><div class="cp-body">');
+    if (!document.getElementById('cp-watermark-css')) {
+      const st = document.createElement('style'); st.id = 'cp-watermark-css';
+      st.textContent = `.cp-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-family:'Montserrat',sans-serif;font-size:90px;font-weight:900;letter-spacing:6px;color:rgba(19,41,74,.1);z-index:2;pointer-events:none;white-space:nowrap}`;
+      document.head.appendChild(st);
+    }
     const footer = document.createElement('div');
     footer.innerHTML = `<button class="btn btn--accent" id="ctm-close">Cerrar</button>`;
-    const m = Modal.open({id:'cert-muestra', title:'Certificado de muestra', subtitle:'Así se verá tu certificado SENTIA', icon:'i-certificate', size:'lg', body, footer});
+    const m = Modal.open({id:'cert-muestra', title:'Certificado de muestra', subtitle:'Datos de ejemplo · no corresponde a un registro real', icon:'i-certificate', size:'lg', body, footer});
     requestAnimationFrame(()=>{ fitCertModal(); setTimeout(fitCertModal, 350); });
     footer.querySelector('#ctm-close').addEventListener('click', () => m.close());
   };
@@ -8105,11 +8125,16 @@ const Sections = (function(){
               <div class="cert-empty-card__t">Tu primer certificado está a un curso de distancia</div>
               <div class="cert-empty-card__d">Termina todas las clases de cualquier curso y aparecerá aquí con su folio verificable.</div>
             </div>
-            <button class="btn btn--accent" onclick="window.navigateToSection && window.navigateToSection('cursos')">Continuar curso</button>
+            <button class="btn btn--accent" id="cert-continuar-curso">Continuar curso</button>
           </div>
         </div>
       `;
       vincularCertHero(container);
+      container.querySelector('#cert-continuar-curso')?.addEventListener('click', () => {
+        const id = cursoAContinuarId();
+        if (id && window.__abrirCursoHome) window.__abrirCursoHome(id);
+        else if (window.navigateToSection) window.navigateToSection('cursos');
+      });
       return;
     }
 
@@ -9782,7 +9807,7 @@ const Sections = (function(){
             <span class="retos-hero__eyebrow"><svg class="ic"><use href="#i-trophy"/></svg>Retos</span>
             <h1>Tu avance también <em>cuenta.</em></h1>
             <p>Convierte tu formación, actividades y práctica profesional en avances verificables para ti.</p>
-            <button type="button" class="retos-hero__cta" data-practice="diario">Resolver reto diario<svg class="ic"><use href="#i-arrow-right"/></svg></button>
+            <button type="button" class="retos-hero__cta" data-practice="diario" data-lockable="true">Resolver reto diario<svg class="ic"><use href="#i-arrow-right"/></svg></button>
           </div>
           <aside class="retos-hero__summary">
             <span>Tu avance actual</span>
@@ -9793,7 +9818,7 @@ const Sections = (function(){
           </aside>
         </div>
 
-        <div class="historia-banner" style="cursor:pointer" id="historia-teaser">
+        <div class="historia-banner" style="cursor:pointer" id="historia-teaser" data-lockable="true">
           <div>
             <span class="historia-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Nueva experiencia · Modo Historia</span>
             <h1>Aprende a leer <em>la mente.</em></h1>
@@ -9810,7 +9835,7 @@ const Sections = (function(){
           </div>
         </div>
 
-        <section class="minuto-card" id="minuto-reto-card">
+        <section class="minuto-card" id="minuto-reto-card" data-lockable="true">
           <div class="minuto-card__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg></div>
           <div>
             <span class="minuto-card__tema">${minutoHoy.tema} · 1 minuto de psicología</span>
@@ -9820,7 +9845,7 @@ const Sections = (function(){
           <button type="button" id="btn-minuto" aria-label="Resolver reto"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
         </section>
 
-        <section class="reto-next">
+        <section class="reto-next" data-lockable="true">
           <div class="reto-next__icon"><svg class="ic"><use href="#i-ps-target"/></svg></div>
           <div><span>Reto diario</span><h2>${retoDiario.pregunta}</h2><p>Una pregunta breve para entrenar tu criterio profesional.</p></div>
           <button type="button" data-practice="diario" aria-label="Resolver reto diario"><svg class="ic"><use href="#i-arrow-right"/></svg></button>
@@ -9832,7 +9857,7 @@ const Sections = (function(){
           <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--express"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Express</span><small>3–5 min</small></div>
             <div class="practice-experiences__grid practice-experiences__grid--2">
-              <div class="pcard-hero" data-practice="mapa-emocional">
+              <div class="pcard-hero" data-practice="mapa-emocional" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--mapa">
                   <span class="pcard-hero__eyebrow">Inteligencia emocional</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
@@ -9846,7 +9871,7 @@ const Sections = (function(){
                   <span class="pcard-hero__cta pcard-hero__cta--mapa">Explorar mapa<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
                 </div>
               </div>
-              <div class="pcard-hero" data-practice="intervencion">
+              <div class="pcard-hero" data-practice="intervencion" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--intervencion">
                   <span class="pcard-hero__eyebrow">Habilidad clínica</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
@@ -9866,7 +9891,7 @@ const Sections = (function(){
           <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--aplicacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Aplicación</span><small>10–15 min</small></div>
             <div class="practice-experiences__grid practice-experiences__grid--2">
-              <div class="pcard-hero" data-practice="caso-clinico">
+              <div class="pcard-hero" data-practice="caso-clinico" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--caso">
                   <span class="pcard-hero__eyebrow">Práctica clínica</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.8 2.3A2 2 0 0 0 3 4v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM9 13a3 3 0 0 0-3 3v3h6v-3a3 3 0 0 0-3-3z"/><path d="M16 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 13a3 3 0 0 1 3 3v3h-6v-3a3 3 0 0 1 3-3z"/></svg></div>
@@ -9880,7 +9905,7 @@ const Sections = (function(){
                   <span class="pcard-hero__cta pcard-hero__cta--caso">Comenzar análisis<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
                 </div>
               </div>
-              <div class="pcard-hero" data-practice="error-clinico">
+              <div class="pcard-hero" data-practice="error-clinico" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--error">
                   <span class="pcard-hero__eyebrow">Análisis crítico</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
@@ -9900,7 +9925,7 @@ const Sections = (function(){
           <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--simulacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Simulación</span><small>15+ min</small></div>
             <div class="practice-experiences__grid practice-experiences__grid--2">
-              <div class="pcard-hero" data-practice="simulador">
+              <div class="pcard-hero" data-practice="simulador" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--simulador">
                   <span class="pcard-hero__eyebrow">Sesión simulada</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
@@ -9914,7 +9939,7 @@ const Sections = (function(){
                   <span class="pcard-hero__cta pcard-hero__cta--simulador">Iniciar sesión<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
                 </div>
               </div>
-              <div class="pcard-hero" data-practice="arbol">
+              <div class="pcard-hero" data-practice="arbol" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--arbol">
                   <span class="pcard-hero__eyebrow">Toma de decisiones</span>
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg></div>
@@ -9934,12 +9959,16 @@ const Sections = (function(){
       </div>
     `;
 
-    container.querySelector('#btn-comenzar-historia')?.addEventListener('click',()=>_renderHistoriaView(container));
-    container.querySelector('#historia-teaser')?.addEventListener('click',e=>{if(!e.target.closest('button'))_renderHistoriaView(container);});
-    container.querySelector('#btn-minuto')?.addEventListener('click',abrirMinutoReto);
-    container.querySelector('#minuto-reto-card')?.addEventListener('click',e=>{if(!e.target.closest('button'))abrirMinutoReto();});
+    // Participar en los retos requiere VIP; se puede ver todo pero no jugar (respaldo
+    // al overlay "Solo VIP" por si algún botón pequeño no queda cubierto del todo)
+    const retosEsVip=()=>window.UserState?.modo==='vip' || (typeof esAdminReal==='function' && esAdminReal());
+    container.querySelector('#btn-comenzar-historia')?.addEventListener('click',()=>{ if(!retosEsVip()){ window.__irASuscripcion(); return; } _renderHistoriaView(container); });
+    container.querySelector('#historia-teaser')?.addEventListener('click',e=>{if(!e.target.closest('button')){ if(!retosEsVip()){ window.__irASuscripcion(); return; } _renderHistoriaView(container); }});
+    container.querySelector('#btn-minuto')?.addEventListener('click',()=>{ if(!retosEsVip()){ window.__irASuscripcion(); return; } abrirMinutoReto(); });
+    container.querySelector('#minuto-reto-card')?.addEventListener('click',e=>{if(!e.target.closest('button')){ if(!retosEsVip()){ window.__irASuscripcion(); return; } abrirMinutoReto(); }});
 
     container.querySelectorAll('[data-practice]').forEach(el=>el.addEventListener('click',()=>{
+      if(!retosEsVip()){ window.__irASuscripcion(); return; }
       const tipo=el.dataset.practice;
       if(tipo==='diario') abrirPreguntaReto(retoDiario,'diario');
       if(tipo==='caso-clinico') _renderCasoClinicoView(container);
