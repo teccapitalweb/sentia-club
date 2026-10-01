@@ -5764,7 +5764,7 @@ function navigateToSection(section, opts){
   opts = opts || {};
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
-  if (section === 'certificados' && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  if (['certificados','directorio','red-profesional'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
@@ -12760,6 +12760,7 @@ function openPasswordResetModal(){
 window.__maybeAskName = function(){
   try {
     if (localStorage.getItem('sentia_name_confirmed') === '1') return;
+    if (window.memberData && window.memberData.nombreConfirmado === true) return;
     if (document.getElementById('name-modal')) return;
     const S = window.UserState || {};
     const email = S.email || '';
@@ -12828,13 +12829,13 @@ window.__maybeAskName = function(){
       try {
         const fs = window.__fs;
         if (fs && fs.updateDoc && window.UserState?.uid) {
-          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombre: val });
+          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombre: val, nombreConfirmado: true });
         }
       } catch(e){}
       window.UserState.nombre = val;
       window.UserState.displayName = val;
       window.UserState.iniciales = (window.calcIniciales ? window.calcIniciales(val) : val.slice(0,2).toUpperCase());
-      if (window.memberData) window.memberData.nombre = val;
+      if (window.memberData) { window.memberData.nombre = val; window.memberData.nombreConfirmado = true; }
       try { const ls=JSON.parse(localStorage.getItem('sentia_profile')||'{}'); ls.nombre=val; localStorage.setItem('sentia_profile',JSON.stringify(ls)); } catch(e){}
       localStorage.setItem('sentia_name_confirmed','1');
       if (typeof window.__applyUserState==='function') window.__applyUserState();
@@ -12843,10 +12844,17 @@ window.__maybeAskName = function(){
     }
     document.getElementById('nm-save').addEventListener('click', guardar);
     input.addEventListener('keydown', e=>{ if(e.key==='Enter') guardar(); });
-    document.getElementById('nm-skip').addEventListener('click', ()=>{
+    document.getElementById('nm-skip').addEventListener('click', async ()=>{
       // No volver a molestar, pero NO marcamos como "confirmado" para que el
       // perfil siga sugiriendo completarlo. Marcamos solo "preguntado".
       localStorage.setItem('sentia_name_confirmed','1');
+      try {
+        const fs = window.__fs;
+        if (fs && fs.updateDoc && window.UserState?.uid) {
+          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombreConfirmado: true });
+        }
+      } catch(e){}
+      if (window.memberData) window.memberData.nombreConfirmado = true;
       ov.remove();
       if (window.Toast) Toast.info('Puedes cambiarlo luego', 'Mi perfil → Nombre completo');
     });
