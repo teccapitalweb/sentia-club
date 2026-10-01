@@ -488,7 +488,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, sendEmailVerification, reload, updateProfile, setPersistence, browserLocalPersistence,
-  onAuthStateChanged, GoogleAuthProvider, signInWithPopup
+  onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, serverTimestamp
@@ -700,11 +700,18 @@ document.getElementById('btn-register').addEventListener('click', async () => {
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
+// App instalada (PWA en Android/iOS) · el popup de Google no logra devolver el
+// resultado a la ventana standalone, así que ahí usamos redirección de página completa.
+const esAppInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 document.querySelectorAll('[data-google]').forEach(btn => {
   btn.addEventListener('click', async () => {
     clearAlert();
     btn.disabled = true;
     try{
+      if (esAppInstalada) {
+        await signInWithRedirect(auth, googleProvider);
+        return; // la página navega a Google; el resultado se procesa al volver
+      }
       await signInWithPopup(auth, googleProvider);
       showAlert('success', 'Listo!', 'Entrando con Google...');
     }catch(e){
@@ -713,6 +720,11 @@ document.querySelectorAll('[data-google]').forEach(btn => {
       showAlert('error', 'No pudimos entrar con Google', translateError(e.code));
     }
   });
+});
+
+// Procesa el resultado si acabamos de volver de la redirección de Google (app instalada)
+getRedirectResult(auth).catch((e) => {
+  showAlert('error', 'No pudimos entrar con Google', translateError(e.code));
 });
 
 document.getElementById('forgot-link').addEventListener('click', async (e) => {
