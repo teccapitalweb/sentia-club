@@ -1690,13 +1690,19 @@ const Pages={
     };
 
     // Presets por tipo (color + icono · idénticos al panel VIP)
+    // Clase/Certificado/Logro usan el MISMO ícono (PNG) que ya aparece en el menú del
+    // panel de usuario para esas secciones, así se ve igual en todos lados.
     const TIPOS = {
-      clase:       { label: 'Clase en vivo', icono: 'i-broadcast', color: '#2fbf2e' },
-      certificado: { label: 'Certificado',   icono: 'i-certificate', color: '#E5C171' },
-      logro:       { label: 'Logro / XP',    icono: 'i-trophy', color: '#FBBF24' },
+      clase:       { label: 'Clase en vivo', icono: 'assets/icon-nav-vivo.png', color: '#2fbf2e' },
+      certificado: { label: 'Certificado',   icono: 'assets/icon-nav-certificados.png', color: '#E5C171' },
+      logro:       { label: 'Logro / XP',    icono: 'assets/icon-nav-logros.png', color: '#FBBF24' },
       sistema:     { label: 'Sistema',       icono: 'i-shield-check', color: '#60A5FA' },
       general:     { label: 'General',       icono: 'i-bell', color: '#A78BFA' }
     };
+    // Devuelve <img> si el ícono es una ruta de archivo, o <svg><use> si es un ícono del sprite
+    const iconoNotifHTML = (icono, px) => icono.includes('/')
+      ? `<img src="${icono}" style="width:${px}px;height:${px}px;object-fit:contain">`
+      : `<svg class="ic" style="width:${px}px;height:${px}px;"><use href="#${icono}"/></svg>`;
 
     p.innerHTML = `
       <div class="fade-up">
@@ -1758,7 +1764,7 @@ const Pages={
                       letter-spacing:.2px;
                       transition:all .15s;
                     " data-color="${t.color}" data-icono="${t.icono}">
-                      <svg class="ic" style="width:18px;height:18px;"><use href="#${t.icono}"/></svg>
+                      ${iconoNotifHTML(t.icono, 18)}
                       ${t.label.split(' ')[0]}
                     </button>
                   `).join('')}
@@ -1803,7 +1809,7 @@ const Pages={
                     width:34px;height:34px;border-radius:9px;
                     background:color-mix(in srgb,#2fbf2e 16%,transparent);color:#2fbf2e;
                     display:flex;align-items:center;justify-content:center;flex-shrink:0;
-                  "><svg class="ic" style="width:17px;height:17px;"><use href="#i-broadcast"/></svg></div>
+                  ">${iconoNotifHTML(TIPOS.clase.icono, 17)}</div>
                   <div style="flex:1;min-width:0;">
                     <div id="notif-preview-titulo" style="font-size:13px;font-weight:700;color:var(--text);line-height:1.35;">Título de la notificación</div>
                     <div id="notif-preview-desc" style="font-size:12px;color:var(--text-2);line-height:1.45;margin-top:3px;">La descripción aparecerá aquí mientras la escribes</div>
@@ -1867,7 +1873,7 @@ const Pages={
                       background:color-mix(in srgb,${color} 14%, transparent);
                       color:${color};
                       display:flex;align-items:center;justify-content:center;flex-shrink:0;
-                    "><svg class="ic" style="width:17px;height:17px;"><use href="#${icono}"/></svg></div>
+                    ">${iconoNotifHTML(icono, 17)}</div>
 
                     <div style="flex:1;min-width:0;">
                       <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
@@ -1938,7 +1944,7 @@ const Pages={
         // Update preview icon
         previewIcon.style.background = `color-mix(in srgb,${c} 16%, transparent)`;
         previewIcon.style.color = c;
-        previewIcon.innerHTML = `<svg class="ic" style="width:17px;height:17px;"><use href="#${ic}"/></svg>`;
+        previewIcon.innerHTML = iconoNotifHTML(ic, 17);
       });
     });
 
