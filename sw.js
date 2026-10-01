@@ -3,7 +3,7 @@
 //    hay conexión, se usa la copia en caché (modo offline).
 //  - Otros recursos (css, imágenes): CACHÉ PRIMERO (rápido), con respaldo de red.
 // Sube VERSION al cambiar archivos del shell para limpiar cachés viejas.
-const VERSION = 'sentia-v34-foro-responsive';
+const VERSION = 'sentia-v35-pwa-iconos';
 const CACHE_SHELL = VERSION + '-shell';
 const CACHE_RUNTIME = VERSION + '-runtime';
 
@@ -13,7 +13,9 @@ const SHELL_FILES = [
   'vip-panel.html',
   'vip-admin.html',
   'mobile.css',
-  'assets/icon-sentia.png'
+  'assets/icon-sentia.png',
+  'assets/icon-sentia-192.png',
+  'assets/icon-sentia-512.png'
 ];
 
 self.addEventListener('install', e => {
