@@ -29,8 +29,42 @@
     queue: [],        // preguntas 2..7 (contextual + 5 generales), una vez conocido perfilBase
     step: 0,          // 0 = pregunta base; 1..6 = índice dentro de queue
     total: 7,
-    resultado: null   // se llena al terminar el test
+    resultado: null,  // se llena al terminar el test
+    history: []       // snapshots para "Pregunta anterior"
   };
+
+  function snapshotState() {
+    return {
+      perfilBase: state.perfilBase,
+      scores: Object.assign({}, state.scores),
+      respuestas: state.respuestas.slice(),
+      tags: new Set(state.tags),
+      formatos: new Set(state.formatos),
+      objetivos: state.objetivos.slice(),
+      queue: state.queue.slice(),
+      step: state.step
+    };
+  }
+  function pushHistory() { state.history.push(snapshotState()); }
+  function restoreSnapshot(s) {
+    state.perfilBase = s.perfilBase;
+    state.scores = s.scores;
+    state.respuestas = s.respuestas;
+    state.tags = s.tags;
+    state.formatos = s.formatos;
+    state.objetivos = s.objetivos;
+    state.queue = s.queue;
+    state.step = s.step;
+  }
+  function updateBackButton() {
+    document.getElementById('q-back').classList.toggle('is-visible', state.history.length > 0);
+  }
+  document.getElementById('q-back').addEventListener('click', () => {
+    if (!state.history.length) return;
+    restoreSnapshot(state.history.pop());
+    document.getElementById('context-msg').classList.remove('is-visible');
+    if (state.step === 0) renderBase(); else renderQueueStep();
+  });
 
   const el = {
     screens: {
@@ -57,6 +91,7 @@
     state.queue = [];
     state.step = 0;
     state.resultado = null;
+    state.history = [];
     resetLeadBox();
     showScreen('welcome');
   }
@@ -76,6 +111,7 @@
       texto: Q.base.text,
       opciones: Q.base.options.map(o => ({ label: o.label, icon: o.icon, _value: o.value, _tag: o.tag })),
       onSelect: (opt) => {
+        pushHistory();
         state.perfilBase = opt._value;
         state.tags.add(opt._tag === 'crecimiento_personal' ? 'crecimiento_personal' : opt._tag);
         state.respuestas.push({ pregunta: Q.base.text, respuesta: opt.label });
@@ -108,6 +144,7 @@
       texto: item.data.text,
       opciones: item.data.options,
       onSelect: (opt) => {
+        pushHistory();
         Scoring.addPoints(state.scores, opt.points);
         state.respuestas.push({ pregunta: item.data.text, respuesta: opt.label });
         (opt.tags || []).forEach(t => state.tags.add(t));
@@ -125,6 +162,7 @@
 
   // ── Render genérico de una pantalla de pregunta ──
   function renderQuestion({ numero, texto, opciones, onSelect }) {
+    updateBackButton();
     document.getElementById('q-num').textContent = numero;
     document.getElementById('q-total').textContent = state.total;
     document.getElementById('progress-fill').style.width = Math.round((numero / state.total) * 100) + '%';

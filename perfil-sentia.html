@@ -19,6 +19,14 @@
   --radius:18px; --radius-sm:12px;
   --font:'Montserrat',sans-serif;
 }
+body.modo-dia{
+  --bg-deep:#eef1f7; --bg:#f5f7fb; --surface:#ffffff; --surface-2:#f1f4f9; --surface-3:#e7ecf4;
+  --line:#e3e8f1; --text:#0e1d40; --muted:#5b6b8f; --faint:#8793ad;
+}
+body.modo-dia::before{
+  background:radial-gradient(60vw 60vw at 90% -8%, rgba(27,93,240,.12), transparent 58%),
+             radial-gradient(70vw 70vw at -10% 100%, rgba(47,191,46,.10), transparent 55%);
+}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -28,6 +36,16 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
 .sentia-test{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 18px}
 .shell{width:100%;max-width:640px}
+
+.theme-btn{position:fixed;top:18px;right:20px;z-index:60;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.theme-btn:hover{border-color:var(--primary-soft)}
+.theme-btn svg{width:17px;height:17px}
+
+.q-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.q-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--primary-soft);font-family:var(--font);font-size:.78rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;padding:4px 0;visibility:hidden}
+.q-back.is-visible{visibility:visible}
+.q-back svg{width:15px;height:15px}
+.q-back:hover{color:var(--primary)}
 
 .screen{display:none}
 .screen.is-active{display:block;animation:screenIn .45s cubic-bezier(.2,.8,.3,1) both}
@@ -155,6 +173,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 </head>
 <body>
 
+<button class="theme-btn" id="theme-toggle" aria-label="Cambiar tema"></button>
+
 <div class="sentia-test" id="sentia-test">
   <div class="shell">
     <div class="brand">
@@ -177,6 +197,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
     <!-- 2. PREGUNTA (una por pantalla) -->
     <section class="screen" id="screen-question">
+      <div class="q-nav">
+        <button class="q-back" id="q-back" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          Pregunta anterior
+        </button>
+      </div>
       <div class="q-progress">
         <div class="q-progress__label">Pregunta <span id="q-num">1</span> de <span id="q-total">7</span></div>
         <div class="q-progress__track"><i id="progress-fill" style="width:14%"></i></div>
@@ -269,6 +295,29 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
+<script>
+// Mismo toggle y misma llave de localStorage que vip-auth.html / vip-panel.html,
+// para que la preferencia de tema del usuario se respete en toda la plataforma.
+(function(){
+  const KEY = 'sentia-auth:theme';
+  const btn = document.getElementById('theme-toggle');
+  function updateIcon(isDay){
+    btn.title = isDay ? 'Modo noche' : 'Modo día';
+    btn.innerHTML = !isDay
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+  const saved = localStorage.getItem(KEY) || 'night';
+  if (saved === 'day') document.body.classList.add('modo-dia');
+  updateIcon(document.body.classList.contains('modo-dia'));
+  btn.addEventListener('click', () => {
+    document.body.classList.toggle('modo-dia');
+    const isDay = document.body.classList.contains('modo-dia');
+    localStorage.setItem(KEY, isDay ? 'day' : 'night');
+    updateIcon(isDay);
+  });
+})();
+</script>
 <script src="assets/perfil-sentia/icons.js"></script>
 <script src="assets/perfil-sentia/profiles.js"></script>
 <script src="assets/perfil-sentia/questions.js"></script>
