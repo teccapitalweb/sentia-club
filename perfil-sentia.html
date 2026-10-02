@@ -41,11 +41,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .theme-btn:hover{border-color:var(--primary-soft)}
 .theme-btn svg{width:17px;height:17px}
 
-.q-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.q-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--primary-soft);font-family:var(--font);font-size:.78rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;padding:4px 0;visibility:hidden}
+/* Barra delgada de navegación: regresar + progreso en una sola franja,
+   como pidió el usuario (no un bloque grande que ocupe la pantalla). */
+.q-topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px 20px;margin-bottom:24px;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.q-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--primary-soft);font-family:var(--font);font-size:.76rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;padding:4px 0;flex-shrink:0;visibility:hidden}
 .q-back.is-visible{visibility:visible}
 .q-back svg{width:15px;height:15px}
 .q-back:hover{color:var(--primary)}
+.q-topbar__progress{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.q-topbar .q-progress__track{width:140px}
+.q-topbar__step{font-size:.76rem;color:var(--muted);font-weight:600;white-space:nowrap}
+@media(max-width:480px){.q-topbar{padding:12px 14px;gap:10px}.q-topbar .q-progress__track{width:72px}.q-back span{display:none}}
 
 .screen{display:none}
 .screen.is-active{display:block;animation:screenIn .45s cubic-bezier(.2,.8,.3,1) both}
@@ -71,8 +77,6 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .note{display:block;margin-top:16px;font-size:.74rem;color:var(--faint)}
 
 /* ── Pantalla: pregunta ── */
-.q-progress{margin-bottom:22px}
-.q-progress__label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
 .q-progress__track{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .q-progress__track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--accent-soft));transition:width .4s cubic-bezier(.2,.8,.3,1)}
 
@@ -197,15 +201,15 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
     <!-- 2. PREGUNTA (una por pantalla) -->
     <section class="screen" id="screen-question">
-      <div class="q-nav">
+      <div class="q-topbar">
         <button class="q-back" id="q-back" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-          Pregunta anterior
+          <span>Pregunta anterior</span>
         </button>
-      </div>
-      <div class="q-progress">
-        <div class="q-progress__label">Pregunta <span id="q-num">1</span> de <span id="q-total">7</span></div>
-        <div class="q-progress__track"><i id="progress-fill" style="width:14%"></i></div>
+        <div class="q-topbar__progress">
+          <div class="q-progress__track"><i id="progress-fill" style="width:14%"></i></div>
+          <span class="q-topbar__step">Pregunta <span id="q-num">1</span> de <span id="q-total">7</span></span>
+        </div>
       </div>
       <div id="context-msg"></div>
       <h2 class="q-text" id="q-text"></h2>
