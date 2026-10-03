@@ -226,6 +226,19 @@
     const principal = PROFILES[resultado.principal];
     const secundario = PROFILES[resultado.secondary];
 
+    const badgeEl = document.getElementById('res-code');
+    const avatarEl = document.getElementById('res-avatar');
+    if (principal.characterVideo && window.SentiaAvatarPlayer) {
+      badgeEl.style.display = 'none';
+      avatarEl.style.display = '';
+      if (avatarEl.dataset.mounted !== principal.code) {
+        avatarEl.dataset.mounted = principal.code;
+        window.SentiaAvatarPlayer.mount(avatarEl, principal.characterVideo);
+      }
+    } else {
+      badgeEl.style.display = '';
+      avatarEl.style.display = 'none';
+    }
     document.getElementById('res-code').textContent = principal.code;
     document.getElementById('res-name').textContent = principal.name;
     document.getElementById('res-tagline').textContent = principal.tagline;

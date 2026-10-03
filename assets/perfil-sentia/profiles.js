@@ -17,7 +17,12 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Práctico e interactivo',
     conecta: ['Casos clínicos', 'Role-play', 'Simuladores', 'Herramientas de intervención'],
     recommendations: ['Role-play terapéutico', 'Casos clínicos interactivos', 'Simuladores de intervención', 'Guías de consulta aplicables'],
-    characterImage: null
+    // PRUEBA: primer avatar real para este perfil (PNG con transparencia real,
+    // generado y recortado con Canva) + video (clic para reproducir, quieto por
+    // defecto). El fondo del video se quita en vivo con chroma key, ver
+    // avatar-player.js — bgColor es el color plano detectado en ese clip.
+    characterImage: 'assets/perfil-sentia/avatar-pa-prueba.png',
+    characterVideo: { src: 'assets/perfil-sentia/avatar-pa-prueba.mp4', bgColor: [244, 238, 232] }
   },
   AC: {
     code: 'AC',

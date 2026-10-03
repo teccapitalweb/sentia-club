@@ -108,6 +108,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .res-head{text-align:center;margin-bottom:22px}
 .res-head .eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
 .res-badge{width:62px;height:62px;border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;color:#fff;background:linear-gradient(135deg,var(--primary),var(--accent))}
+.res-avatar{display:block;margin:0 auto 10px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.18));transition:transform .15s ease}
+.res-avatar:hover{transform:translateY(-2px)}
 .res-head h2{font-size:clamp(1.4rem,3.4vw,1.8rem);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
 .res-head p.tagline{color:var(--primary-soft);font-weight:600;font-size:.96rem;max-width:40ch;margin:0 auto}
 .res-desc{color:var(--muted);font-size:.9rem;line-height:1.6;text-align:center;max-width:48ch;margin:16px auto 22px}
@@ -230,6 +232,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="res-head">
           <span class="eyebrow">Tu perfil Sentia</span>
           <div class="res-badge" id="res-code">PA</div>
+          <canvas class="res-avatar" id="res-avatar" style="display:none"></canvas>
           <h2 id="res-name">Psicólogo Aplicado</h2>
           <p class="tagline" id="res-tagline"></p>
         </div>
@@ -322,6 +325,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   });
 })();
 </script>
+<script src="assets/perfil-sentia/avatar-player.js"></script>
 <script src="assets/perfil-sentia/icons.js"></script>
 <script src="assets/perfil-sentia/profiles.js"></script>
 <script src="assets/perfil-sentia/questions.js"></script>
