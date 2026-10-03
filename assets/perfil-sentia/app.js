@@ -227,17 +227,21 @@
     const secundario = PROFILES[resultado.secondary];
 
     const badgeEl = document.getElementById('res-code');
-    const avatarEl = document.getElementById('res-avatar');
-    if (principal.characterVideo && window.SentiaAvatarPlayer) {
+    const avatarWrap = document.getElementById('res-avatar-wrap');
+    if (principal.characterVideo && principal.characterImage && window.SentiaAvatarPlayer) {
       badgeEl.style.display = 'none';
-      avatarEl.style.display = '';
-      if (avatarEl.dataset.mounted !== principal.code) {
-        avatarEl.dataset.mounted = principal.code;
-        window.SentiaAvatarPlayer.mount(avatarEl, principal.characterVideo);
+      avatarWrap.style.display = '';
+      if (avatarWrap.dataset.mounted !== principal.code) {
+        avatarWrap.dataset.mounted = principal.code;
+        window.SentiaAvatarPlayer.mount(avatarWrap, {
+          imageSrc: principal.characterImage,
+          videoSrc: principal.characterVideo.src,
+          bgColor: principal.characterVideo.bgColor
+        });
       }
     } else {
       badgeEl.style.display = '';
-      avatarEl.style.display = 'none';
+      avatarWrap.style.display = 'none';
     }
     document.getElementById('res-code').textContent = principal.code;
     document.getElementById('res-name').textContent = principal.name;
