@@ -251,10 +251,11 @@
     const badgeEl = document.getElementById('res-code');
     const avatarWrap = document.getElementById('res-avatar-wrap');
     const personaje = window.sentiaGetCharacter ? window.sentiaGetCharacter(principal.code, state.genero) : null;
+    const mountKey = principal.code + ':' + state.genero;
     if (personaje && personaje.video && personaje.image && window.SentiaAvatarPlayer) {
       badgeEl.style.display = 'none';
       avatarWrap.style.display = '';
-      const mountKey = principal.code + ':' + state.genero;
+      avatarWrap.style.cursor = '';
       if (avatarWrap.dataset.mounted !== mountKey) {
         avatarWrap.dataset.mounted = mountKey;
         window.SentiaAvatarPlayer.mount(avatarWrap, {
@@ -262,6 +263,20 @@
           videoSrc: personaje.video.src,
           bgColor: personaje.video.bgColor
         });
+      }
+    } else if (personaje && personaje.image) {
+      // Sin video para este perfil/sexo: se muestra el PNG fijo, sin el
+      // gesto de hover (no hay nada que reproducir).
+      badgeEl.style.display = 'none';
+      avatarWrap.style.display = '';
+      avatarWrap.style.cursor = 'default';
+      if (avatarWrap.dataset.mounted !== mountKey) {
+        avatarWrap.dataset.mounted = mountKey;
+        const imgEl = avatarWrap.querySelector('.res-avatar-img');
+        const canvasEl = avatarWrap.querySelector('.res-avatar-canvas');
+        imgEl.src = personaje.image;
+        imgEl.style.display = '';
+        canvasEl.style.display = 'none';
       }
     } else {
       badgeEl.style.display = '';

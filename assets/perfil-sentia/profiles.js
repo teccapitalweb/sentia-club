@@ -25,7 +25,7 @@ window.SENTIA_PROFILES = {
     recommendations: ['Role-play terapéutico', 'Casos clínicos interactivos', 'Simuladores de intervención', 'Guías de consulta aplicables'],
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/PA-f.png', video: { src: 'assets/perfil-sentia/avatars/PA-f.mp4', bgColor: [244, 238, 232] } },
-      m: null
+      m: { image: 'assets/perfil-sentia/avatars/PA-m.png' }
     }
   },
   AC: {
@@ -37,7 +37,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Analítico y reflexivo',
     conecta: ['Diagnóstico diferencial', 'Análisis de caso', 'Evaluación psicológica', 'Criterio clínico'],
     recommendations: ['Diagnóstico diferencial aplicado', 'Casos de evaluación paso a paso', 'Análisis de instrumentos psicométricos', 'Razonamiento clínico avanzado'],
-    characters: { f: null, m: null }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/AC-f.png' },
+      m: { image: 'assets/perfil-sentia/avatars/AC-m.png' }
+    }
   },
   DE: {
     code: 'DE',
@@ -48,7 +51,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estratégico y aplicable',
     conecta: ['Manejo de aula', 'Inclusión educativa', 'Estrategias de enseñanza', 'Acompañamiento socioemocional'],
     recommendations: ['Estrategias de manejo de aula', 'Inclusión educativa en la práctica', 'Herramientas para dificultades de aprendizaje', 'Salud mental en el entorno escolar'],
-    characters: { f: null, m: null }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/DE-f.png' },
+      m: { image: 'assets/perfil-sentia/avatars/DE-m.png' }
+    }
   },
   EP: {
     code: 'EP',
@@ -59,7 +65,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Curioso y exploratorio',
     conecta: ['Nuevas especialidades', 'Temas emergentes', 'Perspectivas interdisciplinarias', 'Introducción a áreas nuevas'],
     recommendations: ['Panorama de especialidades en psicología', 'Introducción a nuevas áreas de práctica', 'Tendencias emergentes en salud mental', 'Rutas de especialización'],
-    characters: { f: null, m: null }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/EP-f.png' },
+      m: { image: 'assets/perfil-sentia/avatars/EP-m.png' }
+    }
   },
   IH: {
     code: 'IH',
@@ -70,7 +79,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Reflexivo y emocional',
     conecta: ['Manejo emocional', 'Autoconocimiento', 'Comunicación consciente', 'Bienestar integral'],
     recommendations: ['Manejo de ansiedad y estrés', 'Comunicación consciente', 'Autoconocimiento aplicado', 'Hábitos y motivación'],
-    characters: { f: null, m: null }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/IH-f.png' },
+      m: { image: 'assets/perfil-sentia/avatars/IH-m.png' }
+    }
   },
   AP: {
     code: 'AP',
@@ -81,7 +93,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estructurado y orientado a resultados',
     conecta: ['Certificaciones', 'Actualización de conocimientos', 'Clases con especialistas', 'Crecimiento profesional'],
     recommendations: ['Certificaciones con folio verificable', 'Clases en vivo con especialistas', 'Actualización en temas vigentes', 'Rutas de crecimiento profesional'],
-    characters: { f: null, m: null }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/AP-f.png' },
+      m: { image: 'assets/perfil-sentia/avatars/AP-m.png' }
+    }
   }
 };
 
