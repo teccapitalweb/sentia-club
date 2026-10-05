@@ -3275,28 +3275,49 @@ body.has-fomo .main{padding-top:18px}
 
 /* ─── Plan selector inline (dentro de Suscripción) ─── */
 .plan-picker{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:540px;margin:0 auto 18px;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:680px;margin:0 auto 18px;align-items:stretch;
 }
-@media (max-width:600px){.plan-picker{grid-template-columns:1fr}}
+@media (max-width:680px){.plan-picker{grid-template-columns:1fr;max-width:420px}}
 .plan-picker__card{
-  background:var(--surface-2);border:1px solid var(--border-2);
-  border-radius:13px;padding:18px 18px;cursor:pointer;
-  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  position:relative;background:var(--surface-2);border:1px solid var(--border-2);
+  border-radius:20px;padding:26px 24px 22px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:flex-start;gap:0;
   transition:all .15s ease;text-align:left;
 }
-.plan-picker__card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--primary) 35%,var(--border-2))}
-.plan-picker__card.is-active{
-  border-color:var(--primary);
-  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 6%,var(--surface-2)),var(--surface-2));
-  box-shadow:0 0 0 1px var(--primary);
+.plan-picker__card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--primary) 35%,var(--border-2))}
+.plan-picker__card.is-active{border-color:var(--primary);box-shadow:0 0 0 1.5px var(--primary)}
+.plan-picker__card--ano.is-active{box-shadow:0 0 0 1.5px var(--primary),0 14px 34px -14px rgba(27,93,240,.45)}
+.plan-picker__badge{
+  position:absolute;top:0;right:22px;transform:translateY(-50%);
+  background:linear-gradient(110deg,var(--primary),var(--primary-deep));color:#fff;
+  font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  border-radius:999px;padding:5px 12px;box-shadow:0 4px 12px rgba(27,93,240,.4);
 }
-.plan-picker__name{font-size:14px;font-weight:700;letter-spacing:-.2px}
-.plan-picker__sub{font-size:11px;color:var(--text-3);margin-top:3px}
+.plan-picker__head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.plan-picker__ic{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.plan-picker__ic svg{width:19px;height:19px}
+.plan-picker__ic--mes{background:color-mix(in srgb,var(--success) 15%,transparent);color:var(--success)}
+.plan-picker__ic--ano{background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary)}
+.plan-picker__name{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.2px}
+.plan-picker__sub{font-size:11.5px;color:var(--text-2);margin-top:2px}
+.plan-picker__price-block{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
 .plan-picker__price{
-  font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;
-  color:var(--primary);font-feature-settings:"tnum" 1;letter-spacing:-.5px;line-height:1;
+  font-family:'Montserrat',sans-serif;font-size:30px;font-weight:800;
+  color:var(--text);font-feature-settings:"tnum" 1;letter-spacing:-.6px;line-height:1;
 }
-.plan-picker__price-sub{font-size:10.5px;color:var(--text-3);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;font-family:'Montserrat',monospace;font-weight:600}
+.plan-picker__price-sub{font-size:11px;color:var(--text-2);font-weight:600}
+.plan-picker__note{font-size:11.5px;color:var(--text-2);margin-bottom:18px}
+.plan-picker__card--ano .plan-picker__note{color:color-mix(in srgb,var(--success) 80%,black);font-weight:700}
+.plan-picker__features{list-style:none;display:flex;flex-direction:column;gap:9px;margin:0 0 20px;width:100%}
+.plan-picker__features li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-2);line-height:1.35}
+.plan-picker__features li svg{width:15px;height:15px;flex-shrink:0;color:var(--success)}
+.plan-picker__cta{
+  margin-top:auto;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 16px;border-radius:999px;font-size:13px;font-weight:700;
+  background:transparent;border:1px solid var(--border-strong);color:var(--text);
+}
+.plan-picker__cta svg{width:15px;height:15px}
+.plan-picker__cta--solid{background:linear-gradient(110deg,var(--primary),var(--primary-deep));border-color:transparent;color:#fff}
 
 /* ─── Stripe Embedded Checkout container ─── */
 #sub-checkout-mount{
@@ -12122,25 +12143,46 @@ const Sections = (function(){
           </h3>
           <div class="plan-picker" id="plan-picker">
             <!-- MODIFICADO: precios en vivo desde config/club · coinciden con el cobro real de Stripe -->
-            <button class="plan-picker__card ${intentPlan==='mensual'?'is-active':''}" data-plan="mensual" type="button">
-              <div>
-                <div class="plan-picker__name">VIP Mensual</div>
-                <div class="plan-picker__sub">Cancela cuando quieras</div>
+            <button class="plan-picker__card plan-picker__card--mes ${intentPlan==='mensual'?'is-active':''}" data-plan="mensual" type="button">
+              <div class="plan-picker__head">
+                <div class="plan-picker__ic plan-picker__ic--mes"><svg class="ic"><use href="#i-bolt"/></svg></div>
+                <div>
+                  <div class="plan-picker__name">VIP Mensual</div>
+                  <div class="plan-picker__sub">Flexible, sin compromiso</div>
+                </div>
               </div>
-              <div style="text-align:right">
-                <div class="plan-picker__price" data-precio-picker-mes>${window.__preciosClub.cargado ? '$'+window.__preciosClub.mes.toLocaleString('es-MX') : '$—'}</div>
-                <div class="plan-picker__price-sub">MXN/mes</div>
+              <div class="plan-picker__price-block">
+                <span class="plan-picker__price" data-precio-picker-mes>${window.__preciosClub.cargado ? '$'+window.__preciosClub.mes.toLocaleString('es-MX') : '$—'}</span>
+                <span class="plan-picker__price-sub">MXN /mes</span>
               </div>
+              <div class="plan-picker__note">Cancela cuando quieras</div>
+              <ul class="plan-picker__features">
+                <li><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo con especialistas y grabaciones</li>
+                <li><svg class="ic"><use href="#i-certificate"/></svg>Certificados con folio y QR verificable</li>
+                <li><svg class="ic"><use href="#i-folder"/></svg>Herramientas pro y materiales descargables</li>
+              </ul>
+              <span class="plan-picker__cta">Empezar ahora<svg class="ic"><use href="#i-arrow-right"/></svg></span>
             </button>
-            <button class="plan-picker__card ${intentPlan==='anual'?'is-active':''}" data-plan="anual" type="button">
-              <div>
-                <div class="plan-picker__name">VIP Anual</div>
-                <div class="plan-picker__sub" data-precio-picker-ahorro>${window.__preciosClub.cargado ? 'Ahorras $'+window.__preciosClub.ahorro.toLocaleString('es-MX') : 'Mejor precio'}</div>
+            <button class="plan-picker__card plan-picker__card--ano ${intentPlan==='anual'?'is-active':''}" data-plan="anual" type="button">
+              <span class="plan-picker__badge">Más popular</span>
+              <div class="plan-picker__head">
+                <div class="plan-picker__ic plan-picker__ic--ano"><svg class="ic"><use href="#i-crown"/></svg></div>
+                <div>
+                  <div class="plan-picker__name">VIP Anual</div>
+                  <div class="plan-picker__sub">El favorito de nuestros miembros</div>
+                </div>
               </div>
-              <div style="text-align:right">
-                <div class="plan-picker__price" data-precio-picker-ano>${window.__preciosClub.cargado ? '$'+window.__preciosClub.ano.toLocaleString('es-MX') : '$—'}</div>
-                <div class="plan-picker__price-sub">MXN/año</div>
+              <div class="plan-picker__price-block">
+                <span class="plan-picker__price" data-precio-picker-equivmes>${window.__preciosClub.cargado ? '$'+window.__preciosClub.equivMes.toLocaleString('es-MX') : '$—'}</span>
+                <span class="plan-picker__price-sub">MXN /mes</span>
               </div>
+              <div class="plan-picker__note" data-precio-picker-ahorro>${window.__preciosClub.cargado ? '$'+window.__preciosClub.ano.toLocaleString('es-MX')+' MXN al año · ahorras $'+window.__preciosClub.ahorro.toLocaleString('es-MX') : 'Mejor precio'}</div>
+              <ul class="plan-picker__features">
+                <li><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo con especialistas y grabaciones</li>
+                <li><svg class="ic"><use href="#i-certificate"/></svg>Certificados con folio y QR verificable</li>
+                <li><svg class="ic"><use href="#i-folder"/></svg>Herramientas pro y materiales descargables</li>
+              </ul>
+              <span class="plan-picker__cta plan-picker__cta--solid">Empezar ahora<svg class="ic"><use href="#i-arrow-right"/></svg></span>
             </button>
           </div>
 
@@ -12172,8 +12214,8 @@ const Sections = (function(){
       if (!p.cargado) return;
       const fmt = n => '$' + Number(n).toLocaleString('es-MX');
       document.querySelectorAll('[data-precio-picker-mes]').forEach(el => el.textContent = fmt(p.mes));
-      document.querySelectorAll('[data-precio-picker-ano]').forEach(el => el.textContent = fmt(p.ano));
-      document.querySelectorAll('[data-precio-picker-ahorro]').forEach(el => el.textContent = 'Ahorras ' + fmt(p.ahorro));
+      document.querySelectorAll('[data-precio-picker-equivmes]').forEach(el => el.textContent = fmt(p.equivMes));
+      document.querySelectorAll('[data-precio-picker-ahorro]').forEach(el => el.textContent = fmt(p.ano) + ' MXN al año · ahorras ' + fmt(p.ahorro));
     });
 
     // Destruir cualquier checkout previo que haya quedado vivo de un render anterior
