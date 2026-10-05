@@ -319,15 +319,29 @@
     document.getElementById('res-conecta').innerHTML = principal.conecta.map(t => '<span class="chip">' + t + '</span>').join('');
 
     // Tu siguiente paso recomendado: el único curso real (de los 3 que existen
-    // hoy) que mejor conecta con este perfil. Crear cuenta es gratis; cuál
-    // clase queda abierta sin membresía lo decide el panel, no esta pantalla.
+    // hoy) que mejor conecta con este perfil. Solo "custodia" tiene sus
+    // primeras 2 clases abiertas sin membresía — los demás son VIP, así que
+    // el badge y el CTA dicen la verdad en cada caso (nunca "gratis" en un
+    // curso que no lo es).
     const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
     const siguiente = document.getElementById('res-siguiente');
+    const siguienteCta = document.getElementById('res-siguiente-cta');
     if (curso) {
-      document.getElementById('res-siguiente-area').textContent = curso.area;
+      document.getElementById('res-siguiente-area').textContent = curso.gratis ? '2 clases gratis' : 'Acceso VIP';
+      siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
       document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
       document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
-      document.getElementById('res-siguiente-cta').href = 'vip-auth.html';
+      if (curso.gratis) {
+        siguienteCta.textContent = '';
+        siguienteCta.append('Ver clases gratis ');
+        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+        siguienteCta.href = 'vip-auth.html';
+      } else {
+        siguienteCta.textContent = '';
+        siguienteCta.append('Conocer este curso ');
+        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+        siguienteCta.href = curso.url;
+      }
       siguiente.style.display = '';
     } else {
       siguiente.style.display = 'none';

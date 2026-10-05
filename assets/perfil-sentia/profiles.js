@@ -153,21 +153,24 @@ window.SENTIA_CURSOS = {
     area: 'Psicología forense',
     descripcion: 'Entrevista, integración de fuentes y redacción del informe pericial.',
     precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-custodia'
+    url: 'https://sentiamx.com/index.html#curso-custodia',
+    gratis: true // único de los 3 con las primeras 2 clases abiertas sin membresía
   },
   auxilios: {
     titulo: 'Primeros auxilios psicológicos',
     area: 'Intervención psicológica',
     descripcion: 'Contención emocional, detección de riesgo y canalización oportuna.',
     precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-auxilios'
+    url: 'https://sentiamx.com/index.html#curso-auxilios',
+    gratis: false
   },
   laboral: {
     titulo: 'Salud psicológica laboral',
     area: 'Psicología laboral',
     descripcion: 'Riesgos psicosociales, liderazgo y rutas de apoyo en la organización.',
     precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-laboral'
+    url: 'https://sentiamx.com/index.html#curso-laboral',
+    gratis: false
   }
 };
 

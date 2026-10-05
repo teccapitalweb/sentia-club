@@ -144,8 +144,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .res-siguiente h3{margin:0 0 7px;font-size:1.02rem;font-weight:700;color:var(--text)}
 .res-siguiente p{margin:0 0 16px;font-size:.84rem;line-height:1.55;color:var(--muted)}
 .res-siguiente .btn-primary{padding:11px 22px;font-size:.86rem}
+/* Curso de pago (sin clases abiertas): mismo bloque, acento azul en vez de
+   verde, para no insinuar "gratis" donde no lo es. */
+.res-siguiente--vip{border-color:color-mix(in srgb,var(--primary) 30%,var(--line))}
+.res-siguiente--vip .res-siguiente__tag{color:var(--primary-soft);background:color-mix(in srgb,var(--primary) 10%,transparent);border-color:color-mix(in srgb,var(--primary) 30%,transparent)}
 
-.res-explorar-sub{margin:0 0 10px;font-size:.78rem;color:var(--faint);line-height:1.5}
+.res-explorar-sub{margin:0 0 10px;font-size:.82rem;color:var(--muted);line-height:1.5}
 
 .res-secondary{margin:22px 0;font-size:.86rem;color:var(--muted);text-align:center}
 .res-secondary b{color:var(--text)}
