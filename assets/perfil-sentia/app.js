@@ -29,6 +29,7 @@
     queue: [],        // preguntas 2..7 (contextual + 5 generales), una vez conocido perfilBase
     step: 0,          // 0 = pregunta base; 1..6 = índice dentro de queue
     total: 7,
+    genero: null,     // 'f' | 'm' | null (opcional) — se pregunta al terminar las preguntas, antes del resultado
     resultado: null,  // se llena al terminar el test
     history: []       // snapshots para "Pregunta anterior"
   };
@@ -70,6 +71,7 @@
     screens: {
       welcome: document.getElementById('screen-welcome'),
       question: document.getElementById('screen-question'),
+      genero: document.getElementById('screen-genero'),
       analysis: document.getElementById('screen-analysis'),
       result: document.getElementById('screen-result')
     }
@@ -90,9 +92,11 @@
     state.objetivos = [];
     state.queue = [];
     state.step = 0;
+    state.genero = null;
     state.resultado = null;
     state.history = [];
     resetLeadBox();
+    resetGeneroBox();
     showScreen('welcome');
   }
   window.__sentiaResetTest = resetTest;
@@ -154,7 +158,7 @@
         if (state.step - 1 < state.queue.length) {
           renderQueueStep();
         } else {
-          runAnalysis();
+          showScreen('genero');
         }
       }
     });
@@ -190,6 +194,24 @@
     });
     gridEl.classList.remove('is-locked');
   }
+
+  // ── Pantalla de género del avatar (opcional, antes del resultado) ──
+  function resetGeneroBox() {
+    document.querySelectorAll('.genero-opt').forEach(opt => opt.classList.remove('is-selected'));
+    document.querySelectorAll('#genero-grid input[type="radio"]').forEach(r => { r.checked = false; });
+  }
+  document.querySelectorAll('.genero-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.genero-opt').forEach(o => o.classList.remove('is-selected'));
+      opt.classList.add('is-selected');
+      opt.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+  document.getElementById('btn-ver-resultados').addEventListener('click', () => {
+    const checked = document.querySelector('#genero-grid input[type="radio"]:checked');
+    state.genero = checked ? checked.value : null;
+    runAnalysis();
+  });
 
   // ── Pantalla de análisis (mensajes animados antes del resultado) ──
   function runAnalysis() {
@@ -228,15 +250,17 @@
 
     const badgeEl = document.getElementById('res-code');
     const avatarWrap = document.getElementById('res-avatar-wrap');
-    if (principal.characterVideo && principal.characterImage && window.SentiaAvatarPlayer) {
+    const personaje = window.sentiaGetCharacter ? window.sentiaGetCharacter(principal.code, state.genero) : null;
+    if (personaje && personaje.video && personaje.image && window.SentiaAvatarPlayer) {
       badgeEl.style.display = 'none';
       avatarWrap.style.display = '';
-      if (avatarWrap.dataset.mounted !== principal.code) {
-        avatarWrap.dataset.mounted = principal.code;
+      const mountKey = principal.code + ':' + state.genero;
+      if (avatarWrap.dataset.mounted !== mountKey) {
+        avatarWrap.dataset.mounted = mountKey;
         window.SentiaAvatarPlayer.mount(avatarWrap, {
-          imageSrc: principal.characterImage,
-          videoSrc: principal.characterVideo.src,
-          bgColor: principal.characterVideo.bgColor
+          imageSrc: personaje.image,
+          videoSrc: personaje.video.src,
+          bgColor: personaje.video.bgColor
         });
       }
     } else {
@@ -362,6 +386,7 @@
       perfil_base: state.perfilBase,
       perfil_principal: resultado.principal,
       perfil_secundario: resultado.secondary,
+      genero: state.genero,
       todos_los_puntajes: resultado.scores,
       todos_los_porcentajes: resultado.percentages,
       enfoque_dominante: principal.dominantFocus,

@@ -96,6 +96,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .opt-card.is-selected .opt-card__ic{background:color-mix(in srgb,var(--accent-soft) 22%,transparent);color:var(--accent-soft)}
 @media(max-width:560px){.opt-grid{grid-template-columns:1fr}}
 
+/* ── Pantalla: género del avatar ── */
+.genero-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto;max-width:360px}
+.genero-opt{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;color:var(--text);font-family:var(--font);font-size:.95rem;font-weight:700;transition:.18s}
+.genero-opt:hover{border-color:var(--primary-soft);background:var(--surface-2)}
+.genero-opt input{width:17px;height:17px;accent-color:var(--accent-soft);cursor:pointer}
+.genero-opt.is-selected{border-color:var(--accent-soft);background:color-mix(in srgb,var(--accent-soft) 14%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-soft) 25%,transparent)}
+@media(max-width:480px){.genero-grid{grid-template-columns:1fr}}
+
 /* ── Pantalla: análisis ── */
 .card-analysis{text-align:center;padding:70px 20px}
 .analysis-ring{width:74px;height:74px;border-radius:50%;border:3px solid var(--surface-2);border-top-color:var(--primary-soft);margin:0 auto 26px;animation:spin 1s linear infinite}
@@ -217,6 +225,29 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       <div id="context-msg"></div>
       <h2 class="q-text" id="q-text"></h2>
       <div class="opt-grid" id="q-options"></div>
+    </section>
+
+    <!-- 2.5 GÉNERO DEL AVATAR (opcional, antes de ver el resultado) -->
+    <section class="screen" id="screen-genero">
+      <div class="card-welcome">
+        <span class="kicker"><span class="dot"></span>Último paso</span>
+        <h1 style="font-size:1.5rem">Tu género</h1>
+        <p class="sub" style="margin-bottom:22px">Opcional. Esto determinará tu avatar en la pantalla de resultados.</p>
+        <div class="genero-grid" id="genero-grid">
+          <label class="genero-opt" data-genero="m">
+            <input type="radio" name="genero" value="m">
+            <span>Hombre</span>
+          </label>
+          <label class="genero-opt" data-genero="f">
+            <input type="radio" name="genero" value="f">
+            <span>Mujer</span>
+          </label>
+        </div>
+        <button class="btn-primary" id="btn-ver-resultados" style="margin-top:24px">
+          Ver resultados
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
     </section>
 
     <!-- 3. ANÁLISIS -->

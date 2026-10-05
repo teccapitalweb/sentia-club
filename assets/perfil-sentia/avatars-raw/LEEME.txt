@@ -1,0 +1,27 @@
+Aquí se sueltan los videos originales de cada avatar (los que generas tú, ej. con Gemini).
+No hace falta subirlos todos de una vez — se pueden ir agregando poco a poco.
+
+Nombre exacto de archivo esperado: CODIGO-sexo.mp4
+
+Códigos de perfil:
+  PA = Psicólogo Aplicado
+  AC = Analítico Clínico
+  DE = Docente Estratégico
+  EP = Explorador Profesional
+  IH = Impulsor Humano
+  AP = Actualización Profesional
+
+Sexo:
+  f = femenino
+  m = masculino
+
+Ejemplos:
+  PA-f.mp4   PA-m.mp4
+  AC-f.mp4   AC-m.mp4
+  DE-f.mp4   DE-m.mp4
+  EP-f.mp4   EP-m.mp4
+  IH-f.mp4   IH-m.mp4
+  AP-f.mp4   AP-m.mp4
+
+Una vez aquí, se procesan (se genera el PNG limpio con Canva y se optimizan)
+y el resultado final queda en la carpeta ../avatars/ — esa es la que usa el sitio.

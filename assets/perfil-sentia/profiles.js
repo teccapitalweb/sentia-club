@@ -3,9 +3,15 @@
    perfil Sentia". Separado de la interfaz a propósito: para cambiar
    texto, recomendaciones o agregar personajes después, solo se toca
    este archivo.
-   characterImage queda en null a propósito — se preparó el campo
-   para una versión futura con ilustraciones por perfil, pero en
-   esta versión no se genera ni se usa ninguna imagen.
+
+   characters: { f: {image, video}, m: {image, video} } — avatar por
+   sexo (el usuario elige antes de ver el resultado). Si un perfil
+   todavía no tiene el avatar de un sexo listo, queda en null y la
+   interfaz usa el otro sexo disponible, o el círculo con las letras
+   si no hay ninguno (ver _personaje() más abajo y app.js).
+   Los archivos finales viven en assets/perfil-sentia/avatars/ —
+   los originales que se van agregando se sueltan primero en
+   assets/perfil-sentia/avatars-raw/ (ver LEEME.txt ahí).
    ═══════════════════════════════════════════════════════════════ */
 window.SENTIA_PROFILES = {
   PA: {
@@ -17,12 +23,10 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Práctico e interactivo',
     conecta: ['Casos clínicos', 'Role-play', 'Simuladores', 'Herramientas de intervención'],
     recommendations: ['Role-play terapéutico', 'Casos clínicos interactivos', 'Simuladores de intervención', 'Guías de consulta aplicables'],
-    // PRUEBA: primer avatar real para este perfil (PNG con transparencia real,
-    // generado y recortado con Canva) + video (clic para reproducir, quieto por
-    // defecto). El fondo del video se quita en vivo con chroma key, ver
-    // avatar-player.js — bgColor es el color plano detectado en ese clip.
-    characterImage: 'assets/perfil-sentia/avatar-pa-prueba.png',
-    characterVideo: { src: 'assets/perfil-sentia/avatar-pa-prueba.mp4', bgColor: [244, 238, 232] }
+    characters: {
+      f: { image: 'assets/perfil-sentia/avatars/PA-f.png', video: { src: 'assets/perfil-sentia/avatars/PA-f.mp4', bgColor: [244, 238, 232] } },
+      m: null
+    }
   },
   AC: {
     code: 'AC',
@@ -33,7 +37,7 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Analítico y reflexivo',
     conecta: ['Diagnóstico diferencial', 'Análisis de caso', 'Evaluación psicológica', 'Criterio clínico'],
     recommendations: ['Diagnóstico diferencial aplicado', 'Casos de evaluación paso a paso', 'Análisis de instrumentos psicométricos', 'Razonamiento clínico avanzado'],
-    characterImage: null
+    characters: { f: null, m: null }
   },
   DE: {
     code: 'DE',
@@ -44,7 +48,7 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estratégico y aplicable',
     conecta: ['Manejo de aula', 'Inclusión educativa', 'Estrategias de enseñanza', 'Acompañamiento socioemocional'],
     recommendations: ['Estrategias de manejo de aula', 'Inclusión educativa en la práctica', 'Herramientas para dificultades de aprendizaje', 'Salud mental en el entorno escolar'],
-    characterImage: null
+    characters: { f: null, m: null }
   },
   EP: {
     code: 'EP',
@@ -55,7 +59,7 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Curioso y exploratorio',
     conecta: ['Nuevas especialidades', 'Temas emergentes', 'Perspectivas interdisciplinarias', 'Introducción a áreas nuevas'],
     recommendations: ['Panorama de especialidades en psicología', 'Introducción a nuevas áreas de práctica', 'Tendencias emergentes en salud mental', 'Rutas de especialización'],
-    characterImage: null
+    characters: { f: null, m: null }
   },
   IH: {
     code: 'IH',
@@ -66,7 +70,7 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Reflexivo y emocional',
     conecta: ['Manejo emocional', 'Autoconocimiento', 'Comunicación consciente', 'Bienestar integral'],
     recommendations: ['Manejo de ansiedad y estrés', 'Comunicación consciente', 'Autoconocimiento aplicado', 'Hábitos y motivación'],
-    characterImage: null
+    characters: { f: null, m: null }
   },
   AP: {
     code: 'AP',
@@ -77,8 +81,17 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estructurado y orientado a resultados',
     conecta: ['Certificaciones', 'Actualización de conocimientos', 'Clases con especialistas', 'Crecimiento profesional'],
     recommendations: ['Certificaciones con folio verificable', 'Clases en vivo con especialistas', 'Actualización en temas vigentes', 'Rutas de crecimiento profesional'],
-    characterImage: null
+    characters: { f: null, m: null }
   }
+};
+
+/* Devuelve el avatar a mostrar para un perfil + sexo elegido, con respaldo:
+   si el sexo preferido no está listo todavía, usa el otro si existe;
+   si ninguno existe, regresa null (la interfaz cae al círculo con letras). */
+window.sentiaGetCharacter = function (profileCode, genero) {
+  const p = window.SENTIA_PROFILES[profileCode];
+  if (!p || !p.characters) return null;
+  return p.characters[genero] || p.characters[genero === 'f' ? 'm' : 'f'] || null;
 };
 
 /* Frase combinada cuando el 1º y 2º lugar quedan empatados (sección 2 del spec).
