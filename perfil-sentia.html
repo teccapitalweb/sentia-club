@@ -137,10 +137,15 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{font-size:.76rem;font-weight:600;color:var(--primary-soft);background:color-mix(in srgb,var(--primary) 12%,transparent);border:1px solid color-mix(in srgb,var(--primary) 25%,transparent);border-radius:999px;padding:6px 12px}
+.chips--soft .chip{color:var(--muted);background:transparent;border-color:var(--line)}
 
-#res-recos{list-style:none;display:flex;flex-direction:column;gap:9px}
-#res-recos li{display:flex;gap:9px;align-items:flex-start;font-size:.87rem;color:var(--text);line-height:1.4}
-#res-recos li::before{content:"";flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-soft);margin-top:6px}
+.res-siguiente{background:var(--surface-2);border:1px solid color-mix(in srgb,var(--accent-soft) 30%,var(--line));border-radius:16px;padding:20px 22px;margin-bottom:6px}
+.res-siguiente__tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-soft);background:color-mix(in srgb,var(--accent-soft) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent-soft) 30%,transparent);border-radius:999px;padding:4px 10px;margin-bottom:10px}
+.res-siguiente h3{margin:0 0 7px;font-size:1.02rem;font-weight:700;color:var(--text)}
+.res-siguiente p{margin:0 0 16px;font-size:.84rem;line-height:1.55;color:var(--muted)}
+.res-siguiente .btn-primary{padding:11px 22px;font-size:.86rem}
+
+.res-explorar-sub{margin:0 0 10px;font-size:.78rem;color:var(--faint);line-height:1.5}
 
 .res-secondary{margin:22px 0;font-size:.86rem;color:var(--muted);text-align:center}
 .res-secondary b{color:var(--text)}
@@ -287,8 +292,20 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="res-section-title">Lo que más conecta contigo</div>
         <div class="chips" id="res-conecta"></div>
 
-        <div class="res-section-title">Te recomendamos explorar</div>
-        <ul id="res-recos"></ul>
+        <div class="res-section-title">Tu siguiente paso recomendado</div>
+        <div class="res-siguiente" id="res-siguiente">
+          <span class="res-siguiente__tag" id="res-siguiente-area"></span>
+          <h3 id="res-siguiente-titulo"></h3>
+          <p id="res-siguiente-desc"></p>
+          <a class="btn-primary" id="res-siguiente-cta" href="vip-auth.html">
+            Crear mi cuenta gratuita
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+
+        <div class="res-section-title" id="res-explorar-title" style="display:none">También podrías explorar</div>
+        <p class="res-explorar-sub" id="res-explorar-sub" style="display:none">Afinidades complementarias a tu perfil principal — no son un área débil, son una siguiente capa.</p>
+        <div class="chips chips--soft" id="res-explorar" style="display:none"></div>
 
         <!-- Captación de lead (sección 3-4 del spec): discreta, nunca obligatoria -->
         <div class="lead-box" id="lead-box">

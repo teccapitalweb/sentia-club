@@ -23,6 +23,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Práctico e interactivo',
     conecta: ['Casos clínicos', 'Role-play', 'Simuladores', 'Herramientas de intervención'],
     recommendations: ['Role-play terapéutico', 'Casos clínicos interactivos', 'Simuladores de intervención', 'Guías de consulta aplicables'],
+    growthLabel: 'Intervención y casos prácticos',
+    cursoRecomendado: 'auxilios',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/PA-f.png', video: { src: 'assets/perfil-sentia/avatars/PA-f.mp4', bgColor: [244, 238, 232] } },
       m: { image: 'assets/perfil-sentia/avatars/PA-m.png' }
@@ -37,6 +39,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Analítico y reflexivo',
     conecta: ['Diagnóstico diferencial', 'Análisis de caso', 'Evaluación psicológica', 'Criterio clínico'],
     recommendations: ['Diagnóstico diferencial aplicado', 'Casos de evaluación paso a paso', 'Análisis de instrumentos psicométricos', 'Razonamiento clínico avanzado'],
+    growthLabel: 'Evaluación y análisis de casos',
+    cursoRecomendado: 'custodia',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/AC-f.png' },
       m: { image: 'assets/perfil-sentia/avatars/AC-m.png' }
@@ -51,6 +55,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estratégico y aplicable',
     conecta: ['Manejo de aula', 'Inclusión educativa', 'Estrategias de enseñanza', 'Acompañamiento socioemocional'],
     recommendations: ['Estrategias de manejo de aula', 'Inclusión educativa en la práctica', 'Herramientas para dificultades de aprendizaje', 'Salud mental en el entorno escolar'],
+    growthLabel: 'Enseñanza y manejo de grupos',
+    cursoRecomendado: 'auxilios',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/DE-f.png' },
       m: { image: 'assets/perfil-sentia/avatars/DE-m.png' }
@@ -65,6 +71,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Curioso y exploratorio',
     conecta: ['Nuevas especialidades', 'Temas emergentes', 'Perspectivas interdisciplinarias', 'Introducción a áreas nuevas'],
     recommendations: ['Panorama de especialidades en psicología', 'Introducción a nuevas áreas de práctica', 'Tendencias emergentes en salud mental', 'Rutas de especialización'],
+    growthLabel: 'Explorar nuevas especialidades',
+    cursoRecomendado: 'custodia',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/EP-f.png' },
       m: { image: 'assets/perfil-sentia/avatars/EP-m.png' }
@@ -79,6 +87,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Reflexivo y emocional',
     conecta: ['Manejo emocional', 'Autoconocimiento', 'Comunicación consciente', 'Bienestar integral'],
     recommendations: ['Manejo de ansiedad y estrés', 'Comunicación consciente', 'Autoconocimiento aplicado', 'Hábitos y motivación'],
+    growthLabel: 'Bienestar y comunicación socioemocional',
+    cursoRecomendado: 'auxilios',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/IH-f.png' },
       m: { image: 'assets/perfil-sentia/avatars/IH-m.png' }
@@ -93,6 +103,8 @@ window.SENTIA_PROFILES = {
     learningStyle: 'Estructurado y orientado a resultados',
     conecta: ['Certificaciones', 'Actualización de conocimientos', 'Clases con especialistas', 'Crecimiento profesional'],
     recommendations: ['Certificaciones con folio verificable', 'Clases en vivo con especialistas', 'Actualización en temas vigentes', 'Rutas de crecimiento profesional'],
+    growthLabel: 'Actualización y certificación',
+    cursoRecomendado: 'laboral',
     characters: {
       f: { image: 'assets/perfil-sentia/avatars/AP-f.png' },
       m: { image: 'assets/perfil-sentia/avatars/AP-m.png' }
@@ -128,6 +140,35 @@ window.SENTIA_COMBINED_TAGLINES = {
   'EP_IH': 'Combinas la curiosidad por explorar con una fuerte sensibilidad humana.',
   'AP_EP': 'Combinas la curiosidad por explorar con el interés por mantenerte actualizado/a.',
   'AP_IH': 'Combinas la sensibilidad humana con el interés por mantenerte actualizado/a.'
+};
+
+/* Catálogo real (los 3 únicos cursos públicos hoy, mismos datos que
+   sentia-website/index.html). cursoRecomendado en cada perfil apunta
+   aquí por id — ajusta esa asignación cuando haya más cursos o un
+   mapeo curso↔perfil más preciso; hoy es la mejor coincidencia por
+   tema, no una elección validada con el equipo. */
+window.SENTIA_CURSOS = {
+  custodia: {
+    titulo: 'Evaluación psicológica en guarda y custodia',
+    area: 'Psicología forense',
+    descripcion: 'Entrevista, integración de fuentes y redacción del informe pericial.',
+    precio: '$550',
+    url: 'https://sentiamx.com/index.html#curso-custodia'
+  },
+  auxilios: {
+    titulo: 'Primeros auxilios psicológicos',
+    area: 'Intervención psicológica',
+    descripcion: 'Contención emocional, detección de riesgo y canalización oportuna.',
+    precio: '$550',
+    url: 'https://sentiamx.com/index.html#curso-auxilios'
+  },
+  laboral: {
+    titulo: 'Salud psicológica laboral',
+    area: 'Psicología laboral',
+    descripcion: 'Riesgos psicosociales, liderazgo y rutas de apoyo en la organización.',
+    precio: '$550',
+    url: 'https://sentiamx.com/index.html#curso-laboral'
+  }
 };
 
 /* Etiquetas legibles para "formatos_preferidos" (sección 5/6 del spec) */

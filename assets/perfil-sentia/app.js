@@ -12,6 +12,7 @@
   const Scoring = window.SentiaScoring;
   const FORMATOS_LABELS = window.SENTIA_FORMATOS_LABELS;
   const COMBINED = window.SENTIA_COMBINED_TAGLINES;
+  const CURSOS = window.SENTIA_CURSOS;
   // Mismo servidor que ya usa el panel VIP para certificados/progreso (Fase 2).
   // Si la ruta aún no está desplegada en Railway, el guardado falla en silencio
   // y el test sigue funcionando igual para el usuario (nunca se bloquea por esto).
@@ -304,20 +305,51 @@
       secondaryWrap.style.display = '';
     }
 
-    // Mostrar los 6 perfiles individualmente (nunca agrupar "otros" como si fuera uno más).
-    // Top 3 destacados, los otros 3 en versión reducida.
+    // Afinidad por perfil: solo el principal y el que le sigue (sección 2 del
+    // rediseño) — ver el resto en 0% no aporta nada, solo ruido visual.
     const ordenados = resultado.sorted; // [[codigo, puntaje], ...] desc
     const bars = document.getElementById('res-bars');
-    bars.innerHTML = ordenados.map(([codigo], i) => {
+    bars.innerHTML = ordenados.slice(0, 2).map(([codigo]) => {
       const p = PROFILES[codigo];
       const pct = resultado.percentages[codigo];
-      const clase = i < 3 ? 'res-bar res-bar--top' : 'res-bar res-bar--rest';
-      return '<div class="' + clase + '"><div class="res-bar__head"><span>' + codigo + ' — ' + p.name + '</span><b>' + pct + '%</b></div>' +
+      return '<div class="res-bar res-bar--top"><div class="res-bar__head"><span>' + codigo + ' — ' + p.name + '</span><b>' + pct + '%</b></div>' +
         '<div class="res-bar__track"><i style="width:' + pct + '%"></i></div></div>';
     }).join('');
 
     document.getElementById('res-conecta').innerHTML = principal.conecta.map(t => '<span class="chip">' + t + '</span>').join('');
-    document.getElementById('res-recos').innerHTML = principal.recommendations.map(t => '<li>' + t + '</li>').join('');
+
+    // Tu siguiente paso recomendado: el único curso real (de los 3 que existen
+    // hoy) que mejor conecta con este perfil. Crear cuenta es gratis; cuál
+    // clase queda abierta sin membresía lo decide el panel, no esta pantalla.
+    const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
+    const siguiente = document.getElementById('res-siguiente');
+    if (curso) {
+      document.getElementById('res-siguiente-area').textContent = curso.area;
+      document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
+      document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
+      document.getElementById('res-siguiente-cta').href = 'vip-auth.html';
+      siguiente.style.display = '';
+    } else {
+      siguiente.style.display = 'none';
+    }
+
+    // También podrías explorar: los perfiles en 3º y 4º lugar, reencuadrados
+    // como afinidad complementaria (nunca como "te falta esto"). Si no
+    // alcanzaron ni un punto, no se muestran — no hay nada que reencuadrar.
+    const explorarCodigos = ordenados.slice(2, 4).filter(([, puntaje]) => puntaje > 0);
+    const explorarTitle = document.getElementById('res-explorar-title');
+    const explorarSub = document.getElementById('res-explorar-sub');
+    const explorarWrap = document.getElementById('res-explorar');
+    if (explorarCodigos.length) {
+      explorarWrap.innerHTML = explorarCodigos.map(([codigo]) => '<span class="chip">' + (PROFILES[codigo].growthLabel || PROFILES[codigo].name) + '</span>').join('');
+      explorarTitle.style.display = '';
+      explorarSub.style.display = '';
+      explorarWrap.style.display = '';
+    } else {
+      explorarTitle.style.display = 'none';
+      explorarSub.style.display = 'none';
+      explorarWrap.style.display = 'none';
+    }
 
     state.resultado = resultado;
     resetLeadBox();
