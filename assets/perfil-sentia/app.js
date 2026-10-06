@@ -357,17 +357,10 @@
         siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
         document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
         document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
-        if (curso.gratis) {
-          siguienteCta.textContent = '';
-          siguienteCta.append('Ver clases gratis ');
-          siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
-          siguienteCta.href = 'vip-auth.html';
-        } else {
-          siguienteCta.textContent = '';
-          siguienteCta.append('Conocer este curso ');
-          siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
-          siguienteCta.href = curso.url;
-        }
+        siguienteCta.textContent = '';
+        siguienteCta.append(curso.gratis ? 'Ver clases gratis ' : 'Crear mi cuenta ');
+        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+        siguienteCta.href = 'vip-auth.html';
         siguiente.style.display = '';
       } else if (siguiente) {
         siguiente.style.display = 'none';
