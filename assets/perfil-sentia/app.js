@@ -61,6 +61,34 @@
   function updateBackButton() {
     document.getElementById('q-back').classList.toggle('is-visible', state.history.length > 0);
   }
+
+  // ── Progreso guardado: si cierran o recargan a medio test, lo retoman
+  // donde iban en vez de empezar de cero. Se guarda en localStorage (no
+  // sessionStorage) para que sobreviva aunque cierren la pestaña/navegador.
+  // No se guarda `queue`: se reconstruye sola a partir de perfilBase. ──
+  const PROGRESO_KEY = 'sentia-perfil-progreso';
+  function guardarProgreso() {
+    try {
+      localStorage.setItem(PROGRESO_KEY, JSON.stringify({
+        perfilBase: state.perfilBase,
+        scores: state.scores,
+        respuestas: state.respuestas,
+        tags: Array.from(state.tags),
+        formatos: Array.from(state.formatos),
+        objetivos: state.objetivos,
+        step: state.step
+      }));
+    } catch (e) {}
+  }
+  function leerProgreso() {
+    try {
+      const g = JSON.parse(localStorage.getItem(PROGRESO_KEY) || 'null');
+      return g && typeof g === 'object' && g.perfilBase ? g : null;
+    } catch (e) { return null; }
+  }
+  function limpiarProgreso() {
+    try { localStorage.removeItem(PROGRESO_KEY); } catch (e) {}
+  }
   document.getElementById('q-back').addEventListener('click', () => {
     if (!state.history.length) return;
     restoreSnapshot(state.history.pop());
@@ -98,6 +126,7 @@
     state.history = [];
     resetLeadBox();
     resetGeneroBox();
+    limpiarProgreso();
     showScreen('welcome');
   }
   window.__sentiaResetTest = resetTest;
@@ -125,6 +154,7 @@
         state.queue = [{ tipo: 'contextual', data: contextual }]
           .concat(Q.general.map(g => ({ tipo: 'general', data: g })));
         state.step = 1;
+        guardarProgreso();
         mostrarMensajeContexto(Q.contextMessage[state.perfilBase] || Q.contextMessage.otro, () => renderQueueStep());
       }
     });
@@ -156,6 +186,7 @@
         if (opt.formato) state.formatos.add(opt.formato);
         if (item.tipo === 'contextual') state.objetivos.push(opt.label);
         state.step += 1;
+        guardarProgreso();
         if (state.step - 1 < state.queue.length) {
           renderQueueStep();
         } else {
@@ -263,6 +294,7 @@
     } catch (e) {
       console.error('[perfil-sentia] Error al armar el resultado:', e);
     } finally {
+      limpiarProgreso(); // llegar aquí es terminar el test, haya salido bien o a medias
       showScreen('result');
     }
   }
@@ -378,22 +410,57 @@
   // existe aunque el usuario nunca deje datos de contacto). Nunca bloquea la
   // interfaz: si el servidor aún no tiene la ruta desplegada, solo se avisa
   // en consola y el usuario sigue viendo su resultado con normalidad.
-  function guardarResultadoEnServidor(registro) {
-    fetch(WEBHOOK_URL + '/api/perfil-sentia/resultado', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(registro)
+  // ── Reintento de guardados fallidos ──
+  // Si falla el internet o el webhook aún no responde, el envío queda en una
+  // cola en localStorage y se reintenta solo (al recuperar conexión, o en la
+  // próxima visita) en vez de perderse para siempre. Ambos endpoints son
+  // idempotentes (mismo id = mismo documento), así que reintentar de más
+  // nunca duplica nada.
+  const PENDIENTES_KEY = 'sentia-perfil-pendientes';
+  function leerPendientes() {
+    try { const l = JSON.parse(localStorage.getItem(PENDIENTES_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; }
+  }
+  function escribirPendientes(lista) {
+    try { if (lista.length) localStorage.setItem(PENDIENTES_KEY, JSON.stringify(lista)); else localStorage.removeItem(PENDIENTES_KEY); } catch (e) {}
+  }
+  function agregarPendiente(item) {
+    escribirPendientes([...leerPendientes().filter(p => p.id !== item.id), item]);
+  }
+  function enviarAlWebhook(ruta, body) {
+    return fetch(WEBHOOK_URL + ruta, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     }).then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      console.log('[perfil-sentia] Resultado guardado en el servidor.');
-    }).catch(e => console.warn('[perfil-sentia] No se pudo guardar en el servidor (¿ruta aún no desplegada?):', e.message));
+      return true;
+    }).catch(e => { console.warn('[perfil-sentia] Envío falló (¿ruta aún no desplegada?), queda pendiente:', e.message); return false; });
+  }
+  function intentarPendiente(item) {
+    enviarAlWebhook(item.ruta, item.body).then(ok => {
+      if (ok) {
+        console.log('[perfil-sentia] Pendiente enviado al reintentar:', item.id);
+        escribirPendientes(leerPendientes().filter(p => p.id !== item.id));
+      }
+    });
+  }
+  function reintentarPendientes() {
+    leerPendientes().forEach(intentarPendiente);
+  }
+  window.addEventListener('online', reintentarPendientes);
+
+  function guardarResultadoEnServidor(registro) {
+    const item = { id: registro.id + ':resultado', ruta: '/api/perfil-sentia/resultado', body: registro };
+    enviarAlWebhook(item.ruta, item.body).then(ok => {
+      if (ok) console.log('[perfil-sentia] Resultado guardado en el servidor.');
+      else agregarPendiente(item);
+    });
   }
 
   function guardarContactoEnServidor(id, contacto) {
-    fetch(WEBHOOK_URL + '/api/perfil-sentia/' + encodeURIComponent(id) + '/contacto', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contacto)
-    }).then(r => {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      console.log('[perfil-sentia] Contacto guardado en el servidor.');
-    }).catch(e => console.warn('[perfil-sentia] No se pudo guardar el contacto (¿ruta aún no desplegada?):', e.message));
+    const item = { id: id + ':contacto', ruta: '/api/perfil-sentia/' + encodeURIComponent(id) + '/contacto', body: contacto };
+    enviarAlWebhook(item.ruta, item.body).then(ok => {
+      if (ok) console.log('[perfil-sentia] Contacto guardado en el servidor.');
+      else agregarPendiente(item);
+    });
   }
 
   // ── Captación de lead (secciones 3, 4, 16 del spec) ──
@@ -475,6 +542,33 @@
     console.log('[perfil-sentia] Registro listo (aún no se guarda en servidor):', registro);
     return registro;
   }
+
+  // ── Retomar el test si quedó a medias ──
+  // Si hay progreso guardado (al menos la pregunta base respondida), se
+  // reconstruye la cola de preguntas a partir de perfilBase (no se guarda la
+  // cola completa) y se muestra directo la pregunta donde se había quedado,
+  // en vez de la pantalla de bienvenida.
+  function restaurarProgreso() {
+    const g = leerProgreso();
+    if (!g) return false;
+    state.perfilBase = g.perfilBase;
+    state.scores = g.scores || Scoring.emptyScores();
+    state.respuestas = g.respuestas || [];
+    state.tags = new Set(g.tags || []);
+    state.formatos = new Set(g.formatos || []);
+    state.objetivos = g.objetivos || [];
+    state.step = g.step || 0;
+    const contextual = Q.contextual[state.perfilBase] || Q.contextual._fallback;
+    state.queue = [{ tipo: 'contextual', data: contextual }].concat(Q.general.map(gq => ({ tipo: 'general', data: gq })));
+    showScreen('question');
+    if (state.step - 1 < state.queue.length) renderQueueStep(); else showScreen('genero');
+    return true;
+  }
+  try { restaurarProgreso(); } catch (e) { console.warn('[perfil-sentia] No se pudo retomar el progreso guardado:', e.message); limpiarProgreso(); }
+
+  // Envíos que no se confirmaron en una visita anterior (falló internet, el
+  // webhook no respondió, etc.) se reintentan poco después de cargar.
+  setTimeout(reintentarPendientes, 1500);
 })();
 
 /* NOTA: esta versión calcula el resultado, muestra los 6 perfiles sin agrupar,
