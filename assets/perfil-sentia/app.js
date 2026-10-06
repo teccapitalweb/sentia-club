@@ -367,26 +367,6 @@
       }
     } catch (e) { console.error('[perfil-sentia] Error en "siguiente paso":', e); }
 
-    // También podrías explorar: los perfiles en 3º y 4º lugar, reencuadrados
-    // como afinidad complementaria (nunca como "te falta esto"). Si no
-    // alcanzaron ni un punto, no se muestran — no hay nada que reencuadrar.
-    try {
-      const explorarCodigos = ordenados.slice(2, 4).filter(([, puntaje]) => puntaje > 0);
-      const explorarTitle = document.getElementById('res-explorar-title');
-      const explorarSub = document.getElementById('res-explorar-sub');
-      const explorarWrap = document.getElementById('res-explorar');
-      if (explorarCodigos.length && explorarTitle && explorarSub && explorarWrap) {
-        explorarWrap.innerHTML = explorarCodigos.map(([codigo]) => '<span class="chip">' + (PROFILES[codigo].growthLabel || PROFILES[codigo].name) + '</span>').join('');
-        explorarTitle.style.display = '';
-        explorarSub.style.display = '';
-        explorarWrap.style.display = '';
-      } else {
-        if (explorarTitle) explorarTitle.style.display = 'none';
-        if (explorarSub) explorarSub.style.display = 'none';
-        if (explorarWrap) explorarWrap.style.display = 'none';
-      }
-    } catch (e) { console.error('[perfil-sentia] Error en "también podrías explorar":', e); }
-
     state.resultado = resultado;
     resetLeadBox();
     const registro = armarRegistro(); // deja window.__ultimoResultadoSentia listo, sin datos de contacto todavía
