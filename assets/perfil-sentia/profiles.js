@@ -142,37 +142,33 @@ window.SENTIA_COMBINED_TAGLINES = {
   'AP_IH': 'Combinas la sensibilidad humana con el interés por mantenerte actualizado/a.'
 };
 
-/* Catálogo real (los 3 únicos cursos públicos hoy, mismos datos que
-   sentia-website/index.html). cursoRecomendado en cada perfil apunta
-   aquí por id — ajusta esa asignación cuando haya más cursos o un
-   mapeo curso↔perfil más preciso; hoy es la mejor coincidencia por
-   tema, no una elección validada con el equipo. */
-window.SENTIA_CURSOS = {
-  custodia: {
-    titulo: 'Evaluación psicológica en guarda y custodia',
-    area: 'Psicología forense',
-    descripcion: 'Entrevista, integración de fuentes y redacción del informe pericial.',
-    precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-custodia',
-    gratis: true // único de los 3 con las primeras 2 clases abiertas sin membresía
-  },
-  auxilios: {
-    titulo: 'Primeros auxilios psicológicos',
-    area: 'Intervención psicológica',
-    descripcion: 'Contención emocional, detección de riesgo y canalización oportuna.',
-    precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-auxilios',
-    gratis: false
-  },
-  laboral: {
-    titulo: 'Salud psicológica laboral',
-    area: 'Psicología laboral',
-    descripcion: 'Riesgos psicosociales, liderazgo y rutas de apoyo en la organización.',
-    precio: '$550',
-    url: 'https://sentiamx.com/index.html#curso-laboral',
-    gratis: false
-  }
-};
+/* Catálogo real: se trae de sentiamx.com/assets/cursos.json, la misma
+   fuente que ya usan las tarjetas del landing y el chat de Nora — antes
+   estaba copiado a mano aquí también y se desincronizaba (pasó con el
+   precio). cursoRecomendado en cada perfil apunta aquí por id — ajusta
+   esa asignación cuando haya más cursos o un mapeo curso↔perfil más
+   preciso; hoy es la mejor coincidencia por tema, no una elección
+   validada con el equipo.
+   window.SENTIA_CURSOS empieza vacío y se llena solo cuando el fetch
+   resuelve; app.js ya maneja con calma el caso de que un curso no
+   exista todavía (oculta la tarjeta "siguiente paso" en vez de tronar) —
+   como el resultado se ve varios segundos después de abrir la página
+   (7 preguntas + género), en la práctica siempre está listo a tiempo. */
+window.SENTIA_CURSOS = {};
+fetch('https://sentiamx.com/assets/cursos.json')
+  .then(r => r.json())
+  .then(d => {
+    (d.cursos || []).forEach(c => {
+      window.SENTIA_CURSOS[c.id] = {
+        titulo: c.titulo,
+        area: c.area,
+        descripcion: c.resumen,
+        url: 'https://sentiamx.com/index.html#' + c.anchor,
+        gratis: !!c.gratis
+      };
+    });
+  })
+  .catch(e => console.warn('[perfil-sentia] No se pudo cargar el catálogo de cursos:', e.message));
 
 /* Etiquetas legibles para "formatos_preferidos" (sección 5/6 del spec) */
 window.SENTIA_FORMATOS_LABELS = {
