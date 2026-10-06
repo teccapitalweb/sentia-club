@@ -167,9 +167,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .lead-box{margin:26px 0 6px;padding:20px 20px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
 .lead-title{font-size:.95rem;font-weight:700;margin-bottom:6px}
 .lead-sub{font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:16px}
-.lead-ask__actions{display:flex;flex-direction:column;gap:9px}
 .btn-text{background:none;border:none;color:var(--faint);font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;padding:6px}
 .btn-text:hover{color:var(--muted)}
+.res-pie{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 18px;margin:28px 0 6px;text-align:center}
+.res-pie .btn-text{text-decoration:underline;text-underline-offset:2px}
 .lead-form .field{margin-bottom:12px}
 .lead-form label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
 .lead-form input[type=text],.lead-form input[type=tel],.lead-form input[type=email]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 13px;color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;transition:.2s}
@@ -309,17 +310,20 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
           </a>
         </div>
 
-        <!-- Captación de lead (sección 3-4 del spec): discreta, nunca obligatoria -->
-        <div class="lead-box" id="lead-box">
-          <div id="lead-ask">
-            <p class="lead-title">¿Quieres recibir recomendaciones según tu perfil?</p>
-            <p class="lead-sub">Podemos avisarte cuando tengamos cursos, recursos o contenidos relacionados con tus intereses.</p>
-            <div class="lead-ask__actions">
-              <button class="btn-ghost" id="lead-yes" type="button">Sí, quiero recibir recomendaciones</button>
-              <button class="btn-text" id="lead-no" type="button">Solo quiero ver mi resultado</button>
-            </div>
-          </div>
-          <form class="lead-form" id="lead-form" style="display:none">
+        <!-- Pie de resultado estilo Alintec: 3 opciones discretas en vez de -->
+        <!-- empujar el formulario de entrada. "Prefiero que un asesor me   -->
+        <!-- escriba" revela el mismo formulario de siempre (nombre+whats-  -->
+        <!-- app+correo), nunca es obligatorio dejar datos. -->
+        <div class="res-pie" id="res-pie">
+          <button class="btn-text" id="pie-ya-tengo" type="button">Ya tengo cuenta</button>
+          <button class="btn-text" id="pie-asesor" type="button">Prefiero que un asesor me escriba</button>
+          <button class="btn-text" id="pie-seguir" type="button">Seguir viendo</button>
+        </div>
+
+        <div class="lead-box" id="lead-box" style="display:none">
+          <p class="lead-title">¿Quieres recibir recomendaciones según tu perfil?</p>
+          <p class="lead-sub">Podemos avisarte cuando tengamos cursos, recursos o contenidos relacionados con tus intereses.</p>
+          <form class="lead-form" id="lead-form">
             <div class="field">
               <label for="lead-nombre">Nombre</label>
               <input type="text" id="lead-nombre" placeholder="Tu nombre" autocomplete="name">

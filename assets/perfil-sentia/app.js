@@ -463,21 +463,28 @@
     });
   }
 
-  // ── Captación de lead (secciones 3, 4, 16 del spec) ──
+  // ── Pie de resultado + captación de lead (secciones 3, 4, 16 del spec) ──
+  // El pie con 3 opciones (estilo Alintec) es lo que se ve primero; el
+  // formulario de nombre/WhatsApp solo aparece si eligen "Prefiero que un
+  // asesor me escriba" — nunca es obligatorio dejar datos.
   function resetLeadBox() {
-    document.getElementById('lead-ask').style.display = '';
-    document.getElementById('lead-form').style.display = 'none';
+    document.getElementById('res-pie').style.display = '';
+    document.getElementById('lead-box').style.display = 'none';
+    document.getElementById('lead-form').style.display = '';
     document.getElementById('lead-done').style.display = 'none';
     ['lead-nombre', 'lead-whatsapp', 'lead-correo'].forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('lead-consent').checked = false;
   }
 
-  document.getElementById('lead-yes').addEventListener('click', () => {
-    document.getElementById('lead-ask').style.display = 'none';
-    document.getElementById('lead-form').style.display = '';
+  document.getElementById('pie-ya-tengo').addEventListener('click', () => {
+    window.location.href = 'vip-auth.html';
   });
-  document.getElementById('lead-no').addEventListener('click', () => {
-    document.getElementById('lead-ask').style.display = 'none';
+  document.getElementById('pie-asesor').addEventListener('click', () => {
+    document.getElementById('res-pie').style.display = 'none';
+    document.getElementById('lead-box').style.display = '';
+  });
+  document.getElementById('pie-seguir').addEventListener('click', () => {
+    document.getElementById('res-pie').style.display = 'none';
   });
   document.getElementById('lead-save').addEventListener('click', () => {
     const nombre = document.getElementById('lead-nombre').value.trim();
