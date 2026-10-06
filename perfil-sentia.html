@@ -98,6 +98,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* ── Pantalla: género del avatar ── */
 .genero-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto;max-width:360px}
+.genero-opt--wide{grid-column:1 / -1}
 .genero-opt{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;color:var(--text);font-family:var(--font);font-size:.95rem;font-weight:700;transition:.18s}
 .genero-opt:hover{border-color:var(--primary-soft);background:var(--surface-2)}
 .genero-opt input{width:17px;height:17px;accent-color:var(--accent-soft);cursor:pointer}
@@ -250,6 +251,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
           <label class="genero-opt" data-genero="f">
             <input type="radio" name="genero" value="f">
             <span>Mujer</span>
+          </label>
+          <label class="genero-opt genero-opt--wide" data-genero="nd">
+            <input type="radio" name="genero" value="nd">
+            <span>Prefiero no decirlo</span>
           </label>
         </div>
         <button class="btn-primary" id="btn-ver-resultados" style="margin-top:24px">

@@ -210,7 +210,16 @@
   });
   document.getElementById('btn-ver-resultados').addEventListener('click', () => {
     const checked = document.querySelector('#genero-grid input[type="radio"]:checked');
-    state.genero = checked ? checked.value : null;
+    const valor = checked ? checked.value : null;
+    if (valor === 'nd') {
+      // "Prefiero no decirlo": se sortea un avatar (f o m) nada más para
+      // decidir qué imagen mostrar; se guarda aparte que no quiso decir el
+      // género, para no reportarlo como si lo hubiera elegido.
+      state.genero = Math.random() < 0.5 ? 'f' : 'm';
+      state.tags.add('genero_reservado');
+    } else {
+      state.genero = valor;
+    }
     runAnalysis();
   });
 
@@ -244,7 +253,20 @@
   }
 
   // ── Pantalla de resultado ──
+  // Blindada con try/finally: si algo truena a medias (ej. un elemento que
+  // no existe por un caché de HTML viejo con JS nuevo), igual se muestra la
+  // pantalla de resultado en vez de dejar a la persona viendo el spinner de
+  // "analizando" para siempre.
   function renderResult() {
+    try {
+      renderResultInterno();
+    } catch (e) {
+      console.error('[perfil-sentia] Error al armar el resultado:', e);
+    } finally {
+      showScreen('result');
+    }
+  }
+  function renderResultInterno() {
     const resultado = Scoring.computeResult(state.scores);
     const principal = PROFILES[resultado.principal];
     const secundario = PROFILES[resultado.secondary];
@@ -323,53 +345,60 @@
     // primeras 2 clases abiertas sin membresía — los demás son VIP, así que
     // el badge y el CTA dicen la verdad en cada caso (nunca "gratis" en un
     // curso que no lo es).
-    const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
-    const siguiente = document.getElementById('res-siguiente');
-    const siguienteCta = document.getElementById('res-siguiente-cta');
-    if (curso) {
-      document.getElementById('res-siguiente-area').textContent = curso.gratis ? '2 clases gratis' : 'Acceso VIP';
-      siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
-      document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
-      document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
-      if (curso.gratis) {
-        siguienteCta.textContent = '';
-        siguienteCta.append('Ver clases gratis ');
-        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
-        siguienteCta.href = 'vip-auth.html';
-      } else {
-        siguienteCta.textContent = '';
-        siguienteCta.append('Conocer este curso ');
-        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
-        siguienteCta.href = curso.url;
+    // Aislado en su propio try/catch: es una sección "extra", nunca debe
+    // poder tumbar el resto del resultado (guardado, lead box, etc.) si un
+    // elemento no existe por un caché de HTML viejo con JS nuevo.
+    try {
+      const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
+      const siguiente = document.getElementById('res-siguiente');
+      const siguienteCta = document.getElementById('res-siguiente-cta');
+      if (curso && siguiente && siguienteCta) {
+        document.getElementById('res-siguiente-area').textContent = curso.gratis ? '2 clases gratis' : 'Acceso VIP';
+        siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
+        document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
+        document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
+        if (curso.gratis) {
+          siguienteCta.textContent = '';
+          siguienteCta.append('Ver clases gratis ');
+          siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+          siguienteCta.href = 'vip-auth.html';
+        } else {
+          siguienteCta.textContent = '';
+          siguienteCta.append('Conocer este curso ');
+          siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+          siguienteCta.href = curso.url;
+        }
+        siguiente.style.display = '';
+      } else if (siguiente) {
+        siguiente.style.display = 'none';
       }
-      siguiente.style.display = '';
-    } else {
-      siguiente.style.display = 'none';
-    }
+    } catch (e) { console.error('[perfil-sentia] Error en "siguiente paso":', e); }
 
     // También podrías explorar: los perfiles en 3º y 4º lugar, reencuadrados
     // como afinidad complementaria (nunca como "te falta esto"). Si no
     // alcanzaron ni un punto, no se muestran — no hay nada que reencuadrar.
-    const explorarCodigos = ordenados.slice(2, 4).filter(([, puntaje]) => puntaje > 0);
-    const explorarTitle = document.getElementById('res-explorar-title');
-    const explorarSub = document.getElementById('res-explorar-sub');
-    const explorarWrap = document.getElementById('res-explorar');
-    if (explorarCodigos.length) {
-      explorarWrap.innerHTML = explorarCodigos.map(([codigo]) => '<span class="chip">' + (PROFILES[codigo].growthLabel || PROFILES[codigo].name) + '</span>').join('');
-      explorarTitle.style.display = '';
-      explorarSub.style.display = '';
-      explorarWrap.style.display = '';
-    } else {
-      explorarTitle.style.display = 'none';
-      explorarSub.style.display = 'none';
-      explorarWrap.style.display = 'none';
-    }
+    try {
+      const explorarCodigos = ordenados.slice(2, 4).filter(([, puntaje]) => puntaje > 0);
+      const explorarTitle = document.getElementById('res-explorar-title');
+      const explorarSub = document.getElementById('res-explorar-sub');
+      const explorarWrap = document.getElementById('res-explorar');
+      if (explorarCodigos.length && explorarTitle && explorarSub && explorarWrap) {
+        explorarWrap.innerHTML = explorarCodigos.map(([codigo]) => '<span class="chip">' + (PROFILES[codigo].growthLabel || PROFILES[codigo].name) + '</span>').join('');
+        explorarTitle.style.display = '';
+        explorarSub.style.display = '';
+        explorarWrap.style.display = '';
+      } else {
+        if (explorarTitle) explorarTitle.style.display = 'none';
+        if (explorarSub) explorarSub.style.display = 'none';
+        if (explorarWrap) explorarWrap.style.display = 'none';
+      }
+    } catch (e) { console.error('[perfil-sentia] Error en "también podrías explorar":', e); }
 
     state.resultado = resultado;
     resetLeadBox();
     const registro = armarRegistro(); // deja window.__ultimoResultadoSentia listo, sin datos de contacto todavía
     guardarResultadoEnServidor(registro);
-    showScreen('result');
+    // showScreen('result') lo hace el finally de renderResult() (arriba).
   }
 
   // Guarda el resultado anónimo apenas está listo (sección 20: el resultado
