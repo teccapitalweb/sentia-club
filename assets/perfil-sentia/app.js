@@ -32,6 +32,7 @@
     total: 7,
     genero: null,     // 'f' | 'm' | null (opcional) — se pregunta al terminar las preguntas, antes del resultado
     resultado: null,  // se llena al terminar el test
+    resultadoId: null, // id estable del registro, fijado al llegar al resultado (sobrevive un recargo de página)
     history: []       // snapshots para "Pregunta anterior"
   };
 
@@ -89,6 +90,39 @@
   function limpiarProgreso() {
     try { localStorage.removeItem(PROGRESO_KEY); } catch (e) {}
   }
+
+  // ── Resultado guardado: llegar al resultado también se guarda aparte del
+  // progreso del cuestionario (que se borra apenas termina). Sin esto, recargar
+  // la página estando en la pantalla de resultado (ej. a medio llenar el
+  // formulario del asesor) mandaba de vuelta a la bienvenida y obligaba a
+  // repetir las 7 preguntas — se guarda lo mínimo para recalcular el mismo
+  // resultado (el id se conserva para que reenviarlo al servidor nunca
+  // duplique el registro). Se borra solo con "Volver a hacer el test". ──
+  const RESULTADO_KEY = 'sentia-perfil-resultado-guardado';
+  function guardarEstadoResultado() {
+    try {
+      localStorage.setItem(RESULTADO_KEY, JSON.stringify({
+        id: state.resultadoId,
+        perfilBase: state.perfilBase,
+        scores: state.scores,
+        respuestas: state.respuestas,
+        tags: Array.from(state.tags),
+        formatos: Array.from(state.formatos),
+        objetivos: state.objetivos,
+        genero: state.genero
+      }));
+    } catch (e) {}
+  }
+  function leerEstadoResultado() {
+    try {
+      const g = JSON.parse(localStorage.getItem(RESULTADO_KEY) || 'null');
+      return g && typeof g === 'object' && g.perfilBase && g.scores ? g : null;
+    } catch (e) { return null; }
+  }
+  function limpiarEstadoResultado() {
+    try { localStorage.removeItem(RESULTADO_KEY); } catch (e) {}
+  }
+
   document.getElementById('q-back').addEventListener('click', () => {
     if (!state.history.length) return;
     restoreSnapshot(state.history.pop());
@@ -123,10 +157,12 @@
     state.step = 0;
     state.genero = null;
     state.resultado = null;
+    state.resultadoId = null;
     state.history = [];
     resetLeadBox();
     resetGeneroBox();
     limpiarProgreso();
+    limpiarEstadoResultado();
     showScreen('welcome');
   }
   window.__sentiaResetTest = resetTest;
@@ -251,6 +287,11 @@
     } else {
       state.genero = valor;
     }
+    // A partir de aquí ya hay suficiente para recalcular el resultado en
+    // cualquier momento (ver nota de RESULTADO_KEY arriba) — se guarda ya,
+    // antes de la animación de "analizando", por si recargan durante esta.
+    state.resultadoId = 'sentia-' + Date.now().toString(36);
+    guardarEstadoResultado();
     runAnalysis();
   });
 
@@ -298,6 +339,43 @@
       showScreen('result');
     }
   }
+  // Aislado en su propia función (en vez de vivir inline en renderResultInterno):
+  // nunca debe poder tumbar el resto del resultado si un elemento no existe
+  // por un caché de HTML viejo con JS nuevo, y necesita poder llamarse de
+  // nuevo sola cuando el catálogo (window.SENTIA_CURSOS_READY) llega tarde —
+  // pasa al restaurar un resultado guardado justo al recargar la página,
+  // donde no hay tiempo de sobra como en el flujo normal del cuestionario.
+  function renderSiguientePaso(principal) {
+    try {
+      const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
+      const siguiente = document.getElementById('res-siguiente');
+      const siguienteCta = document.getElementById('res-siguiente-cta');
+      if (curso && siguiente && siguienteCta) {
+        document.getElementById('res-siguiente-area').textContent = curso.gratis ? '2 clases gratis' : 'Acceso VIP';
+        siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
+        document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
+        document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
+        siguienteCta.textContent = '';
+        siguienteCta.append(curso.gratis ? 'Ver clases gratis ' : 'Crear mi cuenta ');
+        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
+        siguienteCta.href = 'vip-auth.html';
+        siguiente.style.display = '';
+      } else if (siguiente) {
+        siguiente.style.display = 'none';
+      }
+    } catch (e) { console.error('[perfil-sentia] Error en "siguiente paso":', e); }
+  }
+  // Si el catálogo todavía no había llegado la primera vez que se intentó
+  // pintar esta sección, se reintenta sola en cuanto esté listo — sin esto,
+  // restaurar el resultado al recargar la página podía dejar la tarjeta
+  // oculta para siempre (el fetch cruzado a sentiamx.com no alcanza a
+  // resolver antes de que renderResult() se dispare en ese caso).
+  if (window.SENTIA_CURSOS_READY) {
+    window.SENTIA_CURSOS_READY.then(() => {
+      if (state.resultado) renderSiguientePaso(PROFILES[state.resultado.principal]);
+    }).catch(() => {});
+  }
+
   function renderResultInterno() {
     const resultado = Scoring.computeResult(state.scores);
     const principal = PROFILES[resultado.principal];
@@ -373,31 +451,11 @@
     document.getElementById('res-conecta').innerHTML = principal.conecta.map(t => '<span class="chip">' + t + '</span>').join('');
 
     // Tu siguiente paso recomendado: el único curso real (de los 3 que existen
-    // hoy) que mejor conecta con este perfil. Solo "custodia" tiene sus
-    // primeras 2 clases abiertas sin membresía — los demás son VIP, así que
-    // el badge y el CTA dicen la verdad en cada caso (nunca "gratis" en un
-    // curso que no lo es).
-    // Aislado en su propio try/catch: es una sección "extra", nunca debe
-    // poder tumbar el resto del resultado (guardado, lead box, etc.) si un
-    // elemento no existe por un caché de HTML viejo con JS nuevo.
-    try {
-      const curso = CURSOS && principal.cursoRecomendado ? CURSOS[principal.cursoRecomendado] : null;
-      const siguiente = document.getElementById('res-siguiente');
-      const siguienteCta = document.getElementById('res-siguiente-cta');
-      if (curso && siguiente && siguienteCta) {
-        document.getElementById('res-siguiente-area').textContent = curso.gratis ? '2 clases gratis' : 'Acceso VIP';
-        siguiente.classList.toggle('res-siguiente--vip', !curso.gratis);
-        document.getElementById('res-siguiente-titulo').textContent = curso.titulo;
-        document.getElementById('res-siguiente-desc').textContent = curso.descripcion;
-        siguienteCta.textContent = '';
-        siguienteCta.append(curso.gratis ? 'Ver clases gratis ' : 'Crear mi cuenta ');
-        siguienteCta.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>');
-        siguienteCta.href = 'vip-auth.html';
-        siguiente.style.display = '';
-      } else if (siguiente) {
-        siguiente.style.display = 'none';
-      }
-    } catch (e) { console.error('[perfil-sentia] Error en "siguiente paso":', e); }
+    // hoy) que mejor conecta con este perfil. Los 3 ya tienen primeras clases
+    // gratis, así que el badge/CTA siempre dicen "gratis" por ahora — se
+    // sigue leyendo curso.gratis en vez de asumirlo, para que sea honesto si
+    // algún curso vuelve a ser solo VIP más adelante.
+    renderSiguientePaso(principal);
 
     state.resultado = resultado;
     resetLeadBox();
@@ -472,7 +530,8 @@
     document.getElementById('lead-box').style.display = 'none';
     document.getElementById('lead-form').style.display = '';
     document.getElementById('lead-done').style.display = 'none';
-    ['lead-nombre', 'lead-whatsapp', 'lead-correo'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('lead-lada').value = '+52';
+    document.getElementById('lead-whatsapp').value = '';
     document.getElementById('lead-consent').checked = false;
   }
 
@@ -486,20 +545,23 @@
   document.getElementById('pie-seguir').addEventListener('click', () => {
     document.getElementById('res-pie').style.display = 'none';
   });
+  // "Volver a mis cursos": salir del formulario del asesor sin dejar datos,
+  // de vuelta a las 3 opciones (sección pedida explícitamente: siempre debe
+  // haber una salida para quien no quiera esta opción).
+  document.getElementById('lead-volver').addEventListener('click', resetLeadBox);
   document.getElementById('lead-save').addEventListener('click', () => {
-    const nombre = document.getElementById('lead-nombre').value.trim();
+    const lada = document.getElementById('lead-lada').value;
     const whatsapp = document.getElementById('lead-whatsapp').value.trim();
-    const correo = document.getElementById('lead-correo').value.trim();
     const acepta = document.getElementById('lead-consent').checked;
-    if (!nombre || !whatsapp) { alert('Escribe tu nombre y tu WhatsApp para continuar.'); return; }
+    if (!whatsapp) { alert('Escribe tu WhatsApp para continuar.'); return; }
     if (!acepta) { alert('Necesitamos tu autorización para poder escribirte.'); return; }
 
     const registro = armarRegistro({
-      nombre, telefono: whatsapp, correo: correo || null,
+      nombre: null, telefono: lada + ' ' + whatsapp, correo: null,
       acepta_comunicaciones: true,
       fecha_consentimiento: new Date().toISOString()
     });
-    guardarContactoEnServidor(registro.id, { nombre, telefono: whatsapp, correo: correo || null, acepta_comunicaciones: true });
+    guardarContactoEnServidor(registro.id, { nombre: null, telefono: lada + ' ' + whatsapp, correo: null, acepta_comunicaciones: true });
 
     document.getElementById('lead-form').style.display = 'none';
     document.getElementById('lead-done').style.display = '';
@@ -516,7 +578,7 @@
     tags.push('perfil_' + resultado.principal, 'perfil_' + resultado.secondary);
 
     const base = {
-      id: (window.__ultimoResultadoSentia && window.__ultimoResultadoSentia.id) || ('sentia-' + Date.now().toString(36)),
+      id: state.resultadoId || (window.__ultimoResultadoSentia && window.__ultimoResultadoSentia.id) || ('sentia-' + Date.now().toString(36)),
       fecha: new Date().toISOString(),
       source: 'perfil_sentia',
 
@@ -571,7 +633,31 @@
     if (state.step - 1 < state.queue.length) renderQueueStep(); else showScreen('genero');
     return true;
   }
-  try { restaurarProgreso(); } catch (e) { console.warn('[perfil-sentia] No se pudo retomar el progreso guardado:', e.message); limpiarProgreso(); }
+  // Si ya habían llegado al resultado (ver RESULTADO_KEY arriba), eso manda
+  // sobre un progreso de cuestionario a medias — recargar en la pantalla de
+  // resultado (ej. llenando el formulario del asesor) no debe mandar de
+  // vuelta a repetir las 7 preguntas.
+  function restaurarResultadoGuardado() {
+    const g = leerEstadoResultado();
+    if (!g) return false;
+    state.resultadoId = g.id;
+    state.perfilBase = g.perfilBase;
+    state.scores = g.scores;
+    state.respuestas = g.respuestas || [];
+    state.tags = new Set(g.tags || []);
+    state.formatos = new Set(g.formatos || []);
+    state.objetivos = g.objetivos || [];
+    state.genero = g.genero;
+    renderResult();
+    return true;
+  }
+  try {
+    if (!restaurarResultadoGuardado()) restaurarProgreso();
+  } catch (e) {
+    console.warn('[perfil-sentia] No se pudo retomar el resultado/progreso guardado:', e.message);
+    limpiarProgreso();
+    limpiarEstadoResultado();
+  }
 
   // Envíos que no se confirmaron en una visita anterior (falló internet, el
   // webhook no respondió, etc.) se reintentan poco después de cargar.

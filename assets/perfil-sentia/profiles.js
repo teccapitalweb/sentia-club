@@ -154,8 +154,12 @@ window.SENTIA_COMBINED_TAGLINES = {
    exista todavía (oculta la tarjeta "siguiente paso" en vez de tronar) —
    como el resultado se ve varios segundos después de abrir la página
    (7 preguntas + género), en la práctica siempre está listo a tiempo. */
+// window.SENTIA_CURSOS_READY: la misma promesa del fetch, expuesta para que
+// app.js pueda re-pintar la tarjeta "siguiente paso" si ya intentó mostrarla
+// antes de que el catálogo llegara (pasa al restaurar el resultado guardado
+// justo al recargar la página — ver RESULTADO_KEY en app.js).
 window.SENTIA_CURSOS = {};
-fetch('https://sentiamx.com/assets/cursos.json')
+window.SENTIA_CURSOS_READY = fetch('https://sentiamx.com/assets/cursos.json')
   .then(r => r.json())
   .then(d => {
     (d.cursos || []).forEach(c => {
