@@ -535,19 +535,13 @@
     document.getElementById('lead-consent').checked = false;
   }
 
-  document.getElementById('pie-ya-tengo').addEventListener('click', () => {
-    window.location.href = 'vip-auth.html';
-  });
   document.getElementById('pie-asesor').addEventListener('click', () => {
     document.getElementById('res-pie').style.display = 'none';
     document.getElementById('lead-box').style.display = '';
   });
-  document.getElementById('pie-seguir').addEventListener('click', () => {
-    document.getElementById('res-pie').style.display = 'none';
-  });
-  // "Volver a mis cursos": salir del formulario del asesor sin dejar datos,
-  // de vuelta a las 3 opciones (sección pedida explícitamente: siempre debe
-  // haber una salida para quien no quiera esta opción).
+  // "Volver": salir del formulario del asesor sin dejar datos, de vuelta a
+  // la opción de arriba (sección pedida explícitamente: siempre debe haber
+  // una salida para quien no quiera esta opción).
   document.getElementById('lead-volver').addEventListener('click', resetLeadBox);
   document.getElementById('lead-save').addEventListener('click', () => {
     const lada = document.getElementById('lead-lada').value;
