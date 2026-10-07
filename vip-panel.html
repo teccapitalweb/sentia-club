@@ -1942,7 +1942,7 @@ body::after{
 .foro-composer--editorial{border-radius:20px;padding:17px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 4%,var(--surface)))}
 .foro-tabs--editorial .tab{border-radius:999px;padding:9px 15px}
 .posts-list--editorial{gap:14px}.posts-list--editorial .post{position:relative;border-radius:22px;padding:19px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 3%,var(--surface)));border-color:color-mix(in srgb,var(--primary) 16%,var(--border));box-shadow:0 12px 28px color-mix(in srgb,var(--primary) 7%,transparent)}.posts-list--editorial .post::before{content:"";position:absolute;left:0;top:22px;bottom:22px;width:3px;border-radius:0 6px 6px 0;background:color-mix(in srgb,var(--primary) 55%,transparent)}.posts-list--editorial .post__img{max-width:640px;border-radius:15px}.posts-list--editorial .post__footer{margin-top:13px}
-@media(max-width:1080px){.foro-welcome{grid-template-columns:1fr}.foro-comunidad-layout{grid-template-columns:1fr}.foro-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.foro-side__card:last-child{display:none}}
+@media(max-width:1080px){.foro-welcome{grid-template-columns:1fr}.foro-comunidad-layout{grid-template-columns:1fr}.foro-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.foro-side__card:last-child{display:none}}
 @media(max-width:600px){.foro-welcome__hero{min-height:185px;padding:23px 20px;border-radius:20px}.foro-welcome__title{font-size:29px}.foro-people{right:-20px;transform:scale(.72);transform-origin:bottom right}.foro-live{border-radius:20px;padding:18px}.foro-side{grid-template-columns:1fr}.foro-side__card:last-child{display:block}.foro-composer--editorial{padding:14px}.posts-list--editorial .post{padding:15px}.foro-welcome__copy{font-size:13px}}
 /* ===== DIRECTORIO VIP ===== */
 .dir-bar{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
@@ -11784,6 +11784,7 @@ const Sections = (function(){
       input.placeholder = 'Comparte tu experiencia sobre ' + tema + '…';
       input.focus();
       input.scrollIntoView({behavior:'smooth', block:'center'});
+      Toast.info('Cuéntanos sobre ' + tema, 'Escribe tu publicación aquí abajo.');
     }));
 
     // Suscripción en tiempo real
