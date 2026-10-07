@@ -11080,6 +11080,32 @@ const Sections = (function(){
     if (esVip) container.querySelector('#dir-mi-tarjeta').addEventListener('click', dirEditarMiTarjeta);
 
     dirSuscribir();
+    if (esVip) ensureMiTarjetaDirectorio();
+  }
+
+  // MODIFICADO: al entrar al Directorio por primera vez, se crea la tarjeta
+  // automáticamente (oculta, visible:false) con el nombre de la cuenta, lista
+  // para que la persona la revise y la publique ella misma desde "Mi tarjeta".
+  // Así nadie aparece públicamente sin haberlo decidido. No puede hacerse al
+  // registrarse: las reglas de Firestore solo permiten crear esta ficha a un
+  // miembro ya VIP y con correo verificado, lo cual se cumple aquí.
+  async function ensureMiTarjetaDirectorio(){
+    const fs = window.__fs;
+    const uid = window.UserState?.uid;
+    if (!fs || !uid) return;
+    try {
+      const ref = fs.doc(fs.db, 'directorio', uid);
+      const snap = await fs.getDoc(ref);
+      if (snap.exists()) return;
+      const nombre = (window.UserState?.nombre || window.UserState?.displayName || (window.UserState?.email || '').split('@')[0] || 'Sin nombre').slice(0, 100);
+      await fs.setDoc(ref, {
+        uid, nombre,
+        puesto: '', empresa: '', sector: '', bio: '', whatsapp: '',
+        email: window.UserState?.email || '',
+        visible: false,
+        color: dirColorFor(uid)
+      });
+    } catch (e) { console.warn('[directorio] no se pudo crear la tarjeta automática:', e.message); }
   }
 
   function dirSuscribir(){
