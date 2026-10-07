@@ -123,7 +123,7 @@ body::after{
 .nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
 .nav-item:hover{background:var(--surface-2);color:var(--text)}
 .nav-item.is-active{background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font-weight:600}
-.nav-item .ic{width:15px;height:15px}
+.nav-item .ic{width:19px;height:19px}
 .nav-item__icon{width:24px;height:24px;object-fit:contain;flex-shrink:0;filter:sepia(1) saturate(3) hue-rotate(175deg) brightness(.55);opacity:.75}
 .nav-item.is-active .nav-item__icon,.nav-item:hover .nav-item__icon{filter:sepia(1) saturate(5) hue-rotate(105deg) brightness(.45);opacity:1}
 .nav-item__icon--color{filter:none!important;opacity:1!important}
@@ -4482,13 +4482,13 @@ window.__setDisplayName = async (nombre) => {
 
     <div class="nav-section">
       <div class="nav-label">Principal</div>
-      <a class="nav-item is-active" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="nav-item__icon">Inicio</a>
-      <a class="nav-item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="nav-item__icon">Cursos</a>
-      <a class="nav-item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="nav-item__icon">Clases en vivo<span class="nav-item__dot" id="nav-live-dot" style="display:none"></span></a>
-      <a class="nav-item" data-section="pdfs"><img src="assets/icon-nav-materiales.png" alt="" class="nav-item__icon">Materiales</a>
-      <a class="nav-item" data-section="retos"><img src="assets/icon-nav-retos.png" alt="" class="nav-item__icon">Retos</a>
-      <a class="nav-item" data-section="logros"><img src="assets/icon-nav-logros.png" alt="" class="nav-item__icon">Logros</a>
-      <a class="nav-item" data-section="certificados"><img src="assets/icon-nav-certificados.png" alt="" class="nav-item__icon nav-item__icon--invert">Certificados</a>
+      <a class="nav-item is-active" data-section="inicio"><svg class="ic"><use href="#i-home"/></svg>Inicio</a>
+      <a class="nav-item" data-section="cursos"><svg class="ic"><use href="#i-book"/></svg>Cursos</a>
+      <a class="nav-item" data-section="webinars"><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo<span class="nav-item__dot" id="nav-live-dot" style="display:none"></span></a>
+      <a class="nav-item" data-section="pdfs"><svg class="ic"><use href="#i-folder"/></svg>Materiales</a>
+      <a class="nav-item" data-section="retos"><svg class="ic"><use href="#i-bolt"/></svg>Retos</a>
+      <a class="nav-item" data-section="logros"><svg class="ic"><use href="#i-trophy"/></svg>Logros</a>
+      <a class="nav-item" data-section="certificados"><svg class="ic"><use href="#i-certificate"/></svg>Certificados</a>
     </div>
 
     <div class="nav-section nav-section--tools" data-tour="tools">
@@ -4677,11 +4677,11 @@ window.__setDisplayName = async (nombre) => {
 </div>
 
 <nav class="mobile-nav">
-  <a class="mobile-nav__item is-active" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="mobile-nav__icon">Inicio</a>
-  <a class="mobile-nav__item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="mobile-nav__icon">Cursos</a>
-  <a class="mobile-nav__item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="mobile-nav__icon">Vivo</a>
-  <a class="mobile-nav__item" id="mobile-nav-tools" role="button"><img src="assets/icon-nav-herramientas.png" alt="" class="mobile-nav__icon">Herramientas</a>
-  <a class="mobile-nav__item" id="mobile-nav-more" role="button"><img src="assets/icon-nav-mas.webp" alt="" class="mobile-nav__icon">Más</a>
+  <a class="mobile-nav__item is-active" data-section="inicio"><svg class="ic"><use href="#i-home"/></svg>Inicio</a>
+  <a class="mobile-nav__item" data-section="cursos"><svg class="ic"><use href="#i-book"/></svg>Cursos</a>
+  <a class="mobile-nav__item" data-section="webinars"><svg class="ic"><use href="#i-broadcast"/></svg>Vivo</a>
+  <a class="mobile-nav__item" id="mobile-nav-tools" role="button"><svg class="ic"><use href="#i-tools"/></svg>Herramientas</a>
+  <a class="mobile-nav__item" id="mobile-nav-more" role="button"><svg class="ic"><use href="#i-menu"/></svg>Más</a>
 </nav>
 
 <!-- Drawer móvil con TODAS las opciones · se abre al tocar "Más" -->
@@ -4706,13 +4706,13 @@ window.__setDisplayName = async (nombre) => {
     <div class="mobile-drawer__sections">
       <div class="mobile-drawer__section">
         <div class="mobile-drawer__label">Principal</div>
-        <a class="mobile-drawer__item" data-section="inicio"><img src="assets/icon-nav-inicio.png" alt="" class="drawer-icon">Inicio</a>
-        <a class="mobile-drawer__item" data-section="cursos"><img src="assets/icon-nav-cursos.webp" alt="" class="drawer-icon">Cursos</a>
-        <a class="mobile-drawer__item" data-section="webinars"><img src="assets/icon-nav-vivo.png" alt="" class="drawer-icon">Clases en vivo</a>
-        <a class="mobile-drawer__item" data-section="pdfs"><img src="assets/icon-nav-materiales.png" alt="" class="drawer-icon">Materiales</a>
-        <a class="mobile-drawer__item" data-section="retos"><img src="assets/icon-nav-retos.png" alt="" class="drawer-icon">Retos</a>
-        <a class="mobile-drawer__item" data-section="logros"><img src="assets/icon-nav-logros.png" alt="" class="drawer-icon">Logros</a>
-        <a class="mobile-drawer__item" data-section="certificados"><img src="assets/icon-nav-certificados.png" alt="" class="drawer-icon drawer-icon--invert">Certificados</a>
+        <a class="mobile-drawer__item" data-section="inicio"><svg class="ic"><use href="#i-home"/></svg>Inicio</a>
+        <a class="mobile-drawer__item" data-section="cursos"><svg class="ic"><use href="#i-book"/></svg>Cursos</a>
+        <a class="mobile-drawer__item" data-section="webinars"><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo</a>
+        <a class="mobile-drawer__item" data-section="pdfs"><svg class="ic"><use href="#i-folder"/></svg>Materiales</a>
+        <a class="mobile-drawer__item" data-section="retos"><svg class="ic"><use href="#i-bolt"/></svg>Retos</a>
+        <a class="mobile-drawer__item" data-section="logros"><svg class="ic"><use href="#i-trophy"/></svg>Logros</a>
+        <a class="mobile-drawer__item" data-section="certificados"><svg class="ic"><use href="#i-certificate"/></svg>Certificados</a>
       </div>
 
       <div class="mobile-drawer__section" data-tour="tools">
