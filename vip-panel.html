@@ -1937,6 +1937,7 @@ body::after{
 .foro-live__cta{display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:color-mix(in srgb,var(--primary) 10%,var(--surface));color:var(--primary);border-radius:14px;padding:12px 13px;font:700 12.5px 'Montserrat',sans-serif;cursor:pointer;text-align:left}.foro-live__cta:hover{background:color-mix(in srgb,var(--primary) 18%,var(--surface))}.foro-live__cta .ic{width:18px;height:18px}
 .foro-comunidad-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;align-items:start}
 .foro-side{display:flex;flex-direction:column;gap:12px}.foro-side__card{background:var(--surface);border:1px solid var(--border-2);border-radius:20px;padding:17px}.foro-side__title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px;margin-bottom:13px}.foro-topic{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;border:0;border-top:1px solid var(--border);background:transparent;font:700 12.5px 'Montserrat',sans-serif;color:var(--text);text-align:left;cursor:pointer}.foro-topic:hover{color:var(--primary)}.foro-topic:first-of-type{border-top:0}.foro-topic__icon{width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--topic) 15%,var(--surface));color:var(--topic);display:grid;place-items:center}.foro-topic__icon .ic{width:16px;height:16px}.foro-topic__arrow{margin-left:auto;color:var(--text-3);font-size:18px}
+.foro-discount-card{display:flex;align-items:center;gap:12px}.foro-discount-card__ic{flex:0 0 38px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary)}.foro-discount-card__ic .ic{width:18px;height:18px}.foro-discount-card__text{flex:1;min-width:0}.foro-discount-card__text strong{display:block;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800}.foro-discount-card__text span{display:block;font-size:11.5px;color:var(--text-3);margin-top:1px}.foro-discount-card__cta{flex:0 0 auto;border:0;background:none;color:var(--primary);font-weight:700;font-size:12.5px;cursor:pointer;padding:6px 4px}.foro-discount-card__cta:hover{text-decoration:underline}
 .foro-aviso--editorial{border-radius:15px;margin-bottom:13px;background:color-mix(in srgb,var(--highlight) 8%,var(--surface));border-color:color-mix(in srgb,var(--highlight) 26%,transparent)}.foro-aviso--editorial .ic,.foro-aviso--editorial strong{color:var(--highlight)}
 .foro-composer--editorial{border-radius:20px;padding:17px 18px;margin-bottom:14px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 4%,var(--surface)))}
 .foro-tabs--editorial .tab{border-radius:999px;padding:9px 15px}
@@ -11709,6 +11710,13 @@ const Sections = (function(){
               <button class="foro-topic" data-foro-topic="Recursos y materiales" style="--topic:#f59e0b"><span class="foro-topic__icon"><svg class="ic"><use href="#i-image"/></svg></span>Recursos y materiales<span class="foro-topic__arrow">›</span></button>
             </section>
             <section class="foro-side__card">
+              <div class="foro-discount-card">
+                <div class="foro-discount-card__ic"><svg class="ic"><use href="#i-crown"/></svg></div>
+                <div class="foro-discount-card__text"><strong>20% VIP</strong><span>en certificaciones</span></div>
+                <button type="button" id="btn-disc-wa" class="foro-discount-card__cta">Solicitar</button>
+              </div>
+            </section>
+            <section class="foro-side__card">
               <div class="foro-side__title">Conversaciones con propósito</div>
               <div style="font-size:12.5px;line-height:1.55;color:var(--text-2)">Comparte respetando la privacidad de las personas y evitando datos identificables.</div>
             </section>
@@ -11741,6 +11749,18 @@ const Sections = (function(){
       });
       container.querySelector('#foro-publicar').addEventListener('click', ()=> foroPublicar(container));
     }
+
+    // Tarjeta "20% VIP" del sidebar (vive solo mientras este contenedor existe,
+    // por eso se liga aquí y no en el binding estático de initNav()).
+    container.querySelector('#btn-disc-wa')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof toolEsVIP === 'function' && !toolEsVIP()) {
+        window.__showPaywallModal && window.__showPaywallModal({ title: 'Descuento exclusivo VIP', sub: 'El 20% en certificaciones es un beneficio para miembros. Hazte VIP para solicitarlo.' });
+        return;
+      }
+      window.open(SENTIA_CONTACT.waLink(SENTIA_CONTACT.msgDescuento20()), '_blank');
+      Toast.success('Abriendo WhatsApp', 'Solicitando tu 20% de descuento');
+    });
 
     // Tabs
     container.querySelectorAll('[data-foro-tab]').forEach(b=>{
@@ -13746,12 +13766,6 @@ function initNav(){
   });
   if(typeof toolEsVIP==='function'&&!toolEsVIP()){ document.getElementById('widget-disc')?.style.setProperty('display','none'); }
   document.addEventListener('click',function(e){ if(e.target.closest && e.target.closest('.bn-viplock-btn')){ window.__showPaywallModal && window.__showPaywallModal({title:'Herramientas Pro · solo VIP',sub:'Hazte miembro de SENTIA para usar las calculadoras y descargar tus reportes en PDF.'}); } });
-  document.getElementById('btn-disc-wa')?.addEventListener('click',(e)=>{
-    e.stopPropagation();
-    if(typeof toolEsVIP==='function'&&!toolEsVIP()){ window.__showPaywallModal && window.__showPaywallModal({title:'Descuento exclusivo VIP',sub:'El 20% en certificaciones es un beneficio para miembros. Hazte VIP para solicitarlo.'}); return; }
-    window.open(SENTIA_CONTACT.waLink(SENTIA_CONTACT.msgDescuento20()),'_blank');
-    Toast.success('Abriendo WhatsApp','Solicitando tu 20% de descuento');
-  });
   document.getElementById('btn-notif')?.addEventListener('click',(e)=>{e.stopPropagation();toggleNotifDropdown();});
   document.getElementById('btn-avatar')?.addEventListener('click',()=>navigateToSection('perfil'));
 
