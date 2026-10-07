@@ -4398,6 +4398,14 @@ const Pages={
             ${['disponible','proximamente','oculto'].map(e => `<option value="${e}" ${e===mat.estado?'selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
           </select>
         </div>
+        <div class="form-field">
+          <label class="label" for="bl-nivel">Nivel de Retos requerido</label>
+          <select class="select" id="bl-nivel">
+            <option value="" ${!mat.nivelRequerido?'selected':''}>Sin requisito (solo membresía)</option>
+            ${[[1,'Aprendiz'],[2,'Practicante'],[3,'Profesional'],[4,'Especialista'],[5,'Maestro']].map(([id,nombre]) => `<option value="${id}" ${Number(mat.nivelRequerido)===id?'selected':''}>Nivel ${id} · ${nombre}</option>`).join('')}
+          </select>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Si lo eliges, el libro queda bloqueado en el panel hasta que el alumno alcance ese nivel en Retos (mismos niveles que ve ahí).</div>
+        </div>
         <div class="form-field form-field--full">
           <label class="label" for="bl-desc">Descripción</label>
           <textarea class="input" id="bl-desc" rows="3" maxlength="2000" placeholder="Breve descripción del contenido…" style="resize:vertical">${(mat.descripcion||'').replace(/</g,'&lt;')}</textarea>
@@ -4466,6 +4474,8 @@ const Pages={
         const autor = document.getElementById('bl-autor').value.trim();
         const desc = document.getElementById('bl-desc').value.trim();
         const estado = document.getElementById('bl-estado').value;
+        const nivelVal = document.getElementById('bl-nivel').value;
+        const nivelRequerido = nivelVal ? parseInt(nivelVal, 10) : null;
         const gratis = document.getElementById('bl-gratis').checked;
         const cursoId = document.getElementById('bl-curso').value;
         const url = document.getElementById('bl-url').value.trim();
@@ -4506,7 +4516,7 @@ const Pages={
         const materialId = esEdicion ? editId : (slugify(titulo) + '-' + Math.random().toString(36).slice(2,8));
         const datos = {
           titulo, tipo, categoria, autor, descripcion:desc, estado, gratis,
-          cursoId, paginas, portada:portadaData, url, area,
+          cursoId, paginas, portada:portadaData, url, area, nivelRequerido,
           actualizadoEn: fb.serverTimestamp(),
         };
         if (!esEdicion) datos.creadoEn = fb.serverTimestamp();
