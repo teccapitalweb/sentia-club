@@ -6165,12 +6165,22 @@ const Sections = (function(){
   function claseDesbloqueada(cursoId, indexClase, sesiones) {
     // MODIFICADO: no-VIP ve abiertas las clases gratis; el VIP tiene todas abiertas desde que paga
     if (!tieneAccesoVipCompleto() && !esPrimeraClaseGratis(cursoId, indexClase)) return false;
-    // ...salvo que la clase anterior tenga actividad interactiva sin aprobar
     const i = Number(indexClase);
-    if (i > 0 && Array.isArray(sesiones) && tieneActividad(sesiones[i - 1]) && !(typeof esAdminReal === 'function' && esAdminReal())) {
-      return actividadAprobada(cursoId, sesiones[i - 1].numero || i);
-    }
-    return true;
+    if (i <= 0 || !Array.isArray(sesiones)) return true;
+    if (typeof esAdminReal === 'function' && esAdminReal()) return true;
+    // La clase anterior debe estar, a su vez, desbloqueada (encadenado hacia
+    // atrás) y completada: si tiene actividad interactiva, aprobada; si no,
+    // al menos marcada como vista. Antes solo se revisaba la actividad de la
+    // clase inmediatamente anterior, así que una clase sin actividad propia
+    // (ej. la 4) dejaba desbloqueada a la siguiente (ej. la 5) aunque la
+    // cadena real siguiera bloqueada más atrás.
+    if (!claseDesbloqueada(cursoId, i - 1, sesiones)) return false;
+    const anterior = sesiones[i - 1];
+    const numAnterior = (anterior && anterior.numero) || i;
+    if (tieneActividad(anterior)) return actividadAprobada(cursoId, numAnterior);
+    const progCurso = getProgreso()[cursoId] || {};
+    const vistas = Array.isArray(progCurso.clasesVistas) ? progCurso.clasesVistas : [];
+    return vistas.includes(numAnterior);
   }
 
   // ═══════════════ MODIFICADO: ACTIVIDADES INTERACTIVAS POR CLASE ═══════════════
