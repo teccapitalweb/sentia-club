@@ -4195,7 +4195,7 @@ function limpiarSesionLocal() {
 function instalarCierrePorInactividad() {
   if (window.__idleGuardInstalled) return;
   window.__idleGuardInstalled = true;
-  const LIMITE_INACTIVIDAD_MS = 30 * 60 * 1000;
+  const LIMITE_INACTIVIDAD_MS = 5 * 60 * 60 * 1000;
   const marcarActividad = () => { try { sessionStorage.setItem('sentia_ultima_actividad', String(Date.now())); } catch (_) {} };
   ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(evento => window.addEventListener(evento, marcarActividad, { passive: true }));
   marcarActividad();
