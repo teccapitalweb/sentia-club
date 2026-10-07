@@ -11712,7 +11712,7 @@ const Sections = (function(){
             <section class="foro-side__card">
               <div class="foro-discount-card">
                 <div class="foro-discount-card__ic"><svg class="ic"><use href="#i-crown"/></svg></div>
-                <div class="foro-discount-card__text"><strong>20% VIP</strong><span>en certificaciones</span></div>
+                <div class="foro-discount-card__text"><strong>20% VIP</strong><span>en cursos en vivo</span></div>
                 <button type="button" id="btn-disc-wa" class="foro-discount-card__cta">Solicitar</button>
               </div>
             </section>
@@ -11755,7 +11755,7 @@ const Sections = (function(){
     container.querySelector('#btn-disc-wa')?.addEventListener('click', (e) => {
       e.stopPropagation();
       if (typeof toolEsVIP === 'function' && !toolEsVIP()) {
-        window.__showPaywallModal && window.__showPaywallModal({ title: 'Descuento exclusivo VIP', sub: 'El 20% en certificaciones es un beneficio para miembros. Hazte VIP para solicitarlo.' });
+        window.__showPaywallModal && window.__showPaywallModal({ title: 'Descuento exclusivo VIP', sub: 'El 20% en cursos en vivo es un beneficio para miembros. Hazte VIP para solicitarlo.' });
         return;
       }
       window.open(SENTIA_CONTACT.waLink(SENTIA_CONTACT.msgDescuento20()), '_blank');
@@ -12435,7 +12435,7 @@ const Sections = (function(){
             <div class="plan-feat"><svg class="ic"><use href="#i-check"/></svg>Clases en vivo quincenales</div>
             <div class="plan-feat"><svg class="ic"><use href="#i-check"/></svg>Certificados con folio QR</div>
             <div class="plan-feat"><svg class="ic"><use href="#i-check"/></svg>Foro VIP y canal WhatsApp</div>
-            <div class="plan-feat"><svg class="ic"><use href="#i-check"/></svg>20% descuento en certificaciones</div>
+            <div class="plan-feat"><svg class="ic"><use href="#i-check"/></svg>20% descuento en cursos en vivo</div>
           </div>
           <div class="plan-card__footer">
             <span><strong>Próxima renovación:</strong> ${proxRenovStr}</span>
@@ -12841,7 +12841,7 @@ const SENTIA_CONTACT = {
     return `https://wa.me/${n}?text=${encodeURIComponent(text)}`;
   },
   msgDescuento20() {
-    return '¡Hola SENTIA! Soy miembro VIP y quiero conocer más sobre el *descuento del 20%* en certificaciones. ¿Me pueden dar más información?';
+    return 'Hola SENTIA, soy miembro VIP del club y quiero aplicar mi 20% de descuento en un curso en vivo.';
   },
   msgSoporte() {
     return 'Hola SENTIA, soy miembro VIP y necesito ayuda con mi cuenta. Mi consulta es:\n\n';
