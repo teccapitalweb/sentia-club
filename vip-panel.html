@@ -4563,7 +4563,7 @@ window.__setDisplayName = async (nombre) => {
           <div class="home-hero__progress-label"><span id="home-progress-text">0 de 0 clases vistas</span><strong id="home-progress-pct">0%</strong></div>
           <div class="home-hero__progress"><i id="home-progress-fill" style="width:0%"></i></div>
           <div class="home-hero__actions">
-            <button type="button" class="home-continue-button" data-section="cursos">Continuar clase <svg class="ic"><use href="#i-play"/></svg></button>
+            <button type="button" class="home-continue-button" id="home-continue-btn" data-section="cursos">Continuar clase <svg class="ic"><use href="#i-play"/></svg></button>
             <a href="#cursos" class="home-all-courses" data-section="cursos">Ver todos los cursos <svg class="ic"><use href="#i-arrow-right"/></svg></a>
           </div>
           <div class="home-hero__mini-stats">
@@ -7893,6 +7893,14 @@ const Sections = (function(){
       texto('home-stat-left', Math.max(0, cursoObjetivo.total - cursoObjetivo.vistas));
       texto('home-goal-now', pendiente && pendiente.curso.id === cursoObjetivo.c.id ? pendiente.titulo : tituloSiguiente);
       const fill = document.getElementById('home-progress-fill'); if (fill) fill.style.width = `${cursoObjetivo.pct}%`;
+      // "Continuar clase" debe abrir directo la clase siguiente de ESTE curso,
+      // no solo cambiar a la pestaña general de Cursos (dejaba al alumno
+      // teniendo que buscar y volver a abrir el curso él mismo).
+      const continueBtn = document.getElementById('home-continue-btn');
+      if (continueBtn) {
+        continueBtn.dataset.courseId = cursoObjetivo.c.id;
+        continueBtn.dataset.classIndex = String(siguiente - 1);
+      }
     }
     // Inicio: tres fichas como máximo. El catálogo completo queda en Mis cursos.
     const homeCoursesGrid = document.getElementById('home-courses-grid');
@@ -13693,7 +13701,16 @@ function initNav(){
   });
 
   document.querySelectorAll('[data-open-tool]').forEach(btn=>btn.addEventListener('click',()=>{const t=btn.dataset.openTool;if(Tools[t])Tools[t].open();}));
-  document.querySelectorAll('.section-header__link[data-section], .widget [data-section], .home-continue-button[data-section], .home-all-courses[data-section]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();navigateToSection(el.dataset.section);});});
+  document.querySelectorAll('.section-header__link[data-section], .widget [data-section], .home-all-courses[data-section]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();navigateToSection(el.dataset.section);});});
+  // "Continuar clase": abre directo la clase pendiente (curso + índice) que calculó
+  // __renderAvanceHome; si aún no hay datos (ej. primera carga), cae a Cursos.
+  document.getElementById('home-continue-btn')?.addEventListener('click', e => {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const cid = btn.dataset.courseId, idx = btn.dataset.classIndex;
+    if (cid && idx !== undefined && typeof window.abrirClaseSentia === 'function') window.abrirClaseSentia(cid, Number(idx));
+    else navigateToSection(btn.dataset.section);
+  });
 
   // ─── Botones del DOM estático (topbar, sidebar, widgets siempre presentes) ───
   document.getElementById('btn-logout')?.addEventListener('click',openLogoutModal);
