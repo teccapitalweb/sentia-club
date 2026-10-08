@@ -7377,6 +7377,8 @@ const Sections = (function(){
     {id:'cm4',cat:'Comunidad',nombre:'Voz activa',desc:'Publicaste 10 mensajes en el Foro',xp:120,unlock:null,criterio:'Publica 10 mensajes en el Foro VIP'},
     {id:'cm5',cat:'Comunidad',nombre:'Invita y gana',desc:'Alguien se registró con tu enlace',xp:80,unlock:null,criterio:'Invita a alguien y que se registre con tu enlace'},
     {id:'cm6',cat:'Comunidad',nombre:'Multiplicador',desc:'Tu invitado se hizo VIP',xp:200,unlock:null,criterio:'Que tu invitado se convierta en miembro VIP'},
+    {id:'cm7',cat:'Comunidad',nombre:'Te invitaron',desc:'Te registraste con el enlace de otro miembro',xp:50,unlock:null,criterio:'Entra a SENTIA con el enlace de invitación de alguien más'},
+    {id:'cm8',cat:'Comunidad',nombre:'Bienvenida VIP',desc:'Te hiciste VIP después de que te invitaron',xp:100,unlock:null,criterio:'Actívate como VIP habiendo entrado con un enlace de invitación'},
     // Biblioteca: ligado al mismo contador de retos, no a un conteo de lecturas.
     {id:'bi1',cat:'Biblioteca',nombre:'Biblioteca desbloqueada',desc:'Desbloqueaste todos los libros que piden retos',xp:250,unlock:null,criterio:'Desbloquea todos los libros bloqueados por retos'},
     // Certificación: verificado contra tus certificados oficiales reales.
@@ -12685,7 +12687,7 @@ const Sections = (function(){
           <div>
             <span class="referidos-card__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Invita y gana</span>
             <h2 class="referidos-card__title">Comparte. Ambos ganan.</h2>
-            <p class="referidos-card__desc">Cuando alguien se registre con tu enlace desbloqueas la insignia <b>Invita y gana</b>; si se hace VIP, desbloqueas <b>Multiplicador</b>.</p>
+            <p class="referidos-card__desc">Cuando alguien se registre con tu enlace, tú sumas hasta <b>+280 XP</b> (insignias <b>Invita y gana</b> y <b>Multiplicador</b>) y tu invitado suma hasta <b>+150 XP</b> propios (<b>Te invitaron</b> y <b>Bienvenida VIP</b>) en cuanto entra.</p>
           </div>
           <div class="referidos-card__stats">
             <span class="referidos-card__pill">Hasta +280 XP</span>
@@ -12712,7 +12714,7 @@ const Sections = (function(){
       catch(e){ input.removeAttribute('readonly'); input.select(); try{ document.execCommand('copy'); }catch(_){} input.setAttribute('readonly',''); Toast.success('Enlace copiado',''); }
     });
     container.querySelector('#referidos-compartir')?.addEventListener('click', ()=>{
-      const mensaje = `¡Hola! Te comparto SENTIA Human Institute 🧠 — cursos, retos y herramientas para profesionales de la psicología. Regístrate con mi enlace:\n${input.value}`;
+      const mensaje = `¡Hola! Te comparto SENTIA Human Institute 🧠 — cursos, retos y herramientas para profesionales de la psicología. Si te registras con mi enlace, ya arrancas con una insignia y XP de regalo:\n${input.value}`;
       window.open('https://wa.me/?text=' + encodeURIComponent(mensaje), '_blank', 'noopener');
     });
     (async ()=>{
@@ -13511,6 +13513,7 @@ window.__maybeAskProfile = function(){
     if (yaCompleto || whatsappGuardado) {
       localStorage.setItem('sentia_perfil_completado','1');
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
+      try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){}
       return;
     }
 
@@ -13617,6 +13620,7 @@ window.__maybeAskProfile = function(){
       if (window.Toast) Toast.success('Ficha guardada', val);
       ov.remove();
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
+      setTimeout(()=>{ try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){} }, 300);
     }
     form.addEventListener('submit', guardar);
     document.getElementById('nm-skip').addEventListener('click', async ()=>{
@@ -13632,10 +13636,65 @@ window.__maybeAskProfile = function(){
       ov.remove();
       if (window.Toast) Toast.info('Puedes completarla luego', 'Mi perfil → Directorio');
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
+      setTimeout(()=>{ try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){} }, 300);
     });
   } catch(e){ console.warn('maybeAskProfile:', e); }
 };
 window.__maybeAskName = window.__maybeAskProfile;
+
+// ═══════════════════════════════════════════════════════════════════
+// Popup: "te invitaron" — una sola vez, solo si la cuenta tiene
+// miembros.referidoPor (lo siembra vip-auth.html al registrarse con
+// ?ref=, nunca editable después). No hay nada que reclamar: la insignia
+// cm7 ya está desbloqueada en el servidor en cuanto esto se muestra.
+// ═══════════════════════════════════════════════════════════════════
+window.__maybeShowBienvenidaInvitado = function(){
+  try {
+    if (localStorage.getItem('sentia:bienvenida-invitado-vista') === '1') return;
+    localStorage.setItem('sentia:bienvenida-invitado-vista', '1');
+    if (!(window.memberData && window.memberData.referidoPor)) return;
+    if (document.getElementById('bienvenida-invitado')) return;
+
+    const pop = document.createElement('div');
+    pop.id = 'bienvenida-invitado';
+    pop.innerHTML = `
+      <div class="bi-backdrop"></div>
+      <section class="bi-card" role="dialog" aria-modal="true" aria-labelledby="bi-title">
+        <button class="bi-close" type="button" aria-label="Cerrar">×</button>
+        <div class="bi-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="bi-icon__badge">+50 XP</span></div>
+        <span class="bi-kicker">Te invitaron a SENTIA</span>
+        <h2 id="bi-title">Ya desbloqueaste <em>"Te invitaron"</em></h2>
+        <p>Alguien de la comunidad te compartió su enlace, así que ya tienes tu primera insignia en <b>Mis logros</b>. Si te haces VIP, desbloqueas otra insignia extra (+100 XP).</p>
+        <button type="button" class="bi-cta" id="bi-ir-logros">Ver mis logros<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </section>`;
+    document.body.appendChild(pop);
+    if (!document.getElementById('bi-css')) {
+      const st = document.createElement('style'); st.id = 'bi-css';
+      st.textContent = `
+        #bienvenida-invitado{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px}
+        #bienvenida-invitado .bi-backdrop{position:fixed;inset:0;background:rgba(10,12,20,.72);backdrop-filter:blur(4px)}
+        #bienvenida-invitado .bi-card{position:relative;width:100%;max-width:420px;background:linear-gradient(160deg,#0b1530,#081225);border:1px solid rgba(111,160,255,.25);border-radius:22px;padding:34px 28px 28px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:biPop .35s cubic-bezier(.22,1.4,.36,1);color:#eaf2ff}
+        @keyframes biPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+        #bienvenida-invitado .bi-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:transparent;color:rgba(255,255,255,.7);cursor:pointer;font-size:16px;line-height:1}
+        #bienvenida-invitado .bi-close:hover{background:rgba(255,255,255,.08);color:#fff}
+        #bienvenida-invitado .bi-icon{position:relative;width:64px;height:64px;margin:0 auto 14px;border-radius:18px;background:linear-gradient(135deg,#1b5df0,#3f7bff);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 10px 28px rgba(27,93,240,.4)}
+        #bienvenida-invitado .bi-icon .ic{width:28px;height:28px}
+        #bienvenida-invitado .bi-icon__badge{position:absolute;bottom:-9px;right:-12px;background:#1b5df0;color:#fff;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid #081225}
+        #bienvenida-invitado .bi-kicker{display:block;color:#6fa0ff;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+        #bienvenida-invitado h2{font-family:'Montserrat',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.4px;line-height:1.25;margin:0 0 10px}
+        #bienvenida-invitado h2 em{font-style:normal;color:#6fa0ff}
+        #bienvenida-invitado p{font-size:13.5px;color:rgba(234,242,255,.75);line-height:1.6;margin:0 0 20px}
+        #bienvenida-invitado p b{color:#fff}
+        #bienvenida-invitado .bi-cta{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#1b5df0,#3f7bff);color:#fff;font:750 13px 'Montserrat',sans-serif;cursor:pointer}
+        #bienvenida-invitado .bi-cta .ic{width:15px;height:15px}`;
+      document.head.appendChild(st);
+    }
+    const close = () => pop.remove();
+    pop.querySelector('.bi-close').addEventListener('click', close);
+    pop.querySelector('.bi-backdrop').addEventListener('click', close);
+    pop.querySelector('#bi-ir-logros').addEventListener('click', () => { close(); if (typeof navigateToSection === 'function') navigateToSection('logros'); });
+  } catch(e){ console.warn('bienvenidaInvitado:', e); }
+};
 
 function openEditField(field){
   const wrap=document.querySelector(`[data-field="${field}"]`);
