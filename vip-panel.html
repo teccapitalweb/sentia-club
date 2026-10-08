@@ -1988,7 +1988,20 @@ body::after{
 .dir-card__estado--ok{color:#1e7d46;background:color-mix(in srgb,#1e7d46 14%,transparent)}
 .dir-card__estado--info{color:#1b5df0;background:color-mix(in srgb,#1b5df0 12%,transparent)}
 .dir-det__vipic{width:16px;height:16px;color:#e8a71a;vertical-align:-2px}
+.dir-card__cover{position:absolute;top:0;left:0;right:0;height:64px;background-size:cover;background-position:center;z-index:0}
+.dir-det__cover{width:calc(100% + 48px);margin:-22px -24px 18px;height:84px;background-size:cover;background-position:center;border-radius:16px 16px 0 0}
+@media(max-width:600px){.dir-card__cover{height:100%;width:5px;right:auto;border-radius:0}.dir-det__cover{width:calc(100% + 36px);margin:-18px -18px 18px}}
 /* Form de tarjeta */
+.dir-form__vip{display:inline-flex;align-items:center;gap:4px;margin-left:7px;color:#b8860b;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+.dir-form__vip .ic{width:11px;height:11px}
+.dir-form__portada{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.dir-form__portada-prev{height:66px;border-radius:12px;border:1px solid var(--border-2);background-size:cover;background-position:center}
+.dir-form__swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dir-form__swatch{width:32px;height:32px;border-radius:10px;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border-2);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;padding:0}
+.dir-form__swatch:hover{transform:translateY(-1px)}
+.dir-form__swatch.is-active{box-shadow:0 0 0 2px var(--primary)}
+.dir-form__portada.is-locked{opacity:.5;pointer-events:none}
+.dir-form__portada .dir-form__opt{margin:0;font-size:11.5px}
 .dir-form{display:flex;flex-direction:column;gap:0}
 .dir-form__foto-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:18px}
 .dir-form__foto{width:96px;height:96px;border-radius:50%;background:var(--surface-2);border:2px dashed var(--border-2);display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -11309,6 +11322,23 @@ const Sections = (function(){
   // ═══════════════════════════════════════════════════════════════
   const SECTORES = ['Psicología Clínica','Psicología Educativa','Psicología Forense','Psicología Laboral','Neuropsicología','Salud Mental','Educación / Docencia','Trabajo Social','Desarrollo Humano','Otro'];
   const DIR_ESTADOS = { proyectos: { label: 'Disponible para proyectos', cls: 'ok' }, empleo: { label: 'Busco oportunidades', cls: 'info' } };
+  // Portada de la tarjeta: perk VIP, puramente visual. Paletas fijas (sin
+  // depender de imágenes externas) + opción de subir una foto propia.
+  const DIR_PORTADAS = {
+    dorado: { label: 'Dorado', bg: 'linear-gradient(135deg,#f6e2b3,#e8c071)' },
+    arena: { label: 'Arena', bg: 'linear-gradient(135deg,#f1e7d6,#d9c3a0)' },
+    azul: { label: 'Cielo', bg: 'linear-gradient(135deg,#cfe0f5,#6f9fd8)' },
+    marino: { label: 'Marino', bg: 'linear-gradient(135deg,#1e3a5f,#2f6fa3)' },
+    verde: { label: 'Verde', bg: 'linear-gradient(135deg,#d3eedd,#5cb88a)' },
+    terracota: { label: 'Terracota', bg: 'linear-gradient(135deg,#f6d2bd,#d9784a)' },
+    vino: { label: 'Vino', bg: 'linear-gradient(135deg,#6b1d33,#a8324f)' },
+    grafito: { label: 'Grafito', bg: 'linear-gradient(135deg,#3a3f47,#1f2329)' }
+  };
+  function dirPortadaStyle(c){
+    const img = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c?.portadaImg||'')) ? c.portadaImg : '';
+    if (img) return `background-image:url('${img}')`;
+    return `background:${(DIR_PORTADAS[c?.portadaColor] || DIR_PORTADAS.dorado).bg}`;
+  }
   let _dirUnsub = null;
   window.__dirCleanup = function(){ try{ if(typeof _dirUnsub==='function'){ _dirUnsub(); _dirUnsub=null; } }catch(e){} };
   window.__dirEditar = function(){ return dirEditarMiTarjeta(); };
@@ -11316,6 +11346,7 @@ const Sections = (function(){
   let _dirFiltroSector = 'todos';
   let _dirBusqueda = '';
   let _dirFotoTmp = undefined; // undefined=sin cambio, null=quitar, string=nueva
+  let _dirPortadaTmp = undefined; // undefined=sin cambio, null=quitar, string=nueva
   let _dirMeta = { cargado: false, viewerVip: false, contacts: {}, myContact: null };
 
   function dirEsVipActual(){ return window.UserState?.modo==='vip' || esAdminReal(); }
@@ -11393,6 +11424,21 @@ const Sections = (function(){
         cv.getContext('2d').drawImage(img,sx,sy,lado,lado,0,0,MAX,MAX);
         let q=0.78,out=cv.toDataURL('image/jpeg',q);
         while(out.length>180000 && q>0.4){ q-=0.08; out=cv.toDataURL('image/jpeg',q); }
+        resolve(out);
+      }; img.onerror=reject; img.src=e.target.result; };
+      r.onerror=reject; r.readAsDataURL(file);
+    });
+  }
+  function dirComprimirPortada(file){
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=e=>{ const img=new Image(); img.onload=()=>{
+        const W=900,H=280; const escala=Math.max(W/img.width,H/img.height);
+        const w=W/escala,h=H/escala,sx=(img.width-w)/2,sy=(img.height-h)/2;
+        const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+        cv.getContext('2d').drawImage(img,sx,sy,w,h,0,0,W,H);
+        let q=0.8,out=cv.toDataURL('image/jpeg',q);
+        while(out.length>220000 && q>0.4){ q-=0.08; out=cv.toDataURL('image/jpeg',q); }
         resolve(out);
       }; img.onerror=reject; img.src=e.target.result; };
       r.onerror=reject; r.readAsDataURL(file);
@@ -11644,6 +11690,7 @@ const Sections = (function(){
       : `<button class="dir-cta dir-cta--lock" data-dirlock="1" title="Hazte VIP para contactar"><svg class="ic"><use href="#i-lock"/></svg>Solo VIP</button>`;
     return `
       <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
+        ${c.vip?`<div class="dir-card__cover" style="${dirPortadaStyle(c)}"></div>`:''}
         ${esMia?'<span class="dir-card__badge-mia">Tú</span>':(c.vip?'<span class="dir-card__badge-vip"><svg class="ic"><use href="#i-crown"/></svg>VIP</span>':'')}
         <div class="dir-card__top">${foto}</div>
         <div class="dir-card__body-m">
@@ -11730,6 +11777,7 @@ const Sections = (function(){
         </div>`;
     const body = `
       <div class="dir-det">
+        ${c.vip?`<div class="dir-det__cover" style="${dirPortadaStyle(c)}"></div>`:''}
         <div class="dir-det__head">
           ${foto}
           <div class="dir-det__name">${escapeHtml(c.nombre||'Miembro SENTIA')}${c.vip?' <svg class="ic dir-det__vipic"><use href="#i-crown"/></svg>':''}</div>
@@ -11763,6 +11811,9 @@ const Sections = (function(){
     let contacto = _dirMeta.myContact || {};
     try { const d = await dirApi('/api/directorio/overview'); contacto = d.myContact||{}; _dirMeta = { cargado:true, viewerVip: d.viewerVip===true, contacts: d.contacts||{}, myContact: contacto }; } catch(e){}
     _dirFotoTmp = undefined;
+    _dirPortadaTmp = undefined;
+    const esVip = dirEsVipActual();
+    let portadaColor = DIR_PORTADAS[data.portadaColor] ? data.portadaColor : 'dorado';
 
     const fotoActual = data.foto || '';
     const body = `
@@ -11776,6 +11827,17 @@ const Sections = (function(){
             ${fotoActual?`<button class="btn btn--ghost btn--sm" id="dirf-foto-quitar">Quitar</button>`:''}
             <input type="file" id="dirf-foto-file" accept="image/*" style="display:none;">
           </div>
+        </div>
+        <label class="dir-form__lbl">Portada de tu tarjeta ${esVip?'':'<span class="dir-form__vip"><svg class="ic"><use href="#i-crown"/></svg>Solo VIP</span>'}</label>
+        <div class="dir-form__portada${esVip?'':' is-locked'}">
+          <div class="dir-form__portada-prev" id="dirf-portada-prev" style="${dirPortadaStyle(data)}"></div>
+          <div class="dir-form__swatches">
+            ${Object.entries(DIR_PORTADAS).map(([id,p])=>`<button type="button" class="dir-form__swatch${portadaColor===id && !/^data:image/.test(String(data.portadaImg||''))?' is-active':''}" data-portada="${id}" title="${p.label}" style="background:${p.bg}" ${esVip?'':'disabled'}></button>`).join('')}
+            <button type="button" class="btn btn--ghost btn--sm" id="dirf-portada-btn" ${esVip?'':'disabled'}><svg class="ic"><use href="#i-image"/></svg>Subir portada</button>
+            ${/^data:image/.test(String(data.portadaImg||''))?`<button type="button" class="btn btn--ghost btn--sm" id="dirf-portada-quitar">Quitar imagen</button>`:''}
+            <input type="file" id="dirf-portada-file" accept="image/*" style="display:none;">
+          </div>
+          ${esVip?'':'<p class="dir-form__opt">Hazte VIP para personalizar la portada de tu tarjeta.</p>'}
         </div>
         <label class="dir-form__lbl">Nombre completo</label>
         <input class="dir-form__in" id="dirf-nombre" maxlength="50" value="${(data.nombre||window.UserState?.nombre||'').replace(/"/g,'&quot;')}" placeholder="Ej. Felipe Estrada Ramírez">
@@ -11823,6 +11885,27 @@ const Sections = (function(){
     const btnQuitar = document.getElementById('dirf-foto-quitar');
     if (btnQuitar) btnQuitar.addEventListener('click', ()=>{ _dirFotoTmp = null; document.getElementById('dirf-foto-prev').innerHTML = `<svg class="ic"><use href="#i-user"/></svg>`; });
 
+    // Portada (perk VIP): paleta de colores o foto propia.
+    if (esVip) {
+      const portadaPrev = document.getElementById('dirf-portada-prev');
+      const pintarPortada = () => {
+        const img = _dirPortadaTmp !== undefined ? _dirPortadaTmp : (/^data:image/.test(String(data.portadaImg||''))?data.portadaImg:'');
+        portadaPrev.setAttribute('style', dirPortadaStyle({ portadaImg: img, portadaColor }));
+        document.querySelectorAll('[data-portada]').forEach(b=>b.classList.toggle('is-active', !img && b.dataset.portada===portadaColor));
+      };
+      document.querySelectorAll('[data-portada]').forEach(b=>b.addEventListener('click', ()=>{ portadaColor = b.dataset.portada; _dirPortadaTmp = null; pintarPortada(); }));
+      const portadaFile = document.getElementById('dirf-portada-file');
+      document.getElementById('dirf-portada-btn')?.addEventListener('click', ()=> portadaFile.click());
+      portadaFile?.addEventListener('change', async (e)=>{
+        const f = e.target.files[0]; if(!f) return;
+        if(!['image/jpeg','image/png','image/webp'].includes(f.type) || f.size > 8 * 1024 * 1024){ Toast.error('Archivo inválido','Usa JPG, PNG o WebP de máximo 8 MB'); return; }
+        try { _dirPortadaTmp = await dirComprimirPortada(f); pintarPortada(); }
+        catch(err){ console.error(err); Toast.error('No se pudo cargar la portada',''); }
+        portadaFile.value='';
+      });
+      document.getElementById('dirf-portada-quitar')?.addEventListener('click', ()=>{ _dirPortadaTmp = null; pintarPortada(); });
+    }
+
     footer.querySelector('#dirf-cancel').addEventListener('click', ()=> m.close());
     footer.querySelector('#dirf-guardar').addEventListener('click', async ()=>{
       const nombre = document.getElementById('dirf-nombre').value.trim();
@@ -11856,6 +11939,11 @@ const Sections = (function(){
       };
       if (_dirFotoTmp !== undefined) payload.foto = _dirFotoTmp; // string o null
       else if (data.foto) payload.foto = data.foto; // conservar
+      if (esVip) {
+        payload.portadaColor = portadaColor;
+        if (_dirPortadaTmp !== undefined) payload.portadaImg = _dirPortadaTmp;
+        else if (/^data:image/.test(String(data.portadaImg||''))) payload.portadaImg = data.portadaImg;
+      }
       try {
         // Sin merge: reemplaza el documento completo, así una ficha vieja
         // con whatsapp/correo/linkedin/web sueltos (de antes de este cambio)
