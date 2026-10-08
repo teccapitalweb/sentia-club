@@ -7435,7 +7435,13 @@ const Sections = (function(){
   // como respaldo sin conexión. Cuando el servidor responde (sincronizarLogros,
   // más abajo) sus datos mandan sobre este cálculo, igual que ya hacemos con
   // retos: aquí nadie puede inflar su racha o sus insignias desde DevTools.
+  // Una vez que el servidor ya contestó esta sesión, un `evaluarLogros()`
+  // local (llamado desde otras pantallas, sin idsServidor) ya no debe pisar
+  // esos números reales con el cálculo de respaldo — si no, por ejemplo
+  // entrar a Retos después de ver Mis logros los hacía volver a bajar.
+  let _logrosSincronizados = false;
   function evaluarLogros(idsServidor, statsServidor){
+    if (_logrosSincronizados && !idsServidor) return;
     try{
       const prog = (typeof getProgreso==='function') ? getProgreso() : {};
       const lista = Array.isArray(cursos) ? cursos : [];
@@ -7482,6 +7488,7 @@ const Sections = (function(){
       usuario.xp = logros.filter(l=>l.unlock).reduce((n,l)=>n+l.xp,0);
       usuario.racha = statsServidor ? statsServidor.racha : racha;
       usuario.diasActivos = statsServidor ? statsServidor.diasActivos : dias.length;
+      if (idsServidor) _logrosSincronizados = true;
     }catch(e){ console.warn('[SENTIA] logros:', e); }
   }
   window.__evaluarLogros = evaluarLogros;
@@ -7493,6 +7500,10 @@ const Sections = (function(){
   window.__pingLogrosVisita = async function(){
     try { await fetch(`${retosWebhookBase()}/api/logros/visita`, { method:'POST', headers: await window.__authHeaders() }); }
     catch(e){ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ }
+    // Después de registrar la visita, sincroniza de una vez — así cualquier
+    // pantalla (Biblioteca, Retos, Logros) parte ya con el número real,
+    // sin depender de cuál se visite primero.
+    try { await sincronizarLogros(); } catch(e){}
   };
   async function sincronizarLogros(){
     try {
@@ -10143,7 +10154,7 @@ const Sections = (function(){
     const nivelActual=getNivel(usuario.xp);
     const pct=Math.round(((usuario.xp-nivelActual.desde)/(nivelActual.hasta-nivelActual.desde))*100);
     const xpRest=nivelActual.hasta-usuario.xp;
-    const proxNivel=niveles[nivelActual.id]?.nombre||'Maestro';
+    const proxNivel=niveles[nivelActual.id]?.nombre||'Mentor SENTIA';
     const progresoReal=(typeof getProgreso==='function') ? getProgreso() : {};
     const clasesVistas=Object.values(progresoReal).reduce((n,p)=>n+((p&&p.clasesVistas)?p.clasesVistas.length:0),0);
     const actividadesAprobadas=Object.values(progresoReal).flatMap(p=>Object.values((p&&p.actividades)||{})).filter(a=>a&&a.aprobada).length;
@@ -10164,10 +10175,10 @@ const Sections = (function(){
           </div>
           <aside class="retos-hero__summary">
             <span>Tu avance actual</span>
-            <strong>Nivel ${nivelActual.id} · ${nivelActual.nombre}</strong>
-            <div class="retos-hero__bar"><i style="width:${pct}%"></i></div>
-            <small>${usuario.xp} puntos de avance${xpRest>0?' · '+xpRest+' para '+proxNivel:''}</small>
-            <div class="retos-hero__numbers"><div><b>${clasesVistas}</b><span>clases</span></div><div><b>${actividadesAprobadas}</b><span>actividades</span></div><div><b>${usuario.racha}</b><span>racha</span></div></div>
+            <strong id="retos-hero-nivel">Nivel ${nivelActual.id} · ${nivelActual.nombre}</strong>
+            <div class="retos-hero__bar"><i id="retos-hero-bar" style="width:${pct}%"></i></div>
+            <small id="retos-hero-puntos">${usuario.xp} puntos de avance${xpRest>0?' · '+xpRest+' para '+proxNivel:''}</small>
+            <div class="retos-hero__numbers"><div><b>${clasesVistas}</b><span>clases</span></div><div><b>${actividadesAprobadas}</b><span>actividades</span></div><div><b id="retos-hero-racha">${usuario.racha}</b><span>racha</span></div></div>
           </aside>
         </div>
 
@@ -10352,6 +10363,21 @@ const Sections = (function(){
       if(tipo==='arbol') _renderArbolView(container);
       if(tipo==='crucigrama') _renderCrucigramaView(container);
     }));
+
+    // El resumen de arriba pinta primero con el cálculo local (instantáneo);
+    // en cuanto el servidor responde (mismos puntos/racha que "Mis logros"),
+    // se actualiza sin rehacer toda la vista.
+    sincronizarLogros().then(ok=>{
+      if(!ok || _retosContainer!==container) return;
+      const n2=getNivel(usuario.xp);
+      const pct2=Math.round(((usuario.xp-n2.desde)/(n2.hasta-n2.desde))*100);
+      const xpRest2=n2.hasta-usuario.xp;
+      const proxNivel2=niveles[n2.id]?.nombre||'Mentor SENTIA';
+      const elNivel=container.querySelector('#retos-hero-nivel'); if(elNivel) elNivel.textContent=`Nivel ${n2.id} · ${n2.nombre}`;
+      const elBar=container.querySelector('#retos-hero-bar'); if(elBar) elBar.style.width=pct2+'%';
+      const elPuntos=container.querySelector('#retos-hero-puntos'); if(elPuntos) elPuntos.textContent=`${usuario.xp} puntos de avance${xpRest2>0?' · '+xpRest2+' para '+proxNivel2:''}`;
+      const elRacha=container.querySelector('#retos-hero-racha'); if(elRacha) elRacha.textContent=usuario.racha;
+    });
   }
   async function renderLogros(container){
     evaluarLogros(); // cálculo local instantáneo (primer pintado / respaldo sin conexión)
