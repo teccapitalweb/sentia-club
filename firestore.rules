@@ -189,6 +189,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Avance real de retos (reto diario, etc.) que desbloquea libros de la
+    // Biblioteca. Ni lectura ni escritura directa: las preguntas y respuestas
+    // correctas viven solo en Railway, así nadie puede leer ni falsear su
+    // conteo de retos superados desde DevTools.
+    match /retos_progreso/{uid} {
+      allow read, write: if false;
+    }
+
     match /notificaciones/{id} {
       allow read: if signedIn();
       // La publicación global pasa por el webhook autenticado; ni siquiera
