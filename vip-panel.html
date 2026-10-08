@@ -7225,8 +7225,13 @@ const Sections = (function(){
           // Retos (sube de Nivel), no solo por membresía VIP. Opcional: si el
           // admin no lo configura, el libro se comporta como antes.
           nivelRequerido: typeof d.nivelRequerido === 'number' ? d.nivelRequerido : null,
-          // MODIFICADO: el gate real, verificado en servidor (reto diario).
+          // MODIFICADO: el gate real, verificado en servidor (reto diario). El
+          // número de retos lo calcula el servidor (/api/retos/estado); para
+          // visitantes sin membresía (que no pueden llamar ese endpoint) se
+          // recalcula aquí mismo con bloqueadoPorRetos + creadoEn, mismo criterio.
           retosRequeridos: typeof d.retosRequeridos === 'number' ? d.retosRequeridos : null,
+          bloqueadoPorRetos: d.bloqueadoPorRetos === true,
+          creadoEnMs: d.creadoEn?.toMillis ? d.creadoEn.toMillis() : 0,
         };
       });
       _materialesBibCargados = true;
@@ -10642,55 +10647,83 @@ const Sections = (function(){
     return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados, requiere: dato.requiere };
   }
 
-  // Banner "Supera retos y desbloquea tu próximo libro" (estilo Alintec): se
-  // muestra solo si hay un libro de biblioteca con retosRequeridos que el
-  // miembro aún no ha desbloqueado; elige el más cercano (menos retos piden).
+  // Para visitantes SIN membresía no se puede llamar /api/retos/estado (pide
+  // VIP), pero sí pueden leer la colección `materiales` (allow read: if
+  // signedIn()). Se recalcula el mismo criterio del servidor en el cliente
+  // solo para el teaser (5, 10, 15… por orden de creación) — nunca se usa
+  // para decidir acceso real, solo para mostrar el aviso como hace Alintec.
+  function _retosRankClient(materialesTodos){
+    const map = new Map();
+    materialesTodos
+      .filter(m => m.source === 'biblioteca' && m.bloqueadoPorRetos === true)
+      .sort((a, b) => (a.creadoEnMs || 0) - (b.creadoEnMs || 0))
+      .forEach((m, i) => map.set(m.id, (i + 1) * 5));
+    return map;
+  }
+
+  function _retosCandidatos(materialesTodos, esVip){
+    if (esVip) {
+      return materialesTodos
+        .filter(m => m.source === 'biblioteca' && m.estado === 'disponible')
+        .map(m => { const acc = retosAcceso(m.id); return { m, requiere: acc.requiere, superados: acc.superados || 0, abierto: acc.abierto }; })
+        .filter(x => x.requiere != null);
+    }
+    const rankMap = _retosRankClient(materialesTodos);
+    return materialesTodos
+      .filter(m => m.source === 'biblioteca' && m.estado === 'disponible' && rankMap.has(m.id))
+      .map(m => ({ m, requiere: rankMap.get(m.id), superados: 0, abierto: false }));
+  }
+
+  // Banner "Supera retos y desbloquea tu [próximo/primer] libro" (estilo
+  // Alintec): se muestra también sin membresía, como anzuelo hacia la
+  // suscripción — Alintec lo hace igual con "Ver suscripción".
   function _bibRetosBannerHTML(materialesTodos){
-    if (!tieneAccesoVipCompleto()) return '';
-    const candidatos = materialesTodos
-      .filter(m => m.source === 'biblioteca' && m.estado === 'disponible')
-      .map(m => ({ m, acc: retosAcceso(m.id) }))
-      .filter(x => x.acc.requiere != null && !x.acc.abierto)
-      .sort((a, b) => a.acc.requiere - b.acc.requiere);
+    const esVip = tieneAccesoVipCompleto();
+    const candidatos = _retosCandidatos(materialesTodos, esVip)
+      .filter(x => !x.abierto)
+      .sort((a, b) => a.requiere - b.requiere);
     if (!candidatos.length) return '';
-    const { m, acc } = candidatos[0];
-    const superados = acc.superados || 0;
-    const requiere = acc.requiere;
+    const { m, requiere, superados } = candidatos[0];
     const faltan = Math.max(0, requiere - superados);
     const pct = Math.min(100, Math.round((superados / requiere) * 100));
+    const ctaHTML = esVip
+      ? `<button type="button" class="bib-retos-banner__cta" id="bib-retos-banner-cta">Ir a Retos</button>`
+      : `<button type="button" class="bib-retos-banner__cta" id="bib-retos-banner-cta-suscripcion">Ver suscripción</button>`;
+    const copy = esVip
+      ? `Con el reto diario, completa ${faltan} más para abrir «${escapeHtml(m.titulo)}».`
+      : `Con tu suscripción, completa ${requiere} retos de la Zona de Retos y abre «${escapeHtml(m.titulo)}». Los demás libros se abren con más retos.`;
     return `
       <div class="bib-retos-banner">
         <div class="bib-retos-banner__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
         <div class="bib-retos-banner__body">
-          <strong>Supera retos y desbloquea tu próximo libro</strong>
-          <p>Con el reto diario, completa ${faltan} más para abrir «${escapeHtml(m.titulo)}».</p>
+          <strong>Supera retos y desbloquea tu ${esVip ? 'próximo' : 'primer'} libro</strong>
+          <p>${copy}</p>
           <div class="bib-retos-banner__bar"><div class="bib-retos-banner__bar-fill" style="width:${pct}%"></div></div>
           <span class="bib-retos-banner__caption">${superados}/${requiere} retos diarios superados</span>
         </div>
-        <button type="button" class="bib-retos-banner__cta" id="bib-retos-banner-cta">Ir a Retos</button>
+        ${ctaHTML}
       </div>`;
   }
 
   // Vitrina de "qué libro se desbloquea con cuántos retos" (toda la ruta, no
-  // solo el siguiente) — se muestra arriba del material disponible, como
-  // tarjetas de libro reales (misma tarjeta que la grilla de abajo), no texto.
+  // solo el siguiente) — tarjetas de libro reales (misma tarjeta que la
+  // grilla de abajo). También visible sin membresía, igual que el banner.
   function _bibRetosRutaHTML(materialesTodos){
-    if (!tieneAccesoVipCompleto()) return '';
-    const items = materialesTodos
-      .filter(m => m.source === 'biblioteca' && m.estado === 'disponible')
-      .map(m => ({ m, acc: retosAcceso(m.id) }))
-      .filter(x => x.acc.requiere != null)
-      .sort((a, b) => a.acc.requiere - b.acc.requiere);
+    const esVip = tieneAccesoVipCompleto();
+    const items = _retosCandidatos(materialesTodos, esVip).sort((a, b) => a.requiere - b.requiere);
     if (!items.length) return '';
-    const superados = items[0].acc.superados || 0;
+    const superados = items[0].superados || 0;
     const tarjetas = items.map(({ m }) => _renderBibCard(m, false)).join('');
+    const subtitulo = esVip
+      ? `${superados} reto${superados !== 1 ? 's' : ''} diario${superados !== 1 ? 's' : ''} superado${superados !== 1 ? 's' : ''} en total`
+      : 'Actívate y empieza a sumar retos';
     return `
       <div class="bib-retos-ruta">
         <div class="bib-retos-ruta__head">
           <strong>Libros que vas a desbloquear</strong>
-          <span>${superados} reto${superados !== 1 ? 's' : ''} diario${superados !== 1 ? 's' : ''} superado${superados !== 1 ? 's' : ''} en total</span>
+          <span>${subtitulo}</span>
         </div>
         <div class="bib-grid bib-retos-ruta__grid">${tarjetas}</div>
       </div>`;
@@ -10840,6 +10873,8 @@ const Sections = (function(){
 
       const bannerCta = container.querySelector('#bib-retos-banner-cta');
       if (bannerCta) bannerCta.addEventListener('click', () => navigateToSection('retos'));
+      const bannerCtaSuscripcion = container.querySelector('#bib-retos-banner-cta-suscripcion');
+      if (bannerCtaSuscripcion) bannerCtaSuscripcion.addEventListener('click', () => navigateToSection('suscripcion'));
 
       const rutaGrid = container.querySelector('.bib-retos-ruta__grid');
       if (rutaGrid) {
