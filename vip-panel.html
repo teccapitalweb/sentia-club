@@ -2330,6 +2330,18 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .referidos-card__link-lbl{display:block;font-family:'Montserrat',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
 @media(max-width:680px){.referidos-card{padding:22px 18px}.referidos-card__top{grid-template-columns:1fr}.referidos-card__stats{min-width:0}}
 
+/* Banner "Elige tu curso gratis" arriba del catálogo */
+.free-course-banner{position:relative;display:flex;align-items:center;gap:16px;margin:0 0 20px;padding:18px 20px;border-radius:18px;overflow:hidden;border:1px solid color-mix(in srgb,var(--primary) 35%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,transparent),color-mix(in srgb,var(--primary) 4%,transparent))}
+.free-course-banner__icon{width:46px;height:46px;flex-shrink:0;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#1b5df0,#3f7bff);color:#fff;box-shadow:0 8px 18px color-mix(in srgb,var(--primary) 35%,transparent)}
+.free-course-banner__icon .ic{width:22px;height:22px}
+.free-course-banner__copy{flex:1;min-width:0}
+.free-course-banner__copy>span{display:block;margin-bottom:3px;font:700 10px/1 'Montserrat',monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--primary)}
+.free-course-banner strong{display:block;font:800 16px/1.25 'Montserrat',sans-serif;color:var(--text)}
+.free-course-banner p{margin:3px 0 0;color:var(--text-2);font-size:13px;line-height:1.5}
+.free-course-banner__hint{display:inline-flex;align-items:center;gap:6px;flex:none;padding:8px 13px;border-radius:999px;background:var(--primary);color:#fff;font-size:12px;font-weight:800;white-space:nowrap}
+.free-course-banner__hint .ic{width:14px;height:14px;transform:rotate(90deg)}
+@media(max-width:560px){.free-course-banner{flex-wrap:wrap;align-items:flex-start;padding:16px}.free-course-banner__hint{width:100%;justify-content:center}}
+
 /* Invitación "Elige tu curso gratis" */
 #curso-gratis-intro{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px}
 #curso-gratis-intro .fci__backdrop{position:fixed;inset:0;background:rgba(10,8,5,.55);backdrop-filter:blur(5px)}
@@ -7831,14 +7843,19 @@ const Sections = (function(){
       list.innerHTML=`<div class="empty-state"><div class="empty-state__icon"><svg class="ic ic--xl"><use href="#i-book"/></svg></div><h3>Sin resultados</h3><p>Cambia el filtro o búsqueda para ver más cursos.</p></div>`;
       return;
     }
-    const bannerGratis = cursoGratisPendiente() ? `
-      <div class="bib-retos-banner" style="margin-bottom:18px;">
-        <div class="bib-retos-banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
-        <div class="bib-retos-banner__body">
+    const bannerGratis = cursoGratisPendiente() ? (()=>{
+      const gratisMax = Math.max(0, ...cursos.filter(cursoPuedeSerGratis).map(c => clasesGratisPara(c.sesiones.length)));
+      return `
+      <section class="free-course-banner">
+        <span class="free-course-banner__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
+        <div class="free-course-banner__copy">
+          <span>Tu regalo de bienvenida</span>
           <strong>Elige tu curso gratis</strong>
-          <p>Abre cualquier curso de abajo y elige el que quieras probar gratis. Solo puedes elegir uno.</p>
+          <p>Toca el curso que más te interese y verás gratis sus primeras ${gratisMax || 4} clases. Solo puedes elegir uno.</p>
         </div>
-      </div>` : '';
+        <span class="free-course-banner__hint" aria-hidden="true">Elige abajo <svg class="ic"><use href="#i-arrow-right"/></svg></span>
+      </section>`;
+    })() : '';
     list.innerHTML=`${bannerGratis}<div class="cursos-grid">${items.map((c, idx)=>{
       const cursoIdx = cursos.findIndex(x => x.id === c.id);
       const desbloqueado = cursoDesbloqueado(cursoIdx, c);
@@ -7885,6 +7902,13 @@ const Sections = (function(){
     const cursoIdx = cursos.findIndex(x => x.id === id);
     const desbloqueado = cursoDesbloqueado(cursoIdx, c);
     const diasFalta = diasParaDesbloquear(cursoIdx, c);
+
+    // Aún no elige su curso gratis: en vez de abrir el detalle bloqueado,
+    // le preguntamos de una vez si quiere que ESTE sea su curso gratis.
+    if (!tieneAccesoVipCompleto() && !desbloqueado && cursoGratisPendiente() && cursoPuedeSerGratis(c)) {
+      confirmarCursoGratis(c);
+      return;
+    }
     const portada = c.portada || coverSVG(c.area, c.titulo);
     const colorArea = COLOR_AREA[c.area] || '#1b5df0';
     const iconArea = ICON_AREA[c.area] || 'i-book';
