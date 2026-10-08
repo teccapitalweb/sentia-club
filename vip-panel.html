@@ -10651,6 +10651,20 @@ const Sections = (function(){
     return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados, requiere: dato.requiere };
   }
 
+  // Mismo cálculo de "¿se puede abrir ya?" que usan _renderBibDetalle() y
+  // _renderBibCard(), pero solo el booleano — para poder ordenar la grilla
+  // (disponibles primero, bloqueados al final) sin duplicar esa lógica.
+  function _bibEstaDisponible(m){
+    if (m.source !== 'biblioteca') return _materialDisponible(m);
+    const muestraGratis = m.gratis === true;
+    const requiereMembresia = !tieneAccesoVipCompleto() && !muestraGratis;
+    const retosAccesoInfo = retosAcceso(m.id);
+    const bloqueadoPorRetos = retosAccesoInfo.requiere != null && !retosAccesoInfo.abierto;
+    const nivelReq = retosAccesoInfo.requiere == null ? (m.nivelRequerido || 0) : 0;
+    const bloqueadoPorNivel = nivelReq > 0 && getNivel(usuario.xp).id < nivelReq;
+    return (m.estado === 'disponible' && !requiereMembresia) && !bloqueadoPorNivel && !bloqueadoPorRetos;
+  }
+
   // Para visitantes SIN membresía no se puede llamar /api/retos/estado (pide
   // VIP), pero sí pueden leer la colección `materiales` (allow read: if
   // signedIn()). Se recalcula el mismo criterio del servidor en el cliente
@@ -10754,6 +10768,10 @@ const Sections = (function(){
 
     const bibMats = await cargarMaterialesBiblioteca();
     const materialesTodos = [...bibMats, ..._allMaterialesFromCursos()];
+    // Prioridad: lo ya desbloqueado primero, lo bloqueado (VIP/Nivel/Retos)
+    // al final — sort() es estable, así que dentro de cada grupo se respeta
+    // el orden original.
+    materialesTodos.sort((a, b) => (_bibEstaDisponible(a) ? 0 : 1) - (_bibEstaDisponible(b) ? 0 : 1));
     const total = materialesTodos.length;
     const tipos = {};
     materialesTodos.forEach(m => {
