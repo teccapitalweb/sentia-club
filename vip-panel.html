@@ -3621,6 +3621,11 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .pcard-hero__visual--sopa .pcard-hero__float--1{background:#e0f2f1;color:#00695c}
 .pcard-hero__cta--sopa{color:#00695c}
 :root[data-theme="night"] .pcard-hero__visual--sopa .pcard-hero__float--1{background:var(--surface-3);color:#5ec4a8}
+.pcard-hero__visual--memorama{background:transparent}
+.pcard-hero__visual--memorama .pcard-hero__eyebrow,.pcard-hero__visual--memorama .pcard-hero__tag{color:#ad1457}
+.pcard-hero__visual--memorama .pcard-hero__float--1{background:#fce4ec;color:#ad1457}
+.pcard-hero__cta--memorama{color:#ad1457}
+:root[data-theme="night"] .pcard-hero__visual--memorama .pcard-hero__float--1{background:var(--surface-3);color:#f06292}
 :root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__float--1{background:var(--surface-3);color:#5ec4a8}
 :root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__float--1{background:var(--surface-3);color:#9b93e8}
 :root[data-theme="night"] .pcard-hero__visual--intervencion .pcard-hero__float--1{background:var(--surface-3);color:#64b5f6}
@@ -3764,6 +3769,22 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .sopa-word.is-found{color:#00897b;text-decoration:line-through;background:#e0f2f1}
 :root[data-theme="night"] .sopa-word.is-found{background:var(--surface-3)}
 @media(max-width:760px){.sopa-panel-banner{padding:27px 22px}.sopa-panel-banner h1{font-size:28px}.sopa-panel-area{grid-template-columns:1fr}.sopa-cell{width:24px;height:24px;font-size:11px}}
+
+/* Panel Memorama */
+.memo-panel-banner{position:relative;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#880e4f,#ad1457 55%,#c2185b);color:#fff;overflow:hidden;margin-bottom:22px}
+.memo-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#f8bbd0;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.memo-panel-banner h1{max-width:560px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.memo-panel-banner p{margin:0;max-width:520px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.memo-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#880e4f;font:750 12px 'Montserrat',sans-serif;cursor:pointer;transition:transform .15s}.memo-panel-banner__back:hover{transform:scale(1.03)}.memo-panel-banner__back .ic{width:15px;height:15px}
+.memo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:560px}
+.memo-card{position:relative;aspect-ratio:1;border-radius:12px;cursor:pointer;perspective:600px}
+.memo-card__inner{position:relative;width:100%;height:100%;transition:transform .4s;transform-style:preserve-3d}
+.memo-card.is-flipped .memo-card__inner,.memo-card.is-matched .memo-card__inner{transform:rotateY(180deg)}
+.memo-card__face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:7px;border-radius:12px;backface-visibility:hidden;font-size:11px;line-height:1.3;font-weight:700}
+.memo-card__face--back{background:linear-gradient(135deg,#ad1457,#880e4f);color:#fff;font-size:20px}
+.memo-card__face--front{background:#fce4ec;color:#880e4f;transform:rotateY(180deg)}
+.memo-card.is-matched .memo-card__face--front{background:#f8bbd0}
+@media(max-width:760px){.memo-panel-banner{padding:27px 22px}.memo-panel-banner h1{font-size:28px}.memo-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:100%}}
 
 /* Modo Historia */
 .historia-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:24px 28px;border-radius:20px;background:var(--surface);border:1px solid var(--border-2);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:22px}.historia-banner::before{display:none}.historia-banner>*{position:relative;z-index:1}.historia-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#2d8b5f;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.historia-banner__eyebrow .ic{width:14px;height:14px;color:#2d8b5f}.historia-banner h1{max-width:500px;margin:10px 0 8px;color:var(--text);font-size:clamp(24px,3vw,34px);letter-spacing:-.04em;line-height:1.05}.historia-banner h1 em{font-style:normal;color:#2d8b5f}.historia-banner p{margin:0;max-width:440px;color:var(--text-2);font-size:13px;line-height:1.55}.historia-banner__cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:9px 16px;border:0;border-radius:999px;background:var(--primary);color:#fff;font:750 12px 'Montserrat',sans-serif;cursor:pointer;transition:background .15s}.historia-banner__cta:hover{background:var(--primary-deep)}.historia-banner__cta .ic{width:15px;height:15px}.historia-personajes{display:flex;gap:12px;align-self:center}.historia-pj{display:flex;flex-direction:column;align-items:center;gap:5px}.historia-pj__avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:800;color:#fff;border:2px solid var(--border-2);background:var(--pj-color)}.historia-pj__name{font-size:10px;font-weight:700;color:var(--text)}.historia-pj__role{font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
@@ -8848,6 +8869,12 @@ const Sections = (function(){
   // intentarlo. SOPAS_TOTAL es solo para el contador de la tarjeta.
   const SOPAS_TOTAL = 3;
 
+  /* ═══ MEMORAMA — data ═══ */
+  // Juego rápido, mismo espíritu que sopa/crucigrama: los pares completos
+  // vienen del servidor, nada que ocultar. MEMORAMAS_TOTAL es solo para el
+  // contador de la tarjeta.
+  const MEMORAMAS_TOTAL = 3;
+
   /* ═══ CASO CLÍNICO — panel view ═══ */
   // MODIFICADO: el caso del día, sus preguntas y respuestas correctas ya NO
   // viven en este archivo — los califica el servidor (mismo patrón que el
@@ -9784,6 +9811,104 @@ const Sections = (function(){
     container.querySelector('#sopa-terminar')?.addEventListener('click',terminar);
   }
 
+  /* ═══ MEMORAMA — panel view ═══ */
+  // Mismo patrón fácil: los pares completos vienen del GET, el navegador
+  // arma y baraja las 2N cartas y resuelve el volteo/emparejado solo —
+  // nada que ocultar, nada que calificar. El POST solo certifica el intento.
+  async function _renderMemoramaView(container){
+    _retosContainer=container;
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando memorama de hoy…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/memorama`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar el memorama de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar el memorama de hoy. <button type="button" class="btn btn--ghost" id="memo-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#memo-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
+    const yaHecho=!!data.yaRespondido;
+    let cartas=[];
+    data.pares.forEach(p=>{ cartas.push({parId:p.id,texto:p.term}); cartas.push({parId:p.id,texto:p.par}); });
+    for(let i=cartas.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cartas[i],cartas[j]]=[cartas[j],cartas[i]]; }
+    const cartasHTML=cartas.map((c,i)=>`
+      <div class="memo-card${yaHecho?' is-matched':''}" data-memo-i="${i}" data-memo-par="${c.parId}">
+        <div class="memo-card__inner">
+          <div class="memo-card__face memo-card__face--back">?</div>
+          <div class="memo-card__face memo-card__face--front">${escapeHtml(c.texto)}</div>
+        </div>
+      </div>`).join('');
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="memo-panel-banner">
+          <span class="memo-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Memoria · Memorama del día</span>
+          <h1>${escapeHtml(data.titulo)}</h1>
+          <p>Encuentra cada término con su definición. No importa cuántos intentos te tome: lo importante es intentarlo hoy.</p>
+          <button type="button" class="memo-panel-banner__back" id="memo-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+        </div>
+        <div class="memo-grid" id="memo-grid">${cartasHTML}</div>
+        <div id="memo-resultado-area"></div>
+      </div>
+    `;
+    container.querySelector('#memo-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+
+    function mostrarResultado(){
+      const area=container.querySelector('#memo-resultado-area');
+      area.innerHTML=`
+        <div class="cc-panel-resultado fade-up">
+          <div class="cc-panel-resultado__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h2>¡Memorama completado!</h2>
+          <p>Emparejaste los ${data.pares.length} pares de hoy.</p>
+          <div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+10 XP</div>
+          <p style="font-size:12.5px;color:var(--text-3);margin-top:6px">Con intentarlo ya cuenta para tus libros de la Biblioteca.</p>
+          <button type="button" class="btn btn--ghost" style="margin-top:20px" id="memo-volver-fin">Volver a retos</button>
+        </div>`;
+      container.querySelector('#memo-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+    }
+
+    if(yaHecho){ mostrarResultado(); return; }
+
+    let volteadas=[];
+    let bloqueado=false;
+    const encontrados=new Set();
+    container.querySelectorAll('[data-memo-i]').forEach(carta=>{
+      carta.addEventListener('click',()=>{
+        if(bloqueado || carta.classList.contains('is-flipped') || carta.classList.contains('is-matched')) return;
+        carta.classList.add('is-flipped');
+        volteadas.push(carta);
+        if(volteadas.length<2) return;
+        bloqueado=true;
+        const [a,b]=volteadas;
+        if(a.dataset.memoPar===b.dataset.memoPar){
+          a.classList.add('is-matched'); b.classList.add('is-matched');
+          encontrados.add(a.dataset.memoPar);
+          volteadas=[]; bloqueado=false;
+          if(encontrados.size>=data.pares.length) terminar();
+        }else{
+          setTimeout(()=>{
+            a.classList.remove('is-flipped'); b.classList.remove('is-flipped');
+            volteadas=[]; bloqueado=false;
+          },900);
+        }
+      });
+    });
+
+    async function terminar(){
+      try{
+        const r=await fetch(`${retosWebhookBase()}/api/retos/memorama`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId})});
+        const res=await r.json();
+        if(!r.ok) throw new Error(res.error||'No se pudo registrar tu avance');
+      }catch(e){
+        container.querySelector('#memo-resultado-area').innerHTML=`<p class="fade-up" style="text-align:center;color:var(--text-3);padding:12px">No se pudo registrar tu avance. Intenta de nuevo.</p>`;
+        return;
+      }
+      mostrarResultado();
+      registrarAccionProgreso('memorama');
+    }
+  }
+
   /* ============================ MODO HISTORIA ============================ */
   const historiaPersonajes = {
     elena: { nombre:'Dra. Elena', color:'#2D7A5F', iniciales:'DE', rol:'Mentora' },
@@ -10395,7 +10520,7 @@ const Sections = (function(){
 
           <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--juego"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>Juegos SENTIA</span><small>2–4 min</small></div>
-            <div class="practice-experiences__grid practice-experiences__grid--2">
+            <div class="practice-experiences__grid">
               <div class="pcard-hero" data-practice="crucigrama" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--crucigrama">
                   <span class="pcard-hero__eyebrow">Terminología</span>
@@ -10422,6 +10547,20 @@ const Sections = (function(){
                   <h3 class="pcard-hero__title">Sopa de letras</h3>
                   <p class="pcard-hero__desc">Encuentra términos de psicología escondidos en la cuadrícula.</p>
                   <span class="pcard-hero__cta pcard-hero__cta--sopa">Buscar palabras<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
+              </div>
+              <div class="pcard-hero" data-practice="memorama" data-lockable="true">
+                <div class="pcard-hero__visual pcard-hero__visual--memorama">
+                  <span class="pcard-hero__eyebrow">Memoria</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${MEMORAMAS_TOTAL} memoramas</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Memorama</h3>
+                  <p class="pcard-hero__desc">Empareja cada término con su definición antes de que se te olvide.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--memorama">Jugar memorama<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
                 </div>
               </div>
             </div>
@@ -10552,6 +10691,7 @@ const Sections = (function(){
       if(tipo==='arbol') _renderArbolView(container);
       if(tipo==='crucigrama') _renderCrucigramaView(container);
       if(tipo==='sopa') _renderSopaView(container);
+      if(tipo==='memorama') _renderMemoramaView(container);
     }));
 
     // El resumen de arriba pinta primero con el cálculo local (instantáneo);
