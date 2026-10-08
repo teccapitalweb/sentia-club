@@ -3981,6 +3981,15 @@ const Pages={
         });
       });
     });
+    // El número de retos requeridos NUNCA se escribe a mano: el primer libro
+    // marcado con `bloqueadoPorRetos` pide 5, el segundo 10, el tercero 15…
+    // según el orden real en que se crearon (creadoEn). Mismo cálculo que
+    // hace el servidor en /api/retos/estado — aquí es solo para mostrarlo.
+    const bloqueadosOrden = (store.materialesBiblioteca || [])
+      .filter(m => m.bloqueadoPorRetos === true)
+      .sort((a, b) => (a.creadoEn?.toMillis ? a.creadoEn.toMillis() : 0) - (b.creadoEn?.toMillis ? b.creadoEn.toMillis() : 0));
+    const requiereMap = new Map(bloqueadosOrden.map((m, i) => [m.id, (i + 1) * 5]));
+
     (store.materialesBiblioteca || []).forEach(m => {
       const curso = m.cursoId ? store.cursos.find(c => c.id === m.cursoId) : null;
       out.push({
@@ -3994,7 +4003,8 @@ const Pages={
         estado: m.estado || 'disponible',
         gratis: m.gratis === true,
         nivelRequerido: typeof m.nivelRequerido === 'number' ? m.nivelRequerido : null,
-        retosRequeridos: typeof m.retosRequeridos === 'number' ? m.retosRequeridos : null,
+        bloqueadoPorRetos: m.bloqueadoPorRetos === true,
+        retosRequeridos: requiereMap.get(m.id) || null,
         disponibleSiempre: true,
         desbloquearEnDias: null
       });
@@ -4475,9 +4485,11 @@ const Pages={
           <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Se calcula en el navegador de cada quien — alguien podría adelantarlo manipulando su sesión. Úsalo solo para libros sin información sensible, o déjalo vacío.</div>
         </div>
         <div class="form-field">
-          <label class="label" for="bl-retos">✅ Retos diarios superados requeridos (recomendado)</label>
-          <input type="number" class="input" id="bl-retos" min="0" max="999" value="${mat.retosRequeridos||''}" placeholder="Ej: 5">
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Lo cuenta y califica el servidor (reto diario) — nadie puede falsearlo. Déjalo vacío para no usarlo.</div>
+          <label class="label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="bl-retos" ${mat.bloqueadoPorRetos ? 'checked' : ''}>
+            ✅ Bloquear por retos diarios (recomendado)
+          </label>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">El servidor cuenta y califica el reto diario — nadie puede falsearlo. No escribes ningún número: el primer libro marcado pide 5 retos superados, el segundo 10, el tercero 15… según el orden en que se crearon los libros marcados.</div>
         </div>
         <div class="form-field form-field--full">
           <label class="label" for="bl-desc">Descripción</label>
@@ -4549,8 +4561,7 @@ const Pages={
         const estado = document.getElementById('bl-estado').value;
         const nivelVal = document.getElementById('bl-nivel').value;
         const nivelRequerido = nivelVal ? parseInt(nivelVal, 10) : null;
-        const retosVal = document.getElementById('bl-retos').value.trim();
-        const retosRequeridos = retosVal ? parseInt(retosVal, 10) : null;
+        const bloqueadoPorRetos = document.getElementById('bl-retos').checked;
         const gratis = document.getElementById('bl-gratis').checked;
         const cursoId = document.getElementById('bl-curso').value;
         const url = document.getElementById('bl-url').value.trim();
@@ -4591,7 +4602,7 @@ const Pages={
         const materialId = esEdicion ? editId : (slugify(titulo) + '-' + Math.random().toString(36).slice(2,8));
         const datos = {
           titulo, tipo, categoria, autor, descripcion:desc, estado, gratis,
-          cursoId, paginas, portada:portadaData, url, area, nivelRequerido, retosRequeridos,
+          cursoId, paginas, portada:portadaData, url, area, nivelRequerido, bloqueadoPorRetos,
           actualizadoEn: fb.serverTimestamp(),
         };
         if (!esEdicion) datos.creadoEn = fb.serverTimestamp();

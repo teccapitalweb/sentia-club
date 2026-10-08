@@ -10448,14 +10448,16 @@ const Sections = (function(){
     const tipo = esBib ? m.tipo : _inferirTipoMaterial(m.tipo || '');
     const muestraGratis = esBib ? m.gratis : esMaterialGratis(m.cursoId, m.materialIndex);
     const requiereMembresia = !tieneAccesoVipCompleto() && !muestraGratis;
-    // MODIFICADO: libros de biblioteca con requisito de Retos. retosRequeridos
-    // es el gate real (verificado en servidor); si no está configurado, cae a
-    // nivelRequerido (más simple, pero calculado en el navegador).
+    // MODIFICADO: libros de biblioteca bloqueados por retos. El servidor es la
+    // única fuente de verdad de "cuántos retos pide este libro" (se calcula
+    // solo, por orden de creación: 5, 10, 15… nadie escribe el número); si el
+    // servidor no trae este libro en su lista, cae a nivelRequerido (más
+    // simple, pero calculado en el navegador).
     // (evaluarLogros()/cargarEstadoRetos() ya se llamaron una vez en renderPDFs
     // antes de pintar la lista).
-    const retosAccesoInfo = esBib ? retosAcceso(m.id) : { abierto: true };
-    const bloqueadoPorRetos = esBib && !!m.retosRequeridos && !retosAccesoInfo.abierto;
-    const nivelReq = esBib && !m.retosRequeridos ? (m.nivelRequerido || 0) : 0;
+    const retosAccesoInfo = esBib ? retosAcceso(m.id) : { abierto: true, requiere: null };
+    const bloqueadoPorRetos = esBib && retosAccesoInfo.requiere != null && !retosAccesoInfo.abierto;
+    const nivelReq = esBib && retosAccesoInfo.requiere == null ? (m.nivelRequerido || 0) : 0;
     const nivelActual = getNivel(usuario.xp);
     const bloqueadoPorNivel = nivelReq > 0 && nivelActual.id < nivelReq;
     const nivelReqNombre = (niveles.find(n => n.id === nivelReq) || {}).nombre || '';
@@ -10471,7 +10473,7 @@ const Sections = (function(){
     let estadoTexto = 'Disponible para miembros';
     if (muestraGratis) estadoTexto = 'Gratis';
     else if (!disponible && requiereMembresia) estadoTexto = 'Solo miembros VIP';
-    else if (!disponible && bloqueadoPorRetos) estadoTexto = `${retosAccesoInfo.superados||0}/${m.retosRequeridos} retos diarios superados`;
+    else if (!disponible && bloqueadoPorRetos) estadoTexto = `${retosAccesoInfo.superados||0}/${retosAccesoInfo.requiere} retos diarios superados`;
     else if (!disponible && bloqueadoPorNivel) estadoTexto = `Nivel ${nivelReq} · ${nivelReqNombre} requerido`;
     else if (!disponible && !esBib) estadoTexto = diasFaltan === 1 ? 'Disponible mañana' : 'En ' + diasFaltan + ' días';
     else if (!disponible) estadoTexto = 'Próximamente';
@@ -10495,7 +10497,7 @@ const Sections = (function(){
       btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-paywall="${m.cursoId || 'vip'}" style="background:var(--text-3)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M12 2l2.09 6.26L21 9.27l-5 3.89L17.18 20 12 16.77 6.82 20 8 13.16l-5-3.89 6.91-1.01z"/></svg> Activa tu membresía</button>`;
     } else if (bloqueadoPorRetos) {
-      btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-retos-bloqueo="${m.retosRequeridos}" data-retos-superados="${retosAccesoInfo.superados||0}" style="background:var(--text-3)">
+      btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-retos-bloqueo="${retosAccesoInfo.requiere}" data-retos-superados="${retosAccesoInfo.superados||0}" style="background:var(--text-3)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Resuelve el reto diario</button>`;
     } else if (bloqueadoPorNivel) {
       btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-nivel-bloqueo="${nivelReq}" data-nivel-nombre="${escapeHtml(nivelReqNombre)}" style="background:var(--text-3)">
@@ -10514,8 +10516,8 @@ const Sections = (function(){
 
     const progresoRetosHTML = bloqueadoPorRetos
       ? `<div class="bib-retos-progress">
-          <div class="bib-retos-progress__bar"><div class="bib-retos-progress__fill" style="width:${Math.min(100, Math.round(((retosAccesoInfo.superados||0) / m.retosRequeridos) * 100))}%"></div></div>
-          <span>${retosAccesoInfo.superados||0}/${m.retosRequeridos} retos diarios superados · solo para miembros</span>
+          <div class="bib-retos-progress__bar"><div class="bib-retos-progress__fill" style="width:${Math.min(100, Math.round(((retosAccesoInfo.superados||0) / retosAccesoInfo.requiere) * 100))}%"></div></div>
+          <span>${retosAccesoInfo.superados||0}/${retosAccesoInfo.requiere} retos diarios superados · solo para miembros</span>
         </div>`
       : '';
 
@@ -10560,13 +10562,14 @@ const Sections = (function(){
     const tipo = esBib ? m.tipo : _inferirTipoMaterial(m.tipo || '');
     const muestraGratis = esBib ? m.gratis : esMaterialGratis(m.cursoId, m.materialIndex);
     const requiereMembresia = !tieneAccesoVipCompleto() && !muestraGratis;
-    // MODIFICADO: libros con requisito de Retos. retosRequeridos (servidor) es
-    // el gate real; si no está configurado, cae a nivelRequerido (navegador).
+    // MODIFICADO: libros bloqueados por retos. El servidor dice cuántos pide
+    // cada libro (calculado solo, no se escribe a mano); si no aplica, cae a
+    // nivelRequerido (navegador).
     // (evaluarLogros()/cargarEstadoRetos() ya se llamaron una vez en renderPDFs
     // antes de pintar la lista).
-    const retosAccesoInfoCard = esBib ? retosAcceso(m.id) : { abierto: true };
-    const bloqueadoPorRetos = esBib && !!m.retosRequeridos && !retosAccesoInfoCard.abierto;
-    const nivelReq = esBib && !m.retosRequeridos ? (m.nivelRequerido || 0) : 0;
+    const retosAccesoInfoCard = esBib ? retosAcceso(m.id) : { abierto: true, requiere: null };
+    const bloqueadoPorRetos = esBib && retosAccesoInfoCard.requiere != null && !retosAccesoInfoCard.abierto;
+    const nivelReq = esBib && retosAccesoInfoCard.requiere == null ? (m.nivelRequerido || 0) : 0;
     const bloqueadoPorNivel = nivelReq > 0 && getNivel(usuario.xp).id < nivelReq;
     const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
     const tituloEsc = escapeHtml(m.titulo || 'Sin título');
@@ -10576,7 +10579,7 @@ const Sections = (function(){
 
     let statusHTML = '';
     if (muestraGratis && disponible) statusHTML = '<span class="bib-card__status bib-card__status--free">Gratis</span>';
-    else if (bloqueadoPorRetos) statusHTML = `<span class="bib-card__status bib-card__status--vip">${retosAccesoInfoCard.superados||0}/${m.retosRequeridos} retos</span>`;
+    else if (bloqueadoPorRetos) statusHTML = `<span class="bib-card__status bib-card__status--vip">${retosAccesoInfoCard.superados||0}/${retosAccesoInfoCard.requiere} retos</span>`;
     else if (bloqueadoPorNivel) statusHTML = `<span class="bib-card__status bib-card__status--vip">Nivel ${nivelReq}</span>`;
     else if (requiereMembresia) statusHTML = '<span class="bib-card__status bib-card__status--vip">VIP</span>';
 
@@ -10621,10 +10624,12 @@ const Sections = (function(){
     return _retosEstadoCache;
   }
   function retosAcceso(materialId){
-    if (_retosEstadoCache === 'error' || _retosEstadoCache == null) return { abierto: true, superados: 0 };
+    if (_retosEstadoCache === 'error' || _retosEstadoCache == null) return { abierto: true, superados: 0, requiere: null };
     const dato = _retosEstadoCache.libros.find(x => x.id === materialId);
-    if (!dato) return { abierto: true, superados: _retosEstadoCache.superados };
-    return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados };
+    // requiere === null: este libro no está en la lista de retos del servidor
+    // (no tiene bloqueadoPorRetos), así que no aplica este tipo de bloqueo.
+    if (!dato) return { abierto: true, superados: _retosEstadoCache.superados, requiere: null };
+    return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados, requiere: dato.requiere };
   }
 
   // Banner "Supera retos y desbloquea tu próximo libro" (estilo Alintec): se
@@ -10633,15 +10638,16 @@ const Sections = (function(){
   function _bibRetosBannerHTML(materialesTodos){
     if (!tieneAccesoVipCompleto()) return '';
     const candidatos = materialesTodos
-      .filter(m => m.source === 'biblioteca' && m.retosRequeridos && m.estado === 'disponible')
+      .filter(m => m.source === 'biblioteca' && m.estado === 'disponible')
       .map(m => ({ m, acc: retosAcceso(m.id) }))
-      .filter(x => !x.acc.abierto)
-      .sort((a, b) => a.m.retosRequeridos - b.m.retosRequeridos);
+      .filter(x => x.acc.requiere != null && !x.acc.abierto)
+      .sort((a, b) => a.acc.requiere - b.acc.requiere);
     if (!candidatos.length) return '';
     const { m, acc } = candidatos[0];
     const superados = acc.superados || 0;
-    const faltan = Math.max(0, m.retosRequeridos - superados);
-    const pct = Math.min(100, Math.round((superados / m.retosRequeridos) * 100));
+    const requiere = acc.requiere;
+    const faltan = Math.max(0, requiere - superados);
+    const pct = Math.min(100, Math.round((superados / requiere) * 100));
     return `
       <div class="bib-retos-banner">
         <div class="bib-retos-banner__icon">
@@ -10651,7 +10657,7 @@ const Sections = (function(){
           <strong>Supera retos y desbloquea tu próximo libro</strong>
           <p>Con el reto diario, completa ${faltan} más para abrir «${escapeHtml(m.titulo)}».</p>
           <div class="bib-retos-banner__bar"><div class="bib-retos-banner__bar-fill" style="width:${pct}%"></div></div>
-          <span class="bib-retos-banner__caption">${superados}/${m.retosRequeridos} retos diarios superados</span>
+          <span class="bib-retos-banner__caption">${superados}/${requiere} retos diarios superados</span>
         </div>
         <button type="button" class="bib-retos-banner__cta" id="bib-retos-banner-cta">Ir a Retos</button>
       </div>`;
