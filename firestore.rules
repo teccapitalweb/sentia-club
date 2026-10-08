@@ -28,7 +28,7 @@ service cloud.firestore {
         // notificaciones. Esos datos los gestiona el servidor o un admin.
         && request.resource.data.keys().hasOnly([
           'uid', 'email', 'nombre', 'displayName', 'activa', 'activo', 'plan',
-          'source', 'origen', 'fechaRegistro', 'createdAt', 'lastUpdatedAt'
+          'source', 'origen', 'fechaRegistro', 'createdAt', 'lastUpdatedAt', 'referidoPor'
         ])
         && request.resource.data.uid == uid
         && request.resource.data.email is string && request.resource.data.email.size() <= 254
@@ -36,7 +36,10 @@ service cloud.firestore {
         && (!('nombre' in request.resource.data) || (request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100))
         && (!('displayName' in request.resource.data) || (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100))
         && request.resource.data.activa == false
-        && (!('activo' in request.resource.data) || request.resource.data.activo == false);
+        && (!('activo' in request.resource.data) || request.resource.data.activo == false)
+        // Quién la invitó (para el logro de "invita y gana"). Solo se puede
+        // sembrar al crear la cuenta, nunca editar después, y no a sí mismo.
+        && (!('referidoPor' in request.resource.data) || (request.resource.data.referidoPor is string && request.resource.data.referidoPor.matches('^[A-Za-z0-9]{10,40}$') && request.resource.data.referidoPor != uid));
       // Los cambios de membresía, plan, vencimiento y eliminación pasan por
       // Railway. Un navegador solo puede corregir su propio nombre y los
       // datos de su ficha profesional (whatsapp, área, empresa) que alimentan
@@ -225,6 +228,12 @@ service cloud.firestore {
     // retos_progreso: si el navegador pudiera escribir aquí, cualquiera se
     // marcaría racha infinita desde DevTools. Solo Railway la registra.
     match /actividad_dias/{uid} {
+      allow read, write: if false;
+    }
+
+    // Uso real de las herramientas clínicas (para los logros he1-4/ev2/ev3/
+    // in2/in3/la2). Mismo motivo que arriba: solo Railway lo registra.
+    match /herramientas_uso/{uid} {
       allow read, write: if false;
     }
 

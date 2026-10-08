@@ -5245,7 +5245,13 @@ function bnToolShell(container, cfg){
 
 /* ─── Utilidades comunes ─── */
 function psEsc(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function psMarcarUso(key){ try{ localStorage.setItem('sentia:'+key, String(Date.now())); }catch(e){} }
+async function psRegistrarUsoServidor(key, esPdf){
+  try {
+    const base = (location.hostname==='localhost') ? 'http://localhost:8081' : window.WEBHOOK_URL;
+    await fetch(`${base}/api/logros/herramienta`, { method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({ key, pdf: !!esPdf }) });
+  } catch(e){ /* sin conexión: localStorage ya guardó el respaldo, se reintenta en el próximo uso */ }
+}
+function psMarcarUso(key, esPdf){ try{ localStorage.setItem('sentia:'+key, String(Date.now())); }catch(e){} psRegistrarUsoServidor(key, esPdf); }
 function psDraftGet(key){ try{ return JSON.parse(localStorage.getItem('sentia:draft:'+key)||'{}'); }catch(e){ return {}; } }
 function psDraftSet(key,d){ try{ localStorage.setItem('sentia:draft:'+key, JSON.stringify(d)); }catch(e){} }
 function psHoy(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -5305,7 +5311,7 @@ function psPdfSave(ctx, nombre, key){
   const n=ctx.pdf.getNumberOfPages();
   for(let i=1;i<=n;i++){ ctx.pdf.setPage(i); bnPdfFooter(ctx.pdf); ctx.pdf.setFontSize(8); ctx.pdf.text(i+' / '+n, 194, 287, {align:'right'}); }
   ctx.pdf.save(nombre+'-'+Date.now()+'.pdf');
-  psMarcarUso(key);
+  psMarcarUso(key, true);
   try{ localStorage.setItem('sentia:pdfs', String((parseInt(localStorage.getItem('sentia:pdfs')||'0')||0)+1)); }catch(e){}
   Toast.success('PDF generado','Se descargó en tu dispositivo');
 }
@@ -7351,6 +7357,8 @@ const Sections = (function(){
     {id:'cm2',cat:'Comunidad',nombre:'Tarjeta verificada',desc:'Tu tarjeta aparece como VIP en el Directorio',xp:50,unlock:null,criterio:'Sé VIP y ten tu tarjeta del Directorio activa'},
     {id:'cm3',cat:'Comunidad',nombre:'Primer aporte',desc:'Publicaste tu primer mensaje en el Foro',xp:40,unlock:null,criterio:'Publica 1 mensaje en el Foro VIP'},
     {id:'cm4',cat:'Comunidad',nombre:'Voz activa',desc:'Publicaste 10 mensajes en el Foro',xp:120,unlock:null,criterio:'Publica 10 mensajes en el Foro VIP'},
+    {id:'cm5',cat:'Comunidad',nombre:'Invita y gana',desc:'Alguien se registró con tu enlace',xp:80,unlock:null,criterio:'Invita a alguien y que se registre con tu enlace'},
+    {id:'cm6',cat:'Comunidad',nombre:'Multiplicador',desc:'Tu invitado se hizo VIP',xp:200,unlock:null,criterio:'Que tu invitado se convierta en miembro VIP'},
     // Biblioteca: ligado al mismo contador de retos, no a un conteo de lecturas.
     {id:'bi1',cat:'Biblioteca',nombre:'Biblioteca desbloqueada',desc:'Desbloqueaste todos los libros que piden retos',xp:250,unlock:null,criterio:'Desbloquea todos los libros bloqueados por retos'},
     // Certificación: verificado contra tus certificados oficiales reales.
@@ -12646,6 +12654,54 @@ const Sections = (function(){
     if (typeof loadProfileFromLS==='function') loadProfileFromLS();
   }
 
+  /* ═══ Referidos: "invita y gana" — sin créditos, suma a los logros ═══ */
+  // El enlace usa el propio uid como código: nada que generar, nada que
+  // mapear. Al registrarse con ?ref=<uid>, vip-auth.html lo adjunta a la
+  // cuenta nueva (una sola vez, no editable); el servidor cuenta cuántos
+  // de esos referidos existen y cuántos ya son VIP para los logros cm5/cm6.
+  function referidosWidgetHTML(uid){
+    const link = `${location.origin}${location.pathname.replace(/[^/]+$/,'')}vip-auth.html?tab=register&ref=${encodeURIComponent(uid)}`;
+    return `
+      <section class="perfil-card" id="referidos-widget" style="margin-top:14px;">
+        <div class="perfil-card__title"><svg class="ic" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px"><use href="#i-users"/></svg>Invita y gana</div>
+        <div style="padding:6px 0 14px;font-size:13px;color:var(--text-2);line-height:1.55;">
+          Comparte tu enlace con colegas. Cuando alguien se registre contigo desbloqueas un logro, y si se hace VIP desbloqueas otro.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <input readonly id="referidos-link" value="${link}" style="flex:1;min-width:200px;padding:10px 12px;border-radius:9px;border:1px solid var(--border-2);background:var(--surface-2);color:var(--text);font-size:12.5px;font-family:inherit;">
+          <button class="btn btn--ghost" id="referidos-copiar" type="button" style="white-space:nowrap;"><svg class="ic"><use href="#i-link"/></svg>Copiar</button>
+          <button class="btn btn--accent" id="referidos-compartir" type="button" style="white-space:nowrap;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ic"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>Compartir</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--surface-2);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;" id="referidos-n-registrados">—</div><div style="font-size:11px;color:var(--text-3);">se registraron</div></div>
+          <div style="background:var(--surface-2);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--primary);" id="referidos-n-vip">—</div><div style="font-size:11px;color:var(--text-3);">ya son VIP</div></div>
+        </div>
+      </section>`;
+  }
+  function wireReferidosWidget(container){
+    const input = container.querySelector('#referidos-link');
+    if (!input) return;
+    container.querySelector('#referidos-copiar')?.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(input.value); Toast.success('Enlace copiado',''); }
+      catch(e){ input.removeAttribute('readonly'); input.select(); try{ document.execCommand('copy'); }catch(_){} input.setAttribute('readonly',''); Toast.success('Enlace copiado',''); }
+    });
+    container.querySelector('#referidos-compartir')?.addEventListener('click', async ()=>{
+      if (navigator.share) {
+        try{ await navigator.share({ title:'Únete a SENTIA', text:'Te comparto mi enlace para unirte a SENTIA Human Institute', url: input.value }); return; }catch(e){ if (e?.name==='AbortError') return; }
+      }
+      try{ await navigator.clipboard.writeText(input.value); Toast.success('Enlace copiado','Compártelo donde quieras'); }catch(e){}
+    });
+    (async ()=>{
+      try{
+        const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        const elR = container.querySelector('#referidos-n-registrados'); if (elR) elR.textContent = data.referidosRegistrados ?? 0;
+        const elV = container.querySelector('#referidos-n-vip'); if (elV) elV.textContent = data.referidosVip ?? 0;
+      } catch(e){ /* se queda en "—" si no hay conexión */ }
+    })();
+  }
+
   /* ============================ SUSCRIPCIÓN ============================ */
   function renderSuscripcion(container){
     const S = window.UserState || { modo:'cargando' };
@@ -12939,6 +12995,8 @@ const Sections = (function(){
           </div>
         </section>
 
+        ${referidosWidgetHTML(S.uid)}
+
         <div class="perfil-grid">
           <div class="perfil-card">
             <div class="perfil-card__title">Método de pago</div>
@@ -13014,6 +13072,7 @@ const Sections = (function(){
     if (btnPortal) {
       btnPortal.addEventListener('click', () => abrirBillingPortal(btnPortal));
     }
+    wireReferidosWidget(container);
   }
 
   // ─── Modal de confirmación de cancelación ───

@@ -510,6 +510,15 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 setPersistence(auth, browserLocalPersistence);
 
+// ── Referidos: si llegó por un enlace "?ref=UID" (compartido desde
+// Suscripción), se guarda en sessionStorage para sobrevivir la redirección
+// de Google y se adjunta UNA sola vez, solo si la cuenta resulta ser
+// realmente nueva (ensureMiembroDoc la consume y la borra abajo). ──
+try {
+  const refParam = new URLSearchParams(location.search).get('ref');
+  if (refParam && /^[A-Za-z0-9]{10,40}$/.test(refParam)) sessionStorage.setItem('sentia_ref', refParam);
+} catch (e) {}
+
 async function esAdministrador(user){
   if (!user) return false;
   const token = await user.getIdTokenResult(true);
@@ -586,6 +595,12 @@ async function ensureMiembroDoc(user, displayName, origen){
       console.log('[ensureMiembroDoc] ya existia:', user.uid);
       return { ok:true, action:'exists', uid:user.uid };
     }
+    let referidoPor = null;
+    try {
+      const r = sessionStorage.getItem('sentia_ref');
+      if (r && r !== user.uid) referidoPor = r;
+      sessionStorage.removeItem('sentia_ref');
+    } catch (e) {}
     await setDoc(ref, {
       uid: user.uid,
       email: (user.email || '').toLowerCase(),
@@ -597,7 +612,8 @@ async function ensureMiembroDoc(user, displayName, origen){
       fechaRegistro: serverTimestamp(),
       createdAt: serverTimestamp(),
       lastUpdatedAt: serverTimestamp(),
-      origen: origen || 'login-web'
+      origen: origen || 'login-web',
+      ...(referidoPor ? { referidoPor } : {})
     });
     console.log('[ensureMiembroDoc] doc creado en miembros/' + user.uid);
     return { ok:true, action:'created', uid:user.uid };
