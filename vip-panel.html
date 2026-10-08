@@ -2552,6 +2552,31 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-retos-progress__fill{height:100%;background:var(--primary);border-radius:100px;transition:width .3s ease}
 .bib-retos-progress span{display:block;margin-top:6px;font-size:11.5px;color:var(--text-3)}
 
+.bib-retos-ruta{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:6px 0;margin-bottom:22px;overflow:hidden;
+}
+.bib-retos-ruta__head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:14px 20px 12px;
+}
+.bib-retos-ruta__head strong{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--text)}
+.bib-retos-ruta__head span{font-size:11.5px;color:var(--text-3);white-space:nowrap}
+.bib-retos-ruta__item{
+  display:flex;align-items:center;gap:12px;padding:11px 20px;
+  border-top:1px solid var(--border);cursor:pointer;transition:background .15s;
+}
+.bib-retos-ruta__item:hover{background:color-mix(in srgb,var(--primary) 5%,transparent)}
+.bib-retos-ruta__check{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);
+}
+.bib-retos-ruta__check--lock{background:var(--surface-3);color:var(--text-3)}
+.bib-retos-ruta__titulo{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bib-retos-ruta__meta{font-family:'Montserrat',monospace;font-size:11px;font-weight:700;color:var(--text-3);white-space:nowrap}
+.bib-retos-ruta__item.is-desbloqueado .bib-retos-ruta__meta{color:var(--primary)}
+
 .bib-detalle{
   display:grid;grid-template-columns:auto 1fr;gap:32px;
   background:var(--surface);border:1px solid var(--border);border-radius:20px;
@@ -10665,6 +10690,46 @@ const Sections = (function(){
       </div>`;
   }
 
+  // Lista completa de "qué libro se desbloquea con cuántos retos" (toda la
+  // ruta, no solo el siguiente) — se muestra arriba del material disponible.
+  function _bibRetosRutaHTML(materialesTodos){
+    if (!tieneAccesoVipCompleto()) return '';
+    const items = materialesTodos
+      .filter(m => m.source === 'biblioteca' && m.estado === 'disponible')
+      .map(m => ({ m, acc: retosAcceso(m.id) }))
+      .filter(x => x.acc.requiere != null)
+      .sort((a, b) => a.acc.requiere - b.acc.requiere);
+    if (!items.length) return '';
+    const superados = items[0].acc.superados || 0;
+    const filas = items.map(({ m, acc }) => {
+      const tituloEsc = escapeHtml(m.titulo || 'Sin título');
+      if (acc.abierto) {
+        return `<div class="bib-retos-ruta__item is-desbloqueado" data-mid="${m.id}">
+          <span class="bib-retos-ruta__check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span class="bib-retos-ruta__titulo">${tituloEsc}</span>
+          <span class="bib-retos-ruta__meta">Desbloqueado</span>
+        </div>`;
+      }
+      return `<div class="bib-retos-ruta__item" data-mid="${m.id}">
+        <span class="bib-retos-ruta__check bib-retos-ruta__check--lock">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <span class="bib-retos-ruta__titulo">${tituloEsc}</span>
+        <span class="bib-retos-ruta__meta">${acc.requiere} retos</span>
+      </div>`;
+    }).join('');
+    return `
+      <div class="bib-retos-ruta">
+        <div class="bib-retos-ruta__head">
+          <strong>Libros que vas a desbloquear</strong>
+          <span>${superados} reto${superados !== 1 ? 's' : ''} diario${superados !== 1 ? 's' : ''} superado${superados !== 1 ? 's' : ''} en total</span>
+        </div>
+        ${filas}
+      </div>`;
+  }
+
   async function renderPDFs(container){
     // MODIFICADO: se evalúa una sola vez por render (no por tarjeta) el avance
     // de Retos, para que los libros bloqueados por Nivel usen el XP vigente,
@@ -10707,6 +10772,7 @@ const Sections = (function(){
           <p class="bib-header__count">${total} recurso${total !== 1 ? 's' : ''} · guías, formatos y material de apoyo de tus cursos.</p>
         </div>
         ${_bibRetosBannerHTML(materialesTodos)}
+        ${_bibRetosRutaHTML(materialesTodos)}
         ${total === 0 ? `
           <div style="text-align:center;padding:60px 24px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:14px;margin-top:18px;">
             <div style="width:64px;height:64px;border-radius:50%;background:color-mix(in srgb, var(--primary) 12%, transparent);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
@@ -10808,6 +10874,10 @@ const Sections = (function(){
 
       const bannerCta = container.querySelector('#bib-retos-banner-cta');
       if (bannerCta) bannerCta.addEventListener('click', () => navigateToSection('retos'));
+
+      container.querySelectorAll('.bib-retos-ruta__item[data-mid]').forEach(row => {
+        row.addEventListener('click', () => seleccionarMaterial(row.dataset.mid));
+      });
     }, 50);
   }
 
