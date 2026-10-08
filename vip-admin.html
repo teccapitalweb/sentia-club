@@ -4463,18 +4463,21 @@ const Pages={
             ${['disponible','proximamente','oculto'].map(e => `<option value="${e}" ${e===mat.estado?'selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
           </select>
         </div>
+        <div class="form-field form-field--full" style="padding:12px 14px;background:var(--surface-2);border-radius:10px;font-size:11.5px;color:var(--text-3);line-height:1.5;">
+          Dos formas de exigir retos resueltos antes de desbloquear este libro — usa <strong>una sola</strong>. Si llenas ambas, <strong>"Retos diarios" manda y "Nivel" se ignora por completo</strong>.
+        </div>
         <div class="form-field">
-          <label class="label" for="bl-nivel">Nivel de Retos requerido</label>
+          <label class="label" for="bl-nivel">⚠️ Nivel de Retos requerido (falseable)</label>
           <select class="select" id="bl-nivel">
             <option value="" ${!mat.nivelRequerido?'selected':''}>Sin requisito (solo membresía)</option>
             ${[[1,'Aprendiz'],[2,'Practicante'],[3,'Profesional'],[4,'Especialista'],[5,'Maestro']].map(([id,nombre]) => `<option value="${id}" ${Number(mat.nivelRequerido)===id?'selected':''}>Nivel ${id} · ${nombre}</option>`).join('')}
           </select>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Rápido de cumplir, pero se calcula en el navegador de cada quien — alguien podría adelantarlo manipulando su sesión.</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Se calcula en el navegador de cada quien — alguien podría adelantarlo manipulando su sesión. Úsalo solo para libros sin información sensible, o déjalo vacío.</div>
         </div>
         <div class="form-field">
-          <label class="label" for="bl-retos">Retos diarios superados requeridos</label>
+          <label class="label" for="bl-retos">✅ Retos diarios superados requeridos (recomendado)</label>
           <input type="number" class="input" id="bl-retos" min="0" max="999" value="${mat.retosRequeridos||''}" placeholder="Ej: 5">
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">El bueno de verdad: lo cuenta y califica el servidor (reto diario), nadie puede falsearlo. Déjalo vacío para no usarlo.</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Lo cuenta y califica el servidor (reto diario) — nadie puede falsearlo. Déjalo vacío para no usarlo.</div>
         </div>
         <div class="form-field form-field--full">
           <label class="label" for="bl-desc">Descripción</label>
