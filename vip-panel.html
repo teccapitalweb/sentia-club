@@ -8663,60 +8663,10 @@ const Sections = (function(){
   const INTERVENCIONES_TOTAL = 4;
 
   /* ═══ SIMULADOR DE SESIÓN — data ═══ */
-  const simuladoresData=[
-    {titulo:'Paciente que quiere dejar la terapia',intro:'Llevas 4 meses atendiendo a Fernanda, 29 años, por ansiedad. Hoy entra y dice: "Creo que ya no necesito venir. Me siento bien."',nodos:{
-      inicio:{dialogo:'Fernanda: "Creo que ya no necesito venir. Me siento bien. Además sale caro."',opciones:[
-        {texto:'Me alegra que te sientas mejor. ¿Qué cosas han cambiado para ti?',siguiente:'buena1',feedback:'Buena elección. Explorar los cambios sin presionar valida su percepción y abre espacio para evaluar juntos.'},
-        {texto:'Pero aún no hemos terminado el proceso. Todavía hay cosas que trabajar.',siguiente:'mala1',feedback:'Cuidado. Esto puede sonar como que tú sabes más que ella sobre su bienestar. La alianza se debilita.'},
-        {texto:'¿Hay algo que te incomode de la terapia o de mí como terapeuta?',siguiente:'directa1',feedback:'Válido pero arriesgado tan pronto. Puede sentirlo como que la cuestionas en lugar de escucharla.'}
-      ]},
-      buena1:{dialogo:'Fernanda: "Pues ya no tengo tantos ataques de pánico. Duermo mejor. Siento que puedo manejar las cosas sola."',opciones:[
-        {texto:'Eso es un avance real. ¿Te parece si hacemos un cierre planificado en 2-3 sesiones?',siguiente:'final_bueno',feedback:'Excelente. Un cierre planificado consolida lo aprendido, previene recaídas y respeta la autonomía del paciente.'},
-        {texto:'¿Y qué pasa cuando algo difícil aparece? ¿Cómo lo manejas?',siguiente:'final_neutro',feedback:'Buena pregunta exploratoria. La ayuda a evaluar sus recursos sin invalidar su progreso.'}
-      ]},
-      mala1:{dialogo:'Fernanda (se cruza de brazos): "Es que siento que me quieres retener. Yo ya estoy bien."',opciones:[
-        {texto:'Tienes razón, tu percepción importa. ¿Qué te parece si evaluamos juntos dónde estás?',siguiente:'recupera1',feedback:'Buena recuperación. Devuelves el control y te corriges sin perder autoridad clínica.'},
-        {texto:'No es retenerte, es que hay patrones que pueden regresar si no los trabajamos.',siguiente:'final_malo',feedback:'Esto confirma su sensación de ser retenida. La relación terapéutica se daña más.'}
-      ]},
-      directa1:{dialogo:'Fernanda: "No, no es eso... es que siento que ya di lo que podía y no quiero depender de venir aquí."',opciones:[
-        {texto:'Entiendo. La independencia es justamente una señal de progreso. ¿Hacemos un cierre formal?',siguiente:'final_bueno',feedback:'Perfecto. Reencuadras su deseo de independencia como fortaleza y propones estructura.'},
-        {texto:'Depender de la terapia no es lo mismo que usarla como herramienta.',siguiente:'final_neutro',feedback:'Correcto pero puede sonar como corrección. El tono importa tanto como el contenido.'}
-      ]},
-      recupera1:{dialogo:'Fernanda (se relaja): "Bueno, sí. Podemos ver qué falta. Pero no quiero que se alargue."',opciones:[
-        {texto:'De acuerdo. Hagamos un balance hoy y tú decides. ¿Te parece?',siguiente:'final_bueno',feedback:'Perfecto. Devuelves agencia, acuerdas un marco temporal y mantienes la alianza.'}
-      ]},
-      final_bueno:{dialogo:'Fernanda sonríe: "Sí, me parece bien. Gracias por no presionarme."',opciones:[]},
-      final_neutro:{dialogo:'Fernanda asiente: "Ok, lo pensaré. ¿La siguiente semana?"',opciones:[]},
-      final_malo:{dialogo:'Fernanda: "Bueno, ya veré. Déjame pensarlo." (Se nota distante el resto de la sesión.)',opciones:[]}
-    }},
-    {titulo:'Padre que minimiza el problema del hijo',intro:'Sesión con la familia López. El hijo Emilio, 12 años, tiene problemas de conducta en la escuela. El padre dice que "los niños son así" y no ve necesidad de terapia.',nodos:{
-      inicio:{dialogo:'Padre: "Yo a su edad era igual y salí bien. Los chamacos necesitan mano dura, no un psicólogo."',opciones:[
-        {texto:'Entiendo su perspectiva. ¿Me puede contar cómo era usted a esa edad?',siguiente:'buena1',feedback:'Excelente. Valida sin confrontar y explora su historia para entender el marco de referencia.'},
-        {texto:'Los estudios muestran que la conducta disruptiva puede escalar si no se atiende.',siguiente:'mala1',feedback:'Datos vs emociones. El padre se siente corregido por un "experto" y se cierra más.'},
-        {texto:'Emilio, ¿tú qué piensas de lo que dice tu papá?',siguiente:'directa1',feedback:'Riesgoso. Triangular al hijo puede ponerlo en una posición incómoda frente a su padre.'}
-      ]},
-      buena1:{dialogo:'Padre: "Pues sí me metía en problemas, pero mi papá me ponía en orden. Un par de coscorrones y ya."',opciones:[
-        {texto:'¿Y cómo se sentía usted cuando eso pasaba?',siguiente:'profunda1',feedback:'Perfecto. Lo llevas a conectar con su propia experiencia emocional sin juzgar a su padre.'},
-        {texto:'¿Y cree que eso es lo que Emilio necesita?',siguiente:'final_neutro',feedback:'Puede funcionar pero suena a trampa retórica. El padre puede sentir que lo están guiando.'}
-      ]},
-      mala1:{dialogo:'Padre (molesto): "¿Y usted tiene hijos? Porque una cosa es la teoría y otra la vida real."',opciones:[
-        {texto:'No necesito tener hijos para entender que usted quiere lo mejor para Emilio. Eso es evidente.',siguiente:'recupera1',feedback:'Buena recuperación. Desvías la confrontación y regresas al terreno común: el bienestar del hijo.'},
-        {texto:'Tiene razón, cada familia es diferente. Cuénteme más sobre cómo maneja las situaciones difíciles.',siguiente:'final_neutro',feedback:'Válida pero algo evasiva. Funciona para bajar la tensión.'}
-      ]},
-      directa1:{dialogo:'Emilio (mirando al piso): "No sé... a veces sí me gustaría que me escucharan más."',opciones:[
-        {texto:'Gracias por compartir eso, Emilio. (Al padre:) ¿Qué escucha usted en lo que dijo su hijo?',siguiente:'profunda1',feedback:'Muy bueno. Usas las palabras del hijo como puente sin confrontar al padre directamente.'}
-      ]},
-      profunda1:{dialogo:'Padre (pausa larga): "... Pues la verdad sí me sentía solo. Pero así eran las cosas."',opciones:[
-        {texto:'Y usted no quiere que Emilio se sienta así. Por eso está aquí, aunque no esté seguro de que funcione.',siguiente:'final_bueno',feedback:'Perfecto. Conectas su dolor pasado con su amor presente. La resistencia se disuelve desde adentro.'}
-      ]},
-      recupera1:{dialogo:'Padre: "Bueno, sí. Yo solo quiero que le vaya bien."',opciones:[
-        {texto:'Eso es exactamente lo que vamos a trabajar juntos. ¿Qué le preocupa más de Emilio ahora?',siguiente:'final_bueno',feedback:'Excelente. Alineas la terapia con su objetivo y le devuelves el rol de padre involucrado.'}
-      ]},
-      final_bueno:{dialogo:'Padre: "Ok... vamos a darle una oportunidad. Pero si no veo cambios, yo le digo."',opciones:[]},
-      final_neutro:{dialogo:'Padre: "Bueno, vamos a ver. Pero yo sigo pensando que exageran en la escuela."',opciones:[]},
-      final_malo:{dialogo:'Padre se levanta: "Ya me tengo que ir. Ustedes háganle como quieran."',opciones:[]}
-    }}
-  ];
+  // MODIFICADO: el árbol de diálogo (nodos, feedback, finales) ya NO vive
+  // en este archivo — el servidor lo recorre y califica. SIMULADORES_TOTAL
+  // es solo para el contador de la tarjeta de entrenamiento.
+  const SIMULADORES_TOTAL = 2;
 
   /* ═══ DETECTA EL ERROR CLÍNICO — data ═══ */
   const erroresClinicosData=[
@@ -9178,18 +9128,31 @@ const Sections = (function(){
   }
 
   /* ═══ SIMULADOR DE SESIÓN — panel view ═══ */
-  function _renderSimuladorView(container){
+  // MODIFICADO: el árbol de diálogo (nodos, feedback, finales) ya NO vive en
+  // este archivo. El servidor es stateless: en cada POST se manda el
+  // historial completo de índices elegidos y el servidor repite el
+  // recorrido para saber dónde está y qué sigue.
+  async function _renderSimuladorView(container){
     _retosContainer=container;
-    const sim=simuladoresData[retoIndiceDelDia(simuladoresData)];
-    let nodoActual='inicio';
-    let historial=[];
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando simulación del día…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/simulador`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar la simulación de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar la simulación de hoy. <button type="button" class="btn btn--ghost" id="sim-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#sim-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
     container.innerHTML=`
       <div class="fade-up">
         <div class="sim-panel-banner">
           <div>
             <span class="sim-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Simulación clínica · Sesión del día</span>
-            <h1>${escapeHtml(sim.titulo)}</h1>
-            <p>${escapeHtml(sim.intro)}</p>
+            <h1>${escapeHtml(data.titulo)}</h1>
+            <p>${escapeHtml(data.intro)}</p>
             <button type="button" class="sim-panel-banner__back" id="sim-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
           </div>
           <div class="sim-panel-banner__icons">
@@ -9202,41 +9165,58 @@ const Sections = (function(){
       </div>
     `;
     container.querySelector('#sim-volver-retos')?.addEventListener('click',()=>renderRetos(container));
-    renderNodo();
-    function renderNodo(){
-      const nodo=sim.nodos[nodoActual];if(!nodo)return;
-      const area=container.querySelector('#sim-chat-area');
-      if(nodo.dialogo){
-        const bubble=document.createElement('div');bubble.className='sim-bubble sim-bubble--paciente fade-up';
-        bubble.innerHTML=`<div class="sim-bubble__avatar">P</div><div class="sim-bubble__text">${escapeHtml(nodo.dialogo)}</div>`;
-        area.appendChild(bubble);
-      }
-      if(nodo.opciones.length===0){
-        const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
-        fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c2710c"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>Simulación completada</h2><p>Tomaste ${historial.length} decisiones en esta sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="sim-volver-fin">Volver a retos</button>`;
-        area.appendChild(fin);
-        registrarAccionProgreso('simulador');
-        container.querySelector('#sim-volver-fin')?.addEventListener('click',()=>renderRetos(container));
-        return;
-      }
+    const area=container.querySelector('#sim-chat-area');
+    const historial=[];
+
+    function pintarPaciente(dialogo){
+      if(!dialogo)return;
+      const bubble=document.createElement('div');bubble.className='sim-bubble sim-bubble--paciente fade-up';
+      bubble.innerHTML=`<div class="sim-bubble__avatar">P</div><div class="sim-bubble__text">${escapeHtml(dialogo)}</div>`;
+      area.appendChild(bubble);
+    }
+    function pintarOpciones(opciones){
       const opts=document.createElement('div');opts.className='sim-opciones fade-up';
-      opts.innerHTML=`<p class="sim-opciones__label">¿Cómo respondes?</p>${nodo.opciones.map((o,i)=>`<button type="button" class="sim-opcion" data-sim-opt="${i}">${escapeHtml(o.texto)}</button>`).join('')}`;
+      opts.innerHTML=`<p class="sim-opciones__label">¿Cómo respondes?</p>${opciones.map((o,i)=>`<button type="button" class="sim-opcion" data-sim-opt="${i}">${escapeHtml(o.texto)}</button>`).join('')}`;
       area.appendChild(opts);
-      opts.querySelectorAll('[data-sim-opt]').forEach(btn=>btn.addEventListener('click',()=>{
-        const opt=nodo.opciones[Number(btn.dataset.simOpt)];
-        historial.push(opt);
+      opts.querySelectorAll('[data-sim-opt]').forEach(btn=>btn.addEventListener('click',async()=>{
         opts.querySelectorAll('.sim-opcion').forEach(b=>{b.disabled=true;if(b!==btn)b.style.opacity='.4';});
+        const idx=Number(btn.dataset.simOpt);
         const resp=document.createElement('div');resp.className='sim-bubble sim-bubble--terapeuta fade-up';
-        resp.innerHTML=`<div class="sim-bubble__avatar" style="background:#1565c0">T</div><div class="sim-bubble__text">${escapeHtml(opt.texto)}</div>`;
+        resp.innerHTML=`<div class="sim-bubble__avatar" style="background:#1565c0">T</div><div class="sim-bubble__text">${escapeHtml(opciones[idx].texto)}</div>`;
         area.appendChild(resp);
+        historial.push(idx);
+        let res;
+        try{
+          const r=await fetch(`${retosWebhookBase()}/api/retos/simulador`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId,historial})});
+          res=await r.json();
+          if(!r.ok) throw new Error(res.error||'No se pudo registrar tu elección');
+        }catch(e){
+          const err=document.createElement('div');err.className='fade-up';err.style.cssText='padding:14px;text-align:center;color:var(--text-3)';err.textContent='No se pudo continuar. Intenta de nuevo.';
+          area.appendChild(err);
+          return;
+        }
         const fb=document.createElement('div');fb.className='sim-feedback fade-up';
-        fb.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>${escapeHtml(opt.feedback)}`;
+        fb.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>${escapeHtml(res.feedback)}`;
         area.appendChild(fb);
-        nodoActual=opt.siguiente;
-        setTimeout(()=>{renderNodo();area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});},1200);
+        setTimeout(()=>{
+          pintarPaciente(res.dialogo);
+          if(res.esFinal){
+            const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
+            fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c2710c"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>Simulación completada</h2><p>Tomaste ${historial.length} decisiones en esta sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="sim-volver-fin">Volver a retos</button>`;
+            area.appendChild(fin);
+            registrarAccionProgreso('simulador');
+            container.querySelector('#sim-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+          }else{
+            pintarOpciones(res.opciones);
+          }
+          area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});
+        },1200);
       }));
       setTimeout(()=>opts.scrollIntoView({behavior:'smooth',block:'end'}),100);
     }
+
+    pintarPaciente(data.dialogo);
+    pintarOpciones(data.opciones);
   }
 
   /* ═══ DETECTA EL ERROR CLÍNICO — panel view ═══ */
@@ -10045,7 +10025,7 @@ const Sections = (function(){
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${simuladoresData.length} simulaciones</div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${SIMULADORES_TOTAL} simulaciones</div>
                 </div>
                 <div class="pcard-hero__body">
                   <h3 class="pcard-hero__title">Simulador de sesión</h3>
