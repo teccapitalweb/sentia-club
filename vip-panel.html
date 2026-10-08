@@ -7336,6 +7336,7 @@ const Sections = (function(){
 
   // MODIFICADO: logros con el tema de SENTIA; se desbloquean con actividad real (evaluarLogros)
   const logros = [
+    {id:'pp0',cat:'Primeros pasos',nombre:'Te uniste a SENTIA',desc:'Creaste tu cuenta',xp:15,unlock:null,criterio:'Crea tu cuenta en SENTIA'},
     {id:'pp1',cat:'Primeros pasos',nombre:'Bienvenida a SENTIA',desc:'Activaste tu membresía VIP',xp:30,unlock:null,criterio:'Hazte miembro VIP'},
     {id:'pp2',cat:'Primeros pasos',nombre:'Primera clase',desc:'Viste tu primera clase',xp:20,unlock:null,criterio:'Mira 1 clase completa'},
     {id:'pp3',cat:'Primeros pasos',nombre:'Curso terminado',desc:'Completaste tu primer curso',xp:100,unlock:null,criterio:'Termina 1 curso'},
@@ -10426,7 +10427,7 @@ const Sections = (function(){
     const lunesISO=(()=>{const m=new Date();m.setDate(m.getDate()-diaActual);return m;})();
     const semana=['L','M','M','J','V','S','D'].map((d,i)=>{const dd=new Date(lunesISO);dd.setDate(dd.getDate()+i);const f=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');const esHoy=i===diaActual;const visitado=diasVisita.has(f);return `<span class="${esHoy?'is-today':(visitado?'is-done':'')}">${d}</span>`;}).join('');
     const grupos=[
-      {nombre:'Inicio en SENTIA',ids:['pp1','pp2','pp3']},
+      {nombre:'Inicio en SENTIA',ids:['pp0','pp1','pp2']},
       {nombre:'Práctica profesional',ids:['ev2','in2','he1']},
       {nombre:'Especialización',ids:['ev1','in1','la1']},
       {nombre:'Maestría',ids:['ma1','ma2','ma3']},
@@ -12687,7 +12688,7 @@ const Sections = (function(){
           <div>
             <span class="referidos-card__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Invita y gana</span>
             <h2 class="referidos-card__title">Comparte. Ambos ganan.</h2>
-            <p class="referidos-card__desc">Cuando alguien se registre con tu enlace, tú sumas hasta <b>+280 XP</b> (insignias <b>Invita y gana</b> y <b>Multiplicador</b>) y tu invitado suma hasta <b>+150 XP</b> propios (<b>Te invitaron</b> y <b>Bienvenida VIP</b>) en cuanto entra.</p>
+            <p class="referidos-card__desc">Cuando alguien se registre con tu enlace, tú sumas hasta <b>+280 XP</b> (insignias <b>Invita y gana</b> y <b>Multiplicador</b>). Tu invitado gana <b>+65 XP</b> en cuanto se registra, y hasta <b>+195 XP</b> en total si se hace VIP.</p>
           </div>
           <div class="referidos-card__stats">
             <span class="referidos-card__pill">Hasta +280 XP</span>
@@ -12714,7 +12715,7 @@ const Sections = (function(){
       catch(e){ input.removeAttribute('readonly'); input.select(); try{ document.execCommand('copy'); }catch(_){} input.setAttribute('readonly',''); Toast.success('Enlace copiado',''); }
     });
     container.querySelector('#referidos-compartir')?.addEventListener('click', ()=>{
-      const mensaje = `¡Hola! Te comparto SENTIA Human Institute 🧠 — cursos, retos y herramientas para profesionales de la psicología. Si te registras con mi enlace, ya arrancas con una insignia y XP de regalo:\n${input.value}`;
+      const mensaje = `¡Hola! Te comparto SENTIA Human Institute 🧠 — cursos, retos y herramientas para profesionales de la psicología. Si te registras con mi enlace ganas +65 XP de regalo, y si te haces VIP sumas hasta +195 XP en total:\n${input.value}`;
       window.open('https://wa.me/?text=' + encodeURIComponent(mensaje), '_blank', 'noopener');
     });
     (async ()=>{
@@ -13661,10 +13662,10 @@ window.__maybeShowBienvenidaInvitado = function(){
       <div class="bi-backdrop"></div>
       <section class="bi-card" role="dialog" aria-modal="true" aria-labelledby="bi-title">
         <button class="bi-close" type="button" aria-label="Cerrar">×</button>
-        <div class="bi-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="bi-icon__badge">+50 XP</span></div>
+        <div class="bi-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="bi-icon__badge">+65 XP</span></div>
         <span class="bi-kicker">Te invitaron a SENTIA</span>
         <h2 id="bi-title">Ya desbloqueaste <em>"Te invitaron"</em></h2>
-        <p>Alguien de la comunidad te compartió su enlace, así que ya tienes tu primera insignia en <b>Mis logros</b>. Si te haces VIP, desbloqueas otra insignia extra (+100 XP).</p>
+        <p>Alguien de la comunidad te compartió su enlace, así que ya tienes 2 insignias en <b>Mis logros</b> (+65 XP). Si te haces VIP, desbloqueas 2 insignias más y llegas a +195 XP en total.</p>
         <button type="button" class="bi-cta" id="bi-ir-logros">Ver mis logros<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
       </section>`;
     document.body.appendChild(pop);
