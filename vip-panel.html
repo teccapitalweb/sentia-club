@@ -2329,6 +2329,35 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .referidos-card__stats-row small{display:block;font-size:10.5px;color:rgba(255,255,255,.55);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
 .referidos-card__link-lbl{display:block;font-family:'Montserrat',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
 @media(max-width:680px){.referidos-card{padding:22px 18px}.referidos-card__top{grid-template-columns:1fr}.referidos-card__stats{min-width:0}}
+
+/* Invitación "Elige tu curso gratis" */
+#curso-gratis-intro{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px}
+#curso-gratis-intro .fci__backdrop{position:fixed;inset:0;background:rgba(10,8,5,.55);backdrop-filter:blur(5px)}
+#curso-gratis-intro .fci__card{position:relative;width:min(440px,100%);padding:26px 26px 22px;border-radius:24px;text-align:center;background:var(--surface);border:1px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.35);transform:translateY(14px) scale(.97);transition:transform .35s cubic-bezier(.2,1.2,.4,1)}
+#curso-gratis-intro.is-open .fci__card{transform:none}
+#curso-gratis-intro .fci__close{position:absolute;top:12px;right:14px;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--text-3);font-size:22px;line-height:1;cursor:pointer}
+#curso-gratis-intro .fci__close:hover{background:var(--surface-2);color:var(--text)}
+#curso-gratis-intro .fci__art{position:relative;height:132px;margin:4px auto 18px;width:250px}
+#curso-gratis-intro .fci__cover{position:absolute;top:10px;left:50%;width:120px;height:96px;margin-left:-60px;border-radius:14px;background:var(--surface-2) center/cover no-repeat;border:3px solid var(--surface);box-shadow:0 12px 26px rgba(0,0,0,.22);transition:transform .5s cubic-bezier(.2,1.2,.4,1)}
+#curso-gratis-intro .fci__cover--0{transform:translateX(-70px) rotate(-10deg) scale(.9)}
+#curso-gratis-intro .fci__cover--1{z-index:2;transform:translateY(-6px)}
+#curso-gratis-intro .fci__cover--2{transform:translateX(70px) rotate(10deg) scale(.9)}
+#curso-gratis-intro .fci__badge{position:absolute;z-index:3;left:50%;bottom:0;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;background:linear-gradient(135deg,#3f7bff,#1b5df0);color:#fff;font:800 11px/1 'Montserrat',monospace;letter-spacing:1px;text-transform:uppercase;box-shadow:0 8px 18px color-mix(in srgb,var(--primary) 40%,transparent)}
+#curso-gratis-intro .fci__kicker{display:block;font:700 10.5px/1 'Montserrat',monospace;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary)}
+#curso-gratis-intro .fci__card h2{margin:10px 0 8px;font:800 24px/1.18 'Montserrat',sans-serif;letter-spacing:-.5px;color:var(--text)}
+#curso-gratis-intro .fci__card h2 em{font-style:normal;color:var(--primary)}
+#curso-gratis-intro .fci__card p{margin:0 auto 16px;max-width:36ch;color:var(--text-2);font-size:13.5px;line-height:1.6}
+#curso-gratis-intro .fci__card p strong{color:var(--text)}
+#curso-gratis-intro .fci__steps{list-style:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 0 20px;padding:0}
+#curso-gratis-intro .fci__steps li{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 6px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-2)}
+#curso-gratis-intro .fci__steps b{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--primary);font:800 11px/1 'Montserrat',monospace}
+#curso-gratis-intro .fci__actions{display:grid;grid-template-columns:1fr 1.7fr;gap:10px}
+#curso-gratis-intro .fci__actions button{min-height:46px;border-radius:12px;font:700 14px 'Montserrat',sans-serif;cursor:pointer;transition:transform .15s ease,filter .15s ease;border:0}
+#curso-gratis-intro .fci__later{border:1px solid var(--border-2)!important;background:transparent;color:var(--text-2)}
+#curso-gratis-intro .fci__later:hover{background:var(--surface-2)}
+#curso-gratis-intro .fci__cta{background:linear-gradient(135deg,#1b5df0,#3f7bff);color:#fff;box-shadow:0 10px 24px color-mix(in srgb,var(--primary) 32%,transparent)}
+#curso-gratis-intro .fci__cta:hover{transform:translateY(-1px);filter:brightness(1.04)}
+@media(max-width:480px){#curso-gratis-intro .fci__card{padding:24px 18px 18px}#curso-gratis-intro .fci__card h2{font-size:21px}#curso-gratis-intro .fci__actions{grid-template-columns:1fr}#curso-gratis-intro .fci__cta{order:-1}#curso-gratis-intro .fci__art{width:220px}}
 .perfil-field{
   display:flex;justify-content:space-between;align-items:center;
   padding:10px 0;
@@ -4293,6 +4322,9 @@ if (window.__isDemoMode) {
     // ─── Logros: registra "hoy entré" en el servidor, cuente o no abra Mis logros ───
     setTimeout(() => { try { window.__pingLogrosVisita && window.__pingLogrosVisita(); } catch(e){} }, 1200);
 
+    // ─── Popup: invita a elegir su curso gratis (solo cuentas sin membresía) ───
+    setTimeout(() => { try { window.__maybeShowCursoGratisIntro && window.__maybeShowCursoGratisIntro(); } catch(e){} }, 1700);
+
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
   });
@@ -6050,42 +6082,82 @@ const Sections = (function(){
     return window.UserState?.modo === 'vip' || esAdminReal();
   }
 
-  function cursoConPrimeraClaseGratis() {
-    return cursos.find(c =>
-      c &&
-      c.marcarProximamente !== true &&
-      Array.isArray(c.sesiones) &&
-      c.sesiones.length > 0
-    ) || null;
+  // ═══ Curso gratis elegido por la cuenta (no fijo al primero del catálogo) ═══
+  // Cada cuenta sin membresía elige UN curso para su muestra gratuita; el
+  // servidor guarda esa elección una sola vez (igual patrón que el
+  // referidor del Directorio) y solo autoriza clases de ESE curso.
+  const CURSO_GRATIS_TOPE = 4;
+  function clasesGratisPara(totalClases) {
+    const total = Math.max(0, Number(totalClases) || 0);
+    if (total === 0) return 0;
+    if (total <= CURSO_GRATIS_TOPE) return Math.max(1, total - 1);
+    return CURSO_GRATIS_TOPE;
   }
-
-  const CLASES_GRATIS = 2; // MODIFICADO: las 2 primeras clases del curso de muestra son gratis
   const MATERIALES_GRATIS = 1;
+  let _cursoGratisEstado = { cargado: false, elegido: null, elegible: false };
+  function cursoPuedeSerGratis(c){
+    return !!c && c.marcarProximamente !== true && Array.isArray(c.sesiones) && c.sesiones.length > 0;
+  }
+  function cursoConPrimeraClaseGratis() {
+    if (_cursoGratisEstado.elegido) return cursos.find(c => c.id === _cursoGratisEstado.elegido && cursoPuedeSerGratis(c)) || null;
+    return null; // todavía no elige, o ya es VIP
+  }
+  function cursoGratisPendiente(){
+    return !tieneAccesoVipCompleto() && _cursoGratisEstado.cargado && _cursoGratisEstado.elegible && !_cursoGratisEstado.elegido;
+  }
+  async function cargarCursoGratisEstado(){
+    if (!window.UserState?.uid || tieneAccesoVipCompleto()) { _cursoGratisEstado.cargado = true; return _cursoGratisEstado; }
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/cursos/gratis`, { headers: await window.__authHeaders() });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error);
+      _cursoGratisEstado = { cargado:true, elegido: data.elegido||null, elegible: data.elegible===true };
+    } catch(e){ console.warn('[curso gratis]', e.message); _cursoGratisEstado.cargado = true; }
+    return _cursoGratisEstado;
+  }
+  window.__cargarCursoGratisEstado = cargarCursoGratisEstado;
+
+  // ─── Invita (1 vez) a elegir el curso gratis, sin importar en qué sección esté ───
+  window.__maybeShowCursoGratisIntro = async function(){
+    try {
+      if (localStorage.getItem('sentia:curso-gratis-intro-vista') === '1') return;
+      if (tieneAccesoVipCompleto()) return;
+      if (!_cursosLoaded && !_cursosLoading) { try { await cargarCursosFirestore(); } catch(e){} }
+      await cargarCursoGratisEstado();
+      if (!cursoGratisPendiente()) return;
+      localStorage.setItem('sentia:curso-gratis-intro-vista', '1');
+      mostrarInvitacionCursoGratis();
+    } catch(e) { console.warn('[curso gratis intro]', e.message); }
+  };
+
   // MODIFICADO: si el admin marcó clases/materiales como gratis, se usan esas marcas; si no, la regla por defecto
   function hayMarcaGratis(tipo) { return cursos.some(c => (tipo === 'clase' ? c.sesiones : c.materiales || []).some(x => x && x.gratis === true)); }
   function esPrimeraClaseGratis(cursoId, indexClase) {
     if (tieneAccesoVipCompleto()) return false;
     if (hayMarcaGratis('clase')) { const c = cursos.find(x => x.id === cursoId); return !!(c && c.sesiones && c.sesiones[Number(indexClase)] && c.sesiones[Number(indexClase)].gratis === true); }
     const cursoGratis = cursoConPrimeraClaseGratis();
-    return !tieneAccesoVipCompleto() &&
-      Boolean(cursoGratis) &&
+    return Boolean(cursoGratis) &&
       cursoGratis.id === cursoId &&
-      Number(indexClase) < CLASES_GRATIS;
+      Number(indexClase) < clasesGratisPara(cursoGratis.sesiones.length);
   }
 
   function esMaterialGratis(cursoId, indexMaterial) {
     if (tieneAccesoVipCompleto()) return false;
     if (hayMarcaGratis('material')) { const c = cursos.find(x => x.id === cursoId); return !!(c && c.materiales && c.materiales[Number(indexMaterial)] && c.materiales[Number(indexMaterial)].gratis === true); }
     const cursoGratis = cursoConPrimeraClaseGratis();
-    return !tieneAccesoVipCompleto() &&
-      Boolean(cursoGratis) &&
+    return Boolean(cursoGratis) &&
       cursoGratis.id === cursoId &&
       Number(indexMaterial) < MATERIALES_GRATIS;
   }
 
   function textoPaywallCurso(curso) {
     if (hayMarcaGratis('clase')) return `Disfruta gratis las clases marcadas como gratuitas. Activa tu membresía VIP para ver todo el contenido de este curso y del resto del catálogo.`;
-    return `Disfruta gratis ${CLASES_GRATIS === 1 ? 'la primera clase' : 'las primeras ' + CLASES_GRATIS + ' clases'} y el primer material en PDF del primer curso. Activa tu membresía para abrir el resto del contenido.`;
+    const cursoGratis = cursoConPrimeraClaseGratis();
+    if (cursoGratis) {
+      const gratis = clasesGratisPara(cursoGratis.sesiones.length);
+      return `Disfruta gratis ${gratis === 1 ? 'la primera clase' : 'las primeras ' + gratis + ' clases'} y el primer material de "${escapeHtml(cursoGratis.titulo)}". Activa tu membresía para abrir el resto del contenido.`;
+    }
+    return `Elige un curso gratis para ver sus primeras clases sin costo. Activa tu membresía para abrir todo el contenido.`;
   }
 
   function mostrarPaywallCurso(curso) {
@@ -7728,7 +7800,9 @@ const Sections = (function(){
     if (!_cursosLoaded && !_cursosLoading) {
       const list = document.getElementById('cur-list');
       if (list) list.innerHTML = `<div class="empty-state"><div class="empty-state__icon"><div style="width:42px;height:42px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--primary);animation:spin .8s linear infinite;"></div></div><h3>Cargando cursos…</h3></div>`;
-      cargarCursosFirestore().then(() => renderCursos(container));
+      cargarCursosFirestore().then(() => cargarCursoGratisEstado()).then(() => renderCursos(container));
+    } else if (!_cursoGratisEstado.cargado) {
+      cargarCursoGratisEstado().then(() => renderCursosList());
     } else {
       renderCursosList();
     }
@@ -7757,7 +7831,15 @@ const Sections = (function(){
       list.innerHTML=`<div class="empty-state"><div class="empty-state__icon"><svg class="ic ic--xl"><use href="#i-book"/></svg></div><h3>Sin resultados</h3><p>Cambia el filtro o búsqueda para ver más cursos.</p></div>`;
       return;
     }
-    list.innerHTML=`<div class="cursos-grid">${items.map((c, idx)=>{
+    const bannerGratis = cursoGratisPendiente() ? `
+      <div class="bib-retos-banner" style="margin-bottom:18px;">
+        <div class="bib-retos-banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="bib-retos-banner__body">
+          <strong>Elige tu curso gratis</strong>
+          <p>Abre cualquier curso de abajo y elige el que quieras probar gratis. Solo puedes elegir uno.</p>
+        </div>
+      </div>` : '';
+    list.innerHTML=`${bannerGratis}<div class="cursos-grid">${items.map((c, idx)=>{
       const cursoIdx = cursos.findIndex(x => x.id === c.id);
       const desbloqueado = cursoDesbloqueado(cursoIdx, c);
       const accesoCompleto = tieneAccesoVipCompleto();
@@ -7771,7 +7853,7 @@ const Sections = (function(){
       <article class="curso-card curso-card--catalog ${accesoCompleto && !desbloqueado?'curso-card--locked':''}" data-cid="${c.id}" tabindex="0" style="--area-color:${COLOR_AREA[c.area]||'#1b5df0'};">
         <div class="curso-card__cover" style="background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${portada}');background-size:cover;background-position:center;">
           <svg class="ic" style="opacity:.85;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));"><use href="#${ICON_AREA[c.area]||'i-book'}"/></svg>
-          ${esCursoMuestra ? `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${CLASES_GRATIS === 1 ? '1 CLASE GRATIS' : CLASES_GRATIS + ' CLASES GRATIS'}</span>` : ''}
+          ${esCursoMuestra ? (()=>{const g=clasesGratisPara(c.sesiones?.length||0);return `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${g===1?'1 CLASE GRATIS':g+' CLASES GRATIS'}</span>`;})() : ''}
           ${c.disponibleSiempre && (accesoCompleto || esCursoMuestra) ? '<span class="curso-card__cover-badge" style="background:var(--success);color:#081225;">DISPONIBLE</span>' : ''}
           ${!accesoCompleto && !esCursoMuestra ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--text-2);border:1px solid var(--border-2);"><svg class="ic" style="width:12px;height:12px;"><use href="#i-lock"/></svg>&nbsp;Solo VIP</span>` : ''}
           ${accesoCompleto && !desbloqueado && diasFalta > 0 ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--primary);border:1px solid var(--primary);">Se desbloquea en ${diasFalta} día${diasFalta!==1?'s':''}</span>` : ''}
@@ -8007,7 +8089,8 @@ const Sections = (function(){
     }
 
     const footer = document.createElement('div');
-    footer.innerHTML = `<button class="btn btn--ghost" id="cd-close">Cerrar</button>`;
+    const puedeElegirloGratis = cursoGratisPendiente() && cursoPuedeSerGratis(c);
+    footer.innerHTML = `<button class="btn btn--ghost" id="cd-close">Cerrar</button>${puedeElegirloGratis?'<button class="btn btn--accent" id="cd-elegir-gratis"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Elegir este como mi curso gratis</button>':''}`;
     const m = Modal.open({
       id: 'curso-' + id,
       title: 'Detalle del curso',
@@ -8018,6 +8101,7 @@ const Sections = (function(){
       footer
     });
     footer.querySelector('#cd-close').addEventListener('click', () => m.close());
+    footer.querySelector('#cd-elegir-gratis')?.addEventListener('click', () => { m.close(); setTimeout(() => confirmarCursoGratis(c), 150); });
 
     // ─── Handler del toggle de materiales (Ver los X restantes / Ocultar) ───
     setTimeout(() => {
@@ -8041,6 +8125,87 @@ const Sections = (function(){
       }
     }, 50);
   }
+
+  async function confirmarCursoGratis(curso){
+    if (!curso || !cursoGratisPendiente()) return;
+    const gratis = clasesGratisPara(curso.sesiones?.length || 0);
+    const footer = document.createElement('div');
+    footer.innerHTML = `<button type="button" class="btn btn--ghost" id="free-no">No, ver otros cursos</button><button type="button" class="btn btn--accent" id="free-si">Sí, es mi curso gratis</button>`;
+    const modal = Modal.open({
+      id: 'curso-gratis-confirmar',
+      title: '¿Seguro que deseas este curso?',
+      subtitle: 'Tu curso gratis',
+      icon: 'i-play',
+      size: 'sm',
+      body: `<div class="free-course-confirm">
+        <h3 style="margin:4px 0 0;font:800 18px/1.3 'Montserrat',sans-serif;color:var(--text);">${escapeHtml(curso.titulo)}</h3>
+        <p style="margin:0;color:var(--text-2);font-size:13.5px;line-height:1.55;">Será tu curso gratis: podrás ver sus primeras <strong style="color:var(--text);">${gratis} clase${gratis!==1?'s':''}</strong>, una tras otra, y su primer material.</p>
+        <p style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--primary) 10%,transparent);color:var(--text);font-weight:600;font-size:12.5px;margin:0;"><svg class="ic" style="flex-shrink:0;color:var(--primary);margin-top:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Solo puedes elegir uno y después no se puede cambiar.</p>
+      </div>`,
+      footer
+    });
+    footer.querySelector('#free-no').addEventListener('click', () => modal.close());
+    footer.querySelector('#free-si').addEventListener('click', async (ev) => {
+      const boton = ev.currentTarget;
+      boton.disabled = true; boton.textContent = 'Guardando…';
+      try {
+        const r = await fetch(`${retosWebhookBase()}/api/cursos/gratis`, { method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({ cursoId: curso.id }) });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'No se pudo guardar tu elección');
+        _cursoGratisEstado.elegido = data.elegido || curso.id;
+        _cursoGratisEstado.elegible = false;
+        modal.close();
+        Toast.success('¡Listo! Ya tienes tu curso gratis', curso.titulo);
+        try { renderCursosList(); } catch(e){}
+        window.__abrirCursoHome ? window.__abrirCursoHome(curso.id) : openCursoDetalle(curso.id);
+      } catch(error) {
+        Toast.error('No se pudo guardar', error.message || 'Intenta de nuevo');
+        boton.disabled = false; boton.textContent = 'Sí, es mi curso gratis';
+      }
+    });
+  }
+
+  // ─── Invitación "Elige tu curso gratis" ─── (una sola vez por sesión)
+  function mostrarInvitacionCursoGratis(){
+    if (document.getElementById('curso-gratis-intro')) return;
+    const opciones = (Array.isArray(cursos)?cursos:[]).filter(cursoPuedeSerGratis);
+    if (!opciones.length) return;
+    const gratis = Math.max(...opciones.map(c=>clasesGratisPara(c.sesiones.length)));
+    const nombre = String(window.UserState?.nombre||window.UserState?.displayName||'').trim().split(' ')[0];
+    const portadas = opciones.slice(0,3).map((c,i)=>{
+      const img = (c.portada || coverSVG(c.area, c.titulo) || '').replace(/'/g,'%27');
+      return `<span class="fci__cover fci__cover--${i}" style="background-image:url('${img}')"></span>`;
+    }).join('');
+    const pop = document.createElement('div');
+    pop.id = 'curso-gratis-intro';
+    pop.innerHTML = `
+      <div class="fci__backdrop" data-fci-later></div>
+      <section class="fci__card" role="dialog" aria-modal="true" aria-labelledby="fci-title">
+        <button type="button" class="fci__close" data-fci-later aria-label="Cerrar">×</button>
+        <div class="fci__art" aria-hidden="true">${portadas}<span class="fci__badge">🎁 Gratis</span></div>
+        <span class="fci__kicker">Para miembros nuevos</span>
+        <h2 id="fci-title">${nombre?`${escapeHtml(nombre)}, elige`:'Elige'} tu <em>curso gratis</em></h2>
+        <p>Te regalamos hasta <strong>${gratis} clase${gratis!==1?'s':''}</strong> del curso que tú elijas. Solo puedes elegir uno, así que escoge el que más te sirva.</p>
+        <ol class="fci__steps">
+          <li><b>1</b>Elige tu curso</li>
+          <li><b>2</b>Ve tus clases gratis</li>
+          <li><b>3</b>Suma XP en cada reto</li>
+        </ol>
+        <div class="fci__actions">
+          <button type="button" class="fci__later" data-fci-later>Más tarde</button>
+          <button type="button" class="fci__cta" data-fci-go>Elegir mi curso gratis <span aria-hidden="true">→</span></button>
+        </div>
+      </section>`;
+    document.body.appendChild(pop);
+    requestAnimationFrame(() => pop.classList.add('is-open'));
+    const cerrar = (despues) => {
+      pop.classList.add('is-closing');
+      setTimeout(() => { pop.remove(); if (despues) despues(); }, 220);
+    };
+    pop.querySelectorAll('[data-fci-later]').forEach(el => el.addEventListener('click', () => cerrar()));
+    pop.querySelector('[data-fci-go]').addEventListener('click', () => cerrar(() => { if (typeof navigateToSection === 'function') navigateToSection('cursos'); }));
+  }
+  window.__mostrarInvitacionCursoGratis = mostrarInvitacionCursoGratis;
 
   // Refresca el DETALLE del curso abierto (re-render) para que la siguiente clase
   // se desbloquee al instante tras marcar una como vista, sin recargar la página.
