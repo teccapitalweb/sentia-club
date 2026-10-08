@@ -4331,11 +4331,13 @@ if (window.__isDemoMode) {
     // ─── Popup: completar ficha profesional (1ª vez) · evita certificados con el email y crea la tarjeta del Directorio ───
     setTimeout(() => { try { window.__maybeAskProfile && window.__maybeAskProfile(); } catch(e){} }, 900);
 
-    // ─── Logros: registra "hoy entré" en el servidor, cuente o no abra Mis logros ───
-    setTimeout(() => { try { window.__pingLogrosVisita && window.__pingLogrosVisita(); } catch(e){} }, 1200);
-
-    // ─── Popup: invita a elegir su curso gratis (solo cuentas sin membresía) ───
-    setTimeout(() => { try { window.__maybeShowCursoGratisIntro && window.__maybeShowCursoGratisIntro(); } catch(e){} }, 1700);
+    // ─── Logros: registra "hoy entré" en el servidor (y celebra si desbloqueó
+    // algo nuevo), y SOLO DESPUÉS invita a elegir su curso gratis — así no se
+    // amontonan los dos popups en la misma pantalla.
+    setTimeout(async () => {
+      try { await window.__pingLogrosVisita?.(); } catch(e){}
+      try { window.__maybeShowCursoGratisIntro && window.__maybeShowCursoGratisIntro(); } catch(e){}
+    }, 1200);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
@@ -7687,17 +7689,62 @@ const Sections = (function(){
     catch(e){ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ }
     // Después de registrar la visita, sincroniza de una vez — así cualquier
     // pantalla (Biblioteca, Retos, Logros) parte ya con el número real,
-    // sin depender de cuál se visite primero.
-    try { await sincronizarLogros(); } catch(e){}
+    // sin depender de cuál se visite primero. Si algo se desbloqueó por
+    // primera vez en este dispositivo, se celebra antes de continuar.
+    try {
+      const nuevos = await sincronizarLogros();
+      if (nuevos && nuevos.length) await mostrarLogrosDesbloqueados(nuevos);
+    } catch(e){}
   };
   async function sincronizarLogros(){
     try {
       const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'No se pudo sincronizar');
+      let fechasAntes = {}; try { fechasAntes = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); } catch(e){}
       evaluarLogros(new Set(data.logrosIds||[]), { racha: data.racha||0, diasActivos: data.diasActivos||0 });
-      return true;
-    } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return false; }
+      let fechasDespues = {}; try { fechasDespues = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); } catch(e){}
+      return Object.keys(fechasDespues).filter(id => !fechasAntes[id]).map(id => logros.find(l=>l.id===id)).filter(Boolean);
+    } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return null; }
+  }
+
+  // ─── Celebración de logro(s) recién desbloqueado(s): confeti + XP ganado ───
+  // Se resuelve cuando el usuario la cierra, para poder encadenar después
+  // otros popups (p.ej. la invitación de "elige tu curso gratis") sin que
+  // se amontonen.
+  function mostrarLogrosDesbloqueados(nuevos){
+    return new Promise((resolve) => {
+      try {
+        if (!nuevos || !nuevos.length || document.getElementById('logro-desbloqueado')) return resolve();
+        const xpTotal = nuevos.reduce((n,l)=>n+(Number(l.xp)||0),0);
+        const unoSolo = nuevos.length === 1;
+        let splash = document.createElement('div');
+        splash.id = 'logro-desbloqueado';
+        splash.innerHTML = `
+          <div class="splash-cmp__overlay"></div>
+          <div class="splash-cmp__confetti">
+            ${Array.from({length:60}).map((_,i)=>`<span class="splash-cmp__confetti-bit" style="--d:${(Math.random()*0.5).toFixed(2)}s;--x:${(Math.random()*100-50)|0}vw;--r:${(Math.random()*720-360)|0}deg;--s:${(0.7+Math.random()*0.9).toFixed(2)};--c:${['#1b5df0','#2fbf2e','#3DDC5A','#60A5FA','#F87171','#FBBF24','#A78BFA'][i%7]}"></span>`).join('')}
+          </div>
+          <div class="splash-cmp__box">
+            <button class="splash-cmp__close" aria-label="Cerrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="splash-cmp__icon"><svg class="ic"><use href="#i-trophy"/></svg></div>
+            <div class="splash-cmp__kicker">${unoSolo ? 'NUEVO LOGRO' : `${nuevos.length} LOGROS NUEVOS`}</div>
+            <h1 class="splash-cmp__title">${unoSolo ? escapeHtml(nuevos[0].nombre) : '¡Ganaste varios logros!'}</h1>
+            <p class="splash-cmp__desc">${unoSolo ? escapeHtml(nuevos[0].desc) : nuevos.map(l=>escapeHtml(l.nombre)).join(' · ')}<br><strong>+${xpTotal} XP</strong></p>
+            <div class="splash-cmp__actions">
+              <button class="splash-cmp__btn splash-cmp__btn--primary" id="logro-continuar">Continuar</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(splash);
+        const cerrar = () => { splash.remove(); resolve(); };
+        splash.querySelector('.splash-cmp__close').addEventListener('click', cerrar);
+        splash.querySelector('.splash-cmp__overlay').addEventListener('click', cerrar);
+        splash.querySelector('#logro-continuar').addEventListener('click', cerrar);
+      } catch(e) { resolve(); }
+    });
   }
 
   // Registra una acción de aprendizaje válida para la racha local. En producción
