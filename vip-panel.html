@@ -2981,11 +2981,13 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   .iper-stat__val{font-size:16px}
 
   /* Biblioteca materiales / foro / perfil / suscripción mobile */
-  .bib-detalle{grid-template-columns:1fr;padding:20px;gap:18px;text-align:center}
-  .bib-detalle__cover-wrap{width:min(58vw,220px);margin:0 auto;aspect-ratio:3/4}
-  .bib-detalle__info{align-items:center}
-  .bib-detalle__desc{text-align:center}
-  .bib-detalle__actions{justify-content:center}
+  /* Portada SIEMPRE a un lado (como un libro de verdad, estilo Alintec) —
+     nunca se apila arriba ni se centra, solo se encoge el ancho de la columna. */
+  .bib-detalle{grid-template-columns:auto 1fr;padding:18px;gap:16px;text-align:left}
+  .bib-detalle__cover-wrap{width:clamp(96px,32vw,150px);aspect-ratio:3/4}
+  .bib-detalle__info{align-items:flex-start}
+  .bib-detalle__desc{text-align:left}
+  .bib-detalle__actions{justify-content:flex-start;flex-wrap:wrap}
   .bib-detalle__meta-grid{grid-template-columns:1fr 1fr;text-align:left}
   .bib-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
   .bib-tabs{gap:4px}
