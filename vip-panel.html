@@ -10476,7 +10476,11 @@ const Sections = (function(){
     const nivelActual = getNivel(usuario.xp);
     const bloqueadoPorNivel = nivelReq > 0 && nivelActual.id < nivelReq;
     const nivelReqNombre = (niveles.find(n => n.id === nivelReq) || {}).nombre || '';
-    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
+    // FIX: para libros de biblioteca, `m.estado==='disponible'` no decía nada
+    // sobre membresía — un libro VIP sin nivelRequerido se leía completo sin
+    // estar suscrito. _materialDisponible() ya hace este chequeo para
+    // materiales de curso; aquí había que agregarlo a mano.
+    const disponible = (esBib ? (m.estado === 'disponible' && !requiereMembresia) : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
     const diasFaltan = esBib ? 0 : _diasParaMaterial(m);
     const tituloEsc = escapeHtml(m.titulo || 'Sin título');
     const autorEsc = escapeHtml(m.autor || '');
@@ -10586,7 +10590,7 @@ const Sections = (function(){
     const bloqueadoPorRetos = esBib && retosAccesoInfoCard.requiere != null && !retosAccesoInfoCard.abierto;
     const nivelReq = esBib && retosAccesoInfoCard.requiere == null ? (m.nivelRequerido || 0) : 0;
     const bloqueadoPorNivel = nivelReq > 0 && getNivel(usuario.xp).id < nivelReq;
-    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
+    const disponible = (esBib ? (m.estado === 'disponible' && !requiereMembresia) : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
     const tituloEsc = escapeHtml(m.titulo || 'Sin título');
     const cursoEsc = esBib ? escapeHtml(m.autor || m.cursoTitulo || '') : escapeHtml(m.cursoTitulo || '');
     const portada = _getPortadaMaterial(m);
@@ -10771,6 +10775,7 @@ const Sections = (function(){
           <p class="bib-header__count">${total} recurso${total !== 1 ? 's' : ''} · guías, formatos y material de apoyo de tus cursos.</p>
         </div>
         ${_bibRetosBannerHTML(materialesTodos)}
+        ${_bibRetosRutaHTML(materialesTodos)}
         ${total === 0 ? `
           <div style="text-align:center;padding:60px 24px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:14px;margin-top:18px;">
             <div style="width:64px;height:64px;border-radius:50%;background:color-mix(in srgb, var(--primary) 12%, transparent);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
@@ -10797,7 +10802,6 @@ const Sections = (function(){
             ${materialesTodos.map(m => _renderBibCard(m, m.id === (sel ? sel.id : ''))).join('')}
           </div>
         `}
-        ${_bibRetosRutaHTML(materialesTodos)}
       </div>`;
 
     if (total === 0) return;
