@@ -131,8 +131,7 @@ service cloud.firestore {
         && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
         && request.resource.data.keys().hasOnly([
           'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
-          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt',
-          'modalidad', 'ciudad', 'enfoque', 'publico', 'derivaciones', 'supervision'
+          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
         ])
         && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
         && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
@@ -140,15 +139,6 @@ service cloud.firestore {
         && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
         && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
         && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
-        // MODIFICADO: campos de Red Profesional (derivaciones y supervisión) —
-        // antes no estaban en la lista permitida y Firestore rechazaba todo el
-        // guardado de la tarjeta en cuanto el formulario los incluía.
-        && request.resource.data.modalidad is string && request.resource.data.modalidad.size() <= 20
-        && request.resource.data.ciudad is string && request.resource.data.ciudad.size() <= 50
-        && request.resource.data.enfoque is string && request.resource.data.enfoque.size() <= 40
-        && request.resource.data.publico is list && request.resource.data.publico.size() <= 10
-        && request.resource.data.derivaciones is bool
-        && request.resource.data.supervision is string && request.resource.data.supervision.size() <= 30
         && request.resource.data.visible is bool
         && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
         && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
@@ -163,8 +153,7 @@ service cloud.firestore {
         && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
         && request.resource.data.keys().hasOnly([
           'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
-          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt',
-          'modalidad', 'ciudad', 'enfoque', 'publico', 'derivaciones', 'supervision'
+          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
         ])
         && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
         && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
@@ -172,15 +161,6 @@ service cloud.firestore {
         && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
         && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
         && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
-        // MODIFICADO: campos de Red Profesional (derivaciones y supervisión) —
-        // antes no estaban en la lista permitida y Firestore rechazaba todo el
-        // guardado de la tarjeta en cuanto el formulario los incluía.
-        && request.resource.data.modalidad is string && request.resource.data.modalidad.size() <= 20
-        && request.resource.data.ciudad is string && request.resource.data.ciudad.size() <= 50
-        && request.resource.data.enfoque is string && request.resource.data.enfoque.size() <= 40
-        && request.resource.data.publico is list && request.resource.data.publico.size() <= 10
-        && request.resource.data.derivaciones is bool
-        && request.resource.data.supervision is string && request.resource.data.supervision.size() <= 30
         && request.resource.data.visible is bool
         && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
         && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
