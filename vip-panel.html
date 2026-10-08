@@ -8675,64 +8675,10 @@ const Sections = (function(){
   const ERRORES_CLINICOS_TOTAL = 3;
 
   /* ═══ ÁRBOL DE DECISIONES — data ═══ */
-  const arbolesData=[
-    {titulo:'Reportar o no reportar',intro:'Atiendes a un niño de 9 años. En sesión de juego, hace un dibujo donde un adulto le pega. Cuando le preguntas, dice: "A veces mi papá se enoja mucho." No hay marcas visibles.',nodos:{
-      inicio:{situacion:'Tienes indicios de posible maltrato pero no evidencia física. ¿Qué haces primero?',opciones:[
-        {texto:'Reportar inmediatamente a las autoridades',siguiente:'reporte_rapido',consecuencia:'Actúas por protocolo, pero sin explorar más podrías generar un reporte sin fundamento suficiente que dañe la familia y tu relación terapéutica.'},
-        {texto:'Explorar más con el niño usando lenguaje apropiado para su edad',siguiente:'explorar',consecuencia:'Buena decisión. Recoges más información para tener un panorama más claro antes de actuar.'},
-        {texto:'Hablar con el padre directamente sobre lo que dijo el niño',siguiente:'hablar_padre',consecuencia:'Riesgoso. Alertar al posible agresor puede poner al niño en más peligro y contaminar la evidencia.'}
-      ]},
-      explorar:{situacion:'Le preguntas: "Cuéntame más sobre cuando tu papá se enoja." El niño dice: "Me grita y a veces me avienta cosas. Una vez me pegó con el cinturón." ¿Qué haces?',opciones:[
-        {texto:'Ahora sí reportar: hay una revelación directa del niño',siguiente:'reporte_informado',consecuencia:'Correcto. Con una revelación verbal directa, tienes obligación ética y legal de reportar, aunque no haya marcas visibles.'},
-        {texto:'Seguir recabando información en las próximas sesiones',siguiente:'esperar',consecuencia:'Peligroso. Una vez que hay revelación directa de violencia física, retrasar el reporte puede poner al niño en riesgo. La ley exige reporte oportuno.'}
-      ]},
-      reporte_rapido:{situacion:'Reportaste con poca información. La autoridad investiga, no encuentra evidencia suficiente, y el padre retira al niño de terapia. ¿Qué aprendes?',opciones:[
-        {texto:'Debí explorar más antes de reportar, sin comprometer la seguridad del niño',siguiente:'final_aprendizaje',consecuencia:'Correcto. El protocolo dice reportar ante sospecha fundada. Un dibujo solo no es suficiente, pero una revelación verbal sí lo sería.'}
-      ]},
-      hablar_padre:{situacion:'El padre se muestra molesto: "Mi hijo inventa cosas. ¿Usted le va a creer a un niño de 9 años?" Siguiente sesión, el niño llega callado y no quiere jugar.',opciones:[
-        {texto:'Reportar ahora: el cambio de conducta del niño sugiere que fue presionado',siguiente:'reporte_informado',consecuencia:'Ahora tienes más indicadores. Pero la alerta al padre pudo haber puesto al niño en riesgo. En el futuro: nunca alertar al posible agresor antes de reportar.'}
-      ]},
-      reporte_informado:{situacion:'Reportas con la información recabada. Las autoridades investigan con protocolo. Independientemente del resultado, cumpliste tu obligación. ¿Qué es fundamental después?',opciones:[
-        {texto:'Mantener el espacio terapéutico seguro para el niño, sea cual sea el resultado de la investigación',siguiente:'final_bueno',consecuencia:'Correcto. Tu rol es clínico, no investigador. Mantener la alianza y el espacio seguro es tu prioridad después de reportar.'}
-      ]},
-      esperar:{situacion:'En la siguiente sesión, el niño llega con un moretón en el brazo. Dice que se cayó. Ahora ¿qué haces?',opciones:[
-        {texto:'Reportar de inmediato con toda la información acumulada',siguiente:'final_tarde',consecuencia:'Reportas, pero el daño ya ocurrió. Si hubieras reportado con la primera revelación verbal, podrías haber prevenido este episodio.'}
-      ]},
-      final_bueno:{situacion:'Has manejado un caso éticamente complejo siguiendo el protocolo: explorar con cuidado, reportar ante revelación directa, y mantener el espacio terapéutico.',opciones:[]},
-      final_aprendizaje:{situacion:'Aprendiste que el timing del reporte importa. Ni tan pronto que no tengas fundamento, ni tan tarde que pongas en riesgo. La revelación verbal del niño es el punto de acción.',opciones:[]},
-      final_tarde:{situacion:'Lección difícil: retrasar un reporte ante revelación directa puede tener consecuencias reales. El "quiero estar seguro" no justifica la espera cuando un menor está en riesgo.',opciones:[]}
-    }},
-    {titulo:'Confidencialidad vs seguridad',intro:'Tu paciente adulto, Raúl, 34 años, te confiesa en sesión: "A veces cuando bebo, manejo. La semana pasada iba tan borracho que casi choco contra una familia." No muestra arrepentimiento.',nodos:{
-      inicio:{situacion:'Raúl pone en riesgo a terceros cuando bebe y maneja. No es un menor ni tiene ideación suicida. ¿Cómo abordas esto?',opciones:[
-        {texto:'Explorar la conducta: frecuencia, contexto, y si reconoce el riesgo',siguiente:'explorar',consecuencia:'Buena primera acción. Necesitas evaluar la gravedad y recurrencia antes de decidir qué hacer.'},
-        {texto:'Romper confidencialidad y avisar a las autoridades',siguiente:'romper',consecuencia:'Prematuro. La confidencialidad solo se rompe ante riesgo inminente y grave. Primero debes evaluar y agotar opciones clínicas.'},
-        {texto:'Ignorarlo — lo que haga fuera de sesión no es tu responsabilidad',siguiente:'ignorar',consecuencia:'Incorrecto. Tienes responsabilidad ética cuando un paciente representa un peligro claro para terceros. Ignorar no es neutral.'}
-      ]},
-      explorar:{situacion:'Raúl dice: "Lo hago cada fin de semana. No me va a pasar nada, yo controlo." No tiene disposición a cambiar. ¿Qué haces?',opciones:[
-        {texto:'Confrontar con empatía: "Me preocupa que alguien salga lastimado, incluyéndote a ti"',siguiente:'confrontar',consecuencia:'Buena intervención. Nombras el riesgo sin juzgar y le devuelves la reflexión.'},
-        {texto:'Poner un límite terapéutico: no puedes seguir la terapia si hay riesgo activo a terceros',siguiente:'limite',consecuencia:'Válido pero arriesgado. Si lo pierdes como paciente, pierdes la oportunidad de influir en su conducta.'}
-      ]},
-      confrontar:{situacion:'Raúl se molesta: "¿Ahora tú también me vas a sermonear? Para eso tengo a mi esposa." ¿Cómo continúas?',opciones:[
-        {texto:'No es un sermón. Es que si algo pasa, yo sabía y no dije nada. Hablemos de qué opciones tienes.',siguiente:'opciones',consecuencia:'Excelente. Transparentas tu posición ética sin ser punitivo y le devuelves la agencia.'},
-        {texto:'Documentar la sesión y consultar con un supervisor o comité de ética',siguiente:'final_consulta',consecuencia:'Muy buena práctica. Ante dilemas éticos complejos, la consulta con colegas o supervisores protege al paciente y a ti.'}
-      ]},
-      romper:{situacion:'Rompes confidencialidad. Raúl se entera y abandona terapia. Legalmente no había fundamento suficiente para la ruptura. ¿Qué aprendes?',opciones:[
-        {texto:'La confidencialidad se rompe ante riesgo inminente verificado, no ante conductas de riesgo crónicas. La vía es clínica primero.',siguiente:'final_aprendizaje',consecuencia:'Correcto. La conducta de riesgo crónica se aborda clínicamente. La ruptura de confidencialidad es último recurso ante peligro inminente identificable.'}
-      ]},
-      ignorar:{situacion:'Dos semanas después, Raúl tiene un accidente. Atropella a un peatón. Tú sabías del patrón. ¿Qué aprendes?',opciones:[
-        {texto:'Debí haber abordado la conducta activamente, no ignorarla',siguiente:'final_aprendizaje',consecuencia:'Correcto. Ignorar no es neutralidad. Tenías información y herramientas clínicas para intervenir.'}
-      ]},
-      limite:{situacion:'Le dices que no puedes continuar si pone en riesgo a otros. Raúl dice: "Entonces me voy." Pierdes al paciente.',opciones:[
-        {texto:'Referir a otro profesional y documentar el caso completamente',siguiente:'final_consulta',consecuencia:'Buena práctica. Si pones un límite, asegúrate de que haya una referencia. Nunca dejar al paciente sin opciones.'}
-      ]},
-      opciones:{situacion:'Raúl lo piensa: "¿Y qué propones?" Le planteas: usar Uber cuando beba, darle las llaves a alguien, o trabajar el consumo. Acepta intentar. ¿Qué más haces?',opciones:[
-        {texto:'Documentar, establecer revisión del acuerdo cada 2 semanas, y consultar con supervisor',siguiente:'final_bueno',consecuencia:'Perfecto. Abordaje clínico completo: intervención, acuerdo, seguimiento y respaldo ético.'}
-      ]},
-      final_bueno:{situacion:'Manejaste un dilema ético complejo: exploraste, confrontaste con empatía, ofreciste opciones y documentaste. La vía clínica primero, siempre.',opciones:[]},
-      final_consulta:{situacion:'La consulta con supervisor o comité de ética es una herramienta que protege al paciente, a terceros y a ti. Úsala siempre ante dilemas.',opciones:[]},
-      final_aprendizaje:{situacion:'Cada extremo tiene riesgos: ignorar puede causar daño, romper confidencialidad sin fundamento puede destruir la alianza. El camino es el abordaje clínico activo.',opciones:[]}
-    }}
-  ];
+  // MODIFICADO: el árbol de decisiones (nodos, consecuencias, finales) ya
+  // NO vive en este archivo — el servidor lo recorre y califica, igual que
+  // el Simulador. ARBOLES_TOTAL es solo para el contador de la tarjeta.
+  const ARBOLES_TOTAL = 2;
 
   /* ═══ CASO CLÍNICO — panel view ═══ */
   // MODIFICADO: el caso del día, sus preguntas y respuestas correctas ya NO
@@ -9279,18 +9225,32 @@ const Sections = (function(){
   }
 
   /* ═══ ÁRBOL DE DECISIONES — panel view ═══ */
-  function _renderArbolView(container){
+  // MODIFICADO: el árbol de decisiones (nodos, consecuencias, finales) ya NO
+  // vive en este archivo. Igual que el Simulador: el cliente arranca con el
+  // nodo inicial del GET, y en cada decisión hace POST con el historial
+  // completo de índices; el servidor repite el recorrido y regresa la
+  // consecuencia + el siguiente nodo.
+  async function _renderArbolView(container){
     _retosContainer=container;
-    const arbol=arbolesData[retoIndiceDelDia(arbolesData)];
-    let nodoActual='inicio';
-    let decisiones=0;
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando dilema del día…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/arbol`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar el dilema de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar el dilema de hoy. <button type="button" class="btn btn--ghost" id="arb-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#arb-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
     container.innerHTML=`
       <div class="fade-up">
         <div class="arb-panel-banner">
           <div>
             <span class="arb-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg>Toma de decisiones · Dilema del día</span>
-            <h1>${escapeHtml(arbol.titulo)}</h1>
-            <p>${escapeHtml(arbol.intro)}</p>
+            <h1>${escapeHtml(data.titulo)}</h1>
+            <p>${escapeHtml(data.intro)}</p>
             <button type="button" class="arb-panel-banner__back" id="arb-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
           </div>
           <div class="arb-panel-banner__icons">
@@ -9303,34 +9263,48 @@ const Sections = (function(){
       </div>
     `;
     container.querySelector('#arb-volver-retos')?.addEventListener('click',()=>renderRetos(container));
-    renderDecision();
-    function renderDecision(){
-      const nodo=arbol.nodos[nodoActual];if(!nodo)return;
-      const area=container.querySelector('#arb-flow-area');
+    const area=container.querySelector('#arb-flow-area');
+    const historial=[];
+
+    function pintarDecision(situacion, opciones, numDecision){
       const step=document.createElement('div');step.className='arb-step fade-up';
-      if(nodo.opciones.length===0){
-        step.innerHTML=`<div class="arb-situacion arb-situacion--final"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#2e7d32"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${escapeHtml(nodo.situacion)}</div>
-          <div class="cc-panel-resultado" style="padding-top:18px"><h2>Dilema completado</h2><p>Tomaste ${decisiones} decisiones en este caso.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="arb-volver-fin">Volver a retos</button></div>`;
-        area.appendChild(step);
-        registrarAccionProgreso('arbol-decisiones');
-        container.querySelector('#arb-volver-fin')?.addEventListener('click',()=>renderRetos(container));
-        return;
-      }
-      step.innerHTML=`<div class="arb-situacion"><span class="arb-situacion__num">Decisión ${decisiones+1}</span>${escapeHtml(nodo.situacion)}</div><div class="arb-opciones">${nodo.opciones.map((o,i)=>`<button type="button" class="arb-opcion" data-arb-opt="${i}"><span class="arb-opcion__txt">${escapeHtml(o.texto)}</span></button>`).join('')}</div>`;
+      step.innerHTML=`<div class="arb-situacion"><span class="arb-situacion__num">Decisión ${numDecision}</span>${escapeHtml(situacion)}</div><div class="arb-opciones">${opciones.map((o,i)=>`<button type="button" class="arb-opcion" data-arb-opt="${i}"><span class="arb-opcion__txt">${escapeHtml(o.texto)}</span></button>`).join('')}</div>`;
       area.appendChild(step);
-      step.querySelectorAll('[data-arb-opt]').forEach(btn=>btn.addEventListener('click',()=>{
-        const opt=nodo.opciones[Number(btn.dataset.arbOpt)];
-        decisiones++;
+      step.querySelectorAll('[data-arb-opt]').forEach(btn=>btn.addEventListener('click',async()=>{
         step.querySelectorAll('.arb-opcion').forEach(b=>{b.disabled=true;if(b!==btn)b.style.opacity='.4';});
         btn.classList.add('arb-opcion--chosen');
+        historial.push(Number(btn.dataset.arbOpt));
+        let res;
+        try{
+          const r=await fetch(`${retosWebhookBase()}/api/retos/arbol`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId,historial})});
+          res=await r.json();
+          if(!r.ok) throw new Error(res.error||'No se pudo registrar tu elección');
+        }catch(e){
+          const err=document.createElement('div');err.className='fade-up';err.style.cssText='padding:14px;text-align:center;color:var(--text-3)';err.textContent='No se pudo continuar. Intenta de nuevo.';
+          step.appendChild(err);
+          return;
+        }
         const cons=document.createElement('div');cons.className='arb-consecuencia fade-up';
-        cons.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${escapeHtml(opt.consecuencia)}`;
+        cons.innerHTML=`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${escapeHtml(res.consecuencia)}`;
         step.appendChild(cons);
-        nodoActual=opt.siguiente;
-        setTimeout(()=>{renderDecision();area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});},1200);
+        setTimeout(()=>{
+          if(res.esFinal){
+            const fin=document.createElement('div');fin.className='arb-step fade-up';
+            fin.innerHTML=`<div class="arb-situacion arb-situacion--final"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#2e7d32"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${escapeHtml(res.situacion)}</div>
+              <div class="cc-panel-resultado" style="padding-top:18px"><h2>Dilema completado</h2><p>Tomaste ${historial.length} decisiones en este caso.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+20 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="arb-volver-fin">Volver a retos</button></div>`;
+            area.appendChild(fin);
+            registrarAccionProgreso('arbol-decisiones');
+            container.querySelector('#arb-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+          }else{
+            pintarDecision(res.situacion, res.opciones, historial.length+1);
+          }
+          area.lastElementChild?.scrollIntoView({behavior:'smooth',block:'end'});
+        },1200);
       }));
       setTimeout(()=>step.scrollIntoView({behavior:'smooth',block:'end'}),100);
     }
+
+    pintarDecision(data.situacion, data.opciones, 1);
   }
 
   /* ============================ MODO HISTORIA ============================ */
@@ -10033,7 +10007,7 @@ const Sections = (function(){
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="6" y2="20"/><line x1="12" y1="14" x2="18" y2="20"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/></svg>${arbolesData.length} dilemas</div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="14"/></svg>${ARBOLES_TOTAL} dilemas</div>
                 </div>
                 <div class="pcard-hero__body">
                   <h3 class="pcard-hero__title">Árbol de decisiones</h3>
