@@ -4404,7 +4404,12 @@ const Pages={
             <option value="" ${!mat.nivelRequerido?'selected':''}>Sin requisito (solo membresía)</option>
             ${[[1,'Aprendiz'],[2,'Practicante'],[3,'Profesional'],[4,'Especialista'],[5,'Maestro']].map(([id,nombre]) => `<option value="${id}" ${Number(mat.nivelRequerido)===id?'selected':''}>Nivel ${id} · ${nombre}</option>`).join('')}
           </select>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Si lo eliges, el libro queda bloqueado en el panel hasta que el alumno alcance ese nivel en Retos (mismos niveles que ve ahí).</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">Rápido de cumplir, pero se calcula en el navegador de cada quien — alguien podría adelantarlo manipulando su sesión.</div>
+        </div>
+        <div class="form-field">
+          <label class="label" for="bl-retos">Retos diarios superados requeridos</label>
+          <input type="number" class="input" id="bl-retos" min="0" max="999" value="${mat.retosRequeridos||''}" placeholder="Ej: 5">
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">El bueno de verdad: lo cuenta y califica el servidor (reto diario), nadie puede falsearlo. Déjalo vacío para no usarlo.</div>
         </div>
         <div class="form-field form-field--full">
           <label class="label" for="bl-desc">Descripción</label>
@@ -4476,6 +4481,8 @@ const Pages={
         const estado = document.getElementById('bl-estado').value;
         const nivelVal = document.getElementById('bl-nivel').value;
         const nivelRequerido = nivelVal ? parseInt(nivelVal, 10) : null;
+        const retosVal = document.getElementById('bl-retos').value.trim();
+        const retosRequeridos = retosVal ? parseInt(retosVal, 10) : null;
         const gratis = document.getElementById('bl-gratis').checked;
         const cursoId = document.getElementById('bl-curso').value;
         const url = document.getElementById('bl-url').value.trim();
@@ -4516,7 +4523,7 @@ const Pages={
         const materialId = esEdicion ? editId : (slugify(titulo) + '-' + Math.random().toString(36).slice(2,8));
         const datos = {
           titulo, tipo, categoria, autor, descripcion:desc, estado, gratis,
-          cursoId, paginas, portada:portadaData, url, area, nivelRequerido,
+          cursoId, paginas, portada:portadaData, url, area, nivelRequerido, retosRequeridos,
           actualizadoEn: fb.serverTimestamp(),
         };
         if (!esEdicion) datos.creadoEn = fb.serverTimestamp();

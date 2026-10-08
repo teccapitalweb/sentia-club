@@ -7185,6 +7185,8 @@ const Sections = (function(){
           // Retos (sube de Nivel), no solo por membresía VIP. Opcional: si el
           // admin no lo configura, el libro se comporta como antes.
           nivelRequerido: typeof d.nivelRequerido === 'number' ? d.nivelRequerido : null,
+          // MODIFICADO: el gate real, verificado en servidor (reto diario).
+          retosRequeridos: typeof d.retosRequeridos === 'number' ? d.retosRequeridos : null,
         };
       });
       _materialesBibCargados = true;
@@ -8528,16 +8530,48 @@ const Sections = (function(){
     ]
   };
   function retoIndiceDelDia(lista){ const inicio=new Date(new Date().getFullYear(),0,0); const hoy=new Date(); return Math.floor((hoy-inicio)/86400000)%lista.length; }
-  function abrirPreguntaReto(item, tipo){
-    const id='reto-practica-'+tipo;
-    const body=`<div class="reto-modal"><span class="reto-modal__notice">Práctica educativa · contenido ficticio</span><h2>${escapeHtml(item.pregunta)}</h2><div class="reto-modal__answers">${item.opciones.map((o,i)=>`<button type="button" data-reto-option="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="reto-modal__feedback" id="${id}-feedback"></p></div>`;
-    Modal.open({id,title:tipo==='diario'?'Reto diario':'Caso guiado',subtitle:'SENTIA VIP',icon:'i-ps-target',size:'sm',body,footer:`<button class="btn btn--ghost" onclick="Modal.close('${id}')">Cerrar</button>`});
-    setTimeout(()=>document.querySelectorAll('[data-reto-option]').forEach(btn=>btn.addEventListener('click',()=>{
-      const correcto=Number(btn.dataset.retoOption)===item.correcta;
-      document.querySelectorAll('[data-reto-option]').forEach(b=>{b.disabled=true;if(Number(b.dataset.retoOption)===item.correcta)b.classList.add('is-correct');});
-      if(!correcto)btn.classList.add('is-incorrect');
-      const feedback=document.getElementById(id+'-feedback');if(feedback)feedback.textContent=(correcto?'Respuesta correcta. ':'Para repasar: ')+item.explicacion;
-      registrarAccionProgreso(tipo); try{localStorage.setItem('sentia:retos:'+tipo+':'+new Date().toISOString().slice(0,10),'1')}catch(e){}
+  // MODIFICADO: el reto diario ahora lo califica el servidor (sentia-academy-webhook).
+  // La pregunta y la respuesta correcta ya NO viven en este archivo — así nadie
+  // puede leerla en DevTools y "ganarse" el conteo que desbloquea libros de la
+  // Biblioteca sin resolver nada de verdad. El resto de los retos (casos,
+  // mapas, etc.) sigue siendo práctica educativa sin servidor, sin cambios.
+  function retosWebhookBase(){ return location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL; }
+  async function abrirRetoDiario(){
+    const id = 'reto-diario';
+    let data;
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/retos/diario`, { headers: await window.__authHeaders() });
+      data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'No se pudo cargar el reto de hoy');
+    } catch (e) {
+      Toast.error('No se pudo cargar el reto de hoy', e.message || 'Intenta de nuevo');
+      return;
+    }
+    const footer = `<button class="btn btn--ghost" onclick="Modal.close('${id}')">Cerrar</button>`;
+    if (data.yaRespondido) {
+      const body = `<div class="reto-modal"><span class="reto-modal__notice">Ya contestaste el reto de hoy</span><h2>${escapeHtml(data.pregunta)}</h2><div class="reto-modal__answers">${data.opciones.map((o,i)=>`<button type="button" disabled${i===data.yaRespondido.correcta?' class="is-correct"':''}>${escapeHtml(o)}</button>`).join('')}</div><p class="reto-modal__feedback">${data.yaRespondido.correcto?'Respuesta correcta. ':'Para repasar: '}${escapeHtml(data.yaRespondido.explicacion)}</p></div>`;
+      Modal.open({id,title:'Reto diario',subtitle:'SENTIA VIP',icon:'i-ps-target',size:'sm',body,footer});
+      return;
+    }
+    const body = `<div class="reto-modal"><span class="reto-modal__notice">Práctica educativa</span><h2>${escapeHtml(data.pregunta)}</h2><div class="reto-modal__answers">${data.opciones.map((o,i)=>`<button type="button" data-reto-option="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="reto-modal__feedback" id="${id}-feedback"></p></div>`;
+    Modal.open({id,title:'Reto diario',subtitle:'SENTIA VIP',icon:'i-ps-target',size:'sm',body,footer});
+    setTimeout(()=>document.querySelectorAll('[data-reto-option]').forEach(btn=>btn.addEventListener('click',async()=>{
+      document.querySelectorAll('[data-reto-option]').forEach(b=>b.disabled=true);
+      const opcion = Number(btn.dataset.retoOption);
+      let res;
+      try {
+        const r = await fetch(`${retosWebhookBase()}/api/retos/diario`, { method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({retoId:data.retoId, opcion}) });
+        res = await r.json();
+        if (!r.ok) throw new Error(res.error || 'No se pudo registrar tu respuesta');
+      } catch (e) {
+        document.querySelectorAll('[data-reto-option]').forEach(b=>b.disabled=false);
+        Toast.error('No se pudo registrar tu respuesta', e.message || '');
+        return;
+      }
+      document.querySelectorAll('[data-reto-option]').forEach(b=>{if(Number(b.dataset.retoOption)===res.correcta)b.classList.add('is-correct');});
+      if(!res.correcto)btn.classList.add('is-incorrect');
+      const feedback=document.getElementById(id+'-feedback');if(feedback)feedback.textContent=(res.correcto?'Respuesta correcta. ':'Para repasar: ')+res.explicacion;
+      registrarAccionProgreso('diario');
     })),40);
   }
   function abrirFlashcards(){
@@ -9950,7 +9984,7 @@ const Sections = (function(){
     container.querySelectorAll('[data-practice]').forEach(el=>el.addEventListener('click',()=>{
       if(!retosEsVip()){ window.__irASuscripcion(); return; }
       const tipo=el.dataset.practice;
-      if(tipo==='diario') abrirPreguntaReto(retoDiario,'diario');
+      if(tipo==='diario') abrirRetoDiario();
       if(tipo==='caso-clinico') _renderCasoClinicoView(container);
       if(tipo==='mapa-emocional') _renderMapaEmocionalView(container);
       if(tipo==='intervencion') _renderIntervencionView(container);
@@ -10366,13 +10400,18 @@ const Sections = (function(){
     const tipo = esBib ? m.tipo : _inferirTipoMaterial(m.tipo || '');
     const muestraGratis = esBib ? m.gratis : esMaterialGratis(m.cursoId, m.materialIndex);
     const requiereMembresia = !tieneAccesoVipCompleto() && !muestraGratis;
-    // MODIFICADO: libros de biblioteca que piden cierto Nivel de Retos para abrirse
-    // (evaluarLogros() ya se llamó una vez en renderPDFs antes de pintar la lista).
-    const nivelReq = esBib ? (m.nivelRequerido || 0) : 0;
+    // MODIFICADO: libros de biblioteca con requisito de Retos. retosRequeridos
+    // es el gate real (verificado en servidor); si no está configurado, cae a
+    // nivelRequerido (más simple, pero calculado en el navegador).
+    // (evaluarLogros()/cargarEstadoRetos() ya se llamaron una vez en renderPDFs
+    // antes de pintar la lista).
+    const retosAccesoInfo = esBib ? retosAcceso(m.id) : { abierto: true };
+    const bloqueadoPorRetos = esBib && !!m.retosRequeridos && !retosAccesoInfo.abierto;
+    const nivelReq = esBib && !m.retosRequeridos ? (m.nivelRequerido || 0) : 0;
     const nivelActual = getNivel(usuario.xp);
     const bloqueadoPorNivel = nivelReq > 0 && nivelActual.id < nivelReq;
     const nivelReqNombre = (niveles.find(n => n.id === nivelReq) || {}).nombre || '';
-    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel;
+    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
     const diasFaltan = esBib ? 0 : _diasParaMaterial(m);
     const tituloEsc = escapeHtml(m.titulo || 'Sin título');
     const autorEsc = escapeHtml(m.autor || '');
@@ -10384,6 +10423,7 @@ const Sections = (function(){
     let estadoTexto = 'Disponible para miembros';
     if (muestraGratis) estadoTexto = 'Gratis';
     else if (!disponible && requiereMembresia) estadoTexto = 'Solo miembros VIP';
+    else if (!disponible && bloqueadoPorRetos) estadoTexto = `${retosAccesoInfo.superados||0}/${m.retosRequeridos} retos diarios superados`;
     else if (!disponible && bloqueadoPorNivel) estadoTexto = `Nivel ${nivelReq} · ${nivelReqNombre} requerido`;
     else if (!disponible && !esBib) estadoTexto = diasFaltan === 1 ? 'Disponible mañana' : 'En ' + diasFaltan + ' días';
     else if (!disponible) estadoTexto = 'Próximamente';
@@ -10406,6 +10446,9 @@ const Sections = (function(){
     } else if (requiereMembresia) {
       btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-paywall="${m.cursoId || 'vip'}" style="background:var(--text-3)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M12 2l2.09 6.26L21 9.27l-5 3.89L17.18 20 12 16.77 6.82 20 8 13.16l-5-3.89 6.91-1.01z"/></svg> Activa tu membresía</button>`;
+    } else if (bloqueadoPorRetos) {
+      btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-retos-bloqueo="${m.retosRequeridos}" data-retos-superados="${retosAccesoInfo.superados||0}" style="background:var(--text-3)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Resuelve el reto diario</button>`;
     } else if (bloqueadoPorNivel) {
       btnHTML = `<button class="bib-detalle__btn-leer" id="bib-btn-leer" data-nivel-bloqueo="${nivelReq}" data-nivel-nombre="${escapeHtml(nivelReqNombre)}" style="background:var(--text-3)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Alcanza el Nivel ${nivelReq}</button>`;
@@ -10461,11 +10504,15 @@ const Sections = (function(){
     const tipo = esBib ? m.tipo : _inferirTipoMaterial(m.tipo || '');
     const muestraGratis = esBib ? m.gratis : esMaterialGratis(m.cursoId, m.materialIndex);
     const requiereMembresia = !tieneAccesoVipCompleto() && !muestraGratis;
-    // MODIFICADO: libros que piden cierto Nivel de Retos para desbloquearse
-    // (evaluarLogros() ya se llamó una vez en renderPDFs antes de pintar la lista).
-    const nivelReq = esBib ? (m.nivelRequerido || 0) : 0;
+    // MODIFICADO: libros con requisito de Retos. retosRequeridos (servidor) es
+    // el gate real; si no está configurado, cae a nivelRequerido (navegador).
+    // (evaluarLogros()/cargarEstadoRetos() ya se llamaron una vez en renderPDFs
+    // antes de pintar la lista).
+    const retosAccesoInfoCard = esBib ? retosAcceso(m.id) : { abierto: true };
+    const bloqueadoPorRetos = esBib && !!m.retosRequeridos && !retosAccesoInfoCard.abierto;
+    const nivelReq = esBib && !m.retosRequeridos ? (m.nivelRequerido || 0) : 0;
     const bloqueadoPorNivel = nivelReq > 0 && getNivel(usuario.xp).id < nivelReq;
-    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel;
+    const disponible = (esBib ? (m.estado === 'disponible') : _materialDisponible(m)) && !bloqueadoPorNivel && !bloqueadoPorRetos;
     const tituloEsc = escapeHtml(m.titulo || 'Sin título');
     const cursoEsc = esBib ? escapeHtml(m.autor || m.cursoTitulo || '') : escapeHtml(m.cursoTitulo || '');
     const portada = _getPortadaMaterial(m);
@@ -10473,6 +10520,7 @@ const Sections = (function(){
 
     let statusHTML = '';
     if (muestraGratis && disponible) statusHTML = '<span class="bib-card__status bib-card__status--free">Gratis</span>';
+    else if (bloqueadoPorRetos) statusHTML = `<span class="bib-card__status bib-card__status--vip">${retosAccesoInfoCard.superados||0}/${m.retosRequeridos} retos</span>`;
     else if (bloqueadoPorNivel) statusHTML = `<span class="bib-card__status bib-card__status--vip">Nivel ${nivelReq}</span>`;
     else if (requiereMembresia) statusHTML = '<span class="bib-card__status bib-card__status--vip">VIP</span>';
 
@@ -10499,10 +10547,36 @@ const Sections = (function(){
       </div>`;
   }
 
+  // MODIFICADO: avance REAL de retos (reto diario), verificado por el
+  // servidor — es el gate de verdad para libros con retosRequeridos. Si no
+  // se puede consultar (sin conexión), a un miembro ya VIP no se le cierra
+  // el libro por una falla de red (igual que Alintec).
+  let _retosEstadoCache = undefined; // undefined = sin cargar, null = sin VIP/uid, 'error' | {superados, libros}
+  async function cargarEstadoRetos(){
+    const uid = window.UserState?.uid;
+    if (!tieneAccesoVipCompleto() || !uid) { _retosEstadoCache = null; return null; }
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/retos/estado`, { headers: await window.__authHeaders() });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'error');
+      _retosEstadoCache = { superados: Number(data.superados) || 0, libros: Array.isArray(data.libros) ? data.libros : [] };
+    } catch (e) { _retosEstadoCache = 'error'; }
+    return _retosEstadoCache;
+  }
+  function retosAcceso(materialId){
+    if (_retosEstadoCache === 'error' || _retosEstadoCache == null) return { abierto: true, superados: 0 };
+    const dato = _retosEstadoCache.libros.find(x => x.id === materialId);
+    if (!dato) return { abierto: true, superados: _retosEstadoCache.superados };
+    return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados };
+  }
+
   async function renderPDFs(container){
     // MODIFICADO: se evalúa una sola vez por render (no por tarjeta) el avance
-    // de Retos, para que los libros bloqueados por Nivel usen el XP vigente.
+    // de Retos, para que los libros bloqueados por Nivel usen el XP vigente,
+    // y se consulta al servidor el avance REAL de retos (reto diario) para
+    // los libros con retosRequeridos.
     evaluarLogros();
+    await cargarEstadoRetos();
     if (!_cursosLoaded && !_cursosLoading) {
       container.innerHTML = `
         <div class="fade-up">
@@ -10629,11 +10703,14 @@ const Sections = (function(){
         const cursoId = btnLeer.dataset.curso;
         const idx = Number(btnLeer.dataset.idx);
         const paywallId = btnLeer.dataset.paywall;
+        const retosBloqueo = btnLeer.dataset.retosBloqueo;
         const nivelBloqueo = btnLeer.dataset.nivelBloqueo;
         if (paywallId) {
           const curso = cursos.find(c => c.id === paywallId);
           if (curso) mostrarPaywallCurso(curso);
           else Toast.info('Membresía requerida', 'Necesitas una membresía VIP para acceder a este material.');
+        } else if (retosBloqueo) {
+          Toast.info('Libro bloqueado', `Llevas ${btnLeer.dataset.retosSuperados || 0} de ${retosBloqueo} retos diarios superados. Resuélvelos en Retos para desbloquearlo.`);
         } else if (nivelBloqueo) {
           Toast.info('Libro bloqueado', `Alcanza el Nivel ${nivelBloqueo} · ${btnLeer.dataset.nivelNombre || ''} en Retos para desbloquearlo.`);
         } else if (materialUrl) {
