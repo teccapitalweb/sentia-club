@@ -38,11 +38,20 @@ service cloud.firestore {
         && request.resource.data.activa == false
         && (!('activo' in request.resource.data) || request.resource.data.activo == false);
       // Los cambios de membresía, plan, vencimiento y eliminación pasan por
-      // Railway. Un navegador solo puede corregir su propio nombre.
+      // Railway. Un navegador solo puede corregir su propio nombre y los
+      // datos de su ficha profesional (whatsapp, área, empresa) que alimentan
+      // su tarjeta del Directorio.
       allow update: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['nombre', 'displayName', 'lastUpdatedAt']);
+          .hasOnly([
+            'nombre', 'displayName', 'lastUpdatedAt', 'nombreConfirmado',
+            'whatsapp', 'especialidad', 'empresa',
+            'perfilCompletado', 'perfilCompletadoAt'
+          ])
+        && (!('whatsapp' in request.resource.data) || (request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')))
+        && (!('especialidad' in request.resource.data) || (request.resource.data.especialidad is string && request.resource.data.especialidad.size() <= 80))
+        && (!('empresa' in request.resource.data) || (request.resource.data.empresa is string && request.resource.data.empresa.size() <= 80));
       allow delete: if false;
     }
 
@@ -117,56 +126,64 @@ service cloud.firestore {
     match /directorio/{uid} {
       // Una ficha no visible solo la pueden leer su titular y los admins. La
       // consulta pública del directorio debe filtrar `visible == true`.
+      // MODIFICADO: ya no vive aquí ningún dato de contacto (whatsapp, correo,
+      // linkedin, web) — eso lo guarda Railway en `directorio_contacto`, que
+      // el navegador nunca puede leer directo, y solo lo entrega a quien
+      // consulta el webhook siendo VIP. Esta ficha es el perfil público
+      // (nombre, puesto, empresa, sector, bio, estado) que cualquier miembro
+      // con sesión iniciada puede crearse, VIP o no — el campo `vip` (que
+      // decide si aparece en "Miembros VIP verificados" o en "Comunidad")
+      // no lo puede fijar el cliente: debe coincidir con isVip(uid).
       allow get: if isAdmin() || (signedIn()
         && (request.auth.uid == uid || resource.data.visible == true));
       allow list: if isAdmin() || (signedIn() && resource.data.visible == true);
-      // Es información pública del perfil, no un documento libre donde un
-      // cliente pueda almacenar campos arbitrarios.
       allow create: if isAdmin() || (signedIn()
         && request.auth.uid == uid
-        && isVip(uid)
         && request.resource.data.uid == uid
         && request.auth.token.email_verified == true
-        && request.resource.data.email is string && request.resource.data.email.size() <= 254
-        && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
         && request.resource.data.keys().hasOnly([
-          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
-          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
+          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'estado',
+          'visible', 'color', 'foto', 'vip', 'autoCreada', 'updatedAt'
         ])
         && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
         && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
         && request.resource.data.empresa is string && request.resource.data.empresa.size() <= 100
         && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
         && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
-        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
+        && (!('estado' in request.resource.data) || request.resource.data.estado in ['', 'proyectos', 'empleo'])
         && request.resource.data.visible is bool
         && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
-        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
-        && (!('linkedin' in request.resource.data) || request.resource.data.linkedin == '' || (request.resource.data.linkedin is string && request.resource.data.linkedin.matches('^https://.*')))
-        && (!('web' in request.resource.data) || request.resource.data.web == '' || (request.resource.data.web is string && request.resource.data.web.matches('^https://.*'))));
+        && request.resource.data.vip is bool && request.resource.data.vip == isVip(uid)
+        && (!('autoCreada' in request.resource.data) || request.resource.data.autoCreada is bool)
+        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$'))));
       allow update: if isAdmin() || (signedIn()
         && request.auth.uid == uid
-        && isVip(uid)
         && request.resource.data.uid == uid
         && request.auth.token.email_verified == true
-        && request.resource.data.email is string && request.resource.data.email.size() <= 254
-        && (request.resource.data.email == '' || request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))
         && request.resource.data.keys().hasOnly([
-          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'whatsapp',
-          'email', 'linkedin', 'web', 'visible', 'color', 'foto', 'updatedAt'
+          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'estado',
+          'visible', 'color', 'foto', 'vip', 'autoCreada', 'updatedAt'
         ])
         && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
         && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
         && request.resource.data.empresa is string && request.resource.data.empresa.size() <= 100
         && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
         && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
-        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 30 && request.resource.data.whatsapp.matches('^[0-9 +()-]*$')
+        && (!('estado' in request.resource.data) || request.resource.data.estado in ['', 'proyectos', 'empleo'])
         && request.resource.data.visible is bool
         && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
-        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
-        && (!('linkedin' in request.resource.data) || request.resource.data.linkedin == '' || (request.resource.data.linkedin is string && request.resource.data.linkedin.matches('^https://.*')))
-        && (!('web' in request.resource.data) || request.resource.data.web == '' || (request.resource.data.web is string && request.resource.data.web.matches('^https://.*'))));
+        && request.resource.data.vip is bool && request.resource.data.vip == isVip(uid)
+        && (!('autoCreada' in request.resource.data) || request.resource.data.autoCreada is bool)
+        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$'))));
       allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
+
+    // Contacto del directorio (whatsapp, linkedin, web): protegido por
+    // completo. Solo Railway (Admin SDK) lo lee o lo escribe, después de
+    // comprobar que quien pregunta es VIP o es el dueño de la ficha — así
+    // nadie puede leer el contacto de otro miembro directo desde el cliente.
+    match /directorio_contacto/{uid} {
+      allow read, write: if false;
     }
 
     match /posts/{postId} {

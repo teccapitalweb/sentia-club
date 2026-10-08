@@ -1976,6 +1976,18 @@ body::after{
 .dir-cta--wa:hover{color:#25D366;border-color:#25D366}
 .dir-cta--li:hover{color:#0A66C2;border-color:#0A66C2}
 .dir-card__sincontacto{font-size:11px;color:var(--text-3);margin-top:auto;padding-top:6px;font-style:italic}
+.dir-cta--lock{width:auto;padding:0 14px;gap:6px;font-size:11.5px;font-weight:700;color:var(--text-2)}
+.dir-cta--lock:hover{color:var(--primary);border-color:var(--primary)}
+.dir-grupo{margin-bottom:8px}
+.dir-grupo__title{display:flex;align-items:center;gap:8px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--text);margin:28px 0 14px}
+.dir-grupo__title .ic{width:17px;height:17px;color:var(--primary)}
+.dir-grupo__count{font-size:12.5px;font-weight:600;color:var(--text-3)}
+.dir-card__badge-vip{position:absolute;top:12px;right:12px;z-index:2;display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#f6c453,#e8a71a);color:#4a2e00;font-size:10px;font-weight:800;letter-spacing:.4px;padding:3px 9px 3px 7px;border-radius:999px}
+.dir-card__badge-vip .ic{width:11px;height:11px}
+.dir-card__estado{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.dir-card__estado--ok{color:#1e7d46;background:color-mix(in srgb,#1e7d46 14%,transparent)}
+.dir-card__estado--info{color:#1b5df0;background:color-mix(in srgb,#1b5df0 12%,transparent)}
+.dir-det__vipic{width:16px;height:16px;color:#e8a71a;vertical-align:-2px}
 /* Form de tarjeta */
 .dir-form{display:flex;flex-direction:column;gap:0}
 .dir-form__foto-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:18px}
@@ -4172,8 +4184,8 @@ if (window.__isDemoMode) {
       window.__initPresencia && window.__initPresencia(user.uid);
     }, 50);
 
-    // ─── Popup: confirmar/editar nombre (1ª vez) · evita certificados con el email ───
-    setTimeout(() => { try { window.__maybeAskName && window.__maybeAskName(); } catch(e){} }, 900);
+    // ─── Popup: completar ficha profesional (1ª vez) · evita certificados con el email y crea la tarjeta del Directorio ───
+    setTimeout(() => { try { window.__maybeAskProfile && window.__maybeAskProfile(); } catch(e){} }, 900);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
@@ -5789,7 +5801,9 @@ function navigateToSection(section, opts){
   opts = opts || {};
   // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
   if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
-  if (['directorio','foro'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  // MODIFICADO: el Directorio ahora es visible para cualquier miembro (VIP o
+  // no) — solo el Foro sigue siendo exclusivo VIP.
+  if (['foro'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
@@ -8060,18 +8074,8 @@ const Sections = (function(){
     const comSub = document.getElementById('com-sub');
     const comBtn = document.getElementById('com-btn');
 
-    if (!esVipUser) {
-      // No-VIP: el directorio es exclusivo VIP. En vez de pedirle algo que no puede hacer,
-      // lo invitamos a hacerse miembro. El botón lleva a Suscripción.
-      setTxt('com-title', 'Únete a la comunidad VIP');
-      setTxt('com-sub', 'Al ser miembro, crea tu tarjeta en el Directorio VIP y participa en el foro con cientos de profesionales.');
-      setTxt('com-pct', '');
-      setBar('com-bar', 0);
-      if (comBtn) { comBtn.textContent = 'Hazte VIP'; comBtn.setAttribute('data-section', 'suscripcion'); }
-      return;
-    }
-
-    // VIP/admin: estado real de su tarjeta de directorio
+    // MODIFICADO: el Directorio ya no es exclusivo VIP — cualquier miembro
+    // puede tener su tarjeta (solo lo que sí sigue siendo VIP es el Foro).
     let tieneTarjeta = false, tarjetaVisible = false;
     if (fs && fs.getDoc && uid) {
       try {
@@ -11294,10 +11298,17 @@ const Sections = (function(){
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // DIRECTORIO VIP · cada miembro arma su tarjeta profesional
-  // Firestore: colección `directorio/{uid}` · foto base64 optimizada
+  // DIRECTORIO · cada miembro arma su tarjeta profesional
+  // Firestore: colección `directorio/{uid}` (perfil público, foto base64) ·
+  // el contacto (whatsapp/linkedin/web) vive aparte, protegido en Railway
+  // (`directorio_contacto`), y solo se entrega a quien pregunta siendo VIP.
+  // MODIFICADO: ahora cualquier miembro (VIP o no) puede tener tarjeta; el
+  // campo `vip` en cada ficha decide si aparece en "Miembros VIP verificados"
+  // o en "Comunidad SENTIA" — ese campo lo valida la regla de Firestore
+  // contra isVip(uid), el navegador no puede falsearlo.
   // ═══════════════════════════════════════════════════════════════
   const SECTORES = ['Psicología Clínica','Psicología Educativa','Psicología Forense','Psicología Laboral','Neuropsicología','Salud Mental','Educación / Docencia','Trabajo Social','Desarrollo Humano','Otro'];
+  const DIR_ESTADOS = { proyectos: { label: 'Disponible para proyectos', cls: 'ok' }, empleo: { label: 'Busco oportunidades', cls: 'info' } };
   let _dirUnsub = null;
   window.__dirCleanup = function(){ try{ if(typeof _dirUnsub==='function'){ _dirUnsub(); _dirUnsub=null; } }catch(e){} };
   window.__dirEditar = function(){ return dirEditarMiTarjeta(); };
@@ -11305,6 +11316,66 @@ const Sections = (function(){
   let _dirFiltroSector = 'todos';
   let _dirBusqueda = '';
   let _dirFotoTmp = undefined; // undefined=sin cambio, null=quitar, string=nueva
+  let _dirMeta = { cargado: false, viewerVip: false, contacts: {}, myContact: null };
+
+  function dirEsVipActual(){ return window.UserState?.modo==='vip' || esAdminReal(); }
+  function dirSectorDesde(texto){
+    const t = String(texto||'').trim().toLowerCase();
+    return SECTORES.find(s=>s.toLowerCase()===t) || '';
+  }
+  async function dirApi(path, opts){
+    const r = await fetch(`${retosWebhookBase()}${path}`, { ...(opts||{}), headers: await window.__authHeaders() });
+    const data = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(data.error || 'No pudimos conectar con el directorio.');
+    return data;
+  }
+  async function dirCargarMeta(){
+    try {
+      const d = await dirApi('/api/directorio/overview');
+      _dirMeta = { cargado:true, viewerVip: d.viewerVip===true, contacts: d.contacts||{}, myContact: d.myContact||null };
+    } catch(e){ console.warn('[directorio]', e.message); }
+    dirPintar();
+  }
+  // Contacto visible: el propio siempre (incluso si aún no es VIP, para que
+  // pueda revisarlo); el de otros solo si quien mira es VIP.
+  function dirContactoVisible(c){
+    const uid = window.UserState?.uid;
+    if (c.id===uid) return _dirMeta.myContact || {};
+    if (!_dirMeta.viewerVip) return null;
+    return _dirMeta.contacts[c.id] || {};
+  }
+  // Tarjeta automática: se crea una vez (con lo que ya sabemos de la cuenta)
+  // justo después de la ficha profesional; si ya existe, no se toca para no
+  // pisar lo que la persona haya personalizado después.
+  window.__dirAutoCrear = async function(){
+    const fs = window.__fs;
+    const uid = window.UserState?.uid;
+    if (!fs || !uid || !window.__currentUser) return false;
+    const key = `sentia:dir-auto:v1:${uid}`;
+    try { if (localStorage.getItem(key)==='1') return false; } catch(e){}
+    try {
+      const ref = fs.doc(fs.db,'directorio',uid);
+      const ds = await fs.getDoc(ref);
+      if (ds.exists()) { try{ localStorage.setItem(key,'1'); }catch(e){} return false; }
+      const md = window.memberData || {};
+      const nombre = (window.UserState?.nombre || window.UserState?.displayName || (window.UserState?.email||'').split('@')[0] || 'Miembro SENTIA').slice(0,100);
+      const especialidad = String(md.especialidad || '').trim();
+      const sector = dirSectorDesde(especialidad);
+      await fs.setDoc(ref, {
+        uid, nombre,
+        puesto: sector ? '' : especialidad.slice(0,100),
+        empresa: String(md.empresa||'').trim().slice(0,100),
+        sector, bio: '', estado: '',
+        visible: true,
+        color: dirColorFor(uid),
+        vip: dirEsVipActual(),
+        autoCreada: true,
+        updatedAt: fs.serverTimestamp()
+      });
+      try { localStorage.setItem(key,'1'); } catch(e){}
+      return true;
+    } catch(e){ console.warn('[directorio] no se pudo crear la tarjeta automática:', e.message); return false; }
+  };
 
   function dirColorFor(uid){
     const colores = ['#1b5df0','#2FBF2E','#60A5FA','#A78BFA','#F87171','#FBBF24','#38BDF8','#FB7185'];
@@ -11482,7 +11553,6 @@ const Sections = (function(){
   }
 
   function renderDirectorio(container){
-    const esVip = window.UserState?.modo==='vip' || esAdminReal();
     container.innerHTML = `
       <div class="fade-up">
         <div class="sec-hero">
@@ -11496,7 +11566,7 @@ const Sections = (function(){
             <svg class="ic"><use href="#i-search"/></svg>
             <input type="text" id="dir-buscar" placeholder="Buscar por nombre, empresa o puesto…">
           </div>
-          ${esVip?`<button class="btn btn--accent" id="dir-mi-tarjeta"><svg class="ic"><use href="#i-edit"/></svg>Mi tarjeta</button>`:''}
+          <button class="btn btn--accent" id="dir-mi-tarjeta"><svg class="ic"><use href="#i-edit"/></svg>Mi tarjeta</button>
         </div>
 
         <div class="dir-chips" id="dir-chips">
@@ -11504,17 +11574,19 @@ const Sections = (function(){
           ${SECTORES.map(s=>`<button class="dir-chip" data-sector="${s}">${s}</button>`).join('')}
         </div>
 
-
-        <div class="dir-grid" id="dir-grid">
-          <div class="foro-empty">Cargando directorio…</div>
+        <div class="dir-grupo">
+          <h2 class="dir-grupo__title"><svg class="ic"><use href="#i-crown"/></svg>Miembros VIP verificados<span class="dir-grupo__count" id="dir-count-vip"></span></h2>
+          <div class="dir-grid" id="dir-grid-vip"><div class="foro-empty">Cargando directorio…</div></div>
+        </div>
+        <div class="dir-grupo">
+          <h2 class="dir-grupo__title"><svg class="ic"><use href="#i-users"/></svg>Comunidad SENTIA<span class="dir-grupo__count" id="dir-count-com"></span></h2>
+          <div class="dir-grid" id="dir-grid-com"></div>
         </div>
       </div>
     `;
 
-    // Búsqueda
     const bus = container.querySelector('#dir-buscar');
     bus.addEventListener('input', ()=>{ _dirBusqueda = (bus.value||'').toLowerCase().trim(); dirPintar(); });
-    // Chips de sector
     container.querySelectorAll('[data-sector]').forEach(c=>{
       c.addEventListener('click', ()=>{
         container.querySelectorAll('[data-sector]').forEach(x=>x.classList.remove('is-active'));
@@ -11523,41 +11595,16 @@ const Sections = (function(){
         dirPintar();
       });
     });
-    // Mi tarjeta
-    if (esVip) container.querySelector('#dir-mi-tarjeta').addEventListener('click', dirEditarMiTarjeta);
+    container.querySelector('#dir-mi-tarjeta').addEventListener('click', dirEditarMiTarjeta);
 
     dirSuscribir();
-    if (esVip) ensureMiTarjetaDirectorio();
-  }
-
-  // MODIFICADO: al entrar al Directorio por primera vez, se crea la tarjeta
-  // automáticamente (oculta, visible:false) con el nombre de la cuenta, lista
-  // para que la persona la revise y la publique ella misma desde "Mi tarjeta".
-  // Así nadie aparece públicamente sin haberlo decidido. No puede hacerse al
-  // registrarse: las reglas de Firestore solo permiten crear esta ficha a un
-  // miembro ya VIP y con correo verificado, lo cual se cumple aquí.
-  async function ensureMiTarjetaDirectorio(){
-    const fs = window.__fs;
-    const uid = window.UserState?.uid;
-    if (!fs || !uid) return;
-    try {
-      const ref = fs.doc(fs.db, 'directorio', uid);
-      const snap = await fs.getDoc(ref);
-      if (snap.exists()) return;
-      const nombre = (window.UserState?.nombre || window.UserState?.displayName || (window.UserState?.email || '').split('@')[0] || 'Sin nombre').slice(0, 100);
-      await fs.setDoc(ref, {
-        uid, nombre,
-        puesto: '', empresa: '', sector: '', bio: '', whatsapp: '',
-        email: window.UserState?.email || '',
-        visible: false,
-        color: dirColorFor(uid)
-      });
-    } catch (e) { console.warn('[directorio] no se pudo crear la tarjeta automática:', e.message); }
+    dirCargarMeta();
+    try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
   }
 
   function dirSuscribir(){
     const fs = window.__fs;
-    if (!fs || !fs.onSnapshot){ const g=document.getElementById('dir-grid'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; return; }
+    if (!fs || !fs.onSnapshot){ const g=document.getElementById('dir-grid-vip'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; return; }
     if (_dirUnsub){ _dirUnsub(); _dirUnsub=null; }
     // Solo se solicitan fichas que su titular eligió publicar. Además de no
     // mostrar las privadas, esto permite que las reglas bloqueen su lectura.
@@ -11570,66 +11617,81 @@ const Sections = (function(){
         return fecha(b) - fecha(a);
       });
       dirPintar();
-    }, (err)=>{ console.error('dir snap',err); const g=document.getElementById('dir-grid'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; });
+    }, (err)=>{ console.error('dir snap',err); const g=document.getElementById('dir-grid-vip'); if(g) g.innerHTML='<div class="foro-empty">No se pudo cargar el directorio.</div>'; });
+  }
+
+  function dirCardHTML(c, uid){
+    const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
+    const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
+    const colorSeguro = /^#[0-9a-f]{6}$/i.test(String(c.color||'')) ? c.color : '#1b5df0';
+    const foto = fotoSegura
+      ? `<img src="${fotoSegura}" alt="${escapeHtml(c.nombre||'')}" class="dir-card__foto">`
+      : `<div class="dir-card__foto dir-card__foto--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${escapeHtml(inicial)}</div>`;
+    const esMia = c.id===uid;
+    const contacto = dirContactoVisible(c);
+    const estado = DIR_ESTADOS[c.estado];
+    const contactos = [];
+    if (contacto) {
+      const linkedinSeguro = /^https:\/\//i.test(String(contacto.linkedin||'')) ? contacto.linkedin : '';
+      const webSeguro = /^https:\/\//i.test(String(contacto.web||'')) ? contacto.web : '';
+      if (contacto.whatsapp) contactos.push(`<a class="dir-cta dir-cta--wa" href="https://wa.me/${(contacto.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" title="WhatsApp"><svg class="ic"><use href="#i-whatsapp"/></svg></a>`);
+      if (contacto.email) contactos.push(`<button class="dir-cta dir-cta--mail" data-email="${escapeHtml(contacto.email)}" title="Copiar correo: ${escapeHtml(contacto.email)}"><svg class="ic"><use href="#i-mail"/></svg></button>`);
+      if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
+      if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
+    }
+    const ctasHTML = contacto
+      ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>')
+      : `<button class="dir-cta dir-cta--lock" data-dirlock="1" title="Hazte VIP para contactar"><svg class="ic"><use href="#i-lock"/></svg>Solo VIP</button>`;
+    return `
+      <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
+        ${esMia?'<span class="dir-card__badge-mia">Tú</span>':(c.vip?'<span class="dir-card__badge-vip"><svg class="ic"><use href="#i-crown"/></svg>VIP</span>':'')}
+        <div class="dir-card__top">${foto}</div>
+        <div class="dir-card__body-m">
+          <div class="dir-card__name">${escapeHtml(c.nombre||'Miembro SENTIA')}</div>
+          ${c.puesto?`<div class="dir-card__puesto">${escapeHtml(c.puesto)}</div>`:''}
+          ${c.empresa?`<div class="dir-card__empresa"><svg class="ic"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
+          ${estado?`<span class="dir-card__estado dir-card__estado--${estado.cls}">${estado.label}</span>`:''}
+          ${c.sector?`<span class="dir-card__sector">${escapeHtml(c.sector)}</span>`:''}
+          ${c.bio?`<div class="dir-card__bio">${escapeHtml(c.bio)}</div>`:''}
+          ${ctasHTML}
+        </div>
+      </article>`;
   }
 
   function dirPintar(){
-    const grid = document.getElementById('dir-grid'); if(!grid) return;
+    const gridVip = document.getElementById('dir-grid-vip'), gridCom = document.getElementById('dir-grid-com');
+    if (!gridVip || !gridCom) return;
     let cards = _dirCards.slice();
     if (_dirFiltroSector!=='todos') cards = cards.filter(c=>c.sector===_dirFiltroSector);
     if (_dirBusqueda) cards = cards.filter(c=>{
       const blob = ((c.nombre||'')+' '+(c.empresa||'')+' '+(c.puesto||'')+' '+(c.sector||'')).toLowerCase();
       return blob.includes(_dirBusqueda);
     });
-    if (!cards.length){
-      grid.innerHTML = `<div class="foro-empty">${_dirBusqueda||_dirFiltroSector!=='todos'?'No hay miembros que coincidan con tu búsqueda.':'Aún no hay tarjetas en el directorio. ¡Sé el primero en crear la tuya!'}</div>`;
-      return;
-    }
     const uid = window.UserState?.uid;
-    grid.innerHTML = cards.map(c=>{
-      const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
-      const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
-      const colorSeguro = /^#[0-9a-f]{6}$/i.test(String(c.color||'')) ? c.color : '#1b5df0';
-      const linkedinSeguro = /^https:\/\//i.test(String(c.linkedin||'')) ? c.linkedin : '';
-      const webSeguro = /^https:\/\//i.test(String(c.web||'')) ? c.web : '';
-      const foto = fotoSegura
-        ? `<img src="${fotoSegura}" alt="${escapeHtml(c.nombre||'')}" class="dir-card__foto">`
-        : `<div class="dir-card__foto dir-card__foto--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${escapeHtml(inicial)}</div>`;
-      const contactos = [];
-      if (c.whatsapp) contactos.push(`<a class="dir-cta dir-cta--wa" href="https://wa.me/${(c.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" title="WhatsApp"><svg class="ic"><use href="#i-whatsapp"/></svg></a>`);
-      if (c.email) contactos.push(`<button class="dir-cta dir-cta--mail" data-email="${escapeHtml(c.email)}" title="Copiar correo: ${escapeHtml(c.email)}"><svg class="ic"><use href="#i-mail"/></svg></button>`);
-      if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
-      if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
-      const esMia = c.id===uid;
-      return `
-      <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
-        ${esMia?'<span class="dir-card__badge-mia">Tú</span>':''}
-        <div class="dir-card__top">
-          ${foto}
-        </div>
-        <div class="dir-card__body-m">
-          <div class="dir-card__name">${escapeHtml(c.nombre||'Miembro VIP')}</div>
-          ${c.puesto?`<div class="dir-card__puesto">${escapeHtml(c.puesto)}</div>`:''}
-          ${c.empresa?`<div class="dir-card__empresa"><svg class="ic"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
-          ${c.sector?`<span class="dir-card__sector">${escapeHtml(c.sector)}</span>`:''}
-          ${c.bio?`<div class="dir-card__bio">${escapeHtml(c.bio)}</div>`:''}
-          ${contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>'}
-        </div>
-      </article>`;
-    }).join('');
+    const vipCards = cards.filter(c=>c.vip);
+    const comCards = cards.filter(c=>!c.vip);
+    const sinResultados = _dirBusqueda || _dirFiltroSector!=='todos';
+    document.getElementById('dir-count-vip').textContent = vipCards.length ? ` · ${vipCards.length}` : '';
+    document.getElementById('dir-count-com').textContent = comCards.length ? ` · ${comCards.length}` : '';
+    gridVip.innerHTML = vipCards.length
+      ? vipCards.map(c=>dirCardHTML(c,uid)).join('')
+      : `<div class="foro-empty">${sinResultados?'Aún no hay miembros VIP con esos filtros.':'Aún no hay miembros VIP verificados.'}</div>`;
+    gridCom.innerHTML = comCards.length
+      ? comCards.map(c=>dirCardHTML(c,uid)).join('')
+      : `<div class="foro-empty">${sinResultados?'No hay miembros que coincidan con tu búsqueda.':'Aún no hay más tarjetas en la comunidad. ¡Invita a tus colegas!'}</div>`;
 
-    // Clic en la tarjeta → abre el detalle (sin disparar al tocar un botón de contacto)
-    grid.querySelectorAll('[data-dircard]').forEach(card=>{
-      card.addEventListener('click', (e)=>{
-        if (e.target.closest('.dir-cta')) return; // dejó pasar los enlaces de contacto
-        dirVerDetalle(card.dataset.dircard);
+    [gridVip, gridCom].forEach(grid=>{
+      grid.querySelectorAll('[data-dircard]').forEach(card=>{
+        card.addEventListener('click', (e)=>{
+          if (e.target.closest('.dir-cta')) return; // dejó pasar los botones de contacto
+          dirVerDetalle(card.dataset.dircard);
+        });
       });
-    });
-    // Botón de correo: copiar al portapapeles + intentar abrir cliente
-    grid.querySelectorAll('.dir-cta--mail').forEach(b=>{
-      b.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        dirAbrirCorreo(b.dataset.email);
+      grid.querySelectorAll('.dir-cta--mail').forEach(b=>{
+        b.addEventListener('click', (e)=>{ e.stopPropagation(); dirAbrirCorreo(b.dataset.email); });
+      });
+      grid.querySelectorAll('[data-dirlock]').forEach(b=>{
+        b.addEventListener('click', (e)=>{ e.stopPropagation(); window.__irASuscripcion && window.__irASuscripcion(); });
       });
     });
   }
@@ -11641,8 +11703,6 @@ const Sections = (function(){
     const inicial = (c.nombre||'?').trim().slice(0,2).toUpperCase();
     const fotoSegura = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(c.foto||'')) ? c.foto : '';
     const colorSeguro = /^#[0-9a-f]{6}$/i.test(String(c.color||'')) ? c.color : '#1b5df0';
-    const linkedinSeguro = /^https:\/\//i.test(String(c.linkedin||'')) ? c.linkedin : '';
-    const webSeguro = /^https:\/\//i.test(String(c.web||'')) ? c.web : '';
     const foto = fotoSegura
       ? `<img src="${fotoSegura}" alt="" class="dir-det__foto">`
       : `<div class="dir-det__foto dir-det__foto--ini" style="background:linear-gradient(135deg,${colorSeguro},${colorSeguro}aa);">${escapeHtml(inicial)}</div>`;
@@ -11651,27 +11711,35 @@ const Sections = (function(){
            <span class="dir-det__row-ic"><svg class="ic"><use href="#${icon}"/></svg></span>
            <span class="dir-det__row-tx"><span class="dir-det__row-lbl">${label}</span><span class="dir-det__row-val">${escapeHtml(val)}</span></span>
          </a>` : '';
-    const waNum = (c.whatsapp||'').replace(/[^0-9]/g,'');
+    const contacto = dirContactoVisible(c);
+    const linkedinSeguro = contacto && /^https:\/\//i.test(String(contacto.linkedin||'')) ? contacto.linkedin : '';
+    const webSeguro = contacto && /^https:\/\//i.test(String(contacto.web||'')) ? contacto.web : '';
+    const waNum = contacto ? (contacto.whatsapp||'').replace(/[^0-9]/g,'') : '';
+    const estado = DIR_ESTADOS[c.estado];
+    const contactoHTML = !contacto
+      ? `<button class="btn btn--accent btn--block" id="dirdet-paywall"><svg class="ic"><use href="#i-lock"/></svg>Hazte VIP para contactar</button>`
+      : `<div class="dir-det__rows">
+          ${row('i-whatsapp','WhatsApp',contacto.whatsapp, waNum?`https://wa.me/${waNum}`:'', 'dir-det__row--wa')}
+          ${contacto.email?`<button class="dir-det__row dir-det__row--mail" data-detmail="${escapeHtml(contacto.email)}">
+             <span class="dir-det__row-ic"><svg class="ic"><use href="#i-mail"/></svg></span>
+             <span class="dir-det__row-tx"><span class="dir-det__row-lbl">Correo · toca para copiar</span><span class="dir-det__row-val">${escapeHtml(contacto.email)}</span></span>
+           </button>`:''}
+          ${row('i-linkedin','LinkedIn',linkedinSeguro, linkedinSeguro, 'dir-det__row--li')}
+          ${row('i-link','Sitio web',webSeguro, webSeguro)}
+          ${(!contacto.whatsapp&&!contacto.email&&!linkedinSeguro&&!webSeguro)?'<div class="dir-det__sincontacto">Este miembro no agregó datos de contacto.</div>':''}
+        </div>`;
     const body = `
       <div class="dir-det">
         <div class="dir-det__head">
           ${foto}
-          <div class="dir-det__name">${escapeHtml(c.nombre||'Miembro VIP')}</div>
+          <div class="dir-det__name">${escapeHtml(c.nombre||'Miembro SENTIA')}${c.vip?' <svg class="ic dir-det__vipic"><use href="#i-crown"/></svg>':''}</div>
           ${c.puesto?`<div class="dir-det__puesto">${escapeHtml(c.puesto)}</div>`:''}
           ${c.empresa?`<div class="dir-det__empresa"><svg class="ic"><use href="#i-briefcase"/></svg>${escapeHtml(c.empresa)}</div>`:''}
+          ${estado?`<span class="dir-card__estado dir-card__estado--${estado.cls}">${estado.label}</span>`:''}
           ${c.sector?`<span class="dir-det__sector">${escapeHtml(c.sector)}</span>`:''}
         </div>
         ${c.bio?`<div class="dir-det__bio">${escapeHtml(c.bio)}</div>`:''}
-        <div class="dir-det__rows">
-          ${row('i-whatsapp','WhatsApp',c.whatsapp, waNum?`https://wa.me/${waNum}`:'', 'dir-det__row--wa')}
-          ${c.email?`<button class="dir-det__row dir-det__row--mail" data-detmail="${escapeHtml(c.email)}">
-             <span class="dir-det__row-ic"><svg class="ic"><use href="#i-mail"/></svg></span>
-             <span class="dir-det__row-tx"><span class="dir-det__row-lbl">Correo · toca para copiar</span><span class="dir-det__row-val">${escapeHtml(c.email)}</span></span>
-           </button>`:''}
-          ${row('i-linkedin','LinkedIn',linkedinSeguro, linkedinSeguro, 'dir-det__row--li')}
-          ${row('i-link','Sitio web',webSeguro, webSeguro)}
-        </div>
-        ${(!c.whatsapp&&!c.email&&!c.linkedin&&!c.web)?'<div class="dir-det__sincontacto">Este miembro no agregó datos de contacto.</div>':''}
+        ${contactoHTML}
       </div>
     `;
     const footer = document.createElement('div');
@@ -11681,20 +11749,19 @@ const Sections = (function(){
     const m = Modal.open({id:'dir-det', title:'Tarjeta profesional', subtitle: esMia?'Tu tarjeta en el directorio':'Directorio VIP', icon:'i-user', size:'sm', body, footer});
     footer.querySelector('#dirdet-cerrar').addEventListener('click', ()=> m.close());
     if (esMia) footer.querySelector('#dirdet-editar').addEventListener('click', ()=>{ m.close(); setTimeout(dirEditarMiTarjeta, 150); });
-    // Copiar correo desde el detalle
+    document.getElementById('dirdet-paywall')?.addEventListener('click', ()=>{ m.close(); window.__irASuscripcion && window.__irASuscripcion(); });
     const mailRow = document.querySelector('.dir-det__row--mail');
-    if (mailRow) mailRow.addEventListener('click', ()=>{
-      dirAbrirCorreo(mailRow.dataset.detmail);
-    });
+    if (mailRow) mailRow.addEventListener('click', ()=>{ dirAbrirCorreo(mailRow.dataset.detmail); });
   }
 
   async function dirEditarMiTarjeta(){
     const fs = window.__fs;
     const uid = window.UserState?.uid;
     if (!uid){ Toast.error('Inicia sesión',''); return; }
-    // Cargar tarjeta existente
     let data = {};
     try { const ds = await fs.getDoc(fs.doc(fs.db,'directorio',uid)); if (ds.exists()) data = ds.data(); } catch(e){}
+    let contacto = _dirMeta.myContact || {};
+    try { const d = await dirApi('/api/directorio/overview'); contacto = d.myContact||{}; _dirMeta = { cargado:true, viewerVip: d.viewerVip===true, contacts: d.contacts||{}, myContact: contacto }; } catch(e){}
     _dirFotoTmp = undefined;
 
     const fotoActual = data.foto || '';
@@ -11721,18 +11788,22 @@ const Sections = (function(){
           <option value="">Selecciona…</option>
           ${SECTORES.map(s=>`<option value="${s}" ${data.sector===s?'selected':''}>${s}</option>`).join('')}
         </select>
+        <label class="dir-form__lbl">Estado</label>
+        <select class="dir-form__in" id="dirf-estado">
+          <option value="" ${!data.estado?'selected':''}>Ninguno</option>
+          <option value="proyectos" ${data.estado==='proyectos'?'selected':''}>Disponible para proyectos</option>
+          <option value="empleo" ${data.estado==='empleo'?'selected':''}>Busco oportunidades</option>
+        </select>
         <label class="dir-form__lbl">Bio breve <span class="dir-form__opt">(opcional)</span></label>
         <textarea class="dir-form__in" id="dirf-bio" maxlength="160" rows="2" placeholder="Una línea sobre tu experiencia…">${escapeHtml(data.bio||'')}</textarea>
 
-        <div class="dir-form__sep">Contacto <span class="dir-form__opt">(todos opcionales)</span></div>
+        <div class="dir-form__sep">Contacto <span class="dir-form__opt">(todos opcionales · solo lo ven miembros VIP)</span></div>
         <label class="dir-form__lbl">WhatsApp</label>
-        <input class="dir-form__in" id="dirf-wa" maxlength="20" value="${(data.whatsapp||'').replace(/"/g,'&quot;')}" placeholder="Ej. 52 238 123 4567">
-        <label class="dir-form__lbl">Correo</label>
-        <input class="dir-form__in" id="dirf-email" maxlength="80" value="${(data.email||'').replace(/"/g,'&quot;')}" placeholder="correo@ejemplo.com">
+        <input class="dir-form__in" id="dirf-wa" maxlength="20" value="${(contacto.whatsapp||'').replace(/"/g,'&quot;')}" placeholder="Ej. 52 238 123 4567">
         <label class="dir-form__lbl">LinkedIn</label>
-        <input class="dir-form__in" id="dirf-linkedin" maxlength="120" value="${(data.linkedin||'').replace(/"/g,'&quot;')}" placeholder="linkedin.com/in/tu-perfil">
+        <input class="dir-form__in" id="dirf-linkedin" maxlength="120" value="${(contacto.linkedin||'').replace(/"/g,'&quot;')}" placeholder="linkedin.com/in/tu-perfil">
         <label class="dir-form__lbl">Sitio web</label>
-        <input class="dir-form__in" id="dirf-web" maxlength="120" value="${(data.web||'').replace(/"/g,'&quot;')}" placeholder="tusitio.com">
+        <input class="dir-form__in" id="dirf-web" maxlength="120" value="${(contacto.web||'').replace(/"/g,'&quot;')}" placeholder="tusitio.com">
         <label class="dir-form__check"><input type="checkbox" id="dirf-visible" ${data.visible!==false?'checked':''}> Mostrar mi tarjeta en el directorio</label>
       </div>
     `;
@@ -11740,7 +11811,6 @@ const Sections = (function(){
     footer.innerHTML = `<button class="btn btn--ghost" id="dirf-cancel">Cancelar</button><button class="btn btn--accent" id="dirf-guardar">Guardar tarjeta</button>`;
     const m = Modal.open({id:'dir-form', title:'Mi tarjeta profesional', subtitle:'Aparecerá en el Directorio VIP', icon:'i-user', size:'md', body, footer});
 
-    // Foto
     const fileInput = document.getElementById('dirf-foto-file');
     document.getElementById('dirf-foto-btn').addEventListener('click', ()=> fileInput.click());
     fileInput.addEventListener('change', async (e)=>{
@@ -11765,26 +11835,32 @@ const Sections = (function(){
       const linkedin = enlaceSeguro(document.getElementById('dirf-linkedin').value);
       const web = enlaceSeguro(document.getElementById('dirf-web').value);
       if (linkedin === null || web === null) { Toast.error('Enlace inválido','LinkedIn y sitio web deben usar HTTPS.'); return; }
+      const whatsapp = document.getElementById('dirf-wa').value.trim();
+      if (!/^[0-9 +()-]*$/.test(whatsapp)) { Toast.error('WhatsApp inválido',''); return; }
       const btn = footer.querySelector('#dirf-guardar'); btn.disabled=true; btn.textContent='Guardando…';
+      try {
+        await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp, linkedin, web }) });
+      } catch(e){ Toast.error('No se pudo guardar tu contacto', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; return; }
       const payload = {
         uid,
         nombre,
         puesto: document.getElementById('dirf-puesto').value.trim(),
         empresa: document.getElementById('dirf-empresa').value.trim(),
         sector: document.getElementById('dirf-sector').value,
+        estado: document.getElementById('dirf-estado').value,
         bio: document.getElementById('dirf-bio').value.trim(),
-        whatsapp: document.getElementById('dirf-wa').value.trim(),
-        email: document.getElementById('dirf-email').value.trim(),
-        linkedin,
-        web,
         visible: document.getElementById('dirf-visible').checked,
         color: dirColorFor(uid),
+        vip: dirEsVipActual(),
         updatedAt: fs.serverTimestamp()
       };
       if (_dirFotoTmp !== undefined) payload.foto = _dirFotoTmp; // string o null
       else if (data.foto) payload.foto = data.foto; // conservar
       try {
-        await fs.setDoc(fs.doc(fs.db,'directorio',uid), payload, { merge:true });
+        // Sin merge: reemplaza el documento completo, así una ficha vieja
+        // con whatsapp/correo/linkedin/web sueltos (de antes de este cambio)
+        // queda limpia en cuanto la persona guarda de nuevo.
+        await fs.setDoc(fs.doc(fs.db,'directorio',uid), payload);
         Toast.success('Tarjeta guardada','Ya apareces en el directorio');
         m.close();
       } catch(e){ console.error(e); Toast.error('No se pudo guardar', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; }
@@ -13168,114 +13244,146 @@ function openPasswordResetModal(){
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Popup: confirmar/editar nombre la 1ª vez (para que el certificado
-// no salga con el email). Si el nombre parece venir del correo o es
-// genérico, ofrecemos editarlo; si no, igual avisamos con qué nombre
-// se emitirán los certificados.
+// Popup: completar ficha profesional la 1ª vez (nombre, whatsapp, área,
+// empresa). Así el certificado no sale con el email, y con esos datos se
+// crea automáticamente la tarjeta del Directorio (VIP o Comunidad).
 // ═══════════════════════════════════════════════════════════════════
-window.__maybeAskName = function(){
+window.__maybeAskProfile = function(){
   try {
-    if (localStorage.getItem('sentia_name_confirmed') === '1') return;
-    if (window.memberData && window.memberData.nombreConfirmado === true) return;
     if (document.getElementById('name-modal')) return;
     const S = window.UserState || {};
+    const md = window.memberData || {};
+    let local = {}; try { local = JSON.parse(localStorage.getItem('sentia_profile')||'{}'); } catch(e){}
+    const yaCompleto = localStorage.getItem('sentia_perfil_completado') === '1' || md.perfilCompletado === true;
+    const whatsappGuardado = String(md.whatsapp || local.whatsapp || '').trim();
+    if (yaCompleto || whatsappGuardado) {
+      localStorage.setItem('sentia_perfil_completado','1');
+      try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
+      return;
+    }
+
     const email = S.email || '';
     const emailPart = email.split('@')[0] || '';
     const actual = (S.nombre || S.displayName || '').trim();
-    // ¿el nombre parece "feo"? = igual al inicio del correo, sin espacio, o con dígitos
     const pareceEmail = actual && (actual.toLowerCase() === emailPart.toLowerCase());
-    const sinApellido = actual && !actual.includes(' ');
-    const tieneNumeros = /\d/.test(actual);
     const esGenerico = !actual || ['ingeniero','profesional','miembro','usuario vip','usuario'].includes(actual.toLowerCase());
     const sugerido = (pareceEmail || esGenerico) ? '' : actual;
+    const esc = v => String(v||'').replace(/"/g,'&quot;');
 
     const ov = document.createElement('div');
     ov.id = 'name-modal';
     ov.innerHTML = `
       <div class="nm-ov"></div>
-      <div class="nm-box">
+      <div class="nm-box nm-box--perfil">
         <div class="nm-ic"><svg class="ic"><use href="#i-user"/></svg></div>
-        <h2 class="nm-title">¿Cómo quieres que aparezca tu nombre?</h2>
-        <p class="nm-desc">Este es el nombre que aparecerá en <strong>tus certificados oficiales SENTIA</strong>. Escríbelo completo y bien escrito (nombre y apellidos).</p>
-        <input id="nm-input" class="nm-input" type="text" value="${(sugerido||'').replace(/"/g,'&quot;')}" placeholder="Ej. Felipe Estrada Ramírez" autocomplete="name" maxlength="38">
-        <div class="nm-hint" id="nm-hint"></div>
-        <button class="nm-save" id="nm-save">Guardar y continuar</button>
-        <button class="nm-skip" id="nm-skip">Lo dejo así por ahora</button>
-        <p class="nm-foot">Podrás cambiarlo cuando quieras en <strong>Mi perfil → Nombre completo</strong>.</p>
+        <span class="nm-eyebrow">Un último paso</span>
+        <h2 class="nm-title">Completa tu ficha profesional</h2>
+        <p class="nm-desc">Así podremos identificar tu cuenta, emitir correctamente tus certificados y crear tu tarjeta en el Directorio SENTIA.</p>
+        <form class="nm-form">
+          <label class="nm-field"><span>Nombre completo <b>*</b></span><input id="nm-input" type="text" value="${esc(sugerido)}" placeholder="Ej. Dra. Ana Martínez" autocomplete="name" maxlength="38" required></label>
+          <label class="nm-field"><span>Correo de tu cuenta</span><input value="${esc(email)}" readonly disabled></label>
+          <label class="nm-field"><span>WhatsApp <b>*</b></span><input id="nm-whatsapp" type="tel" value="${esc(whatsappGuardado)}" placeholder="+52 238 123 4567" inputmode="tel" maxlength="20" required></label>
+          <div class="nm-grid">
+            <label class="nm-field"><span>Área profesional <em>(opcional)</em></span><input id="nm-area" type="text" value="${esc(md.especialidad||local.especialidad)}" maxlength="80" placeholder="Psicología clínica"></label>
+            <label class="nm-field"><span>Empresa <em>(opcional)</em></span><input id="nm-empresa" type="text" value="${esc(md.empresa||local.empresa)}" maxlength="80" placeholder="Consultorio / Escuela"></label>
+          </div>
+          <div class="nm-hint" id="nm-hint"></div>
+          <p class="nm-privacy"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>Tu nombre y empresa aparecerán en tu tarjeta del Directorio; puedes editarlos u ocultar la tarjeta cuando quieras. Tu WhatsApp solo lo ven miembros VIP.</p>
+          <button class="nm-save" id="nm-save" type="submit">Guardar y continuar</button>
+          <button class="nm-skip" id="nm-skip" type="button">Ahora no</button>
+        </form>
       </div>`;
     document.body.appendChild(ov);
     if (!document.getElementById('nm-css')) {
       const st=document.createElement('style'); st.id='nm-css';
       st.textContent = `
-        #name-modal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px}
-        #name-modal .nm-ov{position:absolute;inset:0;background:rgba(10,12,20,.72);backdrop-filter:blur(4px)}
-        #name-modal .nm-box{position:relative;width:100%;max-width:440px;background:var(--surface,#15110C);border:1px solid var(--border-2,rgba(255,230,200,.14));border-radius:20px;padding:30px 26px 24px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:nmIn .25s ease}
+        #name-modal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+        #name-modal .nm-ov{position:fixed;inset:0;background:rgba(10,12,20,.72);backdrop-filter:blur(4px)}
+        #name-modal .nm-box{position:relative;width:100%;max-width:440px;margin:auto;background:var(--surface,#15110C);border:1px solid var(--border-2,rgba(255,230,200,.14));border-radius:20px;padding:30px 26px 24px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:nmIn .25s ease}
         @keyframes nmIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
-        #name-modal .nm-ic{font-size:34px;margin-bottom:10px}
+        #name-modal .nm-ic{font-size:34px;margin-bottom:6px}
+        #name-modal .nm-eyebrow{display:block;color:var(--primary,#1b5df0);font-size:10.5px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
         #name-modal .nm-title{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.4px;color:var(--text,#F5EFE6);line-height:1.25;margin-bottom:8px}
-        #name-modal .nm-desc{font-size:13.5px;color:var(--text-2,#B8AC9C);line-height:1.6;margin-bottom:18px}
-        #name-modal .nm-input{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border-2,rgba(255,230,200,.18));background:var(--surface-2,#1E1812);color:var(--text,#F5EFE6);font-size:16px;font-family:inherit;outline:none;transition:border .15s;text-align:center}
-        #name-modal .nm-input:focus{border-color:var(--primary,#1b5df0)}
-        #name-modal .nm-hint{font-size:12px;color:#E0894A;min-height:16px;margin:8px 0 4px}
-        #name-modal .nm-save{width:100%;margin-top:12px;padding:14px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--primary,#1b5df0),var(--highlight,#2fbf2e));color:#0f172a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+        #name-modal .nm-desc{font-size:13.5px;color:var(--text-2,#B8AC9C);line-height:1.6;margin-bottom:16px}
+        #name-modal .nm-form{text-align:left}
+        #name-modal .nm-field{display:block;margin-bottom:12px}
+        #name-modal .nm-field span{display:block;font-size:11.5px;font-weight:700;color:var(--text-2,#B8AC9C);margin-bottom:5px}
+        #name-modal .nm-field span b{color:#E0894A;font-weight:800}
+        #name-modal .nm-field span em{font-weight:500;font-style:normal;opacity:.7}
+        #name-modal .nm-field input{width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid var(--border-2,rgba(255,230,200,.18));background:var(--surface-2,#1E1812);color:var(--text,#F5EFE6);font-size:14px;font-family:inherit;outline:none;transition:border .15s}
+        #name-modal .nm-field input:focus{border-color:var(--primary,#1b5df0)}
+        #name-modal .nm-field input:disabled{opacity:.55}
+        #name-modal .nm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        #name-modal .nm-hint{font-size:12px;color:#E0894A;min-height:16px;margin:2px 0 6px}
+        #name-modal .nm-privacy{display:flex;gap:7px;align-items:flex-start;font-size:11px;line-height:1.5;color:var(--text-3,#8A7E6E);margin:4px 0 16px}
+        #name-modal .nm-privacy .ic{width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--primary,#1b5df0)}
+        #name-modal .nm-save{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--primary,#1b5df0),var(--highlight,#2fbf2e));color:#0f172a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
         #name-modal .nm-save:active{transform:translateY(1px)}
         #name-modal .nm-skip{width:100%;margin-top:9px;padding:11px;border:1px solid var(--border-2,rgba(255,230,200,.16));border-radius:12px;background:none;color:var(--text-2,#B8AC9C);font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
-        #name-modal .nm-foot{font-size:11.5px;color:var(--text-3,#8A7E6E);margin-top:14px;line-height:1.5}`;
+        #name-modal .nm-foot{font-size:11.5px;color:var(--text-3,#8A7E6E);margin-top:14px;line-height:1.5}
+        @media(max-width:480px){#name-modal .nm-grid{grid-template-columns:1fr}}`;
       document.head.appendChild(st);
     }
     const input = document.getElementById('nm-input');
+    const waInput = document.getElementById('nm-whatsapp');
     const hint = document.getElementById('nm-hint');
-    setTimeout(()=>input.focus(), 100);
+    const form = ov.querySelector('.nm-form');
+    setTimeout(()=>(sugerido?waInput:input).focus(), 100);
 
-    // Aviso en vivo: si el nombre se acerca al límite estético del certificado
-    const LIMITE_OK = 32;  // hasta aquí se ve bien centrado en el certificado
-    input.addEventListener('input', ()=>{
-      const v = (input.value||'').trim();
-      if (v.length >= 34) hint.textContent = 'Es el máximo que se ve bien en el certificado. Usa nombre + 1 o 2 apellidos.';
-      else if (v.length >= LIMITE_OK) hint.textContent = 'Procura que no sea más largo para que luzca bien.';
-      else hint.textContent = '';
-    });
-
-    async function guardar(){
+    async function guardar(ev){
+      ev.preventDefault();
       let val = (input.value||'').trim().replace(/\s+/g,' ');
       if (val.length < 3 || !val.includes(' ')) { hint.textContent = 'Escribe tu nombre y al menos un apellido.'; input.focus(); return; }
-      if (val.length > 38) { val = val.slice(0,38).trim(); }  // tope duro estético
-      // Guardar igual que openEditField: Auth + Firestore + UserState
+      if (val.length > 38) { val = val.slice(0,38).trim(); }
+      const wa = (waInput.value||'').trim();
+      if (!/^\+?[0-9 ()\-.]{7,20}$/.test(wa)) { hint.textContent = 'Escribe un WhatsApp válido, incluyendo lada.'; waInput.focus(); return; }
+      const area = document.getElementById('nm-area').value.trim();
+      const empresa = document.getElementById('nm-empresa').value.trim();
+      const btn = document.getElementById('nm-save'); btn.disabled=true; btn.textContent='Guardando…';
       try { if (window.__setDisplayName) await window.__setDisplayName(val); } catch(e){}
       try {
         const fs = window.__fs;
         if (fs && fs.updateDoc && window.UserState?.uid) {
-          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombre: val, nombreConfirmado: true });
+          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), {
+            nombre: val, nombreConfirmado: true, whatsapp: wa, especialidad: area, empresa,
+            perfilCompletado: true, perfilCompletadoAt: fs.serverTimestamp()
+          });
         }
-      } catch(e){}
+      } catch(e){ console.warn('[perfil] no se pudo guardar en miembros:', e.message); }
+      try {
+        await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp: wa }) });
+      } catch(e){ console.warn('[perfil] no se pudo guardar el contacto:', e.message); }
       window.UserState.nombre = val;
       window.UserState.displayName = val;
       window.UserState.iniciales = (window.calcIniciales ? window.calcIniciales(val) : val.slice(0,2).toUpperCase());
-      if (window.memberData) { window.memberData.nombre = val; window.memberData.nombreConfirmado = true; }
-      try { const ls=JSON.parse(localStorage.getItem('sentia_profile')||'{}'); ls.nombre=val; localStorage.setItem('sentia_profile',JSON.stringify(ls)); } catch(e){}
+      if (window.memberData) Object.assign(window.memberData, { nombre: val, nombreConfirmado: true, whatsapp: wa, especialidad: area, empresa, perfilCompletado: true });
+      try { const ls=JSON.parse(localStorage.getItem('sentia_profile')||'{}'); Object.assign(ls, { nombre: val, whatsapp: wa, especialidad: area, empresa }); localStorage.setItem('sentia_profile',JSON.stringify(ls)); } catch(e){}
       localStorage.setItem('sentia_name_confirmed','1');
+      localStorage.setItem('sentia_perfil_completado','1');
       if (typeof window.__applyUserState==='function') window.__applyUserState();
-      if (window.Toast) Toast.success('Nombre guardado', val);
+      try { loadProfileFromLS(); } catch(e){}
+      if (window.Toast) Toast.success('Ficha guardada', val);
       ov.remove();
+      try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
     }
-    document.getElementById('nm-save').addEventListener('click', guardar);
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') guardar(); });
+    form.addEventListener('submit', guardar);
     document.getElementById('nm-skip').addEventListener('click', async ()=>{
-      // No volver a molestar, pero NO marcamos como "confirmado" para que el
-      // perfil siga sugiriendo completarlo. Marcamos solo "preguntado".
       localStorage.setItem('sentia_name_confirmed','1');
+      localStorage.setItem('sentia_perfil_completado','1');
       try {
         const fs = window.__fs;
         if (fs && fs.updateDoc && window.UserState?.uid) {
-          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombreConfirmado: true });
+          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { nombreConfirmado: true, perfilCompletado: true });
         }
       } catch(e){}
-      if (window.memberData) window.memberData.nombreConfirmado = true;
+      if (window.memberData) Object.assign(window.memberData, { nombreConfirmado: true, perfilCompletado: true });
       ov.remove();
-      if (window.Toast) Toast.info('Puedes cambiarlo luego', 'Mi perfil → Nombre completo');
+      if (window.Toast) Toast.info('Puedes completarla luego', 'Mi perfil → Directorio');
+      try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
     });
-  } catch(e){ console.warn('maybeAskName:', e); }
+  } catch(e){ console.warn('maybeAskProfile:', e); }
 };
+window.__maybeAskName = window.__maybeAskProfile;
 
 function openEditField(field){
   const wrap=document.querySelector(`[data-field="${field}"]`);
@@ -13338,7 +13446,23 @@ function openEditField(field){
       return;
     }
 
-    // Resto de campos: solo perfil
+    // Resto de campos: también se guardan en miembros/{uid} (fuente real para
+    // la tarjeta del Directorio), no solo en localStorage.
+    const saveBtn=document.getElementById('save-edit-'+field);
+    if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Guardando…';}
+    if (['whatsapp','empresa','especialidad'].includes(field)) {
+      try {
+        const fs=window.__fs;
+        if (fs && fs.updateDoc && window.UserState?.uid) {
+          await fs.updateDoc(fs.doc(fs.db,'miembros',window.UserState.uid), { [field]: newVal });
+        }
+      } catch(e){ console.warn('[perfil] no se pudo guardar '+field+':', e.message); }
+      if (window.memberData) window.memberData[field]=newVal;
+      if (field==='whatsapp') {
+        try { await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp:newVal }) }); }
+        catch(e){ console.warn('[perfil] no se pudo sincronizar el contacto del directorio:', e.message); }
+      }
+    }
     wrap.querySelector('.perfil-field__val').textContent=newVal;
     Modal.close('edit-'+field);
     Toast.success('Guardado',(labels[field]||field)+' actualizado');
