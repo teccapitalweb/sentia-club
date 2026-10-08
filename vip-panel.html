@@ -8669,49 +8669,10 @@ const Sections = (function(){
   const SIMULADORES_TOTAL = 2;
 
   /* ═══ DETECTA EL ERROR CLÍNICO — data ═══ */
-  const erroresClinicosData=[
-    {titulo:'Sesión con paciente en duelo',contexto:'María, 52 años, perdió a su esposo hace 3 meses. Es su cuarta sesión.',transcripcion:[
-      {id:1,texto:'T: Hola María, qué gusto verte. ¿Cómo te fue esta semana?',esError:false},
-      {id:2,texto:'P: Mal. No puedo dejar de pensar en Jorge. Todo me lo recuerda.',esError:false},
-      {id:3,texto:'T: Te entiendo perfectamente. Cuando yo perdí a mi abuela sentí lo mismo, así que sé exactamente por lo que estás pasando.',esError:true,error:'Auto-revelación inapropiada y equiparación de experiencias. Decir "sé exactamente lo que sientes" invalida la singularidad de su dolor.'},
-      {id:4,texto:'P: (llora) Es que siento que nunca voy a estar bien...',esError:false},
-      {id:5,texto:'T: No digas eso. Vas a estar bien, ya verás. El tiempo lo cura todo.',esError:true,error:'Minimización del dolor con frase cliché. "El tiempo lo cura todo" invalida el proceso de duelo y corta la expresión emocional.'},
-      {id:6,texto:'P: Mi hija me dice que ya debería superarlo, que ya pasaron 3 meses.',esError:false},
-      {id:7,texto:'T: Cada persona tiene su propio tiempo. No hay una fecha para dejar de extrañar a alguien que amas.',esError:false},
-      {id:8,texto:'P: ¿Y si nunca puedo? ¿Y si me quedo así para siempre?',esError:false},
-      {id:9,texto:'T: Mira, lo que necesitas es mantenerte ocupada. ¿Por qué no te inscribes en un curso o sales más con amigas?',esError:true,error:'Consejo prematuro y evitación del dolor. Sugerir "mantenerse ocupada" envía el mensaje de que sentir es improductivo. Primero hay que validar y sostener.'},
-      {id:10,texto:'P: No tengo ganas de nada...',esError:false},
-      {id:11,texto:'T: Entiendo que ahora no tengas ganas, pero es importante que intentes. ¿Quieres que lo dejemos como tarea para la siguiente sesión?',esError:false}
-    ],totalErrores:3},
-    {titulo:'Primera sesión con adolescente',contexto:'Diego, 16 años, fue traído por sus padres. No quiere estar en terapia.',transcripcion:[
-      {id:1,texto:'T: Hola Diego, tus papás me contaron todo lo que ha pasado. Vamos a trabajar en eso.',esError:true,error:'Rompe confidencialidad implícita y asume el motivo sin preguntar al paciente. El adolescente siente que el terapeuta ya está "del lado" de los padres.'},
-      {id:2,texto:'P: (brazos cruzados) Yo no quiero estar aquí.',esError:false},
-      {id:3,texto:'T: Entiendo que no quieras estar aquí. No es fácil que te traigan a un lugar así. ¿Qué es lo que más te molesta?',esError:false},
-      {id:4,texto:'P: Que mis papás creen que estoy loco.',esError:false},
-      {id:5,texto:'T: No estás loco. Venir aquí no significa eso. ¿Hay algo que te preocupe a ti, no a tus papás?',esError:false},
-      {id:6,texto:'P: Pues... a veces me siento muy enojado y no sé por qué.',esError:false},
-      {id:7,texto:'T: ¿Y qué haces cuando te enojas? ¿Les pegas a tus compañeros?',esError:true,error:'Pregunta sugestiva y prejuiciosa. Asume conducta violenta sin evidencia. La pregunta debería ser abierta: "¿Qué haces cuando sientes ese enojo?"'},
-      {id:8,texto:'P: No... solo me encierro en mi cuarto.',esError:false},
-      {id:9,texto:'T: Ah bueno, eso no es tan grave. Hay adolescentes que hacen cosas peores.',esError:true,error:'Minimización y comparación con otros. Que el paciente se aísle es significativo clínicamente. Comparar invalida su experiencia.'},
-      {id:10,texto:'P: ¿Entonces estoy bien?',esError:false},
-      {id:11,texto:'T: Lo que sientes es importante, aunque se exprese de formas que no parecen graves por fuera. ¿Me cuentas más sobre esos momentos?',esError:false}
-    ],totalErrores:3},
-    {titulo:'Sesión de pareja con infidelidad',contexto:'Carmen y Andrés. Ella descubrió mensajes de él con otra persona hace 2 semanas. Sesión conjunta.',transcripcion:[
-      {id:1,texto:'T: Buenas tardes. Sé que están pasando un momento difícil. Este es un espacio para que ambos se expresen con respeto.',esError:false},
-      {id:2,texto:'Carmen: No puedo creer que me haya hecho esto. 15 años juntos para nada.',esError:false},
-      {id:3,texto:'T: Carmen, entiendo tu dolor. Andrés, ¿por qué lo hiciste?',esError:true,error:'Preguntar "¿por qué lo hiciste?" en tono directo frente a la pareja suena como interrogatorio judicial, no exploración terapéutica. Fuerza justificación en vez de explorar.'},
-      {id:4,texto:'Andrés: Yo... no sé. Me sentía solo. No es excusa pero...',esError:false},
-      {id:5,texto:'T: Carmen, ¿escuchaste lo que dijo? Él se sentía solo. ¿Crees que tú contribuiste a eso?',esError:true,error:'Culpabilización de la víctima. Implica que Carmen es corresponsable de la infidelidad. El foco se desvía del que tomó la decisión.'},
-      {id:6,texto:'Carmen: ¿Me estás diciendo que es mi culpa?',esError:false},
-      {id:7,texto:'T: No, no es culpa de nadie. Hay patrones en la relación que podemos explorar juntos sin buscar culpables.',esError:false},
-      {id:8,texto:'Andrés: Yo sé que la regué. Quiero arreglarlo.',esError:false},
-      {id:9,texto:'T: Bien. Lo importante es que ambos quieran intentarlo. Carmen, ¿tú quieres seguir con la relación?',esError:false},
-      {id:10,texto:'Carmen: No sé. Un día sí y otro no.',esError:false},
-      {id:11,texto:'T: Es normal. No tienes que decidir hoy. Pero te recomiendo que si decides quedarte, ya no revises su teléfono porque eso no ayuda.',esError:true,error:'Consejo directivo prematuro que minimiza la necesidad de transparencia. En fase de reconstrucción, la verificación puede ser parte del proceso acordado. No se prohíbe.'},
-      {id:12,texto:'Carmen: ¿Entonces qué hago con la desconfianza?',esError:false},
-      {id:13,texto:'T: La confianza se reconstruye con acciones, no con vigilancia. Vamos a trabajar en eso juntos.',esError:false}
-    ],totalErrores:3}
-  ];
+  // MODIFICADO: la transcripción y cuáles líneas son error ya NO viven en
+  // este archivo — antes se veían directo en el HTML (data-es-error). Las
+  // califica el servidor. ERRORES_CLINICOS_TOTAL es solo para el contador.
+  const ERRORES_CLINICOS_TOTAL = 3;
 
   /* ═══ ÁRBOL DE DECISIONES — data ═══ */
   const arbolesData=[
@@ -9220,11 +9181,27 @@ const Sections = (function(){
   }
 
   /* ═══ DETECTA EL ERROR CLÍNICO — panel view ═══ */
-  function _renderErrorClinicoView(container){
+  // MODIFICADO: cuáles líneas son error (y su explicación) ya NO viven en
+  // este archivo ni en el HTML — antes se veían directo como atributo
+  // data-es-error en el código fuente. Ahora el servidor responde línea por
+  // línea, y recuerda qué ya encontraste hoy por si recargas la página.
+  async function _renderErrorClinicoView(container){
     _retosContainer=container;
-    const data=erroresClinicosData[retoIndiceDelDia(erroresClinicosData)];
-    let encontrados=0;
-    let revelados=new Set();
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando ejercicio del día…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/error-clinico`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar el ejercicio de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar el ejercicio de hoy. <button type="button" class="btn btn--ghost" id="ec-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#ec-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
+    let encontrados=data.encontradosHoy.length;
+    let completo=data.completoHoy;
+    const revelados=new Set(data.encontradosHoy);
     container.innerHTML=`
       <div class="fade-up">
         <div class="ec-panel-banner">
@@ -9246,40 +9223,57 @@ const Sections = (function(){
         </section>
         <section class="ec-panel-transcript">
           <p class="ec-panel-transcript__inst"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Toca las líneas donde detectes un error clínico</p>
-          <div class="ec-panel-transcript__score" id="ec-score">Errores encontrados: <b>0</b> de ${data.totalErrores}</div>
+          <div class="ec-panel-transcript__score" id="ec-score">Errores encontrados: <b>${encontrados}</b> de ${data.totalErrores}</div>
           <div class="ec-lineas" id="ec-lineas">
-            ${data.transcripcion.map(l=>`<div class="ec-linea${l.esError?' ec-linea--clickable':''}" data-ec-id="${l.id}" data-es-error="${l.esError}">${escapeHtml(l.texto)}</div>`).join('')}
+            ${data.lineas.map(l=>`<div class="ec-linea ec-linea--clickable${revelados.has(l.id)?' ec-linea--found':''}" data-ec-id="${l.id}">${escapeHtml(l.texto)}</div>`).join('')}
           </div>
         </section>
       </div>
     `;
     container.querySelector('#ec-volver-retos')?.addEventListener('click',()=>renderRetos(container));
-    container.querySelectorAll('.ec-linea').forEach(el=>el.addEventListener('click',()=>{
+    if(completo){
+      const area=container.querySelector('.ec-panel-transcript');
+      const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
+      fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c62828"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Todos los errores encontrados!</h2><p>Ya completaste este ejercicio hoy.</p><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ec-volver-fin">Volver a retos</button>`;
+      area.appendChild(fin);
+      container.querySelector('#ec-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    container.querySelectorAll('.ec-linea').forEach(el=>el.addEventListener('click',async()=>{
       const id=Number(el.dataset.ecId);
       if(revelados.has(id))return;
-      revelados.add(id);
-      const linea=data.transcripcion.find(l=>l.id===id);
-      if(linea.esError){
-        encontrados++;
+      el.style.pointerEvents='none';
+      let res;
+      try{
+        const r=await fetch(`${retosWebhookBase()}/api/retos/error-clinico`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId,lineaId:id})});
+        res=await r.json();
+        if(!r.ok) throw new Error(res.error||'No se pudo registrar tu respuesta');
+      }catch(e){
+        el.style.pointerEvents='';
+        return;
+      }
+      if(res.esError){
+        revelados.add(id);
+        encontrados=res.encontrados;
         el.classList.add('ec-linea--found');
         const fb=document.createElement('div');fb.className='ec-linea__feedback fade-up';
-        fb.textContent=linea.error;
+        fb.textContent=res.explicacion;
         el.appendChild(fb);
         container.querySelector('#ec-score b').textContent=encontrados;
-        if(encontrados>=data.totalErrores){
+        if(res.completo){
           setTimeout(()=>{
             const area=container.querySelector('.ec-panel-transcript');
             const fin=document.createElement('div');fin.className='cc-panel-resultado fade-up';
-            fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c62828"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Todos los errores encontrados!</h2><p>Detectaste los ${data.totalErrores} errores clínicos en la sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ec-volver-fin">Volver a retos</button>`;
+            fin.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#c62828"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Todos los errores encontrados!</h2><p>Detectaste los ${res.totalErrores} errores clínicos en la sesión.</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ec-volver-fin">Volver a retos</button>`;
             area.appendChild(fin);
             registrarAccionProgreso('error-clinico');
             container.querySelector('#ec-volver-fin')?.addEventListener('click',()=>renderRetos(container));
           },600);
         }
       }else{
+        el.style.pointerEvents='';
         el.classList.add('ec-linea--miss');
         setTimeout(()=>el.classList.remove('ec-linea--miss'),800);
-        revelados.delete(id);
       }
     }));
   }
@@ -10005,7 +9999,7 @@ const Sections = (function(){
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>${erroresClinicosData.length} sesiones</div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>${ERRORES_CLINICOS_TOTAL} sesiones</div>
                 </div>
                 <div class="pcard-hero__body">
                   <h3 class="pcard-hero__title">Detecta el error clínico</h3>
