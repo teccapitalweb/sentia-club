@@ -10646,23 +10646,41 @@ const Sections = (function(){
       const grid = container.querySelector('#bib-grid');
       const tabs = container.querySelector('#bib-tabs');
       let currentFilter = 'todo';
+      let detalleEsPlaceholder = false;
 
       function aplicarFiltro() {
         if (!grid) return;
         const guardados = currentFilter === 'guardados' ? _getGuardados() : [];
+        const visibles = [];
         grid.querySelectorAll('.bib-card').forEach(card => {
           const tipo = card.dataset.tipo || '';
           const mid = card.dataset.mid || '';
-          if (currentFilter === 'todo') card.style.display = '';
-          else if (currentFilter === 'guardados') card.style.display = guardados.includes(mid) ? '' : 'none';
-          else card.style.display = tipo === currentFilter ? '' : 'none';
+          let visible;
+          if (currentFilter === 'todo') visible = true;
+          else if (currentFilter === 'guardados') visible = guardados.includes(mid);
+          else visible = tipo === currentFilter;
+          card.style.display = visible ? '' : 'none';
+          if (visible) visibles.push(mid);
         });
+        // El panel grande de arriba debe reflejar la categoría activa, no
+        // quedarse pegado en lo último seleccionado en otra pestaña.
+        if (!detalleEsPlaceholder && visibles.includes(_bibSeleccionado)) return;
+        if (visibles.length) {
+          seleccionarMaterial(visibles[0]);
+        } else {
+          detalleEsPlaceholder = true;
+          const detalleWrap = container.querySelector('#bib-detalle-panel');
+          if (detalleWrap) {
+            detalleWrap.outerHTML = `<div id="bib-detalle-panel" style="text-align:center;padding:48px 24px;color:var(--text-3);font-size:13px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:14px;">Sin materiales en esta categoría.</div>`;
+          }
+        }
       }
 
       function seleccionarMaterial(mid) {
         _bibSeleccionado = mid;
         const m = materialesTodos.find(x => x.id === mid);
         if (!m) return;
+        detalleEsPlaceholder = false;
         const detalleWrap = container.querySelector('#bib-detalle-panel');
         if (detalleWrap) {
           detalleWrap.outerHTML = _renderBibDetalle(m);
