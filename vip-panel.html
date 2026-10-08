@@ -3616,6 +3616,11 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .pcard-hero__visual--crucigrama .pcard-hero__float--1{background:#e8eaf6;color:#283593}
 .pcard-hero__cta--crucigrama{color:#283593}
 :root[data-theme="night"] .pcard-hero__visual--crucigrama .pcard-hero__float--1{background:var(--surface-3);color:#9fa8da}
+.pcard-hero__visual--sopa{background:transparent}
+.pcard-hero__visual--sopa .pcard-hero__eyebrow,.pcard-hero__visual--sopa .pcard-hero__tag{color:#00695c}
+.pcard-hero__visual--sopa .pcard-hero__float--1{background:#e0f2f1;color:#00695c}
+.pcard-hero__cta--sopa{color:#00695c}
+:root[data-theme="night"] .pcard-hero__visual--sopa .pcard-hero__float--1{background:var(--surface-3);color:#5ec4a8}
 :root[data-theme="night"] .pcard-hero__visual--caso .pcard-hero__float--1{background:var(--surface-3);color:#5ec4a8}
 :root[data-theme="night"] .pcard-hero__visual--mapa .pcard-hero__float--1{background:var(--surface-3);color:#9b93e8}
 :root[data-theme="night"] .pcard-hero__visual--intervencion .pcard-hero__float--1{background:var(--surface-3);color:#64b5f6}
@@ -3740,6 +3745,25 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .cru-clue{font-size:12.5px;line-height:1.5;color:var(--text-2);margin-bottom:7px}
 .cru-clue b{color:var(--text)}
 @media(max-width:760px){.cru-panel-banner{padding:27px 22px}.cru-panel-banner h1{font-size:28px}.cru-panel-area{grid-template-columns:1fr}.cru-cell{width:28px;height:28px}.cru-cell__input{font-size:13px}}
+
+/* Panel Sopa de letras */
+.sopa-panel-banner{position:relative;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#004d40,#00695c 55%,#00897b);color:#fff;overflow:hidden;margin-bottom:22px}
+.sopa-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#b2dfdb;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.sopa-panel-banner h1{max-width:560px;margin:13px 0 12px;color:#fff;font-size:clamp(28px,3.5vw,42px);letter-spacing:-.04em;line-height:1.1}
+.sopa-panel-banner p{margin:0;max-width:520px;color:rgba(255,255,255,.8);font-size:14px;line-height:1.55}
+.sopa-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#004d40;font:750 12px 'Montserrat',sans-serif;cursor:pointer;transition:transform .15s}.sopa-panel-banner__back:hover{transform:scale(1.03)}.sopa-panel-banner__back .ic{width:15px;height:15px}
+.sopa-panel-area{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,280px);gap:26px;align-items:start}
+.sopa-grid{display:inline-grid;gap:2px;background:var(--border-2);border:1px solid var(--border-2);border-radius:10px;overflow:hidden;user-select:none;-webkit-user-select:none}
+.sopa-cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--surface);font:800 13px 'Montserrat',sans-serif;color:var(--text);cursor:pointer}
+.sopa-cell.is-selected{background:#e0f2f1;color:#00695c}
+.sopa-cell.is-found{background:#00897b;color:#fff}
+.sopa-words{display:flex;flex-direction:column;gap:8px}
+.sopa-words h3{margin:0 0 4px;font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#00695c}
+:root[data-theme="night"] .sopa-words h3{color:#5ec4a8}
+.sopa-word{font-size:13px;color:var(--text-2);padding:5px 10px;border-radius:8px;background:var(--surface-2)}
+.sopa-word.is-found{color:#00897b;text-decoration:line-through;background:#e0f2f1}
+:root[data-theme="night"] .sopa-word.is-found{background:var(--surface-3)}
+@media(max-width:760px){.sopa-panel-banner{padding:27px 22px}.sopa-panel-banner h1{font-size:28px}.sopa-panel-area{grid-template-columns:1fr}.sopa-cell{width:24px;height:24px;font-size:11px}}
 
 /* Modo Historia */
 .historia-banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:24px;padding:24px 28px;border-radius:20px;background:var(--surface);border:1px solid var(--border-2);box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:22px}.historia-banner::before{display:none}.historia-banner>*{position:relative;z-index:1}.historia-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#2d8b5f;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.historia-banner__eyebrow .ic{width:14px;height:14px;color:#2d8b5f}.historia-banner h1{max-width:500px;margin:10px 0 8px;color:var(--text);font-size:clamp(24px,3vw,34px);letter-spacing:-.04em;line-height:1.05}.historia-banner h1 em{font-style:normal;color:#2d8b5f}.historia-banner p{margin:0;max-width:440px;color:var(--text-2);font-size:13px;line-height:1.55}.historia-banner__cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:9px 16px;border:0;border-radius:999px;background:var(--primary);color:#fff;font:750 12px 'Montserrat',sans-serif;cursor:pointer;transition:background .15s}.historia-banner__cta:hover{background:var(--primary-deep)}.historia-banner__cta .ic{width:15px;height:15px}.historia-personajes{display:flex;gap:12px;align-self:center}.historia-pj{display:flex;flex-direction:column;align-items:center;gap:5px}.historia-pj__avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:800;color:#fff;border:2px solid var(--border-2);background:var(--pj-color)}.historia-pj__name{font-size:10px;font-weight:700;color:var(--text)}.historia-pj__role{font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
@@ -7369,7 +7393,7 @@ const Sections = (function(){
     {id:'rt3',cat:'Retos',nombre:'Disciplina diaria',desc:'Superaste retos 15 días seguidos',xp:200,unlock:null,criterio:'Supera al menos 1 reto por día, 15 días seguidos'},
     {id:'rt4',cat:'Retos',nombre:'Diez superados',desc:'Superaste 10 retos en total',xp:100,unlock:null,criterio:'Supera 10 retos'},
     {id:'rt5',cat:'Retos',nombre:'Treinta superados',desc:'Superaste 30 retos en total',xp:300,unlock:null,criterio:'Supera 30 retos'},
-    {id:'rt6',cat:'Retos',nombre:'Explorador de retos',desc:'Probaste los 8 tipos de reto',xp:150,unlock:null,criterio:'Intenta al menos 1 vez cada tipo de reto'},
+    {id:'rt6',cat:'Retos',nombre:'Explorador de retos',desc:'Probaste todos los tipos de reto',xp:150,unlock:null,criterio:'Intenta al menos 1 vez cada tipo de reto'},
     {id:'rt7',cat:'Retos',nombre:'Primer libro por retos',desc:'Desbloqueaste tu primer libro superando retos',xp:100,unlock:null,criterio:'Desbloquea 1 libro de la Biblioteca con retos'},
     // Comunidad: Directorio y Foro, verificado por el servidor.
     {id:'cm1',cat:'Comunidad',nombre:'Rostro del directorio',desc:'Creaste tu tarjeta en el Directorio',xp:60,unlock:null,criterio:'Crea tu tarjeta en el Directorio'},
@@ -8818,6 +8842,12 @@ const Sections = (function(){
   // el servidor. CRUCIGRAMAS_TOTAL es solo para el contador de la tarjeta.
   const CRUCIGRAMAS_TOTAL = 3;
 
+  /* ═══ SOPA DE LETRAS — data ═══ */
+  // Juego rápido, mismo espíritu que crucigrama: aquí no hay nada que
+  // ocultar (la cuadrícula completa viene del servidor), solo cuenta con
+  // intentarlo. SOPAS_TOTAL es solo para el contador de la tarjeta.
+  const SOPAS_TOTAL = 3;
+
   /* ═══ CASO CLÍNICO — panel view ═══ */
   // MODIFICADO: el caso del día, sus preguntas y respuestas correctas ya NO
   // viven en este archivo — los califica el servidor (mismo patrón que el
@@ -9639,6 +9669,121 @@ const Sections = (function(){
     });
   }
 
+  /* ═══ SOPA DE LETRAS — panel view ═══ */
+  // Juego rápido, mismo espíritu que crucigrama: no hay nada que ocultar
+  // (la cuadrícula completa y la posición de cada palabra ya vienen del
+  // servidor), así que la búsqueda se resuelve toda en el navegador — solo
+  // se avisa al servidor cuando la persona termina, para contar el intento.
+  async function _renderSopaView(container){
+    _retosContainer=container;
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando sopa de letras de hoy…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/sopa`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar la sopa de letras de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar la sopa de letras de hoy. <button type="button" class="btn btn--ghost" id="sopa-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#sopa-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
+    const yaHecha=!!data.yaRespondido;
+    const gridHTML=data.grid.map((fila,f)=>fila.map((letra,c)=>
+      `<div class="sopa-cell${yaHecha?' is-found':''}" data-sopa-f="${f}" data-sopa-c="${c}">${escapeHtml(letra)}</div>`
+    ).join('')).join('');
+    container.innerHTML=`
+      <div class="fade-up">
+        <div class="sopa-panel-banner">
+          <span class="sopa-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Vocabulario · Sopa de letras del día</span>
+          <h1>${escapeHtml(data.titulo)}</h1>
+          <p>Toca la primera y la última letra de cada palabra para marcarla. No importa si no las encuentras todas: lo importante es intentarlo hoy.</p>
+          <button type="button" class="sopa-panel-banner__back" id="sopa-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a retos</button>
+        </div>
+        <section class="sopa-panel-area">
+          <div class="sopa-grid" id="sopa-grid" style="grid-template-columns:repeat(${data.cols},1fr)">${gridHTML}</div>
+          <div class="sopa-words">
+            <h3>Encuentra</h3>
+            ${data.palabras.map(p=>`<div class="sopa-word${yaHecha?' is-found':''}" data-sopa-word="${escapeHtml(p.palabra)}">${escapeHtml(p.palabra)}</div>`).join('')}
+          </div>
+        </section>
+        <div id="sopa-resultado-area"></div>
+        ${yaHecha?'':'<div style="text-align:center;margin:24px 0"><button type="button" class="btn btn--primary" id="sopa-terminar" style="padding:14px 32px;font-size:14px;border-radius:999px">Terminar<svg class="ic" style="width:16px;height:16px;margin-left:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button></div>'}
+      </div>
+    `;
+    container.querySelector('#sopa-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+
+    function mostrarResultado(encontradas,total){
+      container.querySelector('#sopa-terminar')?.remove();
+      const area=container.querySelector('#sopa-resultado-area');
+      area.innerHTML=`
+        <div class="cc-panel-resultado fade-up">
+          <div class="cc-panel-resultado__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h2>${encontradas>=total?'¡Sopa de letras completa!':'Sopa de letras registrada'}</h2>
+          <p>Encontraste ${encontradas} de ${total} palabras.</p>
+          <div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+10 XP</div>
+          <p style="font-size:12.5px;color:var(--text-3);margin-top:6px">Con intentarlo ya cuenta para tus libros de la Biblioteca.</p>
+          <button type="button" class="btn btn--ghost" style="margin-top:20px" id="sopa-volver-fin">Volver a retos</button>
+        </div>`;
+      container.querySelector('#sopa-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+    }
+
+    if(yaHecha){
+      mostrarResultado(data.palabras.length,data.palabras.length);
+      return;
+    }
+
+    const encontradas=new Set();
+    let inicio=null;
+    container.querySelectorAll('[data-sopa-f]').forEach(celda=>{
+      celda.addEventListener('click',()=>{
+        const f=Number(celda.dataset.sopaF), c=Number(celda.dataset.sopaC);
+        if(celda.classList.contains('is-found')) return;
+        if(!inicio){
+          inicio={f,c,el:celda};
+          celda.classList.add('is-selected');
+          return;
+        }
+        if(inicio.el===celda){ celda.classList.remove('is-selected'); inicio=null; return; }
+        // Solo misma fila (todas las palabras de hoy son horizontales)
+        if(inicio.f!==f){ inicio.el.classList.remove('is-selected'); inicio={f,c,el:celda}; celda.classList.add('is-selected'); return; }
+        const c1=Math.min(inicio.c,c), c2=Math.max(inicio.c,c);
+        let leido='';
+        for(let cc=c1;cc<=c2;cc++) leido+=data.grid[f][cc];
+        const leidoInv=leido.split('').reverse().join('');
+        const match=data.palabras.find(p=>!encontradas.has(p.palabra) && (p.palabra===leido || p.palabra===leidoInv));
+        inicio.el.classList.remove('is-selected');
+        if(match){
+          encontradas.add(match.palabra);
+          for(let cc=c1;cc<=c2;cc++){
+            container.querySelector(`.sopa-cell[data-sopa-f="${f}"][data-sopa-c="${cc}"]`)?.classList.add('is-found');
+          }
+          container.querySelector(`.sopa-word[data-sopa-word="${CSS.escape(match.palabra)}"]`)?.classList.add('is-found');
+          if(encontradas.size>=data.palabras.length) terminar();
+        }
+        inicio=null;
+      });
+    });
+
+    async function terminar(){
+      const btn=container.querySelector('#sopa-terminar');
+      if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
+      let res;
+      try{
+        const r=await fetch(`${retosWebhookBase()}/api/retos/sopa`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId})});
+        res=await r.json();
+        if(!r.ok) throw new Error(res.error||'No se pudo registrar tu avance');
+      }catch(e){
+        if(btn){ btn.disabled=false; btn.textContent='Terminar'; }
+        container.querySelector('#sopa-resultado-area').innerHTML=`<p class="fade-up" style="text-align:center;color:var(--text-3);padding:12px">No se pudo registrar tu avance. Intenta de nuevo.</p>`;
+        return;
+      }
+      mostrarResultado(encontradas.size,data.palabras.length);
+      registrarAccionProgreso('sopa');
+    }
+    container.querySelector('#sopa-terminar')?.addEventListener('click',terminar);
+  }
+
   /* ============================ MODO HISTORIA ============================ */
   const historiaPersonajes = {
     elena: { nombre:'Dra. Elena', color:'#2D7A5F', iniciales:'DE', rol:'Mentora' },
@@ -10249,7 +10394,7 @@ const Sections = (function(){
           <div class="practice-experiences__head"><div><span>Práctica profesional</span><h2>Elige cómo quieres entrenar</h2></div><small>Casos ficticios · contenido educativo</small></div>
 
           <div class="retos-level">
-            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--juego"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>Juego rápido</span><small>2–4 min</small></div>
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--juego"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>Juegos SENTIA</span><small>2–4 min</small></div>
             <div class="practice-experiences__grid practice-experiences__grid--2">
               <div class="pcard-hero" data-practice="crucigrama" data-lockable="true">
                 <div class="pcard-hero__visual pcard-hero__visual--crucigrama">
@@ -10263,6 +10408,20 @@ const Sections = (function(){
                   <h3 class="pcard-hero__title">Crucigrama</h3>
                   <p class="pcard-hero__desc">Repasa vocabulario profesional de todas las áreas con pistas cortas.</p>
                   <span class="pcard-hero__cta pcard-hero__cta--crucigrama">Llenar cuadrícula<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
+              </div>
+              <div class="pcard-hero" data-practice="sopa" data-lockable="true">
+                <div class="pcard-hero__visual pcard-hero__visual--sopa">
+                  <span class="pcard-hero__eyebrow">Vocabulario</span>
+                  <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                  <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg></div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${SOPAS_TOTAL} sopas de letras</div>
+                </div>
+                <div class="pcard-hero__body">
+                  <h3 class="pcard-hero__title">Sopa de letras</h3>
+                  <p class="pcard-hero__desc">Encuentra términos de psicología escondidos en la cuadrícula.</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--sopa">Buscar palabras<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
                 </div>
               </div>
             </div>
@@ -10392,6 +10551,7 @@ const Sections = (function(){
       if(tipo==='error-clinico') _renderErrorClinicoView(container);
       if(tipo==='arbol') _renderArbolView(container);
       if(tipo==='crucigrama') _renderCrucigramaView(container);
+      if(tipo==='sopa') _renderSopaView(container);
     }));
 
     // El resumen de arriba pinta primero con el cálculo local (instantáneo);
