@@ -3981,6 +3981,24 @@ const Pages={
         });
       });
     });
+    (store.materialesBiblioteca || []).forEach(m => {
+      const curso = m.cursoId ? store.cursos.find(c => c.id === m.cursoId) : null;
+      out.push({
+        esBiblioteca: true,
+        bibId: m.id,
+        cursoId: m.cursoId || '',
+        cursoTitulo: curso ? (curso.titulo || 'Sin título') : 'Recurso general',
+        cursoArea: m.area || 'Biblioteca',
+        titulo: m.titulo || 'Sin título',
+        url: m.url || '',
+        estado: m.estado || 'disponible',
+        gratis: m.gratis === true,
+        nivelRequerido: typeof m.nivelRequerido === 'number' ? m.nivelRequerido : null,
+        retosRequeridos: typeof m.retosRequeridos === 'number' ? m.retosRequeridos : null,
+        disponibleSiempre: true,
+        desbloquearEnDias: null
+      });
+    });
     return out;
   },
 
@@ -4096,16 +4114,29 @@ const Pages={
       'Psicología Clínica':'#2fbf2e','Psicología Educativa':'#3B82F6','Psicología Laboral':'#F59E0B',
       'Neuropsicología':'#A855F7','Evaluación Psicológica':'#3ddc5a','Salud Mental':'#EF4444',
       'Intervención Psicológica':'#14B8A6','Desarrollo Infantil':'#F97316','Psicología Forense':'#8B5CF6',
-      'Investigación':'#06B6D4','Otro':'#EC4899'
+      'Investigación':'#06B6D4','Otro':'#EC4899','Biblioteca':'#A855F7'
     };
 
     wrap.innerHTML = `<div class="curso-list">${mats.map(m => {
       const areaColor = areaColors[m.cursoArea] || '#3B82F6';
-      const dispLabel = m.disponibleSiempre
-        ? `<span style="color:#E5C171;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Siempre</span>`
-        : (m.desbloquearEnDias !== null
-            ? `<span style="color:#FBBF24;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Día ${m.desbloquearEnDias}</span>`
-            : `<span style="color:#9CA3AF;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Progresivo</span>`);
+      let dispLabel;
+      if (m.esBiblioteca) {
+        if (m.estado !== 'disponible') {
+          dispLabel = `<span style="color:#9CA3AF;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">${m.estado === 'oculto' ? 'Oculto' : 'Próximamente'}</span>`;
+        } else if (m.retosRequeridos) {
+          dispLabel = `<span style="color:#A855F7;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Retos: ${m.retosRequeridos}</span>`;
+        } else if (m.nivelRequerido) {
+          dispLabel = `<span style="color:#FBBF24;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Nivel ${m.nivelRequerido}</span>`;
+        } else {
+          dispLabel = `<span style="color:#E5C171;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Biblioteca</span>`;
+        }
+      } else {
+        dispLabel = m.disponibleSiempre
+          ? `<span style="color:#E5C171;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Siempre</span>`
+          : (m.desbloquearEnDias !== null
+              ? `<span style="color:#FBBF24;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Día ${m.desbloquearEnDias}</span>`
+              : `<span style="color:#9CA3AF;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Progresivo</span>`);
+      }
       const tituloEsc = (m.titulo || '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
       const cursoTitEsc = (m.cursoTitulo || '').replace(/"/g,'&quot;').replace(/</g,'&lt;');
       return `
@@ -4125,18 +4156,25 @@ const Pages={
             <a href="${(m.url||'').replace(/"/g,'&quot;')}" target="_blank" rel="noopener noreferrer" class="curso-card__action" title="Abrir enlace" onclick="event.stopPropagation()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
+            ${m.esBiblioteca ? `
+            <button class="curso-card__action" data-bib-edit-id="${m.bibId}" title="Editar material de biblioteca">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="curso-card__action curso-card__action--danger" data-bib-del-id="${m.bibId}" title="Eliminar de biblioteca">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>` : `
             <button class="curso-card__action" data-mat-edit-cid="${m.cursoId}" data-mat-edit-idx="${m.idx}" title="Editar material">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
             <button class="curso-card__action curso-card__action--danger" data-mat-del-cid="${m.cursoId}" data-mat-del-idx="${m.idx}" title="Eliminar material">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            </button>
+            </button>`}
           </div>
         </div>
       `;
     }).join('')}</div>`;
 
-    // Bind editar
+    // Bind editar (material de curso)
     wrap.querySelectorAll('[data-mat-edit-cid]').forEach(btn => {
       btn.addEventListener('click', () => {
         const cid = btn.dataset.matEditCid;
@@ -4145,7 +4183,7 @@ const Pages={
       });
     });
 
-    // Bind eliminar
+    // Bind eliminar (material de curso)
     wrap.querySelectorAll('[data-mat-del-cid]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const cid = btn.dataset.matDelCid;
@@ -4166,6 +4204,33 @@ const Pages={
           Toast.success('Material eliminado', mat.titulo);
         } catch (err) {
           console.error('[material] error eliminar:', err);
+          Toast.error('No se pudo eliminar', err.message || 'Intenta de nuevo');
+        }
+      });
+    });
+
+    // Bind editar (libro de biblioteca)
+    wrap.querySelectorAll('[data-bib-edit-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        Pages._abrirModalBiblioteca(btn.dataset.bibEditId);
+      });
+    });
+
+    // Bind eliminar (libro de biblioteca)
+    wrap.querySelectorAll('[data-bib-del-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.bibDelId;
+        const item = (window.AdminStore.materialesBiblioteca || []).find(m => m.id === id);
+        const titulo = item?.titulo || 'este material';
+        const ok = confirm(`¿Eliminar "${titulo}" de la biblioteca?\n\nLos miembros ya no podrán verlo ni descargarlo.\n\nEsta acción NO se puede deshacer.`);
+        if (!ok) return;
+        try {
+          if (MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
+          const fb = window._fb;
+          await fb.deleteDoc(fb.doc(fb.db, 'materiales', id));
+          Toast.success('Eliminado de biblioteca', titulo);
+        } catch (err) {
+          console.error('[biblioteca] error eliminar:', err);
           Toast.error('No se pudo eliminar', err.message || 'Intenta de nuevo');
         }
       });
@@ -6454,6 +6519,7 @@ const AdminStore = {
   // Datos vivos (se llenan al conectar con Firestore)
   cursos: [],
   pdfs: [],
+  materialesBiblioteca: [],
   webinars: [],
   miembros: [],
   certificados: [],
@@ -6492,8 +6558,15 @@ const AdminStore = {
       this.unsubs.push(u);
     } catch(e) { console.warn('[AdminStore] cursos init:', e.message); }
 
-    // Los materiales viven dentro de cada curso; no existe una colección
-    // pública `materiales` y no se abre un listener que las reglas bloquearían.
+    // ─── 2. BIBLIOTECA (colección pública `materiales`, independiente de cursos) ───
+    try {
+      const q = query(collection(db, 'materiales'), orderBy('titulo', 'asc'));
+      const u = onSnapshot(q, (snap) => {
+        this.materialesBiblioteca = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        this._emit('materialesBiblioteca');
+      }, (err) => console.warn('[AdminStore] materiales:', err.message));
+      this.unsubs.push(u);
+    } catch(e) { console.warn('[AdminStore] materiales init:', e.message); }
 
     // ─── 3. WEBINARS / Clases en vivo ───
     try {
@@ -6619,7 +6692,8 @@ const AdminStore = {
       const f = w.fecha?.toDate ? w.fecha.toDate() : (w.fecha ? new Date(w.fecha) : null);
       return f && f > ahora;
     }).length;
-    const pdfsPubl = this.pdfs.filter(p => p.publicado !== false).length;
+    const matsAgregados = Pages._allMaterialesAggregated();
+    const pdfsPubl = matsAgregados.filter(m => !m.esBiblioteca || m.estado !== 'oculto').length;
     const noticiasHoy = this.noticias.filter(n => {
       const f = n.fecha?.toDate ? n.fecha.toDate() : (n.fecha ? new Date(n.fecha) : null);
       if (!f) return false;
@@ -6635,7 +6709,7 @@ const AdminStore = {
       certEmitidos: this.certificados.length,
       webinarsProx,
       pdfsPubl,
-      pdfsTotal: this.pdfs.length,
+      pdfsTotal: matsAgregados.length,
       noticiasHoy,
       notifTotal: this.notificaciones.length
     };
