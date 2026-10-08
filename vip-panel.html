@@ -10775,7 +10775,6 @@ const Sections = (function(){
           <p class="bib-header__count">${total} recurso${total !== 1 ? 's' : ''} · guías, formatos y material de apoyo de tus cursos.</p>
         </div>
         ${_bibRetosBannerHTML(materialesTodos)}
-        ${_bibRetosRutaHTML(materialesTodos)}
         ${total === 0 ? `
           <div style="text-align:center;padding:60px 24px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:14px;margin-top:18px;">
             <div style="width:64px;height:64px;border-radius:50%;background:color-mix(in srgb, var(--primary) 12%, transparent);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
@@ -10797,6 +10796,8 @@ const Sections = (function(){
           </div>
 
           ${sel ? _renderBibDetalle(sel) : ''}
+
+          ${_bibRetosRutaHTML(materialesTodos)}
 
           <div class="bib-grid" id="bib-grid">
             ${materialesTodos.map(m => _renderBibCard(m, m.id === (sel ? sel.id : ''))).join('')}
