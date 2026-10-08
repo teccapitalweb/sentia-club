@@ -2522,6 +2522,36 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-tab:hover{background:color-mix(in srgb,var(--primary) 8%,transparent);color:var(--primary);border-color:color-mix(in srgb,var(--primary) 30%,transparent)}
 .bib-tab.is-active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
+.bib-retos-banner{
+  display:flex;align-items:center;gap:18px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 10%,transparent),color-mix(in srgb,var(--primary) 4%,transparent));
+  border:1px solid color-mix(in srgb,var(--primary) 25%,transparent);
+  border-radius:16px;padding:18px 22px;margin-bottom:22px;
+}
+.bib-retos-banner__icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.bib-retos-banner__body{flex:1;min-width:0}
+.bib-retos-banner__body strong{display:block;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px}
+.bib-retos-banner__body p{font-size:13px;color:var(--text-2);margin:0 0 10px;line-height:1.4}
+.bib-retos-banner__bar{height:6px;border-radius:100px;background:var(--border);overflow:hidden;max-width:320px}
+.bib-retos-banner__bar-fill{height:100%;background:var(--primary);border-radius:100px;transition:width .3s ease}
+.bib-retos-banner__caption{display:block;margin-top:6px;font-size:11.5px;color:var(--text-3)}
+.bib-retos-banner__cta{
+  flex-shrink:0;font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:700;
+  padding:10px 20px;border-radius:12px;border:none;cursor:pointer;
+  background:var(--primary);color:#fff;transition:transform .15s,box-shadow .2s;
+}
+.bib-retos-banner__cta:hover{transform:translateY(-1px);box-shadow:0 6px 18px color-mix(in srgb,var(--primary) 35%,transparent)}
+@media(max-width:640px){.bib-retos-banner{flex-wrap:wrap}.bib-retos-banner__cta{width:100%}}
+
+.bib-retos-progress{margin-top:12px;max-width:360px}
+.bib-retos-progress__bar{height:6px;border-radius:100px;background:var(--border);overflow:hidden}
+.bib-retos-progress__fill{height:100%;background:var(--primary);border-radius:100px;transition:width .3s ease}
+.bib-retos-progress span{display:block;margin-top:6px;font-size:11.5px;color:var(--text-3)}
+
 .bib-detalle{
   display:grid;grid-template-columns:auto 1fr;gap:32px;
   background:var(--surface);border:1px solid var(--border);border-radius:20px;
@@ -8538,6 +8568,9 @@ const Sections = (function(){
   function retosWebhookBase(){ return location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL; }
   async function abrirRetoDiario(){
     const id = 'reto-diario';
+    // Estado de retos ANTES de contestar, para poder avisar si esta respuesta
+    // es justo la que desbloquea un libro (y no repetir el aviso de uno viejo).
+    if (_retosEstadoCache === undefined) await cargarEstadoRetos();
     let data;
     try {
       const r = await fetch(`${retosWebhookBase()}/api/retos/diario`, { headers: await window.__authHeaders() });
@@ -8558,6 +8591,8 @@ const Sections = (function(){
     setTimeout(()=>document.querySelectorAll('[data-reto-option]').forEach(btn=>btn.addEventListener('click',async()=>{
       document.querySelectorAll('[data-reto-option]').forEach(b=>b.disabled=true);
       const opcion = Number(btn.dataset.retoOption);
+      // Estado ANTES de calificar, para detectar qué libro se desbloquea con esta respuesta.
+      const librosAntes = new Set((_retosEstadoCache && _retosEstadoCache !== 'error' ? _retosEstadoCache.libros : []).filter(l => l.desbloqueado).map(l => l.id));
       let res;
       try {
         const r = await fetch(`${retosWebhookBase()}/api/retos/diario`, { method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({retoId:data.retoId, opcion}) });
@@ -8572,6 +8607,19 @@ const Sections = (function(){
       if(!res.correcto)btn.classList.add('is-incorrect');
       const feedback=document.getElementById(id+'-feedback');if(feedback)feedback.textContent=(res.correcto?'Respuesta correcta. ':'Para repasar: ')+res.explicacion;
       registrarAccionProgreso('diario');
+      // Refrescar el estado de retos con lo que acaba de calificar el servidor y
+      // avisar si esta respuesta desbloqueó algún libro de la Biblioteca.
+      if (Array.isArray(res.libros)) {
+        _retosEstadoCache = { superados: Number(res.superados) || 0, libros: res.libros };
+        const nuevos = res.libros.filter(l => l.desbloqueado && !librosAntes.has(l.id));
+        if (nuevos.length) {
+          const mats = await cargarMaterialesBiblioteca();
+          nuevos.forEach(l => {
+            const mat = mats.find(m => m.id === l.id);
+            setTimeout(() => Toast.success('¡Desbloqueaste un libro!', mat ? mat.titulo : 'Nuevo libro disponible en Materiales'), 600);
+          });
+        }
+      }
     })),40);
   }
   function abrirFlashcards(){
@@ -10464,6 +10512,13 @@ const Sections = (function(){
     const descHTML = esBib && descEsc
       ? `<p class="bib-detalle__desc">${descEsc}</p>` : '';
 
+    const progresoRetosHTML = bloqueadoPorRetos
+      ? `<div class="bib-retos-progress">
+          <div class="bib-retos-progress__bar"><div class="bib-retos-progress__fill" style="width:${Math.min(100, Math.round(((retosAccesoInfo.superados||0) / m.retosRequeridos) * 100))}%"></div></div>
+          <span>${retosAccesoInfo.superados||0}/${m.retosRequeridos} retos diarios superados · solo para miembros</span>
+        </div>`
+      : '';
+
     const categoriaEsc = escapeHtml(m.categoria || '');
     let metaItems = `<div class="bib-detalle__meta-item"><label>Formato</label><span>${_bibTipoLabel(tipo)}</span></div>`;
     if (esBib && categoriaEsc) metaItems += `<div class="bib-detalle__meta-item"><label>Categoría</label><span>${categoriaEsc}</span></div>`;
@@ -10492,6 +10547,7 @@ const Sections = (function(){
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
           </div>
+          ${progresoRetosHTML}
           <div class="bib-detalle__meta-grid">
             ${metaItems}
           </div>
@@ -10571,6 +10627,36 @@ const Sections = (function(){
     return { abierto: !!dato.desbloqueado, superados: _retosEstadoCache.superados };
   }
 
+  // Banner "Supera retos y desbloquea tu próximo libro" (estilo Alintec): se
+  // muestra solo si hay un libro de biblioteca con retosRequeridos que el
+  // miembro aún no ha desbloqueado; elige el más cercano (menos retos piden).
+  function _bibRetosBannerHTML(materialesTodos){
+    if (!tieneAccesoVipCompleto()) return '';
+    const candidatos = materialesTodos
+      .filter(m => m.source === 'biblioteca' && m.retosRequeridos && m.estado === 'disponible')
+      .map(m => ({ m, acc: retosAcceso(m.id) }))
+      .filter(x => !x.acc.abierto)
+      .sort((a, b) => a.m.retosRequeridos - b.m.retosRequeridos);
+    if (!candidatos.length) return '';
+    const { m, acc } = candidatos[0];
+    const superados = acc.superados || 0;
+    const faltan = Math.max(0, m.retosRequeridos - superados);
+    const pct = Math.min(100, Math.round((superados / m.retosRequeridos) * 100));
+    return `
+      <div class="bib-retos-banner">
+        <div class="bib-retos-banner__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="bib-retos-banner__body">
+          <strong>Supera retos y desbloquea tu próximo libro</strong>
+          <p>Con el reto diario, completa ${faltan} más para abrir «${escapeHtml(m.titulo)}».</p>
+          <div class="bib-retos-banner__bar"><div class="bib-retos-banner__bar-fill" style="width:${pct}%"></div></div>
+          <span class="bib-retos-banner__caption">${superados}/${m.retosRequeridos} retos diarios superados</span>
+        </div>
+        <button type="button" class="bib-retos-banner__cta" id="bib-retos-banner-cta">Ir a Retos</button>
+      </div>`;
+  }
+
   async function renderPDFs(container){
     // MODIFICADO: se evalúa una sola vez por render (no por tarjeta) el avance
     // de Retos, para que los libros bloqueados por Nivel usen el XP vigente,
@@ -10612,6 +10698,7 @@ const Sections = (function(){
           <h1 class="bib-header__title">Tu biblioteca</h1>
           <p class="bib-header__count">${total} recurso${total !== 1 ? 's' : ''} · guías, formatos y material de apoyo de tus cursos.</p>
         </div>
+        ${_bibRetosBannerHTML(materialesTodos)}
         ${total === 0 ? `
           <div style="text-align:center;padding:60px 24px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:14px;margin-top:18px;">
             <div style="width:64px;height:64px;border-radius:50%;background:color-mix(in srgb, var(--primary) 12%, transparent);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
@@ -10710,6 +10797,9 @@ const Sections = (function(){
       }
 
       _bindDetalleBtns(container, materialesTodos);
+
+      const bannerCta = container.querySelector('#bib-retos-banner-cta');
+      if (bannerCta) bannerCta.addEventListener('click', () => navigateToSection('retos'));
     }, 50);
   }
 
@@ -10729,7 +10819,8 @@ const Sections = (function(){
           if (curso) mostrarPaywallCurso(curso);
           else Toast.info('Membresía requerida', 'Necesitas una membresía VIP para acceder a este material.');
         } else if (retosBloqueo) {
-          Toast.info('Libro bloqueado', `Llevas ${btnLeer.dataset.retosSuperados || 0} de ${retosBloqueo} retos diarios superados. Resuélvelos en Retos para desbloquearlo.`);
+          Toast.info('Te falta superar retos', `Llevas ${btnLeer.dataset.retosSuperados || 0} de ${retosBloqueo} retos diarios superados. Te llevamos a Retos…`);
+          navigateToSection('retos');
         } else if (nivelBloqueo) {
           Toast.info('Libro bloqueado', `Alcanza el Nivel ${nivelBloqueo} · ${btnLeer.dataset.nivelNombre || ''} en Retos para desbloquearlo.`);
         } else if (materialUrl) {
