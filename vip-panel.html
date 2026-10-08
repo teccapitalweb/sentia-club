@@ -8657,37 +8657,10 @@ const Sections = (function(){
   // mostrar el contador en la tarjeta de "Elige cómo quieres entrenar".
   const MAPAS_EMOCIONALES_TOTAL = 16;
 
-  /* ═══ CONSTRUYE LA INTERVENCIÓN — data ═══ */
-  const intervencionesData=[
-    {titulo:'Adolescente con autolesiones',contexto:'Primera sesión con Daniela, 15 años. Su madre la trajo porque descubrió marcas en sus brazos. Daniela no quiere estar ahí.',pasos:[
-      {id:'a',texto:'Agradecer que esté ahí y aclarar que la sesión es un espacio seguro, no un castigo'},
-      {id:'b',texto:'Preguntar abiertamente cómo se siente hoy, sin mencionar aún las marcas'},
-      {id:'c',texto:'Validar sus emociones: "Tiene sentido que no quieras estar aquí, esto no es fácil"'},
-      {id:'d',texto:'Explorar juntas qué función cumple la autolesión para ella, sin juzgar'},
-      {id:'e',texto:'Cerrar resumiendo lo que compartió y acordar si quiere regresar'}
-    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'La secuencia apertura → exploración → validación → técnica → cierre respeta el ritmo del paciente. Con adolescentes resistentes, validar antes de explorar el síntoma es clave para no perder la alianza.'},
-    {titulo:'Paciente en crisis suicida',contexto:'Marcos, 38 años, llega a sesión diciendo: "Ya no quiero estar aquí. No tiene sentido nada." Detectas indicadores de riesgo.',pasos:[
-      {id:'a',texto:'Mantener la calma y preguntar directamente: "¿Estás pensando en hacerte daño?"'},
-      {id:'b',texto:'Escuchar sin interrumpir y validar el dolor: "Escucho que estás sufriendo mucho"'},
-      {id:'c',texto:'Evaluar plan, medio y temporalidad para determinar nivel de riesgo'},
-      {id:'d',texto:'Construir un plan de seguridad con números de emergencia y red de apoyo'},
-      {id:'e',texto:'Cerrar con acuerdo de no-daño y cita de seguimiento en 24-48 horas'}
-    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'En crisis suicida: preguntar directamente (no evitar el tema), validar, evaluar riesgo con protocolo, crear plan de seguridad, y asegurar seguimiento inmediato. Nunca dejar ir sin un plan.'},
-    {titulo:'Pareja con comunicación rota',contexto:'Ana y Luis llevan 12 años juntos. Ella dice que él "nunca escucha". Él dice que ella "siempre grita". Ambos se interrumpen.',pasos:[
-      {id:'a',texto:'Establecer reglas de sesión: turnos para hablar, sin interrumpir, usar "yo siento" en lugar de "tú siempre"'},
-      {id:'b',texto:'Pedir a cada uno que describa un momento reciente de conflicto desde su perspectiva'},
-      {id:'c',texto:'Reflejar lo que cada uno dijo y señalar el patrón: "Noto que ambos se sienten no escuchados"'},
-      {id:'d',texto:'Practicar escucha activa: uno habla 2 minutos, el otro parafrasea lo que entendió'},
-      {id:'e',texto:'Cerrar con una tarea: esta semana, un momento al día para preguntarse "¿cómo estuvo tu día?" sin celular'}
-    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'En terapia de pareja: primero contener (reglas), luego explorar (perspectivas), validar el patrón compartido, aplicar técnica (escucha activa) y cerrar con tarea concreta para generalizar fuera de sesión.'},
-    {titulo:'Niño con miedo escolar',contexto:'Tomás, 7 años, llora cada mañana y dice que le duele la panza. La escuela reporta que se aísla. Los padres están desesperados.',pasos:[
-      {id:'a',texto:'Recibir a Tomás con juego libre: "Puedes usar lo que quieras de aquí, este es tu espacio"'},
-      {id:'b',texto:'Observar su juego y hacer preguntas suaves: "¿Este muñeco va a la escuela? ¿Le gusta?"'},
-      {id:'c',texto:'Nombrar la emoción que aparece: "Parece que este personaje siente algo feo en la panza cuando va a la escuela"'},
-      {id:'d',texto:'Crear juntos un "amuleto de valentía" (objeto transicional) que pueda llevar a la escuela'},
-      {id:'e',texto:'Hablar con los padres sobre rutinas de despedida breves y predecibles'}
-    ],ordenCorrecto:['a','b','c','d','e'],explicacion:'Con niños: el juego es la puerta de entrada. No se pregunta directamente, se observa y se nombra en tercera persona. El objeto transicional reduce ansiedad y el trabajo con padres asegura consistencia fuera de sesión.'}
-  ];
+  // MODIFICADO: los 5 pasos y su orden correcto ya NO viven en este archivo
+  // — los califica el servidor, igual que los demás retos. INTERVENCIONES_TOTAL
+  // es solo para el contador de la tarjeta de entrenamiento.
+  const INTERVENCIONES_TOTAL = 4;
 
   /* ═══ SIMULADOR DE SESIÓN — data ═══ */
   const simuladoresData=[
@@ -9092,10 +9065,22 @@ const Sections = (function(){
   }
 
   /* ═══ CONSTRUYE LA INTERVENCIÓN — panel view ═══ */
-  function _renderIntervencionView(container){
+  // MODIFICADO: los 5 pasos y su orden correcto ya NO viven en este archivo —
+  // el servidor los manda barajados y califica el orden que se le envía.
+  async function _renderIntervencionView(container){
     _retosContainer=container;
-    const data=intervencionesData[retoIndiceDelDia(intervencionesData)];
-    const shuffled=data.pasos.slice().sort(()=>Math.random()-.5);
+    container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando intervención del día…</div>`;
+    let data;
+    try{
+      const r=await fetch(`${retosWebhookBase()}/api/retos/intervencion`,{headers:await window.__authHeaders()});
+      data=await r.json();
+      if(!r.ok) throw new Error(data.error||'No se pudo cargar la intervención de hoy');
+    }catch(e){
+      container.innerHTML=`<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar la intervención de hoy. <button type="button" class="btn btn--ghost" id="ci-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#ci-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
+    const retoId=data.retoId;
     container.innerHTML=`
       <div class="fade-up">
         <div class="ci-panel-banner">
@@ -9115,17 +9100,47 @@ const Sections = (function(){
           <div class="ci-panel-contexto__label"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Contexto del caso</div>
           <p>${escapeHtml(data.contexto)}</p>
         </section>
-        <section class="ci-panel-sorteo">
-          <p class="ci-panel-sorteo__inst">Arrastra o usa las flechas para ordenar los 5 pasos:</p>
-          <div class="ci-panel-sorteo__list" id="ci-sortable">
-            ${shuffled.map((p,i)=>`<div class="ci-paso" data-paso-id="${p.id}"><span class="ci-paso__num">${i+1}</span><span class="ci-paso__txt">${escapeHtml(p.texto)}</span><span class="ci-paso__arrows"><button type="button" data-dir="up" title="Subir">▲</button><button type="button" data-dir="down" title="Bajar">▼</button></span></div>`).join('')}
-          </div>
-          <button type="button" class="btn btn--primary" id="ci-verificar" style="margin-top:18px;padding:12px 28px;border-radius:999px">Verificar orden<svg class="ic" style="width:16px;height:16px;margin-left:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-        </section>
+        <section class="ci-panel-sorteo" id="ci-panel-sorteo"></section>
       </div>
     `;
     container.querySelector('#ci-volver-retos')?.addEventListener('click',()=>renderRetos(container));
-    const list=container.querySelector('#ci-sortable');
+    const sorteo=container.querySelector('#ci-panel-sorteo');
+
+    // filas: [{texto, estado:'ok'|'wrong'|null}] YA en el orden a mostrar —
+    // nunca se mezclan dos índices distintos (el de la respuesta del usuario
+    // y el del orden canónico), para no pintar mal los aciertos.
+    function mostrarResultado(completo, filas, explicacion){
+      const aciertos=filas.filter(f=>f.estado==='ok').length;
+      const filasHtml=filas.map((f,i)=>{
+        const cls=f.estado==='ok'?'ci-paso--ok':(f.estado==='wrong'?'ci-paso--wrong':'');
+        return `<div class="ci-paso ${cls}"><span class="ci-paso__num">${i+1}</span><span class="ci-paso__txt">${escapeHtml(f.texto)}</span></div>`;
+      }).join('');
+      sorteo.innerHTML=`
+        <div class="ci-panel-sorteo__list">${filasHtml}</div>
+        <div class="ci-panel-resultado fade-up">
+          ${completo?`<div class="cc-panel-resultado__icon" style="color:#1565c0"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Orden perfecto!</h2>`:(filas[0]&&filas[0].estado!=null?`<h2>${aciertos} de ${filas.length} en el lugar correcto</h2>`:'<h2>Ya enviaste tu orden hoy</h2>')}
+          <p>${escapeHtml(explicacion)}</p>
+          ${completo?`<div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div>`:'<p style="font-size:12.5px;color:var(--text-3)">Para que cuente hacia tus libros, el orden debe quedar perfecto. Vuelve mañana con una intervención nueva.</p>'}
+          <button type="button" class="btn btn--ghost" style="margin-top:18px" id="ci-volver-fin">Volver a retos</button>
+        </div>`;
+      container.querySelector('#ci-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+    }
+
+    if(data.yaRespondido){
+      // Se perdió el orden exacto que se envió hoy al recargar la página —
+      // se muestra el orden correcto como referencia, sin marcar aciertos.
+      mostrarResultado(data.yaRespondido.completo, data.yaRespondido.pasos.map(p=>({texto:p.texto,estado:null})), data.yaRespondido.explicacion);
+      return;
+    }
+
+    sorteo.innerHTML=`
+      <p class="ci-panel-sorteo__inst">Arrastra o usa las flechas para ordenar los 5 pasos:</p>
+      <div class="ci-panel-sorteo__list" id="ci-sortable">
+        ${data.pasos.map((p,i)=>`<div class="ci-paso" data-paso-id="${p.id}"><span class="ci-paso__num">${i+1}</span><span class="ci-paso__txt">${escapeHtml(p.texto)}</span><span class="ci-paso__arrows"><button type="button" data-dir="up" title="Subir">▲</button><button type="button" data-dir="down" title="Bajar">▼</button></span></div>`).join('')}
+      </div>
+      <button type="button" class="btn btn--primary" id="ci-verificar" style="margin-top:18px;padding:12px 28px;border-radius:999px">Verificar orden<svg class="ic" style="width:16px;height:16px;margin-left:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+    `;
+    const list=sorteo.querySelector('#ci-sortable');
     list.addEventListener('click',e=>{
       const btn=e.target.closest('[data-dir]');if(!btn)return;
       const paso=btn.closest('.ci-paso');
@@ -9141,27 +9156,24 @@ const Sections = (function(){
       el.addEventListener('dragover',e=>e.preventDefault());
       el.addEventListener('drop',e=>{e.preventDefault();if(dragEl&&dragEl!==el){const rect=el.getBoundingClientRect();const mid=rect.top+rect.height/2;if(e.clientY<mid)list.insertBefore(dragEl,el);else list.insertBefore(dragEl,el.nextSibling);}});
     });
-    container.querySelector('#ci-verificar')?.addEventListener('click',function(){
+    sorteo.querySelector('#ci-verificar')?.addEventListener('click',async function(){
       this.disabled=true;
       const items=[...list.querySelectorAll('.ci-paso')];
-      const userOrder=items.map(el=>el.dataset.pasoId);
-      let correct=0;
-      items.forEach((el,i)=>{
-        const isRight=userOrder[i]===data.ordenCorrecto[i];
-        if(isRight){correct++;el.classList.add('ci-paso--ok');}else el.classList.add('ci-paso--wrong');
-        el.querySelector('.ci-paso__arrows').style.display='none';
-      });
-      const score=Math.round(correct/data.pasos.length*100);
-      const area=container.querySelector('.ci-panel-sorteo');
-      const fb=document.createElement('div');fb.className='ci-panel-resultado fade-up';
-      if(score===100){
-        fb.innerHTML=`<div class="cc-panel-resultado__icon" style="color:#1565c0"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h2>¡Orden perfecto!</h2><p>${escapeHtml(data.explicacion)}</p><div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+15 XP</div><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ci-volver-fin">Volver a retos</button>`;
-        registrarAccionProgreso('intervencion');
-      }else{
-        fb.innerHTML=`<h2>${correct} de ${data.pasos.length} en orden correcto</h2><p>${escapeHtml(data.explicacion)}</p><button type="button" class="btn btn--ghost" style="margin-top:18px" id="ci-volver-fin">Volver a retos</button>`;
+      const orden=items.map(el=>el.dataset.pasoId);
+      sorteo.innerHTML=`<div class="fade-up" style="padding:30px;text-align:center;color:var(--text-3)">Calificando…</div>`;
+      let res;
+      try{
+        const r=await fetch(`${retosWebhookBase()}/api/retos/intervencion`,{method:'POST',headers:await window.__authHeaders(),body:JSON.stringify({retoId,orden})});
+        res=await r.json();
+        if(!r.ok) throw new Error(res.error||'No se pudo calificar');
+      }catch(e){
+        sorteo.innerHTML=`<div class="fade-up" style="padding:30px;text-align:center;color:var(--text-3)">No se pudo registrar tu orden. Intenta de nuevo.</div>`;
+        return;
       }
-      area.appendChild(fb);
-      container.querySelector('#ci-volver-fin')?.addEventListener('click',()=>renderRetos(container));
+      const idToTexto=new Map(data.pasos.map(p=>[p.id,p.texto]));
+      const filas=orden.map((id,i)=>({texto:idToTexto.get(id)||'', estado:res.correctas[i]?'ok':'wrong'}));
+      mostrarResultado(res.completo, filas, res.explicacion);
+      if(res.completo) registrarAccionProgreso('intervencion');
     });
   }
 
@@ -9979,7 +9991,7 @@ const Sections = (function(){
                   <div class="pcard-hero__float pcard-hero__float--1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
                   <div class="pcard-hero__float pcard-hero__float--3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${intervencionesData.length} ejercicios</div>
+                  <div class="pcard-hero__tag"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>${INTERVENCIONES_TOTAL} ejercicios</div>
                 </div>
                 <div class="pcard-hero__body">
                   <h3 class="pcard-hero__title">Construye la intervención</h3>
