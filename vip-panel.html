@@ -10558,9 +10558,10 @@ const Sections = (function(){
     try {
       const r = await fetch(`${retosWebhookBase()}/api/retos/estado`, { headers: await window.__authHeaders() });
       const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'error');
+      if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
       _retosEstadoCache = { superados: Number(data.superados) || 0, libros: Array.isArray(data.libros) ? data.libros : [] };
-    } catch (e) { _retosEstadoCache = 'error'; }
+      console.log('[retos] estado cargado:', _retosEstadoCache);
+    } catch (e) { _retosEstadoCache = 'error'; console.warn('[retos] no se pudo cargar el estado (fail-open):', e.message); }
     return _retosEstadoCache;
   }
   function retosAcceso(materialId){
