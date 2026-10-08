@@ -221,6 +221,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Días de actividad (racha de "Mis logros"). Mismo motivo que
+    // retos_progreso: si el navegador pudiera escribir aquí, cualquiera se
+    // marcaría racha infinita desde DevTools. Solo Railway la registra.
+    match /actividad_dias/{uid} {
+      allow read, write: if false;
+    }
+
     match /notificaciones/{id} {
       allow read: if signedIn();
       // La publicación global pasa por el webhook autenticado; ni siquiera

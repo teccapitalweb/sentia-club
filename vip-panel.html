@@ -4200,6 +4200,9 @@ if (window.__isDemoMode) {
     // ─── Popup: completar ficha profesional (1ª vez) · evita certificados con el email y crea la tarjeta del Directorio ───
     setTimeout(() => { try { window.__maybeAskProfile && window.__maybeAskProfile(); } catch(e){} }, 900);
 
+    // ─── Logros: registra "hoy entré" en el servidor, cuente o no abra Mis logros ───
+    setTimeout(() => { try { window.__pingLogrosVisita && window.__pingLogrosVisita(); } catch(e){} }, 1200);
+
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
   });
@@ -5911,11 +5914,13 @@ const Sections = (function(){
   };
   const COLOR_CAT = {
     'Primeros pasos':'#1b5df0','Evaluación y peritaje':'#7c5cff','Intervención y crisis':'#15b8a6',
-    'Salud laboral':'#f59e0b','Educación y desarrollo':'#0ea5e9','Herramientas':'#3f7bff','Constancia':'#2fbf2e','Maestría':'#1b5df0','Actividades':'#a855f7'
+    'Salud laboral':'#f59e0b','Educación y desarrollo':'#0ea5e9','Herramientas':'#3f7bff','Constancia':'#2fbf2e','Maestría':'#1b5df0','Actividades':'#a855f7',
+    'Retos':'#ff7a1a','Comunidad':'#2fbf2e','Biblioteca':'#7c5cff','Certificación':'#e8a71a','Perfil':'#1b5df0'
   };
   const ICON_CAT = {
     'Primeros pasos':'i-ps-seed','Evaluación y peritaje':'i-ps-scale','Intervención y crisis':'i-ps-hands',
-    'Salud laboral':'i-ps-briefcase','Educación y desarrollo':'i-ps-child','Herramientas':'i-ps-note','Constancia':'i-ps-trend','Maestría':'i-crown','Actividades':'i-ps-target'
+    'Salud laboral':'i-ps-briefcase','Educación y desarrollo':'i-ps-child','Herramientas':'i-ps-note','Constancia':'i-ps-trend','Maestría':'i-crown','Actividades':'i-ps-target',
+    'Retos':'i-bolt','Comunidad':'i-users','Biblioteca':'i-book-2','Certificación':'i-certificate','Perfil':'i-user'
   };
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -7298,11 +7303,11 @@ const Sections = (function(){
   const certificados = []; // se llenarán con los certificados reales emitidos
 
   const niveles = [
-    {id:1,nombre:'Aprendiz',desde:0,hasta:200},
-    {id:2,nombre:'Practicante',desde:200,hasta:600},
-    {id:3,nombre:'Profesional',desde:600,hasta:1200},
-    {id:4,nombre:'Especialista',desde:1200,hasta:2400},
-    {id:5,nombre:'Maestro',desde:2400,hasta:99999}
+    {id:1,nombre:'Observador',desde:0,hasta:200},
+    {id:2,nombre:'Escucha Activa',desde:200,hasta:600},
+    {id:3,nombre:'Terapeuta en Formación',desde:600,hasta:1200},
+    {id:4,nombre:'Clínico Empático',desde:1200,hasta:2400},
+    {id:5,nombre:'Mentor SENTIA',desde:2400,hasta:99999}
   ];
 
   // MODIFICADO: logros con el tema de SENTIA; se desbloquean con actividad real (evaluarLogros)
@@ -7330,8 +7335,30 @@ const Sections = (function(){
     {id:'ac2',cat:'Actividades',nombre:'Práctica constante',desc:'Aprobaste 5 actividades interactivas',xp:120,unlock:null,criterio:'Aprueba 5 actividades'},
     {id:'ac3',cat:'Actividades',nombre:'Puntaje perfecto',desc:'Obtuviste 100% en una actividad',xp:80,unlock:null,criterio:'Saca 100% en una actividad'},
     {id:'ma1',cat:'Maestría',nombre:'Tres de tres',desc:'Completaste 3 cursos',xp:250,unlock:null,criterio:'Termina 3 cursos'},
-    {id:'ma2',cat:'Maestría',nombre:'Coleccionista',desc:'Completaste 5 cursos certificados',xp:400,unlock:null,criterio:'Termina 5 cursos'},
-    {id:'ma3',cat:'Maestría',nombre:'Maestro SENTIA',desc:'Completaste 10 cursos. Una referencia.',xp:1000,unlock:null,criterio:'Termina 10 cursos'}
+    {id:'ma2',cat:'Maestría',nombre:'Trayectoria consolidada',desc:'Completaste 5 cursos certificados',xp:400,unlock:null,criterio:'Termina 5 cursos'},
+    {id:'ma3',cat:'Maestría',nombre:'Referente SENTIA',desc:'Completaste 10 cursos. Una referencia.',xp:1000,unlock:null,criterio:'Termina 10 cursos'},
+    // Retos: criterio verificado por el servidor (contador real de retos
+    // superados, tipos de reto probados y racha de retos específica).
+    {id:'rt1',cat:'Retos',nombre:'Primer reto superado',desc:'Superaste tu primer reto',xp:20,unlock:null,criterio:'Supera 1 reto'},
+    {id:'rt2',cat:'Retos',nombre:'Racha de retos',desc:'Superaste retos 5 días seguidos',xp:80,unlock:null,criterio:'Supera al menos 1 reto por día, 5 días seguidos'},
+    {id:'rt3',cat:'Retos',nombre:'Disciplina diaria',desc:'Superaste retos 15 días seguidos',xp:200,unlock:null,criterio:'Supera al menos 1 reto por día, 15 días seguidos'},
+    {id:'rt4',cat:'Retos',nombre:'Diez superados',desc:'Superaste 10 retos en total',xp:100,unlock:null,criterio:'Supera 10 retos'},
+    {id:'rt5',cat:'Retos',nombre:'Treinta superados',desc:'Superaste 30 retos en total',xp:300,unlock:null,criterio:'Supera 30 retos'},
+    {id:'rt6',cat:'Retos',nombre:'Explorador de retos',desc:'Probaste los 8 tipos de reto',xp:150,unlock:null,criterio:'Intenta al menos 1 vez cada tipo de reto'},
+    {id:'rt7',cat:'Retos',nombre:'Primer libro por retos',desc:'Desbloqueaste tu primer libro superando retos',xp:100,unlock:null,criterio:'Desbloquea 1 libro de la Biblioteca con retos'},
+    // Comunidad: Directorio y Foro, verificado por el servidor.
+    {id:'cm1',cat:'Comunidad',nombre:'Rostro del directorio',desc:'Creaste tu tarjeta en el Directorio',xp:60,unlock:null,criterio:'Crea tu tarjeta en el Directorio'},
+    {id:'cm2',cat:'Comunidad',nombre:'Tarjeta verificada',desc:'Tu tarjeta aparece como VIP en el Directorio',xp:50,unlock:null,criterio:'Sé VIP y ten tu tarjeta del Directorio activa'},
+    {id:'cm3',cat:'Comunidad',nombre:'Primer aporte',desc:'Publicaste tu primer mensaje en el Foro',xp:40,unlock:null,criterio:'Publica 1 mensaje en el Foro VIP'},
+    {id:'cm4',cat:'Comunidad',nombre:'Voz activa',desc:'Publicaste 10 mensajes en el Foro',xp:120,unlock:null,criterio:'Publica 10 mensajes en el Foro VIP'},
+    // Biblioteca: ligado al mismo contador de retos, no a un conteo de lecturas.
+    {id:'bi1',cat:'Biblioteca',nombre:'Biblioteca desbloqueada',desc:'Desbloqueaste todos los libros que piden retos',xp:250,unlock:null,criterio:'Desbloquea todos los libros bloqueados por retos'},
+    // Certificación: verificado contra tus certificados oficiales reales.
+    {id:'ce1',cat:'Certificación',nombre:'Primer certificado',desc:'Obtuviste tu primer certificado oficial',xp:100,unlock:null,criterio:'Consigue tu primer certificado con folio'},
+    {id:'ce2',cat:'Certificación',nombre:'Tres certificados',desc:'Acumulaste 3 certificados oficiales',xp:250,unlock:null,criterio:'Consigue 3 certificados'},
+    {id:'ce3',cat:'Certificación',nombre:'Cinco certificados',desc:'Acumulaste 5 certificados oficiales',xp:450,unlock:null,criterio:'Consigue 5 certificados'},
+    // Perfil: la ficha profesional que se pide al entrar por primera vez.
+    {id:'pf1',cat:'Perfil',nombre:'Ficha completa',desc:'Completaste tu ficha profesional',xp:30,unlock:null,criterio:'Completa tu ficha profesional (nombre, WhatsApp, área y empresa)'}
   ];
 
 
@@ -7403,8 +7430,12 @@ const Sections = (function(){
 
   const usuario = {nombre:(window.UserState&&window.UserState.displayName)||'Miembro',xp:0,racha:0,diasActivos:0};
 
-  // MODIFICADO: calcula logros, XP, racha y dias activos con la actividad real del alumno
-  function evaluarLogros(){
+  // MODIFICADO: calcula logros, XP, racha y días activos con la actividad real
+  // del alumno. Es el cálculo LOCAL — sirve para pintar algo al instante y
+  // como respaldo sin conexión. Cuando el servidor responde (sincronizarLogros,
+  // más abajo) sus datos mandan sobre este cálculo, igual que ya hacemos con
+  // retos: aquí nadie puede inflar su racha o sus insignias desde DevTools.
+  function evaluarLogros(idsServidor, statsServidor){
     try{
       const prog = (typeof getProgreso==='function') ? getProgreso() : {};
       const lista = Array.isArray(cursos) ? cursos : [];
@@ -7419,21 +7450,14 @@ const Sections = (function(){
       let pdfs = 0; try{ pdfs = parseInt(localStorage.getItem('sentia:pdfs')||'0')||0; }catch(e){}
       const hoy = new Date(); const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       const hoyIso = iso(hoy);
-      const ayerIso = (()=>{const a=new Date(hoy);a.setDate(a.getDate()-1);return iso(a);})();
-      let rObj; try{ rObj=JSON.parse(localStorage.getItem('sentia:racha')||'null'); }catch(e){}
-      if(!rObj||typeof rObj!=='object'){
-        rObj={ultimo:hoyIso,valor:1};
-      } else if(rObj.ultimo===hoyIso){
-        /* ya se contó hoy */
-      } else if(rObj.ultimo===ayerIso){
-        rObj.valor=(rObj.valor||0)+1; rObj.ultimo=hoyIso;
-      } else { rObj.valor=1; rObj.ultimo=hoyIso; }
-      try{ localStorage.setItem('sentia:racha',JSON.stringify(rObj)); }catch(e){}
-      let racha = rObj.valor;
       let dias = []; try{ dias=JSON.parse(localStorage.getItem('sentia:dias')||'[]'); }catch(e){}
       const set = new Set(dias);
       if(!set.has(hoyIso)){dias.push(hoyIso);set.add(hoyIso);try{ localStorage.setItem('sentia:dias',JSON.stringify(dias.slice(-120))); }catch(e){}}
+      // Racha local (respaldo): días consecutivos terminando hoy, leídos del
+      // mismo historial de 'sentia:dias'.
+      let racha=0; { let c=new Date(hoy); for(;;){ const s=iso(c); if(!set.has(s)) break; racha++; c.setDate(c.getDate()-1); } }
       const vip = (typeof toolEsVIP==='function') && toolEsVIP();
+      const perfilCompletado = !!(window.memberData && window.memberData.perfilCompletado);
       const cond = {
         pp1: vip, pp2: clases>=1, pp3: hechos.length>=1,
         ev1: area(/forense|evaluaci|custodia|peritaj/i), ev2: usado('informe'), ev3: usado('puntajes'),
@@ -7443,19 +7467,42 @@ const Sections = (function(){
         he1: nTools>=1, he2: nTools>=4, he3: nTools>=8, he4: pdfs>=10,
         co1: racha>=7, co2: racha>=30, co3: clases>=10,
         ac1: actOk>=1, ac2: actOk>=5, ac3: actPerfecta,
-        ma1: hechos.length>=3, ma2: hechos.length>=5, ma3: hechos.length>=10
+        ma1: hechos.length>=3, ma2: hechos.length>=5, ma3: hechos.length>=10,
+        pf1: perfilCompletado
+        // rt*/cm*/bi1/ce*: sin dato local honesto — quedan bloqueados hasta
+        // que responda el servidor (idsServidor).
       };
       let fechas = {}; try{ fechas = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); }catch(e){}
       logros.forEach(l=>{
-        if(cond[l.id]){ if(!fechas[l.id]) fechas[l.id]=new Date().toISOString(); l.unlock=fechas[l.id]; }
+        const cumple = idsServidor ? idsServidor.has(l.id) : !!cond[l.id];
+        if(cumple){ if(!fechas[l.id]) fechas[l.id]=new Date().toISOString(); l.unlock=fechas[l.id]; }
         else l.unlock=null;
       });
       try{ localStorage.setItem('sentia:logros', JSON.stringify(fechas)); }catch(e){}
-      usuario.xp = logros.filter(l=>l.unlock).reduce((n,l)=>n+l.xp,0) + clases*10 + actOk*20;
-      usuario.racha = racha; usuario.diasActivos = dias.length;
+      usuario.xp = logros.filter(l=>l.unlock).reduce((n,l)=>n+l.xp,0);
+      usuario.racha = statsServidor ? statsServidor.racha : racha;
+      usuario.diasActivos = statsServidor ? statsServidor.diasActivos : dias.length;
     }catch(e){ console.warn('[SENTIA] logros:', e); }
   }
   window.__evaluarLogros = evaluarLogros;
+
+  // Sincroniza "Mis logros" con el servidor: pide qué insignias están
+  // realmente desbloqueadas (y la racha/días activos reales) y repinta.
+  // Se usa un ping aparte (/api/logros/visita) para registrar "hoy entré",
+  // independiente de si la persona abre esta sección o no.
+  window.__pingLogrosVisita = async function(){
+    try { await fetch(`${retosWebhookBase()}/api/logros/visita`, { method:'POST', headers: await window.__authHeaders() }); }
+    catch(e){ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ }
+  };
+  async function sincronizarLogros(){
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'No se pudo sincronizar');
+      evaluarLogros(new Set(data.logrosIds||[]), { racha: data.racha||0, diasActivos: data.diasActivos||0 });
+      return true;
+    } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return false; }
+  }
 
   // Registra una acción de aprendizaje válida para la racha local. En producción
   // se migrará a Firestore junto con el banco de contenido aprobado.
@@ -10306,8 +10353,14 @@ const Sections = (function(){
       if(tipo==='crucigrama') _renderCrucigramaView(container);
     }));
   }
-  function renderLogros(container){
-    evaluarLogros();
+  async function renderLogros(container){
+    evaluarLogros(); // cálculo local instantáneo (primer pintado / respaldo sin conexión)
+    pintarLogros(container);
+    const sincronizado = await sincronizarLogros();
+    if (sincronizado && document.body.contains(container)) pintarLogros(container);
+    try { window.__pingLogrosVisita && window.__pingLogrosVisita(); } catch(e){}
+  }
+  function pintarLogros(container){
     const nivelActual=getNivel(usuario.xp);
     const pct=Math.max(0,Math.min(100,Math.round(((usuario.xp-nivelActual.desde)/(nivelActual.hasta-nivelActual.desde))*100)));
     const progresoReal=(typeof getProgreso==='function') ? getProgreso() : {};
@@ -10322,7 +10375,9 @@ const Sections = (function(){
       {nombre:'Inicio en SENTIA',ids:['pp1','pp2','pp3']},
       {nombre:'Práctica profesional',ids:['ev2','in2','he1']},
       {nombre:'Especialización',ids:['ev1','in1','la1']},
-      {nombre:'Maestría',ids:['ma1','ma2','ma3']}
+      {nombre:'Maestría',ids:['ma1','ma2','ma3']},
+      {nombre:'Retos diarios',ids:['rt1','rt4','rt6']},
+      {nombre:'Comunidad y perfil',ids:['cm1','ce1','pf1']}
     ];
     const card=l=>`<button type="button" class="achievement-card ${l.unlock?'is-earned':''}" data-lid="${l.id}" style="--cat-color:${COLOR_CAT[l.cat]||'#2e5cff'}"><span class="achievement-card__icon"><svg class="ic"><use href="#${l.unlock?(ICON_CAT[l.cat]||'i-trophy'):'i-lock'}"/></svg></span><b>${escapeHtml(l.nombre)}</b><p>${escapeHtml(l.desc)}</p><small>${l.unlock?'Logrado':l.criterio}</small></button>`;
     container.innerHTML=`<div class="fade-up">
