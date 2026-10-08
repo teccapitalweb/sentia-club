@@ -9599,9 +9599,10 @@ const Sections = (function(){
       area.innerHTML=`
         <div class="cc-panel-resultado fade-up">
           <div class="cc-panel-resultado__icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:36px;height:36px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-          <h2>${completo?'Crucigrama completado':'Crucigrama contestado'}</h2>
-          <p>Acertaste ${numAciertos} de ${resultados.length} palabras.</p>
-          ${completo?`<div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+10 XP</div>`:'<p style="font-size:12.5px;color:var(--text-3)">Para que cuente hacia tus libros, todas las palabras deben ser correctas. Vuelve mañana con uno nuevo.</p>'}
+          <h2>${completo?'¡Crucigrama perfecto!':'Crucigrama resuelto'}</h2>
+          <p>Acertaste ${numAciertos} de ${resultados.length} palabras.${completo?'':' Ya te marcamos las correctas en la cuadrícula.'}</p>
+          <div class="hp-resumen__xp" style="margin-top:16px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>+10 XP</div>
+          <p style="font-size:12.5px;color:var(--text-3);margin-top:6px">Con intentarlo ya cuenta para tus libros de la Biblioteca.</p>
           <button type="button" class="btn btn--ghost" style="margin-top:20px" id="cru-volver-fin">Volver a retos</button>
         </div>`;
       container.querySelector('#cru-volver-fin')?.addEventListener('click',()=>renderRetos(container));
