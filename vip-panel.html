@@ -2669,6 +2669,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    redondeado a la izquierda, canto de páginas crema a la derecha. */
 .bib-detalle__cover{
   width:100%;height:100%;object-fit:cover;display:block;
+  background-color:#0a2540;
   border-radius:20px 6px 6px 20px;
   box-shadow:0 16px 32px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.16);
 }
@@ -2736,6 +2737,10 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-card__cover{
   width:100%;aspect-ratio:3/4;
   background-size:cover;background-position:center;
+  /* Color de respaldo mientras carga la portada real (o si falla, típico en
+     datos móviles lentos) — antes se quedaba en blanco puro y era imposible
+     de ver con el tema claro. */
+  background-color:#0a2540;
   position:relative;overflow:hidden;
   /* Forma de libro: lomo redondeado a la izquierda, canto de páginas
      color crema visible a la derecha, como un libro real de pie. */
@@ -3986,6 +3991,17 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .home-course-card__body i{height:3px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;margin-top:4px}.home-course-card__body i em{height:100%;display:block;background:linear-gradient(90deg,#4dabff,#42f52d);border-radius:inherit}
 .home-course-card__action{display:flex;align-items:center;justify-content:space-between;margin-top:4px}.home-course-card__action span{font-size:11px;font-weight:700;color:rgba(255,255,255,.85)}.home-course-card__play{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.3);display:grid;place-items:center;transition:all .18s}.home-course-card__play .ic{width:16px;height:16px;color:#fff}.home-course-card:hover .home-course-card__play{background:rgba(255,255,255,.3);transform:scale(1.1)}
 @media (max-width:900px){.home-courses-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:560px){.home-courses-grid{grid-template-columns:1fr}.home-course-card{min-height:240px}}
+/* En celular el título de 24px ("Tus cursos disponibles") no cabía junto al
+   botón "Ver todos" en una sola fila y se partía encimado. Se baja el
+   tamaño y se permite que el encabezado pase a dos líneas sin chocar. */
+@media (max-width:480px){
+  .home-courses-section__head .section-header__title,
+  .home-news-section__head .section-header__title{font-size:19px!important}
+  .home-courses-section__head.section-header,
+  .home-news-section__head.section-header{flex-wrap:wrap;row-gap:10px}
+  .home-courses-section__head .section-header__link,
+  .home-news-section__head .section-header__link{flex-shrink:0}
+}
 
 /* Sin difuminados ni degradados: tarjetas planas que igual resaltan */
 .logro-hero::before,.logro-hero::after,.nivel-path::before,.cert-card__top::before,.kpi-card::before,.mes-hero::before,.mes-hero::after,.perfil-hero::before,.perfil-hero::after,.sec-hero::before,.sec-hero::after{display:none!important}
