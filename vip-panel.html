@@ -6284,12 +6284,17 @@ const Sections = (function(){
     if (esAdminReal()) return true;
     if (curso && curso.disponibleSiempre === true) return true;
     if (curso && curso.marcarProximamente === true) return false;
+    // El curso que esta cuenta eligió como su muestra gratis (antes de ser
+    // VIP) no debe quedar atrapado esperando su turno en la fila de 8 días
+    // al activarse — ya tenía avance ahí, así que se abre completo de una vez.
+    if (curso && window.memberData?.cursoGratisElegido === curso.id) return true;
     return calcularDiasMembresia() >= cursoUnlockDay(curso);  // ← turno cada 8 días por orden
   }
 
   function diasParaDesbloquear(indexCurso, curso){
     if (esAdminReal()) return 0;
     if (curso && curso.disponibleSiempre === true) return 0;
+    if (curso && window.memberData?.cursoGratisElegido === curso.id) return 0;
     return Math.max(0, cursoUnlockDay(curso) - calcularDiasMembresia());
   }
 
