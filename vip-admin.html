@@ -1418,8 +1418,8 @@ const SEED={
 
   ],
   config:{
-    precioMensual:199,
-    precioAnual:1999,
+    precioMensual:200,
+    precioAnual:1980,
     monedaSimbolo:'$',
     moneda:'MXN',
     whatsapp:'+52 000 000 0000', // TODO Jorge: pon el WhatsApp real de SENTIA
@@ -1436,7 +1436,7 @@ const SEED={
 /* ═══ MODIFICADO · Precios en vivo (Firestore config/club · patrón SYNOVA) ═══
    Una sola fuente de verdad para el precio: config/club { precioMes, precioAno }.
    El webhook arma el cobro real en Stripe con estos mismos valores. */
-window.__preciosClub = { mes: 199, ano: 1999 };
+window.__preciosClub = { mes: 200, ano: 1980 };
 const fmtPrecioMXN = n => '$' + Number(n).toLocaleString('es-MX');
 async function cargarPreciosClub(){
   try {
@@ -1445,8 +1445,8 @@ async function cargarPreciosClub(){
     const snap = await fb.getDoc(fb.doc(fb.db, 'config', 'club'));
     const c = snap.exists() ? snap.data() : {};
     window.__preciosClub = {
-      mes: Number(c.precioMes) > 0 ? Number(c.precioMes) : 199,
-      ano: Number(c.precioAno) > 0 ? Number(c.precioAno) : 1999
+      mes: Number(c.precioMes) > 0 ? Number(c.precioMes) : 200,
+      ano: Number(c.precioAno) > 0 ? Number(c.precioAno) : 1980
     };
     SEED.config.precioMensual = window.__preciosClub.mes;
     SEED.config.precioAnual   = window.__preciosClub.ano;
@@ -6319,8 +6319,8 @@ set('cfg-direccion',d.whatsappDireccion);         set('cfg-miembros',d.miembrosC
       const type=b.dataset.save;
       if(type==='precios'){
         // Precios globales: el navegador no escribe Firestore directamente.
-        const precioMes=parseInt(document.getElementById('cfg-mens').value)||199;
-        const precioAno=parseInt(document.getElementById('cfg-anual').value)||1999;
+        const precioMes=parseInt(document.getElementById('cfg-mens').value)||200;
+        const precioAno=parseInt(document.getElementById('cfg-anual').value)||1980;
         try{
           if(MODO_LOCAL_SOLO_LECTURA) throw new Error('Vista local en modo solo lectura: no se modificó Firebase.');
           const user=window._fb?.auth?.currentUser;if(!user)throw new Error('Sesión admin no disponible');

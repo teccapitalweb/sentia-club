@@ -4189,13 +4189,13 @@ setPersistence(auth, browserLocalPersistence);
    Stripe cobra en el checkout (price_data dinámico).
    cargado:false → la UI muestra "$—" hasta tener el precio REAL de Firestore,
    así jamás se enseña un número viejo aunque el admin acabe de cambiarlo. */
-window.__preciosClub = { mes: 199, ano: 1999, equivMes: 167, ahorro: 389, cargado: false };
+window.__preciosClub = { mes: 200, ano: 1980, equivMes: 165, ahorro: 420, cargado: false };
 window.__cargarPreciosClub = async function(){
   try {
     const snap = await getDoc(doc(db, 'config', 'club'));
     const c = snap.exists() ? snap.data() : {};
-    const mes = Number(c.precioMes) > 0 ? Number(c.precioMes) : 199;
-    const ano = Number(c.precioAno) > 0 ? Number(c.precioAno) : 1999;
+    const mes = Number(c.precioMes) > 0 ? Number(c.precioMes) : 200;
+    const ano = Number(c.precioAno) > 0 ? Number(c.precioAno) : 1980;
     window.__preciosClub = { mes, ano, equivMes: Math.round(ano / 12), ahorro: Math.max(0, (mes * 12) - ano), cargado: true };
     // MODIFICADO: contacto y comunidad editables desde Admin > Configuracion
     window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', direccion: c.whatsappDireccion || '', miembros: Number(c.miembrosComunidad) || 0 };
@@ -15442,8 +15442,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script>
 (function(){
   const PLAN_LABELS = {
-    mensual: { name:'VIP Mensual', price:'$199', period:'MXN/mes', cycle:'mes' },
-    anual:   { name:'VIP Anual',   price:'$1,999', period:'MXN/año', cycle:'año' },
+    mensual: { name:'VIP Mensual', price:'$200', period:'MXN/mes', cycle:'mes' },
+    anual:   { name:'VIP Anual',   price:'$1,980', period:'MXN/año', cycle:'año' },
     regalo:  { name:'Acceso temporal', price:'—', period:'cortesía', cycle:'cortesía' },
     admin:   { name:'ADMIN',       price:'—',     period:'',         cycle:'—' }
   };
