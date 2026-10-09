@@ -4412,7 +4412,7 @@ if (window.__isDemoMode) {
     // MODIFICADO: una pequeña pausa entre cada paso — antes uno cerraba y el
     // siguiente aparecía en el mismo instante, se sentía atropellado. Ahora
     // hay un respiro visible entre cada aviso (logros, curso gratis, recorrido).
-    const respiro = () => new Promise(r => setTimeout(r, 1600));
+    const respiro = () => new Promise(r => setTimeout(r, 1150));
     setTimeout(async () => {
       try { await window.__maybeAskProfile?.(); } catch(e){}
       await respiro();
