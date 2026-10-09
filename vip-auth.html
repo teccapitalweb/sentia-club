@@ -652,6 +652,14 @@ onAuthStateChanged(auth, async (user) => {
 if (new URLSearchParams(location.search).get('sesion') === 'expirada') {
   showAlert('error', 'Sesión cerrada por inactividad', 'Por seguridad, inicia sesión nuevamente.');
 }
+// El panel cierra la sesión y manda aquí con ?verificar=1 cuando el correo
+// aún no está confirmado. Antes esta página no explicaba nada — solo se
+// volvía a ver el formulario de siempre, como si el registro no hubiera
+// servido. Al iniciar sesión de nuevo, el flujo normal de verificación
+// pendiente (reenviar enlace / ya verifiqué) se muestra solo.
+if (new URLSearchParams(location.search).get('verificar') === '1') {
+  showAlert('error', 'Falta confirmar tu correo', 'Antes de entrar necesitas confirmar tu correo desde el enlace que te enviamos al registrarte. Inicia sesión para reenviarlo si no lo encuentras.');
+}
 
 function translateError(code){
   const map = {
