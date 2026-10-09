@@ -4332,13 +4332,19 @@ if (window.__isDemoMode) {
     // 1) Ficha profesional (si falta) → 2) bienvenida de invitado (si vino
     // referido) → 3) celebración de logro nuevo con confeti (si desbloqueó
     // algo, p.ej. "Te uniste a SENTIA") → 4) invitación a elegir curso
-    // gratis (solo cuentas sin membresía). Cada paso espera a que el
-    // anterior se cierre, así nunca se amontonan dos en la misma pantalla.
+    // gratis (solo cuentas sin membresía) → 5) recorrido guiado del panel.
+    // Cada paso espera a que el anterior se cierre, así nunca se amontonan
+    // dos en la misma pantalla. El recorrido guiado también se auto-inicia
+    // solo (ver onboarding-tour.js), pero por su cuenta se rinde a los 60s
+    // si sigue habiendo algo bloqueando la pantalla — un usuario real
+    // llenando la ficha puede tardar más que eso, así que aquí lo forzamos
+    // explícitamente al terminar esta fila, sin depender de ese límite.
     setTimeout(async () => {
       try { await window.__maybeAskProfile?.(); } catch(e){}
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
       try { await window.__pingLogrosVisita?.(); } catch(e){}
-      try { window.__maybeShowCursoGratisIntro && window.__maybeShowCursoGratisIntro(); } catch(e){}
+      try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
+      try { if (window.SENTIAOnboarding && !window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false); } catch(e){}
     }, 800);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
@@ -6142,7 +6148,7 @@ const Sections = (function(){
       await cargarCursoGratisEstado();
       if (!cursoGratisPendiente()) return;
       localStorage.setItem('sentia:curso-gratis-intro-vista', '1');
-      mostrarInvitacionCursoGratis();
+      await mostrarInvitacionCursoGratis();
     } catch(e) { console.warn('[curso gratis intro]', e.message); }
   };
 
@@ -8242,9 +8248,10 @@ const Sections = (function(){
 
   // ─── Invitación "Elige tu curso gratis" ─── (una sola vez por sesión)
   function mostrarInvitacionCursoGratis(){
-    if (document.getElementById('curso-gratis-intro')) return;
+    return new Promise((resolve) => {
+    if (document.getElementById('curso-gratis-intro')) return resolve();
     const opciones = (Array.isArray(cursos)?cursos:[]).filter(cursoPuedeSerGratis);
-    if (!opciones.length) return;
+    if (!opciones.length) return resolve();
     const gratis = Math.max(...opciones.map(c=>clasesGratisPara(c.sesiones.length)));
     const nombre = String(window.UserState?.nombre||window.UserState?.displayName||'').trim().split(' ')[0];
     const portadas = opciones.slice(0,3).map((c,i)=>{
@@ -8257,7 +8264,7 @@ const Sections = (function(){
       <div class="fci__backdrop" data-fci-later></div>
       <section class="fci__card" role="dialog" aria-modal="true" aria-labelledby="fci-title">
         <button type="button" class="fci__close" data-fci-later aria-label="Cerrar">×</button>
-        <div class="fci__art" aria-hidden="true">${portadas}<span class="fci__badge">🎁 Gratis</span></div>
+        <div class="fci__art" aria-hidden="true">${portadas}<span class="fci__badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Gratis</span></div>
         <span class="fci__kicker">Para miembros nuevos</span>
         <h2 id="fci-title">${nombre?`${escapeHtml(nombre)}, elige`:'Elige'} tu <em>curso gratis</em></h2>
         <p>Te regalamos hasta <strong>${gratis} clase${gratis!==1?'s':''}</strong> del curso que tú elijas. Solo puedes elegir uno, así que escoge el que más te sirva.</p>
@@ -8275,10 +8282,11 @@ const Sections = (function(){
     requestAnimationFrame(() => pop.classList.add('is-open'));
     const cerrar = (despues) => {
       pop.classList.add('is-closing');
-      setTimeout(() => { pop.remove(); if (despues) despues(); }, 220);
+      setTimeout(() => { pop.remove(); if (despues) despues(); resolve(); }, 220);
     };
     pop.querySelectorAll('[data-fci-later]').forEach(el => el.addEventListener('click', () => cerrar()));
     pop.querySelector('[data-fci-go]').addEventListener('click', () => cerrar(() => { if (typeof navigateToSection === 'function') navigateToSection('cursos'); }));
+    });
   }
   window.__mostrarInvitacionCursoGratis = mostrarInvitacionCursoGratis;
 
