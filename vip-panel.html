@@ -4369,7 +4369,17 @@ if (window.__isDemoMode) {
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
       try { await window.__pingLogrosVisita?.(); } catch(e){}
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
-      try { if (window.SENTIAOnboarding && !window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false); } catch(e){}
+      // "Una vez por cuenta", no por navegador: si el servidor ya sabe que
+      // esta cuenta vio el recorrido (en cualquier dispositivo), se marca
+      // visto aquí también para que ni este arranque ni el auto-inicio
+      // propio de la librería (queueAuto, basado en su localStorage) lo
+      // vuelvan a disparar.
+      try {
+        if (window.SENTIAOnboarding) {
+          if (window.__recorridoVistoServidor) window.SENTIAOnboarding.markSeen();
+          else if (!window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false);
+        }
+      } catch(e){}
     }, 800);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
@@ -6144,7 +6154,14 @@ const Sections = (function(){
     return !!c && c.marcarProximamente !== true && Array.isArray(c.sesiones) && c.sesiones.length > 0;
   }
   function cursoConPrimeraClaseGratis() {
-    if (_cursoGratisEstado.elegido) return cursos.find(c => c.id === _cursoGratisEstado.elegido && cursoPuedeSerGratis(c)) || null;
+    // _cursoGratisEstado.elegido es la fuente completa (trae .elegible, etc.)
+    // pero se carga con un fetch aparte que puede tardar unos instantes. Para
+    // que esto nunca dependa de ESE timing, si todavía no llega se usa
+    // window.memberData.cursoGratisElegido — el mismo dato, ya disponible
+    // desde el arranque del panel — así el candado nunca queda "atrasado"
+    // en ningún módulo (Inicio, Mis cursos, detalle) mientras carga.
+    const elegidoId = _cursoGratisEstado.elegido || window.memberData?.cursoGratisElegido || null;
+    if (elegidoId) return cursos.find(c => c.id === elegidoId && cursoPuedeSerGratis(c)) || null;
     return null; // todavía no elige, o ya es VIP
   }
   function cursoGratisPendiente(){
@@ -7753,11 +7770,18 @@ const Sections = (function(){
     catch(e){ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ }
     // Después de registrar la visita, sincroniza de una vez — así cualquier
     // pantalla (Biblioteca, Retos, Logros) parte ya con el número real,
-    // sin depender de cuál se visite primero. Si algo se desbloqueó por
-    // primera vez en este dispositivo, se celebra antes de continuar.
+    // sin depender de cuál se visite primero. Si algo se desbloqueó y el
+    // SERVIDOR todavía no lo tiene marcado como celebrado para esta cuenta,
+    // se celebra antes de continuar, y se avisa al servidor para que no se
+    // repita en otro dispositivo.
     try {
       const nuevos = await sincronizarLogros();
-      if (nuevos && nuevos.length) await mostrarLogrosDesbloqueados(nuevos);
+      if (nuevos && nuevos.length) {
+        await mostrarLogrosDesbloqueados(nuevos);
+        try {
+          await fetch(`${retosWebhookBase()}/api/logros/celebrados`, { method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({ ids: nuevos.map(l=>l.id) }) });
+        } catch(e){}
+      }
     } catch(e){}
   };
   async function sincronizarLogros(){
@@ -7765,10 +7789,16 @@ const Sections = (function(){
       const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'No se pudo sincronizar');
-      let fechasAntes = {}; try { fechasAntes = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); } catch(e){}
       evaluarLogros(new Set(data.logrosIds||[]), { racha: data.racha||0, diasActivos: data.diasActivos||0 });
-      let fechasDespues = {}; try { fechasDespues = JSON.parse(localStorage.getItem('sentia:logros')||'{}'); } catch(e){}
-      return Object.keys(fechasDespues).filter(id => !fechasAntes[id]).map(id => logros.find(l=>l.id===id)).filter(Boolean);
+      // "Para celebrar" = desbloqueados ahora mismo que el SERVIDOR todavía no
+      // tiene marcados como celebrados para esta cuenta — antes esto vivía
+      // solo en localStorage ("sentia:logros"), así que la misma cuenta
+      // volvía a ver la tarjeta de confeti en cualquier otro navegador o
+      // dispositivo, o si se limpiaban datos. Ahora es "una vez por cuenta".
+      const celebradosServidor = new Set(data.logrosCelebrados || []);
+      const paraCelebrar = (data.logrosIds || []).filter(id => !celebradosServidor.has(id)).map(id => logros.find(l=>l.id===id)).filter(Boolean);
+      window.__recorridoVistoServidor = data.recorridoVisto === true;
+      return paraCelebrar;
     } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return null; }
   }
 
@@ -8431,11 +8461,16 @@ const Sections = (function(){
           const meta = d.pc.completado ? 'Completado' : d.vistas ? `Clase ${Math.min(d.vistas + 1, d.total)} de ${d.total}` : durTxt;
           const accion = d.pc.completado ? 'Repasar' : d.vistas ? 'Continuar' : 'Empezar';
           // Mismo candado que en Mis cursos: sin esto, aquí se veían siempre
-          // abiertas sin importar el desbloqueo VIP progresivo o el curso gratis elegido.
+          // abiertas sin importar el desbloqueo VIP progresivo o el curso gratis
+          // elegido. Usa cursoElegidoIdHome (window.memberData, disponible de
+          // inmediato) en vez de cursoConPrimeraClaseGratis() (depende de
+          // _cursoGratisEstado, que se carga aparte y puede tardar) — así el
+          // candado coincide con el orden de arriba desde el primer render,
+          // sin un instante bloqueado que se corrige solo después.
           const cursoIdx = cursos.findIndex(x => x.id === d.c.id);
           const accesoCompleto = tieneAccesoVipCompleto();
           const desbloqueado = cursoDesbloqueado(cursoIdx, d.c);
-          const esCursoMuestra = cursoConPrimeraClaseGratis()?.id === d.c.id && !accesoCompleto;
+          const esCursoMuestra = !accesoCompleto && !!cursoElegidoIdHome && d.c.id === cursoElegidoIdHome;
           const sinAcceso = (accesoCompleto && !desbloqueado) || (!accesoCompleto && !esCursoMuestra);
           const lockHTML = sinAcceso ? `<span class="home-course-card__lock"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>` : '';
           return `<button type="button" class="home-course-card${sinAcceso ? ' home-course-card--locked' : ''}" data-course-id="${escapeHtml(d.c.id)}" style="background-image:url('${portada}');">
@@ -16331,6 +16366,16 @@ window.SENTIAOnboarding = new window.MembershipTour({
   identity: function(){
     var state = window.UserState || {};
     return state.uid || state.email || '';
+  },
+  // "Una vez por cuenta": al terminar/omitir por primera vez en este
+  // dispositivo, se avisa al servidor para que ningún otro dispositivo de
+  // la misma cuenta lo vuelva a mostrar.
+  onFinish: async function(){
+    try {
+      const base = location.hostname === 'localhost' ? 'http://localhost:8081' : (window.WEBHOOK_URL || 'https://sentia-academy-webhook-production.up.railway.app');
+      const headers = window.__authHeaders ? await window.__authHeaders() : { 'Content-Type': 'application/json' };
+      await fetch(base + '/api/perfil/recorrido-visto', { method: 'POST', headers });
+    } catch (e) {}
   },
   ready: function(){
     var state = window.UserState || {};

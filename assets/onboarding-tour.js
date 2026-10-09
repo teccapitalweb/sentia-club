@@ -283,7 +283,13 @@
 
   MembershipTour.prototype.finish = async function (remember) {
     if (!this.active) return;
-    if (remember) this.markSeen();
+    if (remember) {
+      this.markSeen();
+      // Avisa (si el que lo integra quiere) que se terminó/omitió por
+      // primera vez en ESTE dispositivo — para guardarlo del lado del
+      // servidor y que la cuenta no lo vuelva a ver en otro dispositivo.
+      if (typeof this.config.onFinish === 'function') { try { this.config.onFinish(); } catch (_) {} }
+    }
     this.active = false;
     if (this.anchor) this.anchor.removeAttribute('data-membership-tour-active');
     this.anchor = null;
