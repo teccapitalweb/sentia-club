@@ -95,6 +95,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Resultados del test "Encuentra tu perfil Sentia": Railway los escribe
+    // con el Admin SDK (bypassa reglas). Sin esta entrada, el panel admin
+    // los lee con el SDK normal del navegador y la regla por defecto al
+    // final del archivo los bloquea en silencio — se ve "vacío" aunque sí
+    // se estén guardando.
+    match /perfiles_sentia/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // El avance que cuenta para certificación lo escribe Railway después de
     // validar el token y el catálogo. El cliente puede consultar únicamente
     // su propio documento, nunca modificarlo.
