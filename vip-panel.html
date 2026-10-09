@@ -3958,6 +3958,9 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .home-news-section{margin-top:38px;padding-bottom:14px}.home-news-section__head{margin-bottom:15px!important}.home-news-section__head .section-header__title{font-size:24px!important}.home-news-section__head .section-header__title em{font-style:normal;color:#2460ee}.home-news-section .news-card{box-shadow:0 1px 2px rgba(6,20,93,.06)}
 .home-course-card{position:relative;min-height:280px;border:0;border-radius:20px;overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column;background-color:#071331;background-size:cover;background-position:center;color:#fff;cursor:pointer;transition:transform .22s ease,box-shadow .22s ease}
 .home-course-card:hover{transform:translateY(-4px) scale(1.015);box-shadow:0 18px 36px rgba(6,20,93,.3)}
+.home-course-card--locked::after{content:'';position:absolute;inset:0;background:rgba(4,10,35,.55);z-index:1;pointer-events:none}
+.home-course-card__lock{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.95);display:grid;place-items:center;color:#10255f;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.home-course-card__lock .ic{width:20px;height:20px}
 .home-course-card__top{position:absolute;top:0;left:0;right:0;display:flex;align-items:flex-start;justify-content:space-between;padding:14px 14px 0;z-index:2}.home-course-card__top span{padding:5px 10px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);color:#fff;font-size:9px;letter-spacing:.06em;font-weight:700;text-transform:uppercase}.home-course-card__top b{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.92);color:#0a376b;font-size:11px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .home-course-card__body{margin-top:auto;padding:60px 16px 16px;background:linear-gradient(to top,rgba(4,12,41,.95) 40%,transparent);display:grid;gap:6px;position:relative;z-index:1}.home-course-card__body strong{font-family:'Montserrat',sans-serif;font-size:16px;line-height:1.25;letter-spacing:-.02em;text-shadow:0 1px 3px rgba(0,0,0,.4)}.home-course-card__body small{font-size:11px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px}
 .home-course-card__body i{height:3px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;margin-top:4px}.home-course-card__body i em{height:100%;display:block;background:linear-gradient(90deg,#4dabff,#42f52d);border-radius:inherit}
@@ -8400,8 +8403,17 @@ const Sections = (function(){
           const durTxt = d.c.duracion || `${d.total} clases`;
           const meta = d.pc.completado ? 'Completado' : d.vistas ? `Clase ${Math.min(d.vistas + 1, d.total)} de ${d.total}` : durTxt;
           const accion = d.pc.completado ? 'Repasar' : d.vistas ? 'Continuar' : 'Empezar';
-          return `<button type="button" class="home-course-card" data-course-id="${escapeHtml(d.c.id)}" style="background-image:url('${portada}');">
+          // Mismo candado que en Mis cursos: sin esto, aquí se veían siempre
+          // abiertas sin importar el desbloqueo VIP progresivo o el curso gratis elegido.
+          const cursoIdx = cursos.findIndex(x => x.id === d.c.id);
+          const accesoCompleto = tieneAccesoVipCompleto();
+          const desbloqueado = cursoDesbloqueado(cursoIdx, d.c);
+          const esCursoMuestra = cursoConPrimeraClaseGratis()?.id === d.c.id && !accesoCompleto;
+          const sinAcceso = (accesoCompleto && !desbloqueado) || (!accesoCompleto && !esCursoMuestra);
+          const lockHTML = sinAcceso ? `<span class="home-course-card__lock"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>` : '';
+          return `<button type="button" class="home-course-card${sinAcceso ? ' home-course-card--locked' : ''}" data-course-id="${escapeHtml(d.c.id)}" style="background-image:url('${portada}');">
             <span class="home-course-card__top"><span>${escapeHtml(d.c.area || 'SENTIA')}</span><b>${d.pct}%</b></span>
+            ${lockHTML}
             <span class="home-course-card__body"><strong>${escapeHtml(d.c.titulo || 'Curso SENTIA')}</strong><small><svg class="ic" style="width:12px;height:12px"><use href="#i-clock"/></svg> ${meta}</small><i><em style="width:${d.pct}%"></em></i><span class="home-course-card__action"><span>${accion}</span><span class="home-course-card__play"><svg class="ic"><use href="#i-play"/></svg></span></span></span>
           </button>`;
         }).join('');
