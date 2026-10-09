@@ -7985,6 +7985,12 @@ const Sections = (function(){
       confirmarCursoGratis(c);
       return;
     }
+    // Ya eligió su curso gratis (o nunca fue elegible) y este NO es ese
+    // curso: no hay nada que mostrar de él, directo a la suscripción.
+    if (!tieneAccesoVipCompleto() && c.disponibleSiempre !== true && cursoConPrimeraClaseGratis()?.id !== c.id) {
+      window.__irASuscripcion();
+      return;
+    }
     const portada = c.portada || coverSVG(c.area, c.titulo);
     const colorArea = COLOR_AREA[c.area] || '#1b5df0';
     const iconArea = ICON_AREA[c.area] || 'i-book';
