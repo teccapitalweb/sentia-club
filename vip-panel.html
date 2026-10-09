@@ -7452,10 +7452,19 @@ const Sections = (function(){
         };
       });
       // ─── Día de desbloqueo por ORDEN · igual que IMFRA, todos cuentan turno ───
-      // cursos viene ordenado por `orden` asc. El 1er curso = día 0 (abierto para
-      // miembros activos), el siguiente = día 8, etc. "disponibleSiempre" ya no
-      // salta la fila (ver cursoDesbloqueado): aquí tampoco se salta al contar.
-      cursos.forEach((c, _rank) => { c._unlockDay = _rank * 8; });
+      // cursos viene ordenado por `orden` asc. Si la cuenta ya eligió un curso
+      // gratis, ese curso no consume turno (ya tiene acceso directo) y los
+      // demás arrancan en el turno 1 (día 8) — el "día 0 gratis" es exclusivo
+      // del curso elegido, nunca le toca a otro por casualidad de orden.
+      {
+        const _elegido = window.memberData?.cursoGratisElegido || null;
+        let _turno = _elegido ? 1 : 0;
+        cursos.forEach(c => {
+          if (_elegido && c.id === _elegido) { c._unlockDay = 0; return; }
+          c._unlockDay = _turno * 8;
+          _turno++;
+        });
+      }
       try {
         var _ce=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
         void _ce; // MODIFICADO: las estadisticas del banner las calcula __renderAvanceHome con el avance del alumno
