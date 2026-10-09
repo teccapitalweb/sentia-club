@@ -4384,11 +4384,19 @@ if (window.__isDemoMode) {
     // si sigue habiendo algo bloqueando la pantalla — un usuario real
     // llenando la ficha puede tardar más que eso, así que aquí lo forzamos
     // explícitamente al terminar esta fila, sin depender de ese límite.
+    // MODIFICADO: una pequeña pausa entre cada paso — antes uno cerraba y el
+    // siguiente aparecía en el mismo instante, se sentía atropellado. Ahora
+    // hay un respiro visible entre cada aviso (logros, curso gratis, recorrido).
+    const respiro = () => new Promise(r => setTimeout(r, 700));
     setTimeout(async () => {
       try { await window.__maybeAskProfile?.(); } catch(e){}
+      await respiro();
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
+      await respiro();
       try { await window.__pingLogrosVisita?.(); } catch(e){}
+      await respiro();
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
+      await respiro();
       // "Una vez por cuenta", no por navegador: si el servidor ya sabe que
       // esta cuenta vio el recorrido (en cualquier dispositivo), se marca
       // visto aquí también para que ni este arranque ni el auto-inicio
