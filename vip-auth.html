@@ -519,6 +519,17 @@ try {
   if (refParam && /^[A-Za-z0-9]{10,40}$/.test(refParam)) sessionStorage.setItem('sentia_ref', refParam);
 } catch (e) {}
 
+// ── Curso sugerido por el test de perfil-sentia ("?cursoGratis=ID"): se
+// guarda igual que el referido, para sobrevivir la redirección de Google.
+// vip-panel.html lo lee y lo borra una sola vez al arrancar; si la cuenta
+// todavía puede elegir su curso gratis, le ofrece confirmar justo ESE
+// (en vez del popup genérico), sin tocar el límite de "uno solo" que ya
+// protege el servidor.
+try {
+  const cursoSugeridoParam = new URLSearchParams(location.search).get('cursoGratis');
+  if (cursoSugeridoParam && /^[A-Za-z0-9]{10,40}$/.test(cursoSugeridoParam)) sessionStorage.setItem('sentia_curso_sugerido', cursoSugeridoParam);
+} catch (e) {}
+
 async function esAdministrador(user){
   if (!user) return false;
   const token = await user.getIdTokenResult(true);

@@ -168,7 +168,8 @@ window.SENTIA_CURSOS_READY = fetch('https://sentiamx.com/assets/cursos.json')
         area: c.area,
         descripcion: c.resumen,
         url: 'https://sentiamx.com/index.html#' + c.anchor,
-        gratis: !!c.gratis
+        gratis: !!c.gratis,
+        cursoId: c.cursoId || null
       };
     });
   })

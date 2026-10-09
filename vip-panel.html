@@ -6171,6 +6171,19 @@ const Sections = (function(){
       await cargarCursoGratisEstado();
       if (!cursoGratisPendiente()) return;
       localStorage.setItem('sentia:curso-gratis-intro-vista', '1');
+      // Curso sugerido por el test de perfil-sentia (?cursoGratis=ID, guardado
+      // en vip-auth.html): si llegó así, se le pregunta directo por ESE curso
+      // en vez del popup genérico — la recomendación se siente personalizada,
+      // pero sigue pasando por el mismo "una sola vez" de siempre.
+      let cursoSugeridoId = null;
+      try { cursoSugeridoId = sessionStorage.getItem('sentia_curso_sugerido'); sessionStorage.removeItem('sentia_curso_sugerido'); } catch(e){}
+      if (cursoSugeridoId) {
+        const cursoSugerido = cursos.find(c => c.id === cursoSugeridoId);
+        if (cursoSugerido && cursoPuedeSerGratis(cursoSugerido)) {
+          await confirmarCursoGratis(cursoSugerido);
+          return;
+        }
+      }
       await mostrarInvitacionCursoGratis();
     } catch(e) { console.warn('[curso gratis intro]', e.message); }
   };
