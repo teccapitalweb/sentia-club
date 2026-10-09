@@ -1273,10 +1273,15 @@ instalarCierreAdminPorInactividad();
     <div class="nav-section">
       <div class="nav-label">Comunidad</div>
       <a class="nav-item" data-section="miembros"><svg class="ic"><use href="#i-users"/></svg>Miembros VIP<span class="nav-item__badge" id="badge-miembros">0</span></a>
-      <a class="nav-item" data-section="perfiles-sentia"><svg class="ic"><use href="#i-chart-bar"/></svg>Perfiles Sentia<span class="nav-item__badge" id="badge-perfiles">0</span></a>
       <a class="nav-item" data-section="noticias"><svg class="ic"><use href="#i-news"/></svg>Noticias</a>
       <a class="nav-item" data-section="foro"><svg class="ic"><use href="#i-users"/></svg>Foro<span class="nav-item__badge" id="badge-foro">0</span></a>
       <a class="nav-item" data-section="directorio"><svg class="ic"><use href="#i-user"/></svg>Directorio<span class="nav-item__badge" id="badge-dir">0</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Marketing</div>
+      <a class="nav-item" data-section="perfiles-sentia"><svg class="ic"><use href="#i-chart-bar"/></svg>Perfiles<span class="nav-item__badge" id="badge-perfiles">0</span></a>
+      <a class="nav-item" data-section="perfiles-metricas"><svg class="ic"><use href="#i-trend"/></svg>Métricas</a>
     </div>
 
     <div class="nav-section">
@@ -5673,14 +5678,6 @@ const Pages={
             <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-gauge"/></svg>Formatos favoritos</div></div>
             <div id="ps-dist-formatos" style="padding:4px 4px 10px;"></div>
           </div>
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>De dónde vinieron</div></div>
-            <div id="ps-dist-fuentes" style="padding:4px 4px 10px;"></div>
-          </div>
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivo</div></div>
-            <div id="ps-dist-dispositivo" style="padding:4px 4px 10px;"></div>
-          </div>
         </div>
 
         <div style="margin-top:28px;">
@@ -5845,6 +5842,43 @@ const Pages={
     const cFmt = {}; items.forEach(i => (i.formatos_preferidos || []).forEach(t => { cFmt[t] = (cFmt[t] || 0) + 1; }));
     const entriesFmt = Object.entries(cFmt).sort((a, b) => b[1] - a[1]);
     Pages._renderBarList(document.getElementById('ps-dist-formatos'), entriesFmt, { total });
+  },
+
+  // ─── Métricas (sección aparte): de dónde vino cada visita del test ───
+  _renderKpisMetricas() {
+    const el = document.getElementById('pm-kpis');
+    if (!el) return;
+    const items = window.AdminStore?.perfilesSentia || [];
+    const total = items.length;
+    const conUtm = items.filter(i => i.utm_source).length;
+    const directo = items.filter(i => !i.utm_source && !i.referrer).length;
+    const movil = items.filter(i => i.dispositivo === 'movil').length;
+    el.innerHTML = `
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
+        <div class="kpi-card__label">Visitas con origen registrado</div>
+        <div class="kpi-card__value">${total}</div>
+        <div class="kpi-card__sub">Últimos 500</div>
+      </div>
+      <div class="kpi-card" style="--c1:#3B82F6;--c2:#60A5FA;">
+        <div class="kpi-card__label">Con campaña (UTM)</div>
+        <div class="kpi-card__value">${total ? Math.round(conUtm / total * 100) : 0}<span style="font-size:18px;">%</span></div>
+        <div class="kpi-card__sub">${conUtm} de ${total}</div>
+      </div>
+      <div class="kpi-card" style="--c1:#F59E0B;--c2:#FBBF24;">
+        <div class="kpi-card__label">Entrada directa</div>
+        <div class="kpi-card__value">${total ? Math.round(directo / total * 100) : 0}<span style="font-size:18px;">%</span></div>
+        <div class="kpi-card__sub">Sin campaña ni referencia</div>
+      </div>
+      <div class="kpi-card" style="--c1:#A78BFA;--c2:#C4B5FD;">
+        <div class="kpi-card__label">Desde celular</div>
+        <div class="kpi-card__value">${total ? Math.round(movil / total * 100) : 0}<span style="font-size:18px;">%</span></div>
+        <div class="kpi-card__sub">${movil} de ${total}</div>
+      </div>
+    `;
+  },
+  _renderDistribucionesMetricas() {
+    const items = window.AdminStore?.perfilesSentia || [];
+    const total = items.length;
 
     // De dónde vinieron: utm_source si trae campaña, si no el dominio del
     // referrer, si no "Directo" (entró con el link a secas, sin ninguno).
@@ -5856,12 +5890,48 @@ const Pages={
       cFuente[fuente] = (cFuente[fuente] || 0) + 1;
     });
     const entriesFuente = Object.entries(cFuente).sort((a, b) => b[1] - a[1]);
-    Pages._renderBarList(document.getElementById('ps-dist-fuentes'), entriesFuente, { total });
+    Pages._renderBarList(document.getElementById('pm-dist-fuentes'), entriesFuente, { total });
 
     const cDisp = { movil: 0, escritorio: 0 };
     items.forEach(i => { if (i.dispositivo === 'movil' || i.dispositivo === 'escritorio') cDisp[i.dispositivo]++; });
     const entriesDisp = [['Móvil', cDisp.movil], ['Escritorio', cDisp.escritorio]].filter(([, v]) => v > 0);
-    Pages._renderBarList(document.getElementById('ps-dist-dispositivo'), entriesDisp, { total });
+    Pages._renderBarList(document.getElementById('pm-dist-dispositivo'), entriesDisp, { total });
+
+    const cCampana = {};
+    items.forEach(i => { if (i.utm_campaign) cCampana[i.utm_campaign] = (cCampana[i.utm_campaign] || 0) + 1; });
+    const entriesCampana = Object.entries(cCampana).sort((a, b) => b[1] - a[1]);
+    Pages._renderBarList(document.getElementById('pm-dist-campanas'), entriesCampana, { total: Object.values(cCampana).reduce((a, b) => a + b, 0) || 1 });
+  },
+
+  'perfiles-metricas'(p) {
+    p.innerHTML = `
+      <div class="fade-up">
+        <div class="sec-hero">
+          <span class="sec-hero__eyebrow">Analítica de usuarios</span>
+          <h1 class="sec-hero__title">Métricas</h1>
+          <p class="sec-hero__sub">De dónde vienen las visitas que hacen "Encuentra tu perfil Sentia": campaña, referencia y tipo de dispositivo.</p>
+        </div>
+
+        <div class="kpi-grid" id="pm-kpis"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>De dónde vinieron</div></div>
+            <div id="pm-dist-fuentes" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivo</div></div>
+            <div id="pm-dist-dispositivo" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card" style="grid-column:1/-1;">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-zap"/></svg>Campañas (utm_campaign)</div></div>
+            <div id="pm-dist-campanas" style="padding:4px 4px 10px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    Pages._renderKpisMetricas();
+    Pages._renderDistribucionesMetricas();
   },
 
   _renderListaPerfiles() {
@@ -6497,7 +6567,7 @@ function dirAdminCargar(){
    refresh te deja donde estabas, los botones atrás/adelante del
    navegador funcionan y puedes compartir un link directo a la sección.
    ═══════════════════════════════════════════════════════════════════ */
-const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia'];
+const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia','perfiles-metricas'];
 
 function seccionDesdeHash(){
   const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
@@ -6811,6 +6881,9 @@ const AdminStore = {
       if (typeof Pages._renderKpisPerfiles === 'function') Pages._renderKpisPerfiles();
       if (typeof Pages._renderDistribucionesPerfiles === 'function') Pages._renderDistribucionesPerfiles();
       if (typeof Pages._renderListaPerfiles === 'function') Pages._renderListaPerfiles();
+    } else if (section === 'perfiles-metricas' && Pages[section]) {
+      if (typeof Pages._renderKpisMetricas === 'function') Pages._renderKpisMetricas();
+      if (typeof Pages._renderDistribucionesMetricas === 'function') Pages._renderDistribucionesMetricas();
     }
   },
 
