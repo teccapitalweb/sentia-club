@@ -11709,7 +11709,7 @@ const Sections = (function(){
     const portada = _getPortadaMaterial(m);
 
     let estadoTexto = 'Disponible para miembros';
-    if (muestraGratis) estadoTexto = 'Gratis · Desbloqueado';
+    if (muestraGratis) estadoTexto = 'Gratis';
     else if (!disponible && requiereMembresia) estadoTexto = 'Solo miembros VIP';
     else if (!disponible && bloqueadoPorRetos) estadoTexto = `${retosAccesoInfo.superados||0}/${retosAccesoInfo.requiere} retos diarios superados`;
     else if (!disponible && bloqueadoPorNivel) estadoTexto = `Nivel ${nivelReq} · ${nivelReqNombre} requerido`;
@@ -11816,7 +11816,7 @@ const Sections = (function(){
     const locked = !disponible;
 
     let statusHTML = '';
-    if (muestraGratis && disponible) statusHTML = '<span class="bib-card__status bib-card__status--free">Desbloqueado</span>';
+    if (muestraGratis && disponible) statusHTML = '<span class="bib-card__status bib-card__status--free">Gratis</span>';
     else if (bloqueadoPorRetos) statusHTML = `<span class="bib-card__status bib-card__status--vip">${retosAccesoInfoCard.superados||0}/${retosAccesoInfoCard.requiere} retos</span>`;
     else if (bloqueadoPorNivel) statusHTML = `<span class="bib-card__status bib-card__status--vip">Nivel ${nivelReq}</span>`;
     else if (requiereMembresia) statusHTML = '<span class="bib-card__status bib-card__status--vip">VIP</span>';
