@@ -400,7 +400,7 @@ body.modo-dia .theme-btn{color:#111c38!important;background:#fff!important;borde
 <script>
 const Theme = {
   init(){
-    const s = localStorage.getItem('sentia-auth:theme') || 'night';
+    const s = localStorage.getItem('sentia-auth:theme') || 'day';
     if (s === 'day') document.body.classList.add('modo-dia');
     this.updateIcon();
   },
