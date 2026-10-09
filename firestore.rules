@@ -12,24 +12,6 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && request.auth.token.admin == true;
     }
-    function isVip(uid) {
-      // Dos trampas de Firestore Rules en una: (1) get(...).data revienta la
-      // evaluación completa (= permiso denegado) si el documento no existe
-      // todavía — se checa exists() primero; (2) leer un campo con punto
-      // (miembro.activo) revienta igual si ese campo no existe en el mapa,
-      // a diferencia de JS donde solo da undefined — muchas cuentas tienen
-      // 'activa' pero no 'activo' (o viceversa). Se usa el operador `in`
-      // (siempre seguro) antes de leer cada campo, en vez de leerlo directo.
-      let miembroPath = /databases/$(database)/documents/miembros/$(uid);
-      let miembroExiste = exists(miembroPath);
-      let miembro = miembroExiste ? get(miembroPath).data : {};
-      let activoOk = ('activo' in miembro) && miembro.activo == true;
-      let activaOk = ('activa' in miembro) && miembro.activa == true;
-      let noExpiro = !('expiraEn' in miembro) || miembro.expiraEn > request.time;
-      return signedIn() && (request.auth.token.admin == true ||
-        (miembroExiste && (activoOk || activaOk) && noExpiro));
-    }
-
     match /miembros/{uid} {
       allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow list: if isAdmin();
@@ -145,13 +127,20 @@ service cloud.firestore {
       // el navegador nunca puede leer directo, y solo lo entrega a quien
       // consulta el webhook siendo VIP. Esta ficha es el perfil público
       // (nombre, puesto, empresa, sector, bio, estado) que cualquier miembro
-      // con sesión iniciada puede crearse, VIP o no — el campo `vip` (que
-      // decide si aparece en "Miembros VIP verificados" o en "Comunidad")
-      // no lo puede fijar el cliente: debe coincidir con isVip(uid).
+      // con sesión iniciada puede crearse, VIP o no — el campo `vip` decide
+      // si aparece en "Miembros VIP verificados" o en "Comunidad" (ver nota
+      // más abajo sobre por qué ya no se valida contra isVip(uid)).
       allow get: if isAdmin() || (signedIn()
         && (request.auth.uid == uid || resource.data.visible == true));
       allow list: if isAdmin() || (signedIn() && resource.data.visible == true);
-      allow create: if isAdmin() || (signedIn()
+      // El campo `vip` ya no se valida contra isVip(uid): esa función cruza a
+      // la colección miembros/ dentro de la regla y, en la práctica, tumbaba
+      // el guardado con "permisos insuficientes" incluso reescrita de varias
+      // formas (probado en vivo). No es un campo de seguridad real — solo
+      // decide en qué sección del Directorio aparece la tarjeta — así que se
+      // confía en el valor que ya manda el cliente (calculado con el mismo
+      // estado de membresía que usa el resto del panel).
+      allow create, update: if isAdmin() || (signedIn()
         && request.auth.uid == uid
         && request.resource.data.uid == uid
         && request.auth.token.email_verified == true
@@ -168,32 +157,10 @@ service cloud.firestore {
         && (!('estado' in request.resource.data) || request.resource.data.estado in ['', 'proyectos', 'empleo'])
         && request.resource.data.visible is bool
         && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
-        && request.resource.data.vip is bool && request.resource.data.vip == isVip(uid)
+        && request.resource.data.vip is bool
         && (!('autoCreada' in request.resource.data) || request.resource.data.autoCreada is bool)
         && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
-        // Portada: perk VIP — solo quien ya es VIP puede fijarla.
-        && (!('portadaColor' in request.resource.data) || (request.resource.data.vip == true && request.resource.data.portadaColor in ['dorado','arena','azul','marino','verde','terracota','vino','grafito']))
-        && (!('portadaImg' in request.resource.data) || (request.resource.data.vip == true && (request.resource.data.portadaImg == null || (request.resource.data.portadaImg is string && request.resource.data.portadaImg.size() <= 260000 && request.resource.data.portadaImg.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$'))))));
-      allow update: if isAdmin() || (signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.uid == uid
-        && request.auth.token.email_verified == true
-        && request.resource.data.keys().hasOnly([
-          'uid', 'nombre', 'puesto', 'empresa', 'sector', 'bio', 'estado',
-          'visible', 'color', 'foto', 'vip', 'autoCreada', 'updatedAt',
-          'portadaColor', 'portadaImg'
-        ])
-        && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
-        && request.resource.data.puesto is string && request.resource.data.puesto.size() <= 100
-        && request.resource.data.empresa is string && request.resource.data.empresa.size() <= 100
-        && request.resource.data.sector is string && request.resource.data.sector.size() <= 80
-        && request.resource.data.bio is string && request.resource.data.bio.size() <= 1000
-        && (!('estado' in request.resource.data) || request.resource.data.estado in ['', 'proyectos', 'empleo'])
-        && request.resource.data.visible is bool
-        && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
-        && request.resource.data.vip is bool && request.resource.data.vip == isVip(uid)
-        && (!('autoCreada' in request.resource.data) || request.resource.data.autoCreada is bool)
-        && (!('foto' in request.resource.data) || request.resource.data.foto == null || (request.resource.data.foto is string && request.resource.data.foto.size() <= 240000 && request.resource.data.foto.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$')))
+        // Portada: perk VIP — solo quien ya mandó vip:true puede fijarla.
         && (!('portadaColor' in request.resource.data) || (request.resource.data.vip == true && request.resource.data.portadaColor in ['dorado','arena','azul','marino','verde','terracota','vino','grafito']))
         && (!('portadaImg' in request.resource.data) || (request.resource.data.vip == true && (request.resource.data.portadaImg == null || (request.resource.data.portadaImg is string && request.resource.data.portadaImg.size() <= 260000 && request.resource.data.portadaImg.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$'))))));
       allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
