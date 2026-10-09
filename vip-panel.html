@@ -8374,7 +8374,12 @@ const Sections = (function(){
     const pendiente = datos.flatMap(d => d.actsInfo).find(a => a.abierta && a.vista && !(a.r && a.r.aprobada));
     const enCurso = datos.filter(d => d.vistas > 0 && !d.pc.completado).sort((x, y) => y.pct - x.pct)[0];
     const goalTitle = document.getElementById('home-goal-title');
-    const cursoObjetivo = enCurso || datos.find(x => !x.pc.completado) || datos[0];
+    // Si la cuenta eligió un curso gratis, ESE es "su curso" en Inicio —
+    // sin esto, Inicio mostraba el primero del catálogo (por orden) aunque
+    // fuera uno bloqueado distinto al que de verdad eligió.
+    const cursoElegidoIdHome = !tieneAccesoVipCompleto() ? (window.memberData?.cursoGratisElegido || null) : null;
+    const datoElegidoHome = cursoElegidoIdHome ? datos.find(d => d.c.id === cursoElegidoIdHome) : null;
+    const cursoObjetivo = datoElegidoHome || enCurso || datos.find(x => !x.pc.completado) || datos[0];
     if (cursoObjetivo) {
       const siguiente = Math.min(cursoObjetivo.vistas + 1, cursoObjetivo.total);
       const sesion = cursoObjetivo.c.sesiones[siguiente - 1] || {};
@@ -8413,6 +8418,9 @@ const Sections = (function(){
       } else {
         homeCoursesSec.style.display = '';
         const visibles = datos.slice().sort((a,b) => {
+          const aElegido = cursoElegidoIdHome && a.c.id === cursoElegidoIdHome ? 1 : 0;
+          const bElegido = cursoElegidoIdHome && b.c.id === cursoElegidoIdHome ? 1 : 0;
+          if (aElegido !== bElegido) return bElegido - aElegido;
           const aActivo = a.vistas > 0 && !a.pc.completado ? 1 : 0;
           const bActivo = b.vistas > 0 && !b.pc.completado ? 1 : 0;
           return bActivo - aActivo || b.pct - a.pct;
