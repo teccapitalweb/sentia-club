@@ -13,10 +13,16 @@ service cloud.firestore {
       return signedIn() && request.auth.token.admin == true;
     }
     function isVip(uid) {
-      let miembro = get(/databases/$(database)/documents/miembros/$(uid)).data;
+      // get(...).data revienta la evaluación completa (= permiso denegado)
+      // si el documento todavía no existe — por ejemplo, justo después de
+      // crear una cuenta nueva o recrearla desde el admin. Se checa exists()
+      // primero para que esos casos simplemente den "no es VIP" en vez de
+      // tumbar cualquier regla que dependa de isVip() (como la del Directorio).
+      let miembroPath = /databases/$(database)/documents/miembros/$(uid);
       return signedIn() && (request.auth.token.admin == true ||
-        ((miembro.activo == true || miembro.activa == true)
-          && (!('expiraEn' in miembro) || miembro.expiraEn > request.time)));
+        (exists(miembroPath) &&
+          (get(miembroPath).data.activo == true || get(miembroPath).data.activa == true)
+          && (!('expiraEn' in get(miembroPath).data) || get(miembroPath).data.expiraEn > request.time)));
     }
 
     match /miembros/{uid} {
