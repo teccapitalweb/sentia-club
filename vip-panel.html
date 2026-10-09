@@ -19,7 +19,7 @@
 <link rel="icon" type="image/png" href="assets/icon-sentia.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/onboarding-tour.css?v=1">
 
 <style>
@@ -2595,21 +2595,21 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    ========================================================= */
 .bib-header{margin-bottom:28px}
 .bib-header__eyebrow{
-  font-family:'Montserrat',monospace;font-size:11px;font-weight:700;
+  font-family:'Instrument Sans',monospace;font-size:11px;font-weight:700;
   letter-spacing:1.5px;text-transform:uppercase;color:var(--primary);
 }
 .bib-header__title{
-  font-family:'Montserrat',sans-serif;font-size:clamp(26px,4vw,36px);font-weight:800;
-  letter-spacing:-.5px;color:var(--text);margin:4px 0 6px;line-height:1.15;
+  font-family:'Fraunces',serif;font-size:clamp(28px,4.2vw,38px);font-weight:700;
+  letter-spacing:-.3px;color:var(--text);margin:4px 0 6px;line-height:1.15;
 }
-.bib-header__count{font-size:14px;color:var(--text-3);line-height:1.5}
+.bib-header__count{font-family:'Instrument Sans',sans-serif;font-size:14px;color:var(--text-3);line-height:1.5}
 
 .bib-tabs{
   display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;
   border-bottom:1px solid var(--border);padding-bottom:12px;
 }
 .bib-tab{
-  font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;
+  font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;
   padding:7px 16px;border-radius:100px;border:1px solid var(--border);
   background:transparent;color:var(--text-2);cursor:pointer;
   transition:all .2s ease;
@@ -2629,13 +2629,13 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   display:inline-flex;align-items:center;justify-content:center;
 }
 .bib-retos-banner__body{flex:1;min-width:0}
-.bib-retos-banner__body strong{display:block;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px}
-.bib-retos-banner__body p{font-size:13px;color:var(--text-2);margin:0 0 10px;line-height:1.4}
-.bib-retos-banner__bar{height:6px;border-radius:100px;background:var(--border);overflow:hidden;max-width:320px}
+.bib-retos-banner__body strong{display:block;font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.bib-retos-banner__body p{font-family:'Instrument Sans',sans-serif;font-size:13px;color:var(--text-2);margin:0 0 10px;line-height:1.4}
+.bib-retos-banner__bar{height:9px;border-radius:100px;background:color-mix(in srgb,var(--text-3) 22%,var(--border));overflow:hidden;max-width:320px}
 .bib-retos-banner__bar-fill{height:100%;background:var(--primary);border-radius:100px;transition:width .3s ease}
-.bib-retos-banner__caption{display:block;margin-top:6px;font-size:11.5px;color:var(--text-3)}
+.bib-retos-banner__caption{display:block;font-family:'Instrument Sans',sans-serif;margin-top:6px;font-size:11.5px;color:var(--text-3)}
 .bib-retos-banner__cta{
-  flex-shrink:0;font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:700;
+  flex-shrink:0;font-family:'Instrument Sans',sans-serif;font-size:13.5px;font-weight:700;
   padding:10px 20px;border-radius:12px;border:none;cursor:pointer;
   background:var(--primary);color:#fff;transition:transform .15s,box-shadow .2s;
 }
@@ -2643,17 +2643,17 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 @media(max-width:640px){.bib-retos-banner{flex-wrap:wrap}.bib-retos-banner__cta{width:100%}}
 
 .bib-retos-progress{margin-top:12px;max-width:360px}
-.bib-retos-progress__bar{height:6px;border-radius:100px;background:var(--border);overflow:hidden}
+.bib-retos-progress__bar{height:9px;border-radius:100px;background:color-mix(in srgb,var(--text-3) 22%,var(--border));overflow:hidden}
 .bib-retos-progress__fill{height:100%;background:var(--primary);border-radius:100px;transition:width .3s ease}
-.bib-retos-progress span{display:block;margin-top:6px;font-size:11.5px;color:var(--text-3)}
+.bib-retos-progress span{display:block;font-family:'Instrument Sans',sans-serif;margin-top:6px;font-size:11.5px;color:var(--text-3)}
 
 .bib-retos-ruta{margin-bottom:28px}
 .bib-retos-ruta__head{
   display:flex;align-items:baseline;justify-content:space-between;gap:10px;
   margin-bottom:14px;
 }
-.bib-retos-ruta__head strong{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--text)}
-.bib-retos-ruta__head span{font-size:11.5px;color:var(--text-3);white-space:nowrap}
+.bib-retos-ruta__head strong{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--text)}
+.bib-retos-ruta__head span{font-family:'Instrument Sans',sans-serif;font-size:11.5px;color:var(--text-3);white-space:nowrap}
 
 .bib-detalle{
   display:grid;grid-template-columns:auto 1fr;gap:32px;
@@ -2681,7 +2681,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 }
 .bib-detalle__cover-badge{
   position:absolute;bottom:10px;left:10px;z-index:2;
-  font-family:'Montserrat',monospace;font-size:11px;font-weight:700;
+  font-family:'Instrument Sans',monospace;font-size:11px;font-weight:700;
   padding:4px 10px;border-radius:6px;
   background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;
   display:inline-flex;align-items:center;gap:5px;
@@ -2689,19 +2689,19 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-detalle__cover-badge svg{width:14px;height:14px}
 .bib-detalle__info{display:flex;flex-direction:column;justify-content:center;gap:6px}
 .bib-detalle__cat{
-  font-family:'Montserrat',monospace;font-size:11px;font-weight:700;
+  font-family:'Instrument Sans',monospace;font-size:11px;font-weight:700;
   letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);
 }
 .bib-detalle__title{
-  font-family:'Montserrat',sans-serif;font-size:clamp(20px,3vw,28px);font-weight:800;
-  letter-spacing:-.4px;color:var(--text);line-height:1.2;margin:2px 0 4px;
+  font-family:'Fraunces',serif;font-size:clamp(22px,3.2vw,30px);font-weight:700;
+  letter-spacing:-.2px;color:var(--text);line-height:1.2;margin:2px 0 4px;
 }
-.bib-detalle__author{font-size:14px;color:var(--text-2)}
-.bib-detalle__desc{font-size:13.5px;color:var(--text-3);line-height:1.55;max-width:520px;margin-top:4px}
+.bib-detalle__author{font-family:'Instrument Sans',sans-serif;font-size:14px;color:var(--text-2)}
+.bib-detalle__desc{font-family:'Instrument Sans',sans-serif;font-size:13.5px;color:var(--text-3);line-height:1.55;max-width:520px;margin-top:4px}
 .bib-detalle__actions{display:flex;align-items:center;gap:10px;margin-top:12px}
 .bib-detalle__btn-leer{
   display:inline-flex;align-items:center;gap:8px;
-  font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;
+  font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:700;
   padding:10px 26px;border-radius:12px;border:none;cursor:pointer;
   background:var(--primary);color:#fff;
   transition:transform .15s,box-shadow .2s;
@@ -2722,10 +2722,10 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
   margin-top:16px;padding-top:14px;border-top:1px solid var(--border);
 }
 .bib-detalle__meta-item label{
-  display:block;font-family:'Montserrat',monospace;font-size:10px;font-weight:700;
+  display:block;font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;
   letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:2px;
 }
-.bib-detalle__meta-item span{font-size:13px;font-weight:600;color:var(--text)}
+.bib-detalle__meta-item span{font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
 
 .bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:32px 26px}
 .bib-card{
@@ -2751,7 +2751,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 }
 .bib-card__type{
   position:absolute;bottom:10px;left:10px;
-  font-family:'Montserrat',monospace;font-size:11px;font-weight:700;
+  font-family:'Instrument Sans',monospace;font-size:11px;font-weight:700;
   padding:4px 9px;border-radius:6px;
   background:rgba(0,0,0,.6);backdrop-filter:blur(6px);color:#fff;
   display:inline-flex;align-items:center;gap:4px;
@@ -2759,12 +2759,12 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-card__type svg{width:12px;height:12px}
 .bib-card__body{padding:12px 4px 0}
 .bib-card__title{
-  font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;
+  font-family:'Fraunces',serif;font-size:16px;font-weight:600;
   line-height:1.3;color:var(--text);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .bib-card__curso{
-  font-family:'Montserrat',monospace;font-size:11px;font-weight:600;
+  font-family:'Instrument Sans',monospace;font-size:11px;font-weight:600;
   color:var(--text-3);margin-top:5px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
@@ -2782,7 +2782,7 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-card__lock svg{width:22px;height:22px}
 .bib-card__status{
   position:absolute;top:10px;right:10px;
-  font-family:'Montserrat',monospace;font-size:10px;font-weight:700;
+  font-family:'Instrument Sans',monospace;font-size:10px;font-weight:700;
   padding:4px 8px;border-radius:6px;letter-spacing:.5px;text-transform:uppercase;
 }
 .bib-card__status--free{background:#3DDC5A;color:#081225}
@@ -2793,17 +2793,17 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
    ========================================================= */
 .libro-overlay{position:fixed;inset:0;z-index:10001;background:rgba(7,5,3,.97);display:flex;flex-direction:column;animation:visorFadeIn .25s ease}
 .libro-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:linear-gradient(180deg,rgba(11,21,48,.95),rgba(8,18,37,.85));border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;z-index:2}
-.libro-header__back{display:inline-flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(245,249,255,.7);background:transparent;border:none;cursor:pointer;padding:6px 10px;border-radius:8px;transition:all .15s}
+.libro-header__back{display:inline-flex;align-items:center;gap:6px;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(245,249,255,.7);background:transparent;border:none;cursor:pointer;padding:6px 10px;border-radius:8px;transition:all .15s}
 .libro-header__back:hover{color:#f5f9ff;background:rgba(255,255,255,.06)}
 .libro-header__back svg{width:16px;height:16px}
-.libro-header__title{flex:1;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#f5f9ff;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.libro-header__title{flex:1;font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:#f5f9ff;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .libro-header__controls{display:flex;gap:6px;align-items:center}
 .libro-ctrl{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(245,249,255,.8);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;font-size:13px;font-weight:700}
 .libro-ctrl:hover{background:rgba(255,255,255,.08);color:#f5f9ff;border-color:rgba(27,93,240,.4)}
 .libro-ctrl:disabled{opacity:.3;cursor:not-allowed}
 .libro-ctrl svg{width:16px;height:16px}
 .libro-bookmark{text-align:center;padding:8px;background:linear-gradient(90deg,transparent,rgba(27,93,240,.12),transparent);flex-shrink:0}
-.libro-bookmark__btn{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:#1b5df0;background:transparent;border:none;cursor:pointer;padding:4px 14px;border-radius:6px;transition:background .15s}
+.libro-bookmark__btn{font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:600;color:#1b5df0;background:transparent;border:none;cursor:pointer;padding:4px 14px;border-radius:6px;transition:background .15s}
 .libro-bookmark__btn:hover{background:rgba(27,93,240,.15)}
 .libro-body{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;touch-action:none}
 .libro-paginas{display:flex;gap:0;align-items:stretch;max-height:100%;transition:transform .08s ease-out}
@@ -2817,15 +2817,15 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .libro-nav--der{right:0;background:linear-gradient(270deg,rgba(0,0,0,.4),transparent)}
 .libro-nav svg{width:32px;height:32px;color:rgba(255,255,255,.8);filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
 .libro-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 20px;background:linear-gradient(0deg,rgba(11,21,48,.95),rgba(8,18,37,.85));border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;z-index:2}
-.libro-footer__author{font-family:'Montserrat',sans-serif;font-size:12px;color:rgba(245,249,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.libro-footer__pages{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(245,249,255,.7);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.libro-footer__author{font-family:'Instrument Sans',sans-serif;font-size:12px;color:rgba(245,249,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.libro-footer__pages{font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(245,249,255,.7);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .libro-footer__goto{display:inline-flex;align-items:center;gap:4px}
-.libro-footer__goto input{width:48px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f5f9ff;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600}
-.libro-footer__goto button{height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(27,93,240,.3);background:rgba(27,93,240,.15);color:#1b5df0;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.libro-footer__goto input{width:48px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#f5f9ff;text-align:center;font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:600}
+.libro-footer__goto button{height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(27,93,240,.3);background:rgba(27,93,240,.15);color:#1b5df0;font-family:'Instrument Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
 .libro-footer__goto button:hover{background:rgba(27,93,240,.25)}
 .libro-progress{height:3px;background:rgba(255,255,255,.06);flex-shrink:0;cursor:pointer;position:relative}
 .libro-progress__bar{height:100%;background:linear-gradient(90deg,var(--primary,#1b5df0),var(--highlight,#6C5CE7));border-radius:0 2px 2px 0;transition:width .3s ease;box-shadow:0 0 8px color-mix(in srgb,var(--primary,#1b5df0) 40%,transparent)}
-.libro-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(245,249,255,.5);font-family:'Montserrat',sans-serif;font-size:14px}
+.libro-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(245,249,255,.5);font-family:'Instrument Sans',sans-serif;font-size:14px}
 @media(max-width:768px){.libro-spine{display:none}.libro-header{padding:8px 12px}.libro-header__title{font-size:12px}.libro-footer{padding:6px 12px;flex-wrap:wrap;gap:8px}.libro-nav{width:50px}.libro-pagina img{max-height:calc(100vh - 120px)}}
 
 /* =========================================================
