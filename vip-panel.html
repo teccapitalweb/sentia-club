@@ -4328,16 +4328,18 @@ if (window.__isDemoMode) {
       window.__initPresencia && window.__initPresencia(user.uid);
     }, 50);
 
-    // ─── Popup: completar ficha profesional (1ª vez) · evita certificados con el email y crea la tarjeta del Directorio ───
-    setTimeout(() => { try { window.__maybeAskProfile && window.__maybeAskProfile(); } catch(e){} }, 900);
-
-    // ─── Logros: registra "hoy entré" en el servidor (y celebra si desbloqueó
-    // algo nuevo), y SOLO DESPUÉS invita a elegir su curso gratis — así no se
-    // amontonan los dos popups en la misma pantalla.
+    // ─── Fila de popups de bienvenida, UNO A LA VEZ (nunca en paralelo) ───
+    // 1) Ficha profesional (si falta) → 2) bienvenida de invitado (si vino
+    // referido) → 3) celebración de logro nuevo con confeti (si desbloqueó
+    // algo, p.ej. "Te uniste a SENTIA") → 4) invitación a elegir curso
+    // gratis (solo cuentas sin membresía). Cada paso espera a que el
+    // anterior se cierre, así nunca se amontonan dos en la misma pantalla.
     setTimeout(async () => {
+      try { await window.__maybeAskProfile?.(); } catch(e){}
+      try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
       try { await window.__pingLogrosVisita?.(); } catch(e){}
       try { window.__maybeShowCursoGratisIntro && window.__maybeShowCursoGratisIntro(); } catch(e){}
-    }, 1200);
+    }, 800);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
@@ -14207,8 +14209,9 @@ function openPasswordResetModal(){
 // crea automáticamente la tarjeta del Directorio (VIP o Comunidad).
 // ═══════════════════════════════════════════════════════════════════
 window.__maybeAskProfile = function(){
+  return new Promise((resolve) => {
   try {
-    if (document.getElementById('name-modal')) return;
+    if (document.getElementById('name-modal')) return resolve();
     const S = window.UserState || {};
     const md = window.memberData || {};
     let local = {}; try { local = JSON.parse(localStorage.getItem('sentia_profile')||'{}'); } catch(e){}
@@ -14217,8 +14220,7 @@ window.__maybeAskProfile = function(){
     if (yaCompleto || whatsappGuardado) {
       localStorage.setItem('sentia_perfil_completado','1');
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
-      try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){}
-      return;
+      return resolve();
     }
 
     const email = S.email || '';
@@ -14324,7 +14326,7 @@ window.__maybeAskProfile = function(){
       if (window.Toast) Toast.success('Ficha guardada', val);
       ov.remove();
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
-      setTimeout(()=>{ try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){} }, 300);
+      resolve();
     }
     form.addEventListener('submit', guardar);
     document.getElementById('nm-skip').addEventListener('click', async ()=>{
@@ -14340,9 +14342,10 @@ window.__maybeAskProfile = function(){
       ov.remove();
       if (window.Toast) Toast.info('Puedes completarla luego', 'Mi perfil → Directorio');
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
-      setTimeout(()=>{ try { window.__maybeShowBienvenidaInvitado && window.__maybeShowBienvenidaInvitado(); } catch(e){} }, 300);
+      resolve();
     });
-  } catch(e){ console.warn('maybeAskProfile:', e); }
+  } catch(e){ console.warn('maybeAskProfile:', e); resolve(); }
+  });
 };
 window.__maybeAskName = window.__maybeAskProfile;
 
@@ -14353,11 +14356,12 @@ window.__maybeAskName = window.__maybeAskProfile;
 // cm7 ya está desbloqueada en el servidor en cuanto esto se muestra.
 // ═══════════════════════════════════════════════════════════════════
 window.__maybeShowBienvenidaInvitado = function(){
+  return new Promise((resolve) => {
   try {
-    if (localStorage.getItem('sentia:bienvenida-invitado-vista') === '1') return;
+    if (localStorage.getItem('sentia:bienvenida-invitado-vista') === '1') return resolve();
     localStorage.setItem('sentia:bienvenida-invitado-vista', '1');
-    if (!(window.memberData && window.memberData.referidoPor)) return;
-    if (document.getElementById('bienvenida-invitado')) return;
+    if (!(window.memberData && window.memberData.referidoPor)) return resolve();
+    if (document.getElementById('bienvenida-invitado')) return resolve();
 
     const pop = document.createElement('div');
     pop.id = 'bienvenida-invitado';
@@ -14393,11 +14397,12 @@ window.__maybeShowBienvenidaInvitado = function(){
         #bienvenida-invitado .bi-cta .ic{width:15px;height:15px}`;
       document.head.appendChild(st);
     }
-    const close = () => pop.remove();
+    const close = () => { pop.remove(); resolve(); };
     pop.querySelector('.bi-close').addEventListener('click', close);
     pop.querySelector('.bi-backdrop').addEventListener('click', close);
     pop.querySelector('#bi-ir-logros').addEventListener('click', () => { close(); if (typeof navigateToSection === 'function') navigateToSection('logros'); });
-  } catch(e){ console.warn('bienvenidaInvitado:', e); }
+  } catch(e){ console.warn('bienvenidaInvitado:', e); resolve(); }
+  });
 };
 
 function openEditField(field){
