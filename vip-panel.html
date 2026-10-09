@@ -12533,9 +12533,14 @@ const Sections = (function(){
       if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
       if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
     }
-    const ctasHTML = contacto
-      ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>')
-      : `<button class="dir-cta dir-cta--lock" data-dirlock="1" title="Hazte VIP para contactar"><svg class="ic"><use href="#i-lock"/></svg>Solo VIP</button>`;
+    // En tu propia tarjeta nunca tiene sentido el candado "hazte VIP para
+    // contactar" — es tu propio contacto. Si no has llenado nada, se invita
+    // a completarlo en vez de mostrar el candado.
+    const ctasHTML = esMia
+      ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<button class="dir-cta" data-dirmia-editar="1" title="Agrega tu contacto"><svg class="ic"><use href="#i-edit"/></svg>Agrega tu contacto</button>')
+      : (contacto
+        ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>')
+        : `<button class="dir-cta dir-cta--lock" data-dirlock="1" title="Hazte VIP para contactar"><svg class="ic"><use href="#i-lock"/></svg>Solo VIP</button>`);
     return `
       <article class="dir-card${esMia?' dir-card--mia':''}" data-dircard="${c.id}">
         ${c.vip?`<div class="dir-card__cover" style="${dirPortadaStyle(c)}"></div>`:''}
@@ -12587,6 +12592,9 @@ const Sections = (function(){
       });
       grid.querySelectorAll('[data-dirlock]').forEach(b=>{
         b.addEventListener('click', (e)=>{ e.stopPropagation(); window.__irASuscripcion && window.__irASuscripcion(); });
+      });
+      grid.querySelectorAll('[data-dirmia-editar]').forEach(b=>{
+        b.addEventListener('click', (e)=>{ e.stopPropagation(); dirEditarMiTarjeta(); });
       });
     });
   }
