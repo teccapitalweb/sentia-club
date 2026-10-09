@@ -5976,11 +5976,9 @@ function seccionPanelDesdeHash(){
 
 function navigateToSection(section, opts){
   opts = opts || {};
-  // MODIFICADO: las herramientas son VIP; sin membresía se va directo a los planes
-  if (String(section).startsWith('tool-') && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
-  // MODIFICADO: el Directorio ahora es visible para cualquier miembro (VIP o
-  // no) — solo el Foro sigue siendo exclusivo VIP.
-  if (['foro'].includes(section) && typeof toolEsVIP === 'function' && !toolEsVIP()) { window.__irASuscripcion(); return; }
+  // Las herramientas y el Foro SÍ se pueden abrir y ver sin membresía; lo
+  // que se bloquea (y manda a Suscripción) es pedir un resultado de una
+  // herramienta (toolRequiereVIP) o publicar en el Foro (ver renderForo).
   if(!SECCIONES_VALIDAS_PANEL.includes(section)) section = 'inicio';
   document.querySelector('.app')?.classList.toggle('app--foro-focus', section === 'foro');
   document.querySelectorAll('.nav-item, .mobile-nav__item, .mobile-drawer__item').forEach(n=>n.classList.remove('is-active'));
