@@ -7939,7 +7939,7 @@ const Sections = (function(){
       const totalClases = c.sesiones?.length || 0;
       const avance = totalClases ? progresoCursoPct(c.id, totalClases) : 0;
       const etiquetaAvance = avance >= 100 ? 'Completado' : avance > 0 ? 'Continuar curso' : 'Ver programa';
-      const sinAcceso = (accesoCompleto && !desbloqueado) || (!accesoCompleto && !esCursoMuestra && c.disponibleSiempre !== true);
+      const sinAcceso = (accesoCompleto && !desbloqueado) || (!accesoCompleto && !esCursoMuestra);
       return `
       <article class="curso-card curso-card--catalog ${sinAcceso?'curso-card--locked':''}" data-cid="${c.id}" tabindex="0" style="--area-color:${COLOR_AREA[c.area]||'#1b5df0'};">
         <div class="curso-card__cover" style="background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${portada}');background-size:cover;background-position:center;">
@@ -7987,7 +7987,7 @@ const Sections = (function(){
     }
     // Ya eligió su curso gratis (o nunca fue elegible) y este NO es ese
     // curso: no hay nada que mostrar de él, directo a la suscripción.
-    if (!tieneAccesoVipCompleto() && c.disponibleSiempre !== true && cursoConPrimeraClaseGratis()?.id !== c.id) {
+    if (!tieneAccesoVipCompleto() && cursoConPrimeraClaseGratis()?.id !== c.id) {
       window.__irASuscripcion();
       return;
     }
