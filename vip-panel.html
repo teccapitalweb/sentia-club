@@ -2729,6 +2729,17 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .bib-detalle__meta-item span{font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
 
 .bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:32px 26px}
+/* La vitrina "Libros que vas a desbloquear" se veía como un hueco vacío en
+   celular: con un solo libro gigante apilado por fila se perdía la sensación
+   de estantería. En pantallas angostas pasa a ser una fila que se desliza
+   horizontal, con libros más chicos — como en escritorio, pero compacto. */
+@media (max-width:600px){
+  .bib-retos-ruta__grid{
+    display:flex;flex-wrap:nowrap;overflow-x:auto;gap:14px;
+    padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+  }
+  .bib-retos-ruta__grid .bib-card{flex:0 0 140px;scroll-snap-align:start}
+}
 .bib-card{
   background:transparent;border:none;border-radius:0;
   overflow:visible;cursor:pointer;position:relative;
