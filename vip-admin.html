@@ -1282,6 +1282,7 @@ instalarCierreAdminPorInactividad();
       <div class="nav-label">Marketing</div>
       <a class="nav-item" data-section="perfiles-sentia"><svg class="ic"><use href="#i-chart-bar"/></svg>Perfiles<span class="nav-item__badge" id="badge-perfiles">0</span></a>
       <a class="nav-item" data-section="perfiles-metricas"><svg class="ic"><use href="#i-trend"/></svg>Métricas</a>
+      <a class="nav-item" data-section="pruebas-gratuitas"><svg class="ic"><use href="#i-zap"/></svg>Pruebas gratuitas</a>
     </div>
 
     <div class="nav-section">
@@ -5934,6 +5935,145 @@ const Pages={
     Pages._renderDistribucionesMetricas();
   },
 
+  // ─── Pruebas gratuitas: qué curso elige cada cuenta nueva y cuántas
+  // terminan pagando. Usa miembros/cursos que AdminStore ya tiene cargados
+  // (cursoGratisElegido, cursoGratisElegidoEn, activa) — sin fetch aparte.
+  _pruebasMiembros() {
+    return window.AdminStore?.miembros || [];
+  },
+  _pruebaEsVip(m) { return m.activo === true || m.activa === true; },
+  _pruebaTituloCurso(id) {
+    const c = (window.AdminStore?.cursos || []).find(x => x.id === id);
+    return c ? c.titulo : (id || 'Curso eliminado');
+  },
+  _renderKpisPruebas() {
+    const el = document.getElementById('pg-kpis');
+    if (!el) return;
+    const items = Pages._pruebasMiembros();
+    const eligieron = items.filter(m => m.cursoGratisElegido);
+    const sinElegir = items.filter(m => !m.cursoGratisElegido && !Pages._pruebaEsVip(m));
+    const eligieronYPagaron = eligieron.filter(Pages._pruebaEsVip);
+    const pagaronSinElegir = items.filter(m => Pages._pruebaEsVip(m) && !m.cursoGratisElegido);
+    const totalNuevas = eligieron.length + sinElegir.length;
+    el.innerHTML = `
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
+        <div class="kpi-card__label">Pruebas elegidas</div>
+        <div class="kpi-card__value">${eligieron.length}</div>
+        <div class="kpi-card__sub">${totalNuevas ? Math.round(eligieron.length / totalNuevas * 100) : 0}% de las cuentas sin membresía</div>
+      </div>
+      <div class="kpi-card" style="--c1:#F59E0B;--c2:#FBBF24;">
+        <div class="kpi-card__label">Cuentas sin elegir</div>
+        <div class="kpi-card__value">${sinElegir.length}</div>
+        <div class="kpi-card__sub">Se registraron y todavía no escogen curso</div>
+      </div>
+      <div class="kpi-card" style="--c1:#3B82F6;--c2:#60A5FA;">
+        <div class="kpi-card__label">Eligieron y ya pagaron</div>
+        <div class="kpi-card__value">${eligieronYPagaron.length}</div>
+        <div class="kpi-card__sub">${eligieron.length ? Math.round(eligieronYPagaron.length / eligieron.length * 100) : 0}% de quienes eligieron</div>
+      </div>
+      <div class="kpi-card" style="--c1:#A78BFA;--c2:#C4B5FD;">
+        <div class="kpi-card__label">Pagaron sin elegir curso</div>
+        <div class="kpi-card__value">${pagaronSinElegir.length}</div>
+        <div class="kpi-card__sub">Se hicieron VIP directo</div>
+      </div>
+    `;
+  },
+  _renderDistribucionPruebas() {
+    const items = Pages._pruebasMiembros().filter(m => m.cursoGratisElegido);
+    const total = items.length;
+    const c = {};
+    items.forEach(m => { c[m.cursoGratisElegido] = (c[m.cursoGratisElegido] || 0) + 1; });
+    const entries = Object.entries(c).sort((a, b) => b[1] - a[1]).map(([id, v]) => [Pages._pruebaTituloCurso(id), v]);
+    Pages._renderBarList(document.getElementById('pg-dist-cursos'), entries, { total });
+  },
+  _fechaDeCampo(v) {
+    if (!v) return null;
+    if (typeof v.toDate === 'function') return v.toDate();
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  },
+  _renderSerieDiasPruebas() {
+    const el = document.getElementById('pg-dist-dias');
+    if (!el) return;
+    const items = Pages._pruebasMiembros().filter(m => m.cursoGratisElegido);
+    const dias = [];
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    for (let i = 13; i >= 0; i--) { const d = new Date(hoy); d.setDate(d.getDate() - i); dias.push(d); }
+    const fmt = (d) => `${d.getDate()}/${d.getMonth() + 1}`;
+    const cuentas = dias.map(() => 0);
+    items.forEach(m => {
+      const f = Pages._fechaDeCampo(m.cursoGratisElegidoEn);
+      if (!f) return;
+      const f0 = new Date(f); f0.setHours(0, 0, 0, 0);
+      const idx = dias.findIndex(d => d.getTime() === f0.getTime());
+      if (idx >= 0) cuentas[idx]++;
+    });
+    const total = cuentas.reduce((a, b) => a + b, 0);
+    const entries = dias.map((d, i) => [fmt(d), cuentas[i]]);
+    Pages._renderBarList(el, entries, { total: Math.max(total, 1) });
+  },
+  _renderListaPruebas() {
+    const wrap = document.getElementById('pg-container');
+    if (!wrap) return;
+    const items = Pages._pruebasMiembros()
+      .filter(m => m.cursoGratisElegido)
+      .map(m => ({ ...m, _fecha: Pages._fechaDeCampo(m.cursoGratisElegidoEn) }))
+      .sort((a, b) => (b._fecha?.getTime() || 0) - (a._fecha?.getTime() || 0))
+      .slice(0, 30);
+    if (!items.length) {
+      wrap.innerHTML = '<div class="adm-list"><div class="empty"><div class="empty__icon"><svg class="ic"><use href="#i-zap"/></svg></div><h3>Nadie ha elegido su curso gratis todavía</h3></div></div>';
+      return;
+    }
+    wrap.innerHTML = `<div class="adm-list">${items.map(m => {
+      const pago = Pages._pruebaEsVip(m);
+      return `<div class="adm-row">
+        <div class="adm-row__thumb"><svg class="ic"><use href="#i-user"/></svg></div>
+        <div class="adm-row__body">
+          <div class="adm-row__title">${adminEsc(m.nombre || m.email || 'Sin nombre')}</div>
+          <div class="adm-row__meta">
+            <span>${adminEsc(Pages._pruebaTituloCurso(m.cursoGratisElegido))}</span>
+            <span><svg class="ic"><use href="#i-calendar"/></svg>${m._fecha ? m._fecha.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</span>
+          </div>
+        </div>
+        <span class="tag ${pago ? 'tag--success' : 'tag--warning'}">${pago ? 'Pagó' : 'Sin pagar'}</span>
+      </div>`;
+    }).join('')}</div>`;
+  },
+
+  'pruebas-gratuitas'(p) {
+    p.innerHTML = `
+      <div class="fade-up">
+        <div class="sec-hero">
+          <span class="sec-hero__eyebrow">Marketing</span>
+          <h1 class="sec-hero__title">Pruebas gratuitas</h1>
+          <p class="sec-hero__sub">Qué curso eligen las cuentas nuevas como su prueba gratuita y cuántas de ellas terminan pagando la membresía.</p>
+        </div>
+
+        <div class="kpi-grid" id="pg-kpis"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Cursos más elegidos</div></div>
+            <div id="pg-dist-cursos" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-calendar"/></svg>Pruebas elegidas por día (últimos 14 días)</div></div>
+            <div id="pg-dist-dias" style="padding:4px 4px 10px;"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;">
+          <div class="dash-card__header" style="padding:0 0 10px;"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-zap"/></svg>Últimas pruebas elegidas</div></div>
+          <div id="pg-container"></div>
+        </div>
+      </div>
+    `;
+    Pages._renderKpisPruebas();
+    Pages._renderDistribucionPruebas();
+    Pages._renderSerieDiasPruebas();
+    Pages._renderListaPruebas();
+  },
+
   _renderListaPerfiles() {
     const wrap = document.getElementById('ps-container');
     if (!wrap) return;
@@ -6567,7 +6707,7 @@ function dirAdminCargar(){
    refresh te deja donde estabas, los botones atrás/adelante del
    navegador funcionan y puedes compartir un link directo a la sección.
    ═══════════════════════════════════════════════════════════════════ */
-const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia','perfiles-metricas'];
+const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia','perfiles-metricas','pruebas-gratuitas'];
 
 function seccionDesdeHash(){
   const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
@@ -6884,6 +7024,11 @@ const AdminStore = {
     } else if (section === 'perfiles-metricas' && Pages[section]) {
       if (typeof Pages._renderKpisMetricas === 'function') Pages._renderKpisMetricas();
       if (typeof Pages._renderDistribucionesMetricas === 'function') Pages._renderDistribucionesMetricas();
+    } else if (section === 'pruebas-gratuitas' && Pages[section]) {
+      if (typeof Pages._renderKpisPruebas === 'function') Pages._renderKpisPruebas();
+      if (typeof Pages._renderDistribucionPruebas === 'function') Pages._renderDistribucionPruebas();
+      if (typeof Pages._renderSerieDiasPruebas === 'function') Pages._renderSerieDiasPruebas();
+      if (typeof Pages._renderListaPruebas === 'function') Pages._renderListaPruebas();
     }
   },
 
