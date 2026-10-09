@@ -13678,10 +13678,10 @@ const Sections = (function(){
                 </div>
               </div>
               <div class="plan-picker__price-block">
-                <span class="plan-picker__price" data-precio-picker-equivmes>${window.__preciosClub.cargado ? '$'+window.__preciosClub.equivMes.toLocaleString('es-MX') : '$—'}</span>
-                <span class="plan-picker__price-sub">MXN /mes</span>
+                <span class="plan-picker__price" data-precio-picker-ano>${window.__preciosClub.cargado ? '$'+window.__preciosClub.ano.toLocaleString('es-MX') : '$—'}</span>
+                <span class="plan-picker__price-sub">MXN /año</span>
               </div>
-              <div class="plan-picker__note" data-precio-picker-ahorro>${window.__preciosClub.cargado ? '$'+window.__preciosClub.ano.toLocaleString('es-MX')+' MXN al año · ahorras $'+window.__preciosClub.ahorro.toLocaleString('es-MX') : 'Mejor precio'}</div>
+              <div class="plan-picker__note" data-precio-picker-ahorro>${window.__preciosClub.cargado ? '~$'+window.__preciosClub.equivMes.toLocaleString('es-MX')+'/mes · ahorras $'+window.__preciosClub.ahorro.toLocaleString('es-MX') : 'Mejor precio'}</div>
               <ul class="plan-picker__features">
                 <li><svg class="ic"><use href="#i-broadcast"/></svg>Clases en vivo con especialistas y grabaciones</li>
                 <li><svg class="ic"><use href="#i-certificate"/></svg>Certificados con folio y QR verificable</li>
@@ -13719,8 +13719,8 @@ const Sections = (function(){
       if (!p.cargado) return;
       const fmt = n => '$' + Number(n).toLocaleString('es-MX');
       document.querySelectorAll('[data-precio-picker-mes]').forEach(el => el.textContent = fmt(p.mes));
-      document.querySelectorAll('[data-precio-picker-equivmes]').forEach(el => el.textContent = fmt(p.equivMes));
-      document.querySelectorAll('[data-precio-picker-ahorro]').forEach(el => el.textContent = fmt(p.ano) + ' MXN al año · ahorras ' + fmt(p.ahorro));
+      document.querySelectorAll('[data-precio-picker-ano]').forEach(el => el.textContent = fmt(p.ano));
+      document.querySelectorAll('[data-precio-picker-ahorro]').forEach(el => el.textContent = '~' + fmt(p.equivMes) + '/mes · ahorras ' + fmt(p.ahorro));
     });
 
     // Destruir cualquier checkout previo que haya quedado vivo de un render anterior
