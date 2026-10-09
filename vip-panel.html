@@ -2716,18 +2716,42 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 }
 .bib-detalle__meta-item span{font-size:13px;font-weight:600;color:var(--text)}
 
-.bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px 18px}
 .bib-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  overflow:hidden;cursor:pointer;position:relative;
-  transition:transform .25s cubic-bezier(.2,.8,.25,1),border-color .2s,box-shadow .3s;
+  background:transparent;border:none;border-radius:0;
+  overflow:visible;cursor:pointer;position:relative;
+  transition:transform .25s cubic-bezier(.2,.8,.25,1);
 }
-.bib-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--primary) 40%,transparent);box-shadow:0 16px 40px rgba(0,0,0,.1)}
-.bib-card.is-selected{border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 25%,transparent)}
+.bib-card:hover{transform:translateY(-4px) rotate(-1deg)}
+.bib-card.is-selected .bib-card__cover{box-shadow:
+    inset 4px 0 8px -2px rgba(0,0,0,.3),
+    2px 3px 0 0 var(--surface),
+    2px 3px 0 1px var(--border),
+    5px 6px 0 0 var(--surface),
+    5px 6px 0 1px var(--border),
+    0 0 0 2px var(--primary),
+    0 12px 22px -6px rgba(0,0,0,.25);}
 .bib-card__cover{
   width:100%;aspect-ratio:3/4;
   background-size:cover;background-position:center;
-  position:relative;
+  position:relative;overflow:hidden;
+  /* Efecto "libro": lomo oscuro a la izquierda, canto de páginas a la
+     derecha y una sombra apilada para dar volumen, como un libro real
+     en vez de una tarjeta plana. */
+  border-radius:3px 9px 9px 3px;
+  box-shadow:
+    inset 4px 0 8px -2px rgba(0,0,0,.3),
+    2px 3px 0 0 var(--surface),
+    2px 3px 0 1px var(--border),
+    5px 6px 0 0 var(--surface),
+    5px 6px 0 1px var(--border),
+    0 12px 22px -6px rgba(0,0,0,.25);
+}
+.bib-card__cover::before{
+  content:'';position:absolute;top:3%;right:0;bottom:3%;width:4px;
+  background:repeating-linear-gradient(to bottom,#fff 0 2px,#d8dde3 2px 3px);
+  box-shadow:-1px 0 2px rgba(0,0,0,.12) inset;
+  pointer-events:none;
 }
 .bib-card__type{
   position:absolute;bottom:8px;left:8px;
