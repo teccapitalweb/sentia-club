@@ -11574,12 +11574,20 @@ const Sections = (function(){
     const out = [];
     cursos.forEach((c, cursoIdx) => {
       if (!Array.isArray(c.materiales)) return;
+      // MODIFICADO: el día de desbloqueo del material usa el mismo turno ya
+      // ajustado por el curso gratis elegido (cursoUnlockDay/cursoDesbloqueado)
+      // — antes recalculaba con c.orden*8 "a mano" y eso ignoraba el corrimiento
+      // de turno, dejando materiales abiertos antes de tiempo (o al revés).
+      const cursoGratisElegido = window.memberData?.cursoGratisElegido === c.id;
+      const cursoUnlockDayVal = cursoUnlockDay(c);
       c.materiales.forEach((m, idx) => {
         out.push({
           id: `${c.id}_${idx}`,
           cursoId: c.id,
           materialIndex: idx,
           cursoOrden: typeof c.orden === 'number' ? c.orden : cursoIdx,
+          cursoUnlockDay: cursoUnlockDayVal,
+          cursoGratisElegido,
           cursoTitulo: c.titulo || 'Sin título',
           cursoArea: c.area || 'General',
           cursoDisponibleSiempre: c.disponibleSiempre === true,
@@ -11600,11 +11608,13 @@ const Sections = (function(){
     if (esAdminReal()) return true;
     if (mat.disponibleSiempre === true) return true;
     if (mat.cursoDisponibleSiempre === true) return true;
+    if (mat.cursoGratisElegido) return true;
     const dias = calcularDiasMembresia();
-    // Si tiene día manual, usar ese · si no, usar la cola por orden del curso
+    // Si tiene día manual, usar ese · si no, usar el mismo turno ya ajustado
+    // por el curso elegido que usa el propio curso (cursoUnlockDay).
     const diaDesbloqueo = (mat.desbloquearEnDias !== null && mat.desbloquearEnDias !== undefined)
       ? mat.desbloquearEnDias
-      : (mat.cursoOrden * 8);
+      : mat.cursoUnlockDay;
     return dias >= diaDesbloqueo;
   }
 
@@ -11613,7 +11623,7 @@ const Sections = (function(){
     const dias = calcularDiasMembresia();
     const diaDesbloqueo = (mat.desbloquearEnDias !== null && mat.desbloquearEnDias !== undefined)
       ? mat.desbloquearEnDias
-      : (mat.cursoOrden * 8);
+      : mat.cursoUnlockDay;
     return Math.max(0, diaDesbloqueo - dias);
   }
 
