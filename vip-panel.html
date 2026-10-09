@@ -4435,8 +4435,13 @@ if (window.__isDemoMode) {
           // por ejemplo al borrar y recrear la cuenta desde admin. Ahora un
           // "false" explícito del servidor manda siempre; wasSeen() local
           // solo se usa si de plano no se pudo consultar el servidor.
+          // OJO: start(false) internamente SIGUE revisando wasSeen() local
+          // (ver onboarding-tour.js) y se cancela solo si lo encuentra en
+          // true — por eso aquí hay que pasarle force=true para que de
+          // verdad ignore ese localStorage viejo, no basta con decidir
+          // "si iniciar o no" desde afuera.
           if (window.__recorridoVistoServidor === true) window.SENTIAOnboarding.markSeen();
-          else if (window.__recorridoVistoServidor === false) window.SENTIAOnboarding.start(false);
+          else if (window.__recorridoVistoServidor === false) window.SENTIAOnboarding.start(true);
           else if (!window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false);
         }
       } catch(e){}
@@ -8410,9 +8415,15 @@ const Sections = (function(){
         if (!r.ok) throw new Error(data.error || 'No se pudo guardar tu elección');
         _cursoGratisEstado.elegido = data.elegido || curso.id;
         _cursoGratisEstado.elegible = false;
+        // MODIFICADO: window.__renderAvanceHome() lee el curso elegido de
+        // window.memberData (no de _cursoGratisEstado), así que sin esto la
+        // tarjeta de Inicio seguía pintada como bloqueada hasta recargar la
+        // página, aunque el acceso real ya funcionara bien al hacer click.
+        if (window.memberData) window.memberData.cursoGratisElegido = data.elegido || curso.id;
         modal.close();
         Toast.success('¡Listo! Ya tienes tu curso gratis', curso.titulo);
         try { renderCursosList(); } catch(e){}
+        try { window.__renderAvanceHome && window.__renderAvanceHome(); } catch(e){}
         window.__abrirCursoHome ? window.__abrirCursoHome(curso.id) : openCursoDetalle(curso.id);
       } catch(error) {
         Toast.error('No se pudo guardar', error.message || 'Intenta de nuevo');
@@ -14449,10 +14460,15 @@ window.__maybeAskProfile = function(){
     const S = window.UserState || {};
     const md = window.memberData || {};
     let local = {}; try { local = JSON.parse(localStorage.getItem('sentia_profile')||'{}'); } catch(e){}
-    const yaCompleto = localStorage.getItem('sentia_perfil_completado') === '1' || md.perfilCompletado === true;
-    const whatsappGuardado = String(md.whatsapp || local.whatsapp || '').trim();
+    // MODIFICADO: "ya completo" se decide solo con datos del SERVIDOR
+    // (window.memberData), no con localStorage — ese localStorage sobrevivía
+    // a borrar y recrear la cuenta desde admin, así que una cuenta
+    // genuinamente nueva se topaba con "ya está completo" por una prueba
+    // anterior en el mismo navegador y nunca pedía la ficha ni creaba la
+    // tarjeta del directorio real.
+    const yaCompleto = md.perfilCompletado === true;
+    const whatsappGuardado = String(md.whatsapp || '').trim();
     if (yaCompleto || whatsappGuardado) {
-      localStorage.setItem('sentia_perfil_completado','1');
       try { window.__dirAutoCrear && window.__dirAutoCrear(); } catch(e){}
       return resolve();
     }
