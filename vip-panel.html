@@ -6890,8 +6890,10 @@ const Sections = (function(){
     const numClase = sesion.numero || (Number(indexClase) + 1);
     if (!sesion.videoId) {
       // Un enlace externo no puede protegerse como Bunny. Se permite solo en
-      // una clase expresamente gratuita; para clases VIP debe migrarse a Bunny.
-      if (!sesion.gratis) {
+      // una clase gratuita (admin-marcada, o dentro del curso gratis elegido);
+      // para clases VIP debe migrarse a Bunny (esPrimeraClaseGratis ya
+      // devuelve false con acceso VIP completo, así que sigue exigiéndolo).
+      if (!esPrimeraClaseGratis(cursoId, indexClase)) {
         Toast.error('Video pendiente de protección', 'Esta clase debe vincularse a Bunny antes de poder abrirse.');
         return;
       }
@@ -7937,8 +7939,9 @@ const Sections = (function(){
       const totalClases = c.sesiones?.length || 0;
       const avance = totalClases ? progresoCursoPct(c.id, totalClases) : 0;
       const etiquetaAvance = avance >= 100 ? 'Completado' : avance > 0 ? 'Continuar curso' : 'Ver programa';
+      const sinAcceso = (accesoCompleto && !desbloqueado) || (!accesoCompleto && !esCursoMuestra && c.disponibleSiempre !== true);
       return `
-      <article class="curso-card curso-card--catalog ${accesoCompleto && !desbloqueado?'curso-card--locked':''}" data-cid="${c.id}" tabindex="0" style="--area-color:${COLOR_AREA[c.area]||'#1b5df0'};">
+      <article class="curso-card curso-card--catalog ${sinAcceso?'curso-card--locked':''}" data-cid="${c.id}" tabindex="0" style="--area-color:${COLOR_AREA[c.area]||'#1b5df0'};">
         <div class="curso-card__cover" style="background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${portada}');background-size:cover;background-position:center;">
           <svg class="ic" style="opacity:.85;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));"><use href="#${ICON_AREA[c.area]||'i-book'}"/></svg>
           ${esCursoMuestra ? (()=>{const g=clasesGratisPara(c.sesiones?.length||0);return `<span class="curso-card__cover-badge" style="left:12px;right:auto;background:var(--success);color:#081225;border-color:var(--success);">${g===1?'1 CLASE GRATIS':g+' CLASES GRATIS'}</span>`;})() : ''}
@@ -7946,7 +7949,7 @@ const Sections = (function(){
           ${!accesoCompleto && !esCursoMuestra ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--text-2);border:1px solid var(--border-2);"><svg class="ic" style="width:12px;height:12px;"><use href="#i-lock"/></svg>&nbsp;Solo VIP</span>` : ''}
           ${accesoCompleto && !desbloqueado && diasFalta > 0 ? `<span class="curso-card__cover-badge" style="background:rgba(14,10,6,.85);color:var(--primary);border:1px solid var(--primary);">Acceso VIP · se desbloquea en ${diasFalta} día${diasFalta!==1?'s':''}</span>` : ''}
         </div>
-        ${accesoCompleto && !desbloqueado ? `<span class="curso-card__lock-badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>` : ''}
+        ${sinAcceso ? `<span class="curso-card__lock-badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>` : ''}
         <div class="curso-card__body">
           <div class="curso-card__tags">
             <span class="tag tag--soon">${c.area}</span>
