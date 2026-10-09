@@ -7894,19 +7894,35 @@ const Sections = (function(){
   let cursosState={tab:'todos',area:'todas',search:''};
   let countdownTimer=null;
 
+  // El avance real de cada curso vive en getProgresoCurso() (local, igual que
+  // usa la tarjeta y el Inicio) — el campo c.status es solo compatibilidad con
+  // la UI vieja y nunca se actualiza, así que NO sirve para filtrar/contar.
+  function estadoRealCurso(c){
+    const total = c.sesiones?.length || 0;
+    if(!total) return 'catalogo';
+    const pc = getProgresoCurso(c.id);
+    if(pc.completado || pc.clasesVistas.length >= total) return 'completado';
+    if(pc.clasesVistas.length > 0) return 'progreso';
+    return 'catalogo';
+  }
   function counts(){
+    let progreso=0, completado=0, catalogo=0;
+    cursos.forEach(c=>{
+      const st=estadoRealCurso(c);
+      if(st==='progreso') progreso++;
+      else if(st==='completado') completado++;
+      else catalogo++;
+    });
     return {
-      progreso:cursos.filter(c=>c.status==='progreso').length,
-      completado:cursos.filter(c=>c.status==='completado').length,
-      catalogo:cursos.filter(c=>c.status==='catalogo').length,
+      progreso, completado, catalogo,
       total:cursos.length,
       clases:cursos.reduce((n,c)=>n+(c.sesiones?.length||0),0)
     };
   }
   function cursosFiltrados(){
     return cursos.filter(c=>{
-      if(cursosState.tab==='progreso'&&c.status!=='progreso')return false;
-      if(cursosState.tab==='completado'&&c.status!=='completado')return false;
+      if(cursosState.tab==='progreso'&&estadoRealCurso(c)!=='progreso')return false;
+      if(cursosState.tab==='completado'&&estadoRealCurso(c)!=='completado')return false;
       if(cursosState.area!=='todas'&&c.area!==cursosState.area)return false;
       if(cursosState.search){
         const q=cursosState.search.toLowerCase();
