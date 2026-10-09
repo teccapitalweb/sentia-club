@@ -8667,6 +8667,14 @@ const Sections = (function(){
     } catch(e){ return null; }
   }
   function certHeroHTML(){
+    // El certificado de muestra es un anzuelo para quien aún no es VIP; para
+    // quien ya pagó no aporta nada (o ya tiene certificados reales, o está
+    // por ganar el suyo propio sin necesitar el ejemplo genérico).
+    const muestraBtnHTML = tieneAccesoVipCompleto() ? '' : `
+          <button class="btn btn--ghost cert-hero__muestra" id="cert-ver-muestra" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+            Ver certificado de muestra
+          </button>`;
     return `
       <div class="cert-hero">
         <div class="cert-hero__row">
@@ -8675,10 +8683,7 @@ const Sections = (function(){
             <h1>Tus certificados <em>SENTIA</em></h1>
             <p>Con folio único y verificación pública. Se emiten al completar todas las clases de un curso.</p>
           </div>
-          <button class="btn btn--ghost cert-hero__muestra" id="cert-ver-muestra" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-            Ver certificado de muestra
-          </button>
+          ${muestraBtnHTML}
         </div>
       </div>`;
   }
