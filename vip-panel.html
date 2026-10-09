@@ -16351,7 +16351,9 @@ html[data-mode="vip"] .tools-catalog__footer{display:none}
   .tools-catalog.is-open .tools-catalog__panel{transform:translate(-50%,0)}
 }
 @media(max-width:420px){
-  .tools-catalog__grid{grid-template-columns:1fr;gap:10px;padding:16px 18px}
+  /* Se mantienen 2 columnas también en celular (a pedido explícito) — antes
+     colapsaba a 1 sola columna aquí. */
+  .tools-catalog__grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:16px 18px}
   .tools-catalog__header{padding:22px 20px 16px}
   .tools-catalog__header h2{font-size:20px}
 }
