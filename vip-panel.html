@@ -4396,7 +4396,14 @@ if (window.__isDemoMode) {
       // vuelvan a disparar.
       try {
         if (window.SENTIAOnboarding) {
-          if (window.__recorridoVistoServidor) window.SENTIAOnboarding.markSeen();
+          // MODIFICADO: antes "else if (!wasSeen())" dejaba que un localStorage
+          // viejo de ESTE navegador (de una prueba anterior) bloqueara el
+          // recorrido aunque el servidor dijera que la cuenta es nueva —
+          // por ejemplo al borrar y recrear la cuenta desde admin. Ahora un
+          // "false" explícito del servidor manda siempre; wasSeen() local
+          // solo se usa si de plano no se pudo consultar el servidor.
+          if (window.__recorridoVistoServidor === true) window.SENTIAOnboarding.markSeen();
+          else if (window.__recorridoVistoServidor === false) window.SENTIAOnboarding.start(false);
           else if (!window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false);
         }
       } catch(e){}
@@ -6199,15 +6206,22 @@ const Sections = (function(){
   }
   window.__cargarCursoGratisEstado = cargarCursoGratisEstado;
 
-  // ─── Invita (1 vez) a elegir el curso gratis, sin importar en qué sección esté ───
+  // ─── Invita (1 vez por cuenta) a elegir el curso gratis, sin importar en qué sección esté ───
+  // MODIFICADO: antes "ya vista" vivía solo en localStorage, así que al
+  // borrar y recrear la cuenta desde admin (para probar el flujo de nuevo)
+  // el navegador seguía "recordando" haberla visto y la invitación nunca
+  // volvía a aparecer. Ahora es el servidor el que manda; localStorage solo
+  // se usa si de plano no se pudo consultar (sin conexión).
   window.__maybeShowCursoGratisIntro = async function(){
     try {
-      if (localStorage.getItem('sentia:curso-gratis-intro-vista') === '1') return;
+      if (window.__cursoGratisIntroVistaServidor === true) return;
+      if (window.__cursoGratisIntroVistaServidor === undefined && localStorage.getItem('sentia:curso-gratis-intro-vista') === '1') return;
       if (tieneAccesoVipCompleto()) return;
       if (!_cursosLoaded && !_cursosLoading) { try { await cargarCursosFirestore(); } catch(e){} }
       await cargarCursoGratisEstado();
       if (!cursoGratisPendiente()) return;
       localStorage.setItem('sentia:curso-gratis-intro-vista', '1');
+      fetch(`${retosWebhookBase()}/api/perfil/curso-gratis-intro-visto`, { method:'POST', headers: await window.__authHeaders() }).catch(()=>{});
       // Curso sugerido por el test de perfil-sentia (?cursoGratis=ID, guardado
       // en vip-auth.html): si llegó así, se le pregunta directo por ESE curso
       // en vez del popup genérico — la recomendación se siente personalizada,
@@ -7818,6 +7832,7 @@ const Sections = (function(){
       const celebradosServidor = new Set(data.logrosCelebrados || []);
       const paraCelebrar = (data.logrosIds || []).filter(id => !celebradosServidor.has(id)).map(id => logros.find(l=>l.id===id)).filter(Boolean);
       window.__recorridoVistoServidor = data.recorridoVisto === true;
+      window.__cursoGratisIntroVistaServidor = data.cursoGratisIntroVista === true;
       return paraCelebrar;
     } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return null; }
   }
