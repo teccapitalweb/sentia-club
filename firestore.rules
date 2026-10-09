@@ -18,13 +18,16 @@ service cloud.firestore {
       // todavía — se checa exists() primero; (2) leer un campo con punto
       // (miembro.activo) revienta igual si ese campo no existe en el mapa,
       // a diferencia de JS donde solo da undefined — muchas cuentas tienen
-      // 'activa' pero no 'activo' (o viceversa), así que se usa .get(llave,
-      // valorPorDefecto) en vez del punto para leer ambos sin riesgo.
+      // 'activa' pero no 'activo' (o viceversa). Se usa el operador `in`
+      // (siempre seguro) antes de leer cada campo, en vez de leerlo directo.
       let miembroPath = /databases/$(database)/documents/miembros/$(uid);
+      let miembroExiste = exists(miembroPath);
+      let miembro = miembroExiste ? get(miembroPath).data : {};
+      let activoOk = ('activo' in miembro) && miembro.activo == true;
+      let activaOk = ('activa' in miembro) && miembro.activa == true;
+      let noExpiro = !('expiraEn' in miembro) || miembro.expiraEn > request.time;
       return signedIn() && (request.auth.token.admin == true ||
-        (exists(miembroPath) &&
-          (get(miembroPath).data.get('activo', false) == true || get(miembroPath).data.get('activa', false) == true)
-          && (!('expiraEn' in get(miembroPath).data) || get(miembroPath).data.expiraEn > request.time)));
+        (miembroExiste && (activoOk || activaOk) && noExpiro));
     }
 
     match /miembros/{uid} {
