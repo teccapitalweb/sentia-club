@@ -7870,6 +7870,7 @@ const Sections = (function(){
       const paraCelebrar = (data.logrosIds || []).filter(id => !celebradosServidor.has(id)).map(id => logros.find(l=>l.id===id)).filter(Boolean);
       window.__recorridoVistoServidor = data.recorridoVisto === true;
       window.__cursoGratisIntroVistaServidor = data.cursoGratisIntroVista === true;
+      window.__bienvenidaInvitadoVistaServidor = data.bienvenidaInvitadoVista === true;
       return paraCelebrar;
     } catch(e){ console.warn('[logros] sin servidor, se usa el cálculo local:', e.message); return null; }
   }
@@ -14605,13 +14606,33 @@ window.__maybeAskName = window.__maybeAskProfile;
 // ?ref=, nunca editable después). No hay nada que reclamar: la insignia
 // cm7 ya está desbloqueada en el servidor en cuanto esto se muestra.
 // ═══════════════════════════════════════════════════════════════════
-window.__maybeShowBienvenidaInvitado = function(){
+// MODIFICADO: "ya vista" se decide por el servidor (una vez por cuenta), no
+// por localStorage — antes, borrar y recrear la cuenta desde admin no
+// reseteaba este aviso porque el navegador seguía "recordando" haberlo
+// visto. Esta función corre ANTES que sincronizarLogros() en la fila de
+// arranque, así que consulta el servidor por su cuenta en vez de esperar
+// el dato compartido (si no, siempre lo vería como "desconocido" y caería
+// al localStorage viejo de respaldo).
+window.__maybeShowBienvenidaInvitado = async function(){
+  try {
+    if (!(window.memberData && window.memberData.referidoPor)) return;
+    let yaVista = window.__bienvenidaInvitadoVistaServidor;
+    if (yaVista === undefined) {
+      try {
+        const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
+        const data = await r.json();
+        if (r.ok) { yaVista = data.bienvenidaInvitadoVista === true; window.__bienvenidaInvitadoVistaServidor = yaVista; }
+      } catch(e){}
+    }
+    if (yaVista === true) return;
+    if (yaVista === undefined && localStorage.getItem('sentia:bienvenida-invitado-vista') === '1') return;
+  } catch(e){}
+  const headers = await window.__authHeaders().catch(() => ({}));
   return new Promise((resolve) => {
   try {
-    if (localStorage.getItem('sentia:bienvenida-invitado-vista') === '1') return resolve();
-    localStorage.setItem('sentia:bienvenida-invitado-vista', '1');
-    if (!(window.memberData && window.memberData.referidoPor)) return resolve();
     if (document.getElementById('bienvenida-invitado')) return resolve();
+    localStorage.setItem('sentia:bienvenida-invitado-vista', '1');
+    fetch(`${retosWebhookBase()}/api/perfil/bienvenida-invitado-visto`, { method:'POST', headers }).catch(()=>{});
 
     const pop = document.createElement('div');
     pop.id = 'bienvenida-invitado';
