@@ -7946,15 +7946,17 @@ const Sections = (function(){
     });
   }
 
-  function openCursoDetalle(id){
+  function openCursoDetalle(id, opts){
     const c=cursos.find(x=>x.id===id);if(!c)return;
     const cursoIdx = cursos.findIndex(x => x.id === id);
     const desbloqueado = cursoDesbloqueado(cursoIdx, c);
     const diasFalta = diasParaDesbloquear(cursoIdx, c);
 
-    // Aún no elige su curso gratis: en vez de abrir el detalle bloqueado,
-    // le preguntamos de una vez si quiere que ESTE sea su curso gratis.
-    if (!tieneAccesoVipCompleto() && !desbloqueado && cursoGratisPendiente() && cursoPuedeSerGratis(c)) {
+    // Aún no elige su curso gratis: en vez de abrir el detalle (aunque el
+    // curso ya tenga algo de contenido libre), le preguntamos de una vez si
+    // quiere que ESTE sea su curso gratis. "saltarConfirmacion" lo usa el
+    // botón "No, ver otros cursos" para abrir igual el detalle sin insistir.
+    if (!opts?.saltarConfirmacion && !tieneAccesoVipCompleto() && cursoGratisPendiente() && cursoPuedeSerGratis(c)) {
       confirmarCursoGratis(c);
       return;
     }
@@ -8203,7 +8205,7 @@ const Sections = (function(){
     if (!curso || !cursoGratisPendiente()) return;
     const gratis = clasesGratisPara(curso.sesiones?.length || 0);
     const footer = document.createElement('div');
-    footer.innerHTML = `<button type="button" class="btn btn--ghost" id="free-no">No, ver otros cursos</button><button type="button" class="btn btn--accent" id="free-si">Sí, es mi curso gratis</button>`;
+    footer.innerHTML = `<button type="button" class="btn btn--ghost" id="free-no">Solo quiero verlo</button><button type="button" class="btn btn--accent" id="free-si">Sí, es mi curso gratis</button>`;
     const modal = Modal.open({
       id: 'curso-gratis-confirmar',
       title: '¿Seguro que deseas este curso?',
@@ -8218,7 +8220,7 @@ const Sections = (function(){
       </div>`,
       footer
     });
-    footer.querySelector('#free-no').addEventListener('click', () => modal.close());
+    footer.querySelector('#free-no').addEventListener('click', () => { modal.close(); openCursoDetalle(curso.id, { saltarConfirmacion: true }); });
     footer.querySelector('#free-si').addEventListener('click', async (ev) => {
       const boton = ev.currentTarget;
       boton.disabled = true; boton.textContent = 'Guardando…';
