@@ -20,6 +20,25 @@
     ? 'http://localhost:8081'
     : 'https://sentia-academy-webhook-production.up.railway.app';
 
+  // ── Atribución: de dónde llegó la visita, capturada UNA vez al abrir la
+  // página (no al terminar el test) — así una visita que llegó por un
+  // anuncio con utm_source=facebook se queda con ese dato aunque el test
+  // tarde varios minutos en completarse. Si no trae UTM, se guarda el
+  // referrer (de qué página venía) como respaldo.
+  const ENTRY_META = (function () {
+    try {
+      const params = new URLSearchParams(location.search);
+      return {
+        utm_source: params.get('utm_source') || null,
+        utm_medium: params.get('utm_medium') || null,
+        utm_campaign: params.get('utm_campaign') || null,
+        utm_content: params.get('utm_content') || null,
+        referrer: document.referrer || null,
+        dispositivo: /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'movil' : 'escritorio'
+      };
+    } catch (e) { return {}; }
+  })();
+
   const state = {
     perfilBase: null,
     scores: Scoring.emptyScores(),
@@ -578,6 +597,7 @@
       id: state.resultadoId || (window.__ultimoResultadoSentia && window.__ultimoResultadoSentia.id) || ('sentia-' + Date.now().toString(36)),
       fecha: new Date().toISOString(),
       source: 'perfil_sentia',
+      ...ENTRY_META,
 
       perfil_base: state.perfilBase,
       perfil_principal: resultado.principal,

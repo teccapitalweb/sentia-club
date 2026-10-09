@@ -5673,6 +5673,14 @@ const Pages={
             <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-gauge"/></svg>Formatos favoritos</div></div>
             <div id="ps-dist-formatos" style="padding:4px 4px 10px;"></div>
           </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>De dónde vinieron</div></div>
+            <div id="ps-dist-fuentes" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivo</div></div>
+            <div id="ps-dist-dispositivo" style="padding:4px 4px 10px;"></div>
+          </div>
         </div>
 
         <div style="margin-top:28px;">
@@ -5837,6 +5845,23 @@ const Pages={
     const cFmt = {}; items.forEach(i => (i.formatos_preferidos || []).forEach(t => { cFmt[t] = (cFmt[t] || 0) + 1; }));
     const entriesFmt = Object.entries(cFmt).sort((a, b) => b[1] - a[1]);
     Pages._renderBarList(document.getElementById('ps-dist-formatos'), entriesFmt, { total });
+
+    // De dónde vinieron: utm_source si trae campaña, si no el dominio del
+    // referrer, si no "Directo" (entró con el link a secas, sin ninguno).
+    const cFuente = {};
+    items.forEach(i => {
+      let fuente = i.utm_source;
+      if (!fuente && i.referrer) { try { fuente = new URL(i.referrer).hostname.replace(/^www\./, ''); } catch (e) { fuente = 'Otro'; } }
+      fuente = fuente || 'Directo';
+      cFuente[fuente] = (cFuente[fuente] || 0) + 1;
+    });
+    const entriesFuente = Object.entries(cFuente).sort((a, b) => b[1] - a[1]);
+    Pages._renderBarList(document.getElementById('ps-dist-fuentes'), entriesFuente, { total });
+
+    const cDisp = { movil: 0, escritorio: 0 };
+    items.forEach(i => { if (i.dispositivo === 'movil' || i.dispositivo === 'escritorio') cDisp[i.dispositivo]++; });
+    const entriesDisp = [['Móvil', cDisp.movil], ['Escritorio', cDisp.escritorio]].filter(([, v]) => v > 0);
+    Pages._renderBarList(document.getElementById('ps-dist-dispositivo'), entriesDisp, { total });
   },
 
   _renderListaPerfiles() {
