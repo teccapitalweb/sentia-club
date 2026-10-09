@@ -7727,13 +7727,13 @@ const Sections = (function(){
           <div class="splash-cmp__confetti">
             ${Array.from({length:60}).map((_,i)=>`<span class="splash-cmp__confetti-bit" style="--d:${(Math.random()*0.5).toFixed(2)}s;--x:${(Math.random()*100-50)|0}vw;--r:${(Math.random()*720-360)|0}deg;--s:${(0.7+Math.random()*0.9).toFixed(2)};--c:${['#1b5df0','#2fbf2e','#3DDC5A','#60A5FA','#F87171','#FBBF24','#A78BFA'][i%7]}"></span>`).join('')}
           </div>
-          <div class="splash-cmp__box">
+          <div class="splash-cmp__box" role="dialog" aria-modal="true" aria-labelledby="logro-desbloqueado-title">
             <button class="splash-cmp__close" aria-label="Cerrar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
             <div class="splash-cmp__icon"><svg class="ic"><use href="#i-trophy"/></svg></div>
             <div class="splash-cmp__kicker">${unoSolo ? 'NUEVO LOGRO' : `${nuevos.length} LOGROS NUEVOS`}</div>
-            <h1 class="splash-cmp__title">${unoSolo ? escapeHtml(nuevos[0].nombre) : '¡Ganaste varios logros!'}</h1>
+            <h1 class="splash-cmp__title" id="logro-desbloqueado-title">${unoSolo ? escapeHtml(nuevos[0].nombre) : '¡Ganaste varios logros!'}</h1>
             <p class="splash-cmp__desc">${unoSolo ? escapeHtml(nuevos[0].desc) : nuevos.map(l=>escapeHtml(l.nombre)).join(' · ')}<br><strong>+${xpTotal} XP</strong></p>
             <div class="splash-cmp__actions">
               <button class="splash-cmp__btn splash-cmp__btn--primary" id="logro-continuar">Continuar</button>
@@ -16251,7 +16251,7 @@ window.SENTIAOnboarding = new window.MembershipTour({
       desktopSelectors: '.sidebar .nav-item[data-section="cursos"]',
       mobileSelectors: '.mobile-nav .mobile-nav__item[data-section="cursos"]',
       title: 'Tus cursos',
-      copy: 'En Mis cursos encontrarás las clases disponibles, tu progreso y los contenidos de psicología, educación y áreas afines.'
+      copy: 'En Mis cursos encontrarás las clases disponibles, tu progreso y los contenidos de psicología, educación y áreas afines. Ahí también verás las próximas clases en vivo.'
     },
     {
       desktopSelectors: '.sidebar .nav-item[data-section="pdfs"]',
@@ -16259,12 +16259,6 @@ window.SENTIAOnboarding = new window.MembershipTour({
       mobileDrawer: true,
       title: 'Tu biblioteca de materiales',
       copy: 'Guías, formatos, atlas y recursos descargables de tus cursos, listos para consultar.'
-    },
-    {
-      desktopSelectors: '.sidebar .nav-item[data-section="webinars"]',
-      mobileSelectors: '.mobile-nav .mobile-nav__item[data-section="webinars"]',
-      title: 'Clases en vivo',
-      copy: 'Consulta próximas transmisiones y sesiones con especialistas. Desde aquí podrás revisar fechas y entrar cuando una clase esté disponible.'
     },
     {
       desktopSelectors: '.sidebar [data-tour="tools"]',
@@ -16278,12 +16272,7 @@ window.SENTIAOnboarding = new window.MembershipTour({
       mobileSelectors: '.mobile-drawer .mobile-drawer__item[data-section="perfil"]',
       mobileDrawer: true,
       title: 'Perfil y configuración de tu cuenta',
-      copy: 'En Mi perfil puedes revisar tus datos, preferencias, seguridad y estado de membresía. La sección Suscripción está justo debajo para gestionar tu plan.'
-    },
-    {
-      selectors: '#btn-tour-help',
-      title: 'Vuelve a consultar esta guía',
-      copy: 'Cuando necesites recordar dónde está algo, pulsa este botón de ayuda. También puedes iniciar el recorrido nuevamente desde Mi perfil.'
+      copy: 'En Mi perfil puedes revisar tus datos, preferencias, seguridad y estado de membresía, y la sección Suscripción justo debajo. Si necesitas recordar dónde está algo, pulsa el botón de ayuda (?) o reinicia este recorrido desde aquí.'
     }
   ]
 });
