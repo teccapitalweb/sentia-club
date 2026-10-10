@@ -4447,7 +4447,12 @@ if (window.__isDemoMode) {
       await respiro(1100);
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
       try { await mostrarRecorridoYEsperar(); } catch(e){}
-      await respiro(1700);
+      // MODIFICADO: antes 1700ms fijos aquí, pensados para "mientras lee el
+      // recorrido" — pero mostrarRecorridoYEsperar() YA espera a que se
+      // cierre de verdad (click en "Listo" o avance hasta el final), así que
+      // ese tiempo extra era pura espera de más, sobre todo para quien le da
+      // "siguiente, siguiente" rápido y luego sigue esperando sin razón.
+      await respiro(400);
       try { await window.__pingLogrosVisita?.(); } catch(e){}
       await respiro(1600);
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
