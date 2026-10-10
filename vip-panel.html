@@ -4399,52 +4399,58 @@ if (window.__isDemoMode) {
     }, 50);
 
     // ─── Fila de popups de bienvenida, UNO A LA VEZ (nunca en paralelo) ───
+    // Orden pedido explícitamente por el cliente, cada uno esperando a que
+    // el anterior se cierre de verdad (no un tiempo fijo calculado a ciegas):
     // 1) Ficha profesional (si falta) → 2) bienvenida de invitado (si vino
-    // referido) → 3) celebración de logro nuevo con confeti (si desbloqueó
-    // algo, p.ej. "Te uniste a SENTIA") → 4) invitación a elegir curso
-    // gratis (solo cuentas sin membresía) → 5) recorrido guiado del panel.
-    // Cada paso espera a que el anterior se cierre, así nunca se amontonan
-    // dos en la misma pantalla. El recorrido guiado también se auto-inicia
-    // solo (ver onboarding-tour.js), pero por su cuenta se rinde a los 60s
-    // si sigue habiendo algo bloqueando la pantalla — un usuario real
-    // llenando la ficha puede tardar más que eso, así que aquí lo forzamos
-    // explícitamente al terminar esta fila, sin depender de ese límite.
-    // MODIFICADO: una pequeña pausa entre cada paso — antes uno cerraba y el
-    // siguiente aparecía en el mismo instante, se sentía atropellado. Ahora
-    // hay un respiro visible entre cada aviso (logros, curso gratis, recorrido).
-    const respiro = () => new Promise(r => setTimeout(r, 1600));
+    // referido, silencioso si no) → 3) recorrido guiado del panel → 4)
+    // celebración de logro nuevo con confeti (p.ej. "Te uniste a SENTIA") →
+    // 5) invitación a elegir curso gratis (solo cuentas sin membresía).
+    // MODIFICADO: el recorrido guiado ya NO se auto-inicia solo (se apagó su
+    // queueAuto más abajo, en la configuración de SENTIAOnboarding) — antes
+    // competía con esta fila y se adelantaba, apareciendo en un orden
+    // impredecible. Ahora solo arranca aquí, en su turno.
+    const respiro = (ms) => new Promise(r => setTimeout(r, ms));
+    // Consulta el servidor por su cuenta si hace falta (independiente de
+    // sincronizarLogros, que todavía no ha corrido en este punto de la fila).
+    async function recorridoVistoEnServidor(){
+      if (window.__recorridoVistoServidor !== undefined) return window.__recorridoVistoServidor;
+      try {
+        const r = await fetch(`${retosWebhookBase()}/api/logros/estado`, { headers: await window.__authHeaders() });
+        const data = await r.json();
+        if (r.ok) { window.__recorridoVistoServidor = data.recorridoVisto === true; return window.__recorridoVistoServidor; }
+      } catch(e){}
+      return undefined;
+    }
+    // Arranca el recorrido (si toca) y espera a que se cierre de verdad,
+    // antes de seguir con el siguiente aviso de la fila.
+    async function mostrarRecorridoYEsperar(){
+      if (!window.SENTIAOnboarding) return;
+      const visto = await recorridoVistoEnServidor();
+      let empezo = false;
+      // OJO: start(false) internamente SIGUE revisando wasSeen() local (ver
+      // onboarding-tour.js) y se cancela solo si lo encuentra en true — por
+      // eso aquí hay que pasarle force=true para que de verdad ignore ese
+      // localStorage viejo (p.ej. al borrar y recrear la cuenta desde admin).
+      if (visto === true) { window.SENTIAOnboarding.markSeen(); }
+      else if (visto === false) { window.SENTIAOnboarding.start(true); empezo = true; }
+      else if (!window.SENTIAOnboarding.wasSeen()) { window.SENTIAOnboarding.start(false); empezo = true; }
+      if (!empezo) return;
+      await new Promise(resolve => {
+        window.__resolverRecorridoCerrado = resolve;
+        // Respaldo: si por algo no se dispara onFinish, no se queda atorada
+        // la fila para siempre.
+        setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 90000);
+      });
+    }
     setTimeout(async () => {
       try { await window.__maybeAskProfile?.(); } catch(e){}
-      await respiro();
+      await respiro(1100);
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
-      await respiro();
+      try { await mostrarRecorridoYEsperar(); } catch(e){}
+      await respiro(1700);
       try { await window.__pingLogrosVisita?.(); } catch(e){}
-      await respiro();
+      await respiro(1600);
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
-      await respiro();
-      // "Una vez por cuenta", no por navegador: si el servidor ya sabe que
-      // esta cuenta vio el recorrido (en cualquier dispositivo), se marca
-      // visto aquí también para que ni este arranque ni el auto-inicio
-      // propio de la librería (queueAuto, basado en su localStorage) lo
-      // vuelvan a disparar.
-      try {
-        if (window.SENTIAOnboarding) {
-          // MODIFICADO: antes "else if (!wasSeen())" dejaba que un localStorage
-          // viejo de ESTE navegador (de una prueba anterior) bloqueara el
-          // recorrido aunque el servidor dijera que la cuenta es nueva —
-          // por ejemplo al borrar y recrear la cuenta desde admin. Ahora un
-          // "false" explícito del servidor manda siempre; wasSeen() local
-          // solo se usa si de plano no se pudo consultar el servidor.
-          // OJO: start(false) internamente SIGUE revisando wasSeen() local
-          // (ver onboarding-tour.js) y se cancela solo si lo encuentra en
-          // true — por eso aquí hay que pasarle force=true para que de
-          // verdad ignore ese localStorage viejo, no basta con decidir
-          // "si iniciar o no" desde afuera.
-          if (window.__recorridoVistoServidor === true) window.SENTIAOnboarding.markSeen();
-          else if (window.__recorridoVistoServidor === false) window.SENTIAOnboarding.start(true);
-          else if (!window.SENTIAOnboarding.wasSeen()) window.SENTIAOnboarding.start(false);
-        }
-      } catch(e){}
     }, 800);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
@@ -16538,6 +16544,10 @@ window.SENTIAOnboarding = new window.MembershipTour({
       const headers = window.__authHeaders ? await window.__authHeaders() : { 'Content-Type': 'application/json' };
       await fetch(base + '/api/perfil/recorrido-visto', { method: 'POST', headers });
     } catch (e) {}
+    // Avisa a la fila de bienvenida (ver más abajo) que el recorrido ya se
+    // cerró, para que el siguiente aviso espere a que este termine de verdad
+    // en vez de calcular su propio tiempo fijo.
+    try { if (window.__resolverRecorridoCerrado) { window.__resolverRecorridoCerrado(); window.__resolverRecorridoCerrado = null; } } catch(e){}
   },
   ready: function(){
     var state = window.UserState || {};
@@ -16585,6 +16595,14 @@ window.SENTIAOnboarding = new window.MembershipTour({
     }
   ]
 });
+// MODIFICADO: la librería se auto-inicia sola (queueAuto, ver
+// onboarding-tour.js) apenas la página está lista — eso competía con nuestra
+// fila de tarjetas de bienvenida y se adelantaba, haciendo que el recorrido
+// apareciera en un orden impredecible (justo después de la ficha de perfil,
+// en vez de en el lugar que le toca en la fila). Se apaga ese auto-inicio
+// propio para que el recorrido SOLO arranque cuando nuestra fila lo indique,
+// en el orden y con los tiempos que decidimos.
+try { clearTimeout(window.SENTIAOnboarding.autoTimer); } catch(e){}
 </script>
 <script src="cookies.js" defer></script>
 </body>
