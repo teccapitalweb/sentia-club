@@ -4447,12 +4447,12 @@ if (window.__isDemoMode) {
       await respiro(1100);
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
       try { await mostrarRecorridoYEsperar(); } catch(e){}
-      // MODIFICADO: pausa casi nula para logros y curso — mostrar cada
-      // tarjeta ya toma su propio tiempo (animación, fetch), así que se
-      // siguen una a otra casi de inmediato, igual de rápido ambas.
-      await respiro(100);
+      // MODIFICADO: sin pausa para logros y curso — se siguen una a otra
+      // en cuanto la anterior termina de cargar (el respiro() en 0 solo
+      // deja que el navegador respire un tick, no agrega espera real).
+      await respiro(0);
       try { await window.__pingLogrosVisita?.(); } catch(e){}
-      await respiro(100);
+      await respiro(0);
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
     }, 800);
 
