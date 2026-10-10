@@ -4438,8 +4438,9 @@ if (window.__isDemoMode) {
       await new Promise(resolve => {
         window.__resolverRecorridoCerrado = resolve;
         // Respaldo: si por algo no se dispara onFinish, no se queda atorada
-        // la fila para siempre.
-        setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 90000);
+        // la fila para siempre. MODIFICADO: 90s -> 30s, se sentía como que
+        // los logros nunca iban a aparecer.
+        setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 30000);
       });
     }
     setTimeout(async () => {
@@ -6264,8 +6265,12 @@ const Sections = (function(){
       if (window.__cursoGratisIntroVistaServidor === true) return;
       if (window.__cursoGratisIntroVistaServidor === undefined && localStorage.getItem('sentia:curso-gratis-intro-vista') === '1') return;
       if (tieneAccesoVipCompleto()) return;
-      if (!_cursosLoaded && !_cursosLoading) { try { await cargarCursosFirestore(); } catch(e){} }
-      await cargarCursoGratisEstado();
+      // MODIFICADO: tope de 10s cargando cursos/estado — antes podía
+      // quedarse esperando sin límite si la red iba lenta, y la invitación
+      // a elegir curso gratis nunca llegaba a aparecer en ese arranque.
+      const conTope = (p) => Promise.race([p, new Promise(r => setTimeout(r, 10000))]);
+      if (!_cursosLoaded && !_cursosLoading) { try { await conTope(cargarCursosFirestore()); } catch(e){} }
+      await conTope(cargarCursoGratisEstado());
       if (!cursoGratisPendiente()) return;
       localStorage.setItem('sentia:curso-gratis-intro-vista', '1');
       fetch(`${retosWebhookBase()}/api/perfil/curso-gratis-intro-visto`, { method:'POST', headers: await window.__authHeaders() }).catch(()=>{});
