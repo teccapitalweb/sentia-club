@@ -7846,14 +7846,16 @@ const Sections = (function(){
   // Se usa un ping aparte (/api/logros/visita) para registrar "hoy entré",
   // independiente de si la persona abre esta sección o no.
   window.__pingLogrosVisita = async function(){
-    try { await fetch(`${retosWebhookBase()}/api/logros/visita`, { method:'POST', headers: await window.__authHeaders() }); }
-    catch(e){ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ }
-    // Después de registrar la visita, sincroniza de una vez — así cualquier
-    // pantalla (Biblioteca, Retos, Logros) parte ya con el número real,
-    // sin depender de cuál se visite primero. Si algo se desbloqueó y el
-    // SERVIDOR todavía no lo tiene marcado como celebrado para esta cuenta,
-    // se celebra antes de continuar, y se avisa al servidor para que no se
-    // repita en otro dispositivo.
+    // MODIFICADO: antes esperaba a que terminara de registrar la visita
+    // (POST) para apenas ENTONCES pedir el estado (GET) — dos viajes al
+    // servidor uno detrás del otro, y la tarjeta de logros tardaba en
+    // aparecer por eso. Ahora se disparan juntos: si el POST no alcanzó a
+    // guardarse antes de que el GET lea el estado, lo que haya quedado
+    // pendiente (racha de hoy, etc.) se detecta en la siguiente sincronía,
+    // no se pierde, solo se nota uno visita después — y a cambio la
+    // tarjeta aparece casi al mismo tiempo que antes de llamar a esto.
+    const headers = await window.__authHeaders();
+    fetch(`${retosWebhookBase()}/api/logros/visita`, { method:'POST', headers }).catch(()=>{ /* sin conexión: la racha se intenta de nuevo en la próxima visita */ });
     try {
       const nuevos = await sincronizarLogros();
       if (nuevos && nuevos.length) {
