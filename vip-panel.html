@@ -12178,7 +12178,7 @@ const Sections = (function(){
         }
       }
 
-      function seleccionarMaterial(mid) {
+      function seleccionarMaterial(mid, opts) {
         _bibSeleccionado = mid;
         const m = materialesTodos.find(x => x.id === mid);
         if (!m) return;
@@ -12187,6 +12187,14 @@ const Sections = (function(){
         if (detalleWrap) {
           detalleWrap.outerHTML = _renderBibDetalle(m);
           _bindDetalleBtns(container, materialesTodos);
+          // Al hacer click en una tarjeta del grid (no al auto-seleccionar
+          // por cambio de pestaña), el panel grande queda arriba del grid
+          // y puede estar fuera de vista si el libro clickeado está más
+          // abajo — se sube la vista para que se note el cambio.
+          if (opts && opts.scroll) {
+            const nuevoDetalle = container.querySelector('#bib-detalle-panel');
+            if (nuevoDetalle) nuevoDetalle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
         grid.querySelectorAll('.bib-card').forEach(c => c.classList.toggle('is-selected', c.dataset.mid === mid));
       }
@@ -12207,7 +12215,7 @@ const Sections = (function(){
           const card = e.target.closest('.bib-card');
           if (!card) return;
           const mid = card.dataset.mid;
-          if (mid) seleccionarMaterial(mid);
+          if (mid) seleccionarMaterial(mid, { scroll: true });
         });
       }
 
@@ -12224,7 +12232,7 @@ const Sections = (function(){
           const card = e.target.closest('.bib-card');
           if (!card) return;
           const mid = card.dataset.mid;
-          if (mid) seleccionarMaterial(mid);
+          if (mid) seleccionarMaterial(mid, { scroll: true });
         });
       }
     }, 50);
