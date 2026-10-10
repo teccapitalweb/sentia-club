@@ -4438,9 +4438,9 @@ if (window.__isDemoMode) {
       await new Promise(resolve => {
         window.__resolverRecorridoCerrado = resolve;
         // Respaldo: si por algo no se dispara onFinish, no se queda atorada
-        // la fila para siempre. MODIFICADO: 90s -> 30s, se sentía como que
-        // los logros nunca iban a aparecer.
-        setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 30000);
+        // la fila para siempre. MODIFICADO: 90s -> 30s -> 18s, se sentía
+        // como que los logros nunca iban a aparecer.
+        setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 18000);
       });
     }
     setTimeout(async () => {
