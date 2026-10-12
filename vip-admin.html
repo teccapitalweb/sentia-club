@@ -1171,23 +1171,10 @@ onAuthStateChanged(auth, async (user) => {
 function limpiarSesionAdmin() {
   try { sessionStorage.removeItem('sentia_sesion'); sessionStorage.removeItem('sentia_ultima_actividad'); localStorage.removeItem('sentia_last_user'); } catch (_) {}
 }
-function instalarCierreAdminPorInactividad() {
-  if (window.__idleAdminGuardInstalled) return;
-  window.__idleAdminGuardInstalled = true;
-  const LIMITE_INACTIVIDAD_MS = 30 * 60 * 1000;
-  const marcar = () => { try { sessionStorage.setItem('sentia_ultima_actividad', String(Date.now())); } catch (_) {} };
-  ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(evento => window.addEventListener(evento, marcar, { passive: true }));
-  marcar();
-  setInterval(async () => {
-    const ultima = Number(sessionStorage.getItem('sentia_ultima_actividad') || Date.now());
-    if (Date.now() - ultima > LIMITE_INACTIVIDAD_MS && auth.currentUser) await window.__signOut('expirada');
-  }, 60 * 1000);
-}
 window.__signOut = async (motivo) => {
   try { limpiarSesionAdmin(); await signOut(auth); window.location.href = 'vip-auth.html' + (motivo === 'expirada' ? '?sesion=expirada' : ''); }
   catch(e){ alert('No pudimos cerrar sesión. Intenta de nuevo.'); }
 };
-instalarCierreAdminPorInactividad();
 </script>
 
 <script src="assets/sentia-bunny-catalog.js"></script>
