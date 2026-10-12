@@ -1288,6 +1288,7 @@ instalarCierreAdminPorInactividad();
     <div class="nav-section">
       <div class="nav-label">Cuenta</div>
       <a class="nav-item" data-section="config"><svg class="ic"><use href="#i-settings"/></svg>Configuración</a>
+      <a class="nav-item" href="vip-panel.html?como=vip" target="_blank" rel="noopener" title="Abre el panel en otra pestaña, viéndolo exactamente como lo ve un miembro VIP (sin nada de admin de por medio)"><svg class="ic"><use href="#i-eye"/></svg>Ver como VIP</a>
       <a class="nav-item" id="btn-logout"><svg class="ic"><use href="#i-logout"/></svg>Cerrar sesión</a>
     </div>
   </aside>
@@ -7434,9 +7435,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   Theme.init();
   document.getElementById('theme-toggle').addEventListener('click',()=>Theme.toggle());
   document.querySelectorAll('.nav-item, .mobile-nav__item').forEach(b=>b.addEventListener('click',e=>{
+    if(b.id==='btn-logout'){e.preventDefault();if(confirm('¿Cerrar sesión?')){AdminStore.destroy();if(window.__signOut)window.__signOut();else Toast.info('Cerrando…');}return;}
+    // Los que no navegan secciones del panel (como "Ver como VIP", con su
+    // propio href a otra pestaña) se dejan con su comportamiento normal de link.
+    if(!b.dataset.section)return;
     e.preventDefault();
-    if(b.id==='btn-logout'){if(confirm('¿Cerrar sesión?')){AdminStore.destroy();if(window.__signOut)window.__signOut();else Toast.info('Cerrando…');}return;}
-    if(b.dataset.section)navigate(b.dataset.section);
+    navigate(b.dataset.section);
   }));
   document.getElementById('modal-close').addEventListener('click',()=>Modal.close());
   document.getElementById('modal-backdrop').addEventListener('click',e=>{if(e.target.id==='modal-backdrop')Modal.close();});

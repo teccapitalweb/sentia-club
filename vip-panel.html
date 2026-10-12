@@ -6222,15 +6222,18 @@ const Sections = (function(){
   // ─── Lógica de desbloqueo progresivo (copiada de Sinergia) ───
   // Un curso se desbloquea cada 10 días desde fechaAlta del miembro
   // EXCEPCIÓN: si disponibleSiempre === true, visible desde día 1
-  // ═══ Modo preview para admins (probar como usuario VIP sin crear cuenta) ═══
-  // URL params: ?como=user → ignora isAdmin, se comporta como usuario normal
+  // ═══ Modo preview para admins (ver el panel como lo vería un miembro,
+  // sin crear una cuenta aparte) ═══
+  // URL params: ?como=user → simula una cuenta SIN VIP (sin admin tampoco)
+  //             ?como=vip  → simula una cuenta CON VIP, sin nada de admin
   //             &dias=N    → simula N días desde el alta (para probar desbloqueos)
   const _urlParams = new URLSearchParams(window.location.search);
   const PREVIEW_AS_USER = _urlParams.get('como') === 'user';
+  const PREVIEW_AS_VIP = _urlParams.get('como') === 'vip';
   const PREVIEW_DIAS = _urlParams.get('dias') !== null ? parseInt(_urlParams.get('dias'), 10) : null;
 
   function esAdminReal() {
-    return window.UserState?.isAdmin && !PREVIEW_AS_USER;
+    return window.UserState?.isAdmin && !PREVIEW_AS_USER && !PREVIEW_AS_VIP;
   }
 
   // ═══ Acceso público controlado: muestra gratis del primer curso ═══
@@ -6238,6 +6241,7 @@ const Sections = (function(){
   // publicable por orden. El resto del catálogo requiere membresía activa.
   function tieneAccesoVipCompleto() {
     if (PREVIEW_AS_USER) return false;
+    if (PREVIEW_AS_VIP) return true;
     return window.UserState?.modo === 'vip' || esAdminReal();
   }
 
@@ -6449,14 +6453,19 @@ const Sections = (function(){
     return Math.max(0, cursoUnlockDay(curso) - calcularDiasMembresia());
   }
 
-  // Mostrar banner si está en modo preview (solo admins lo ven)
-  if (PREVIEW_AS_USER) {
+  // Mostrar banner si está en modo preview (solo admins lo ven). El texto
+  // decía "como usuario VIP" en los dos casos por error — ?como=user en
+  // realidad simula SIN VIP; se corrige y se distingue de ?como=vip.
+  if (PREVIEW_AS_USER || PREVIEW_AS_VIP) {
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.UserState?.isAdmin) return;
       const banner = document.createElement('div');
       banner.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1b5df0,#2fbf2e);color:#081225;padding:11px 18px;border-radius:13px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:-.1px;box-shadow:0 12px 28px rgba(27,93,240,.35);display:flex;align-items:center;gap:14px;';
+      const texto = PREVIEW_AS_VIP
+        ? `Vista previa como miembro VIP · día ${calcularDiasMembresia()} de membresía`
+        : `Vista previa como miembro SIN VIP · día ${calcularDiasMembresia()} de membresía`;
       banner.innerHTML = `
-        <span>Vista previa como usuario VIP · día ${calcularDiasMembresia()} de membresía</span>
+        <span>${texto}</span>
         <a href="?" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Salir del preview</a>
       `;
       document.body.appendChild(banner);
