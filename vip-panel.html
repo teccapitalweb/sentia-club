@@ -6444,11 +6444,14 @@ const Sections = (function(){
     // Si hay override por URL (?dias=N), usar ese valor
     if (PREVIEW_DIAS !== null && !isNaN(PREVIEW_DIAS)) return PREVIEW_DIAS;
     const md = window.memberData;
+    // La cuenta admin nunca tiene miembros/{uid} con fechaAlta (ni en preview,
+    // ver boot) — sin esto el banner de preview siempre mostraría "día 0".
+    if ((PREVIEW_AS_USER || PREVIEW_AS_VIP) && !md) return 14;
     if (!md) return 0;
     const fecha = md.fechaAlta?.toDate
       ? md.fechaAlta.toDate()
       : (md.fechaAlta ? new Date(md.fechaAlta) : null);
-    if (!fecha) return 0;
+    if (!fecha) return (PREVIEW_AS_USER || PREVIEW_AS_VIP) ? 14 : 0;
     const dias = Math.floor((Date.now() - fecha.getTime()) / (1000 * 60 * 60 * 24));
     return Math.max(0, dias);
   }
