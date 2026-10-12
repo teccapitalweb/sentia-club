@@ -6982,14 +6982,56 @@ const Sections = (function(){
       }
       pintar();
     }
+    function jugarOrdenaPasos(items){
+      let orden = items.map((_, i) => i);   // posiciones actuales = índices sobre el arreglo que llegó (ya revuelto)
+      function pintar(){
+        body.innerHTML = `<div class="act-q__n">Ordena los pasos del 1 al ${items.length} y envía</div>
+          <div class="op-list">${orden.map((oi, pos) => `<div class="op-row">
+            <span class="op-num">${pos + 1}</span>
+            <span class="op-txt">${escapeHtml(items[oi].texto)}</span>
+            <button type="button" class="act-x" data-op-up="${pos}" ${pos === 0 ? 'disabled' : ''} aria-label="Subir">↑</button>
+            <button type="button" class="act-x" data-op-down="${pos}" ${pos === orden.length - 1 ? 'disabled' : ''} aria-label="Bajar">↓</button>
+          </div>`).join('')}</div>
+          <div class="act-actions"><button class="btn btn--primary" data-act="fin">Enviar orden</button></div>`;
+        body.querySelectorAll('[data-op-up]').forEach(b => b.onclick = () => { const k = +b.dataset.opUp; if (k > 0) { [orden[k - 1], orden[k]] = [orden[k], orden[k - 1]]; pintar(); } });
+        body.querySelectorAll('[data-op-down]').forEach(b => b.onclick = () => { const k = +b.dataset.opDown; if (k < orden.length - 1) { [orden[k], orden[k + 1]] = [orden[k + 1], orden[k]]; pintar(); } });
+        body.querySelector('[data-act="fin"]').onclick = () => terminar(0, orden);
+      }
+      pintar();
+    }
+
+    function jugarSemaforo(){
+      body.innerHTML = `<div class="act-q__n">¿Qué tan bien entendiste esta clase?</div>
+        <div class="act-actions" style="justify-content:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+          <button type="button" class="btn btn--ghost" data-sem style="border-color:#ef4444;color:#ef4444;">🔴 Aún tengo dudas</button>
+          <button type="button" class="btn btn--ghost" data-sem style="border-color:#f59e0b;color:#f59e0b;">🟡 Necesito repasarlo</button>
+          <button type="button" class="btn btn--ghost" data-sem style="border-color:#22c55e;color:#22c55e;">🟢 Lo entiendo</button>
+        </div>`;
+      // Es autoevaluación, no calificación: cualquier respuesta completa la actividad.
+      body.querySelectorAll('[data-sem]').forEach(b => b.onclick = () => terminar(100));
+    }
+
+    function jugarReflexion(){
+      body.innerHTML = `<div class="act-caso">${escapeHtml(a.pregunta || '¿Cómo aplicarías esto en tu contexto?')}</div>
+        <textarea class="input" rows="5" style="width:100%;font-family:inherit;font-size:13.5px;" placeholder="Escribe tu respuesta…" data-refl-txt></textarea>
+        <div class="act-actions"><button type="button" class="btn btn--primary" data-act="fin" disabled>Enviar</button></div>`;
+      const ta = body.querySelector('[data-refl-txt]'), btn = body.querySelector('[data-act="fin"]');
+      ta.addEventListener('input', () => { btn.disabled = !ta.value.trim(); });
+      btn.onclick = () => terminar(100);
+    }
+
     if (a.tipo === 'rompecabezas') { jugarRompecabezas(); }
     else if (a.tipo === 'ahorcado') { jugarAhorcado(a.items); }
     else if (a.tipo === 'sopa') { jugarSopa(a.items); }
     else if (a.tipo === 'crucigrama') { jugarCrucigrama(a.items); }
-    else if (a.tipo === 'quiz') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas)
+    else if (a.tipo === 'ordena_pasos') { jugarOrdenaPasos(a.items); }
+    else if (a.tipo === 'semaforo') { jugarSemaforo(); }
+    else if (a.tipo === 'reflexion') { jugarReflexion(); }
+    else if (a.tipo === 'quiz' || a.tipo === 'detecta_error' || a.tipo === 'mejor_respuesta') {   // MODIFICADO: preguntas capturadas en el editor visual (opción múltiple y verdadero/falso mezcladas); detecta_error/mejor_respuesta son variantes del mismo formato
+      const intro = a.tipo === 'detecta_error' ? 'Encuentra la opción que NO ayuda en cada pregunta.' : a.tipo === 'mejor_respuesta' ? 'Elige la mejor respuesta ante cada situación.' : '';
       preguntas(a.items.map(it => it.tipo === 'vf'
         ? { q: it.pregunta, exp: it.explicacion, ops: [{ texto: 'Verdadero', indiceRespuesta: 0 }, { texto: 'Falso', indiceRespuesta: 1 }] }
-        : { q: it.pregunta, exp: it.explicacion, ops: actBarajar((it.opciones || []).map((o, i) => ({ ...o, indiceRespuesta: i }))) }));
+        : { q: it.pregunta, exp: it.explicacion, ops: actBarajar((it.opciones || []).map((o, i) => ({ ...o, indiceRespuesta: i }))) }), intro);
     } else if (a.tipo === 'trivia' || a.tipo === 'caso') {
       preguntas(a.items.map(it => ({ q: it.pregunta, ops: (a.tipo === 'caso' ? it.opciones : actBarajar(it.opciones || [])).map((o, i, arr) => ({ ...o, indiceRespuesta: a.tipo === 'caso' ? i : (it.opciones || []).indexOf(o) })), exp: it.explicacion })), a.tipo === 'caso' ? a.situacion : '');
     } else if (a.tipo === 'vf') {
@@ -7081,6 +7123,10 @@ const Sections = (function(){
     .act-result__t{font-size:19px;font-weight:800;margin-top:4px}
     .act-result__d{font-size:14px;color:var(--text-2);margin:8px auto 16px;max-width:460px;line-height:1.55}
     .act-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+    .op-list{display:flex;flex-direction:column;gap:8px}
+    .op-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border)}
+    .op-num{flex-shrink:0;width:22px;height:22px;border-radius:999px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .op-txt{flex:1;font-size:13.5px;line-height:1.4;text-align:left}
     @media (max-width:600px){.act-chip{margin-left:0}.act-mem{grid-template-columns:repeat(2,1fr)}}`;
     document.head.appendChild(st);
   })();

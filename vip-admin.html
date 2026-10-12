@@ -2708,14 +2708,21 @@ const Pages={
         const clave = porClase.get(Number(sesion.numero) || indice + 1);
         if (!actividad || !clave || !Array.isArray(clave.respuestasCorrectas)) return sesion;
         const copia = JSON.parse(JSON.stringify(sesion));
-        (copia.actividad.items || []).forEach((item, i) => {
-          const respuesta = clave.respuestasCorrectas[i];
-          if (copia.actividad.tipo === 'vf' || (copia.actividad.tipo === 'quiz' && item.tipo === 'vf')) {
-            item.respuesta = respuesta !== 1;
-          } else {
-            (item.opciones || []).forEach((opcion, oi) => { opcion.correcta = oi === respuesta; });
-          }
-        });
+        if (copia.actividad.tipo === 'ordena_pasos') {
+          // El documento público trae los pasos revueltos; se reconstruye el
+          // orden original con la clave antes de mostrarlo en el editor.
+          const mostrados = copia.actividad.items || [];
+          copia.actividad.items = clave.respuestasCorrectas.map(j => mostrados[j]).filter(Boolean);
+        } else {
+          (copia.actividad.items || []).forEach((item, i) => {
+            const respuesta = clave.respuestasCorrectas[i];
+            if (copia.actividad.tipo === 'vf' || item.tipo === 'vf') {
+              item.respuesta = respuesta !== 1;
+            } else {
+              (item.opciones || []).forEach((opcion, oi) => { opcion.correcta = oi === respuesta; });
+            }
+          });
+        }
         return copia;
       });
     }
@@ -3029,15 +3036,31 @@ const Pages={
     if (s.actividad && a !== s.actividad) s.actividad = a;
     const esc = v => String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     if (!a) return '';
-    const tipos = { quiz:'Preguntas (opción múltiple y V/F)', ahorcado:'Ahorcado', sopa:'Sopa de letras', crucigrama:'Crucigrama', memorama:'Memorama', rompecabezas:'Rompecabezas', caso:'Caso práctico', externo:'Link externo' };
+    const tipos = { quiz:'Preguntas (opción múltiple y V/F)', detecta_error:'Detecta el error', mejor_respuesta:'Elige la mejor respuesta', ordena_pasos:'Ordena los pasos', ahorcado:'Ahorcado', sopa:'Sopa de letras', crucigrama:'Crucigrama', memorama:'Memorama', rompecabezas:'Rompecabezas', semaforo:'Semáforo de dominio', reflexion:'Reflexión', caso:'Caso práctico', externo:'Link externo' };
     const filas = (cols) => `<div class="actw">${(a.items || []).map((it, wi) => `<div class="actw__row" data-w="${wi}">
         <input class="input" data-wf="${cols[0].k}" value="${esc(it[cols[0].k])}" placeholder="${cols[0].ph}">
         <input class="input" data-wf="${cols[1].k}" value="${esc(it[cols[1].k])}" placeholder="${cols[1].ph}">
         <button type="button" class="actq__x actq__x--sm" data-wdel="${wi}" title="Quitar">×</button></div>`).join('')}</div>
       <button type="button" class="actq__add" data-wadd="${idx}">+ ${cols[2]}</button>`;
-    const cuerpo = a.tipo === 'quiz'
-      ? `${(a.items || []).map((q, qi) => this._actPreguntaHTML(idx, qi, q)).join('')}
+    const filasPasos = () => `<div class="actw">${(a.items || []).map((it, wi) => `<div class="actw__row actw__row--pasos" data-w="${wi}">
+        <span class="actw__num">${wi + 1}</span>
+        <input class="input" data-wf="texto" value="${esc(it.texto)}" placeholder="Paso ${wi + 1}">
+        <button type="button" class="actq__x actq__x--sm" data-wup="${wi}" title="Subir" ${wi === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" class="actq__x actq__x--sm" data-wdown="${wi}" title="Bajar" ${wi === (a.items || []).length - 1 ? 'disabled' : ''}>↓</button>
+        <button type="button" class="actq__x actq__x--sm" data-wdel="${wi}" title="Quitar">×</button></div>`).join('')}</div>
+      <button type="button" class="actq__add" data-wadd="${idx}">+ Agregar paso</button>`;
+    const cuerpo = ['quiz','detecta_error','mejor_respuesta'].includes(a.tipo)
+      ? `${a.tipo === 'detecta_error' ? '<div class="actw__help">Marca como "correcta" la opción que es el ERROR — la frase o intervención que NO ayuda. El alumno debe encontrarla.</div>' : ''}
+         ${a.tipo === 'mejor_respuesta' ? '<div class="actw__help">Marca como "correcta" la mejor respuesta ante el escenario. Usa la explicación para decir por qué.</div>' : ''}
+         ${(a.items || []).map((q, qi) => this._actPreguntaHTML(idx, qi, q)).join('')}
          <button type="button" class="actq__add" data-qadd="${idx}">+ Agregar pregunta</button>`
+      : a.tipo === 'ordena_pasos'
+      ? `<div class="actw__help">Escribe los pasos en su orden correcto (2 a 10). Al alumno se le muestran revueltos y los tiene que acomodar.</div>` + filasPasos()
+      : a.tipo === 'semaforo'
+      ? `<div class="actw__help">No requiere configuración. Al terminar la clase, el alumno marca qué tan bien entendió: verde, amarillo o rojo. No es calificable, solo informativo para ustedes.</div>`
+      : a.tipo === 'reflexion'
+      ? `<div class="actw__help">Pregunta abierta, no calificable — el alumno responde con texto libre.</div>
+         <textarea class="input actq__txt" rows="2" data-act-pregunta="${idx}" placeholder="¿Cómo aplicarías esto en tu contexto?">${esc(a.pregunta)}</textarea>`
       : ['ahorcado','sopa','crucigrama'].includes(a.tipo)
       ? `<div class="actw__help">${a.tipo === 'ahorcado' ? 'El alumno adivina cada palabra letra por letra; la pista aparece arriba.' : a.tipo === 'sopa' ? 'Palabras de hasta 12 letras (se buscan en horizontal, vertical y diagonal). La pista es opcional.' : 'Palabras de hasta 12 letras con su pista; el crucigrama se arma solo.'}</div>` + filas([{k:'palabra',ph:'Palabra'},{k:'pista',ph: a.tipo === 'sopa' ? 'Pista (opcional)' : 'Pista o definición'},'Agregar palabra'])
       : a.tipo === 'rompecabezas'
@@ -3063,11 +3086,11 @@ const Pages={
       <div class="actbox__head">
         <select class="input actq__sel" data-act-tipo="${idx}">${Object.entries(tipos).map(([k,v]) => `<option value="${k}" ${k === a.tipo ? 'selected' : ''}>${v}</option>`).join('')}</select>
         <input class="input" data-act-titulo="${idx}" value="${esc(a.titulo)}" placeholder="Título de la actividad">
-        <label class="actbox__min">Mínimo <input class="input" type="number" min="0" max="100" data-act-minimo="${idx}" value="${a.minimo ?? 60}">%</label>
+        ${['semaforo','reflexion'].includes(a.tipo) ? '<span class="actbox__min"></span>' : `<label class="actbox__min">Mínimo <input class="input" type="number" min="0" max="100" data-act-minimo="${idx}" value="${a.minimo ?? 60}">%</label>`}
         <button type="button" class="actq__x" data-act-quitar="${idx}" title="Quitar actividad">×</button>
       </div>
       <div style="font-size:11.5px;display:flex;align-items:center;gap:6px;margin:-2px 0 0;">
-        ${['quiz','trivia','caso','vf'].includes(a.tipo)
+        ${['quiz','detecta_error','mejor_respuesta','ordena_pasos','trivia','caso','vf'].includes(a.tipo)
           ? '<span style="color:#16a34a;font-weight:600;">✔ Cuenta para el certificado</span><span style="color:var(--text-3);">· el alumno debe aprobarla para certificar</span>'
           : '<span style="color:var(--text-3);">🎮 Práctica · no es obligatoria para el certificado (solo hay que ver la clase)</span>'}
       </div>
@@ -3094,6 +3117,8 @@ const Pages={
       .actq__add:hover{border-color:var(--ok,#1f9d24);color:var(--ok,#1f9d24)}
       .actq__exp{font-size:12.5px;padding:8px 11px}
       .actw{display:flex;flex-direction:column;gap:6px}.actw__row{display:grid;grid-template-columns:1fr 1.6fr 26px;gap:8px;align-items:center}.actw__row .input{padding:8px 11px;font-size:13px}
+      .actw__row--pasos{grid-template-columns:20px 1fr 26px 26px 26px}
+      .actw__num{font-size:12px;color:var(--text-3);text-align:center}
       .actw__help{font-size:11.5px;color:var(--text-3)}
       .actpz{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start}
       .actpz__prev{width:120px;height:120px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;display:grid;place-items:center;font-size:11px;color:var(--text-3)}
@@ -3115,6 +3140,7 @@ const Pages={
       if (t.dataset.actTitulo !== undefined) a.titulo = t.value;
       else if (t.dataset.actMinimo !== undefined) a.minimo = Math.max(0, Math.min(100, parseInt(t.value, 10) || 0));
       else if (t.dataset.actTexto !== undefined) a.texto = t.value;
+      else if (t.dataset.actPregunta !== undefined) a.pregunta = t.value;
       else if (t.dataset.pz) { if (t.dataset.pz === 'url') { a.imagen = t.value.trim(); const pv = t.closest('.actpz').querySelector('.actpz__prev'); pv.style.backgroundImage = a.imagen ? `url('${a.imagen}')` : 'none'; pv.textContent = a.imagen ? '' : 'Sin imagen'; } else if (t.dataset.pz === 'mensaje') a.mensaje = t.value; }
       else if (t.dataset.wf) { const w = t.closest('[data-w]'); if (w) a.items[+w.dataset.w][t.dataset.wf] = t.value; }
       else { const qi = qDe(t); if (qi === null) return; const q = a.items[qi];
@@ -3136,10 +3162,13 @@ const Pages={
       }
       if (t.dataset.actTipo !== undefined) {
         a.tipo = t.value;
-        if (t.value === 'quiz') { a.items = (a.items && a.items[0] && a.items[0].pregunta !== undefined) ? a.items : [{ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false}], explicacion:'' }]; }
+        if (['quiz','detecta_error','mejor_respuesta'].includes(t.value)) { a.items = (a.items && a.items[0] && a.items[0].pregunta !== undefined) ? a.items : [{ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false}], explicacion:'' }]; }
         else if (['ahorcado','sopa','crucigrama'].includes(t.value)) { a.items = (a.items && a.items[0] && a.items[0].palabra !== undefined) ? a.items : [{palabra:'',pista:''},{palabra:'',pista:''},{palabra:'',pista:''}]; }
         else if (t.value === 'rompecabezas') { a.items = [{ pz: true }]; a.piezas = a.piezas || 3; }
         else if (t.value === 'memorama') { a.items = (a.items && a.items[0] && a.items[0].a !== undefined) ? a.items : [{a:'',b:''},{a:'',b:''},{a:'',b:''}]; }
+        else if (t.value === 'ordena_pasos') { a.items = (a.items && a.items[0] && a.items[0].texto !== undefined && !a.items[0].refl) ? a.items : [{texto:''},{texto:''},{texto:''}]; }
+        else if (t.value === 'semaforo') { a.items = [{ sem: true }]; }
+        else if (t.value === 'reflexion') { a.items = [{ refl: true }]; a.pregunta = a.pregunta || ''; }
         else { a.items = []; a.texto = a.texto || ''; }
         return re();
       }
@@ -3153,8 +3182,10 @@ const Pages={
       const i = idxDe(t), a = ses(i).actividad; if (!a) return;
       if (t.dataset.actQuitar !== undefined) { if (confirm('¿Quitar la actividad de esta clase?')) { delete ses(i).actividad; re(); } return; }
       if (t.dataset.pzSubir !== undefined) { t.parentElement.querySelector('[data-pz-file]').click(); return; }
-      if (t.dataset.wadd !== undefined) { a.items.push(a.tipo === 'memorama' ? {a:'',b:''} : {palabra:'',pista:''}); return re(); }
+      if (t.dataset.wadd !== undefined) { a.items.push(a.tipo === 'memorama' ? {a:'',b:''} : a.tipo === 'ordena_pasos' ? {texto:''} : {palabra:'',pista:''}); return re(); }
       if (t.dataset.wdel !== undefined) { a.items.splice(+t.dataset.wdel, 1); return re(); }
+      if (t.dataset.wup !== undefined) { const k = +t.dataset.wup; if (k > 0) { [a.items[k-1], a.items[k]] = [a.items[k], a.items[k-1]]; } return re(); }
+      if (t.dataset.wdown !== undefined) { const k = +t.dataset.wdown; if (k < a.items.length - 1) { [a.items[k], a.items[k+1]] = [a.items[k+1], a.items[k]]; } return re(); }
       if (t.dataset.qadd !== undefined) { a.items.push({ tipo:'opcion', pregunta:'', opciones:[{texto:'',correcta:true},{texto:'',correcta:false},{texto:'',correcta:false}], explicacion:'' }); return re(); }
       if (t.dataset.actGuardar !== undefined) {
         const r = Pages._parseActividad(a.tipo, a.texto || ''); const msg = cont.querySelector(`[data-act-msg="${i}"]`);
@@ -3170,7 +3201,7 @@ const Pages={
   // Revisa una actividad antes de guardar el curso; devuelve el texto del error o ''
   _actValidar(a, n){
     if (!a) return '';
-    if (a.tipo === 'quiz') {
+    if (['quiz','detecta_error','mejor_respuesta'].includes(a.tipo)) {
       if (!(a.items || []).length) return `Clase ${n}: la actividad no tiene preguntas`;
       for (let k = 0; k < a.items.length; k++) {
         const q = a.items[k];
@@ -3199,6 +3230,15 @@ const Pages={
       a.items = (a.items || []).filter(it => String(it.a || '').trim() || String(it.b || '').trim());
       if (a.items.length < 3 || a.items.length > 8) return `Clase ${n}: el memorama necesita de 3 a 8 parejas`;
       if (a.items.some(it => !String(it.a || '').trim() || !String(it.b || '').trim())) return `Clase ${n}: completa concepto y definición en cada pareja`;
+    } else if (a.tipo === 'ordena_pasos') {
+      a.items = (a.items || []).filter(it => String(it.texto || '').trim());
+      if (a.items.length < 2) return `Clase ${n}: agrega al menos 2 pasos`;
+      if (a.items.length > 10) return `Clase ${n}: máximo 10 pasos`;
+    } else if (a.tipo === 'semaforo') {
+      a.items = [{ sem: true }];
+    } else if (a.tipo === 'reflexion') {
+      if (!String(a.pregunta || '').trim()) return `Clase ${n}: falta la pregunta de reflexión`;
+      a.items = [{ refl: true }];
     } else if (!(a.items || []).length) return `Clase ${n}: da clic en "Aplicar" en la actividad`;
     return '';
   },
@@ -3284,12 +3324,26 @@ const Pages={
   },
 
   _separarClaveActividad(actividad, numeroClase) {
-    if (!actividad || !['quiz', 'trivia', 'caso', 'vf'].includes(actividad.tipo)) {
+    const CERTIFICABLES = ['quiz', 'detecta_error', 'mejor_respuesta', 'ordena_pasos', 'trivia', 'caso', 'vf'];
+    if (!actividad || !CERTIFICABLES.includes(actividad.tipo)) {
       return { actividadPublica: actividad, clave: null };
+    }
+    if (actividad.tipo === 'ordena_pasos') {
+      const items = Array.isArray(actividad.items) ? actividad.items : [];
+      const n = items.length;
+      // Se revuelve el orden antes de publicar: el documento público nunca
+      // debe dejar ver cuál es el orden correcto (igual que se ocultan las
+      // respuestas correctas del quiz).
+      const perm = items.map((_, i) => i);
+      for (let i = perm.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [perm[i], perm[j]] = [perm[j], perm[i]]; }
+      const actividadPublica = JSON.parse(JSON.stringify(actividad));
+      actividadPublica.items = perm.map(i => items[i]);
+      const respuestasCorrectas = Array.from({ length: n }, (_, k) => perm.indexOf(k));
+      return { actividadPublica, clave: { numeroClase, tipo: actividad.tipo, respuestasCorrectas } };
     }
     const items = Array.isArray(actividad.items) ? actividad.items : [];
     const respuestasCorrectas = items.map(item => {
-      if (actividad.tipo === 'vf' || (actividad.tipo === 'quiz' && item.tipo === 'vf')) {
+      if (actividad.tipo === 'vf' || item.tipo === 'vf') {
         return item.respuesta === false ? 1 : 0;
       }
       return (item.opciones || []).findIndex(opcion => opcion?.correcta === true);
