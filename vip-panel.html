@@ -4470,6 +4470,10 @@ if (window.__isDemoMode) {
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
     setTimeout(() => { if (typeof setupNotificacionesListener === 'function') setupNotificacionesListener(); }, 100);
+
+    // Corrige sola la tarjeta del Directorio si el VIP real ya no coincide
+    // con lo que tenía guardado (silencioso, sin UI, no bloquea nada más).
+    setTimeout(() => { try { window.__dirSincronizarVip && window.__dirSincronizarVip(); } catch(e){} }, 100);
   });
 }
 
@@ -12533,6 +12537,25 @@ const Sections = (function(){
       try { localStorage.setItem(key,'1'); } catch(e){}
       return true;
     } catch(e){ console.warn('[directorio] no se pudo crear la tarjeta automática:', e.message); return false; }
+  };
+
+  // El campo `vip` de la tarjeta solo se guardaba al crearla o al editarla
+  // a mano — si alguien se hacía VIP después y nunca volvía a tocar su
+  // tarjeta, se quedaba para siempre en "Comunidad" en vez de "Miembros VIP
+  // verificados". Esto la corrige sola y en silencio, sin tocar nada más
+  // de lo que la persona ya haya personalizado (nombre, bio, foto, etc.).
+  window.__dirSincronizarVip = async function(){
+    const fs = window.__fs;
+    const uid = window.UserState?.uid;
+    if (!fs || !uid || !window.__currentUser) return;
+    try {
+      const ref = fs.doc(fs.db,'directorio',uid);
+      const ds = await fs.getDoc(ref);
+      if (!ds.exists()) return; // __dirAutoCrear se encarga de crearla si falta
+      const esVipAhora = dirEsVipActual();
+      if (ds.data().vip === esVipAhora) return; // ya está al día
+      await fs.updateDoc(ref, { vip: esVipAhora, updatedAt: fs.serverTimestamp() });
+    } catch(e){ console.warn('[directorio] no se pudo sincronizar vip:', e.message); }
   };
 
   function dirColorFor(uid){
