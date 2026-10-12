@@ -7726,64 +7726,97 @@ const Sections = (function(){
   ];
 
 
-  // Webinars: ahora se cargan de Firestore (col `webinars`)
-  // Antes era hardcoded · ahora vacío al iniciar, se llena con cargarWebinarsFirestore()
+  // Webinars: ahora se cargan de Firestore (col `webinars`) con un oído en
+  // vivo (onSnapshot) en vez de una sola lectura — antes, si el admin creaba
+  // una clase nueva mientras un miembro ya tenía el panel abierto, no se
+  // enteraba hasta recargar la página.
   let webinars = [];
   let _webinarsLoaded = false;
   let _webinarsLoading = false;
+  let _webinarsUnsub = null;
+
+  function _procesarSnapshotWebinars(snap) {
+    const ahora = Date.now();
+    webinars = snap.docs.map(d => {
+      const data = d.data();
+      // Convertir fecha (Timestamp o string) a ISO string
+      let fechaIso = '';
+      let fechaMs = 0;
+      const f = data.fecha;
+      if (f?.toDate) { const dt = f.toDate(); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
+      else if (f?.seconds) { const dt = new Date(f.seconds * 1000); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
+      else if (typeof f === 'string') { const dt = new Date(f); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
+      else if (f instanceof Date) { fechaIso = f.toISOString(); fechaMs = f.getTime(); }
+
+      return {
+        id: d.id,
+        titulo: data.titulo || 'Sin título',
+        desc: data.descripcion || data.desc || '',
+        descripcion: data.descripcion || data.desc || '',
+        instructor: data.instructor || 'Equipo SENTIA',
+        fecha: fechaIso,
+        fechaMs: fechaMs,
+        duracion: data.duracion || 60,
+        link: data.link || '',
+        area: data.area || 'General',
+        // MODIFICADO: sigue abierta mientras dure la clase (inicio + duracion), no solo hasta la hora de inicio
+        status: (fechaMs + (Number(data.duracion) || 60) * 60000) > ahora ? 'proxima' : 'grabada',
+        registrado: false,
+        visto: false
+      };
+    });
+    _webinarsLoaded = true;
+    _webinarsLoading = false;
+    // MODIFICADO: punto rojo en "Clases en vivo" solo si hay una clase proxima
+    try { const hay = webinars.some(w => w.status === 'proxima'); document.querySelectorAll('#nav-live-dot').forEach(d => d.style.display = hay ? '' : 'none'); } catch (_) {}
+  }
 
   async function cargarWebinarsFirestore() {
-    if (_webinarsLoading) return;
+    if (_webinarsUnsub) {
+      // Ya hay un oído en vivo corriendo — si el primer snapshot todavía no
+      // llegó, se espera un poco en vez de regresar con datos vacíos.
+      let intentos = 0;
+      while (_webinarsLoading && intentos < 50) { await new Promise(r => setTimeout(r, 100)); intentos++; }
+      return;
+    }
     _webinarsLoading = true;
     try {
       const db = window.__db;
       const fs = window.__fs;
       if (!db || !fs) throw new Error('Firestore no inicializado');
       const q = fs.query(fs.collection(db, 'webinars'), fs.orderBy('fecha', 'desc'));
-      const snap = await fs.getDocs(q);
-      const ahora = Date.now();
-      webinars = snap.docs.map(d => {
-        const data = d.data();
-        // Convertir fecha (Timestamp o string) a ISO string
-        let fechaIso = '';
-        let fechaMs = 0;
-        const f = data.fecha;
-        if (f?.toDate) { const dt = f.toDate(); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
-        else if (f?.seconds) { const dt = new Date(f.seconds * 1000); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
-        else if (typeof f === 'string') { const dt = new Date(f); fechaIso = dt.toISOString(); fechaMs = dt.getTime(); }
-        else if (f instanceof Date) { fechaIso = f.toISOString(); fechaMs = f.getTime(); }
-
-        return {
-          id: d.id,
-          titulo: data.titulo || 'Sin título',
-          desc: data.descripcion || data.desc || '',
-          descripcion: data.descripcion || data.desc || '',
-          instructor: data.instructor || 'Equipo SENTIA',
-          fecha: fechaIso,
-          fechaMs: fechaMs,
-          duracion: data.duracion || 60,
-          link: data.link || '',
-          area: data.area || 'General',
-          // MODIFICADO: sigue abierta mientras dure la clase (inicio + duracion), no solo hasta la hora de inicio
-          status: (fechaMs + (Number(data.duracion) || 60) * 60000) > ahora ? 'proxima' : 'grabada',
-          registrado: false,
-          visto: false
-        };
+      _webinarsUnsub = fs.onSnapshot(q, (snap) => {
+        _procesarSnapshotWebinars(snap);
+        // Refresca lo que esté visible ahora mismo (el widget de Inicio, o
+        // la sección "Clases en vivo" si está abierta), sin recargar.
+        try { if (typeof window.initCountdown === 'function') window.initCountdown(); } catch(e){}
+        try {
+          if ((window.location.hash || '').replace(/^#\/?/, '') === 'webinars' && typeof window.navigateToSection === 'function') {
+            window.navigateToSection('webinars', { replace: true });
+          }
+        } catch(e){}
+      }, (err) => {
+        console.warn('No se pudieron cargar webinars de Firestore:', err.message);
+        webinars = [];
+        _webinarsLoaded = true;
+        _webinarsLoading = false;
       });
-      _webinarsLoaded = true;
-      // MODIFICADO: punto rojo en "Clases en vivo" solo si hay una clase proxima
-      try { const hay = webinars.some(w => w.status === 'proxima'); document.querySelectorAll('#nav-live-dot').forEach(d => d.style.display = hay ? '' : 'none'); } catch (_) {}
     } catch (e) {
-      console.warn('No se pudieron cargar webinars de Firestore:', e.message);
+      console.warn('No se pudo iniciar el oído de webinars:', e.message);
       webinars = [];
       _webinarsLoaded = true;
-    } finally {
       _webinarsLoading = false;
     }
+    let intentos = 0;
+    while (_webinarsLoading && intentos < 100) { await new Promise(r => setTimeout(r, 100)); intentos++; }
   }
   window.__cargarWebinarsFirestore = cargarWebinarsFirestore;
-  // Permite forzar re-carga después de que auth esté listo
+  // Permite forzar re-carga después de que auth esté listo (apaga el oído
+  // viejo, que probablemente falló por falta de sesión, y deja que la
+  // siguiente llamada arranque uno nuevo ya autenticado)
   window.__resetWebinarsCache = function() {
+    if (_webinarsUnsub) { try { _webinarsUnsub(); } catch(e){} }
+    _webinarsUnsub = null;
     _webinarsLoaded = false;
     _webinarsLoading = false;
     webinars.length = 0;
