@@ -14923,9 +14923,26 @@ const NOTIFS_DEMO = [
   {id:'demo-3', tipo:'logro', icono:'i-trophy', color:'#FBBF24', titulo:'5 niveles de progresión', descripcion:'Desde Aprendiz hasta Maestro', createdAtMs: Date.now()-2*86400000}
 ];
 
+// Decide si una notificación le toca a ESTE miembro: por audiencia (todos/
+// solo VIP/solo no-VIP) y por fecha de evento (se oculta sola al día
+// siguiente de esa fecha, sin que el admin tenga que borrarla a mano).
+function notifAplicaParaMi(n, esVip) {
+  if (n.audiencia === 'vip' && !esVip) return false;
+  if (n.audiencia === 'no-vip' && esVip) return false;
+  if (n.fechaEvento) {
+    const hoy = new Date();
+    const hoyStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+    if (hoyStr > n.fechaEvento) return false;
+  }
+  return true;
+}
+
 // Setup del listener de notificaciones — se llama al cargar el panel
 // Es robusto: si __fs aún no está listo (módulo Firebase aún cargando), reintenta hasta 10s
 function setupNotificacionesListener(intento = 0) {
+  // Se dispara una sola vez (reintentos posteriores no la repiten) en paralelo
+  // con el listener de Firestore de abajo — no bloquea el primer pintado.
+  if (intento === 0 && !window.__notifsEstadoServidor.cargado) cargarNotifsEstadoServidor();
   const fs = window.__fs;
 
   // Si __fs aún no está listo, reintentar hasta 10 segundos (cada 500ms)
@@ -14955,6 +14972,7 @@ function setupNotificacionesListener(intento = 0) {
       fs.limit(15)
     );
     window.__notifsState.unsubscribe = fs.onSnapshot(q, (snap) => {
+      const esVip = tieneAccesoVipCompleto();
       const items = snap.docs.map(d => {
         const data = d.data();
         return {
@@ -14964,9 +14982,11 @@ function setupNotificacionesListener(intento = 0) {
           color: data.color || '#1b5df0',
           titulo: data.titulo || 'Sin título',
           descripcion: data.descripcion || '',
+          audiencia: data.audiencia || 'todos',
+          fechaEvento: data.fechaEvento || null,
           createdAtMs: data.createdAt?.toDate?.()?.getTime?.() || data.createdAt?.toMillis?.() || Date.now()
         };
-      });
+      }).filter(n => notifAplicaParaMi(n, esVip));
       // Usar SIEMPRE las notif reales de Firestore (aunque esté vacío · ahí el empty state se ve),
       // más el dato curioso del día (se calcula en el navegador, no depende de Firestore/Railway)
       window.__notifsState.items = [datoCuriosoDeHoy(), ...items];
@@ -14990,8 +15010,38 @@ function setupNotificacionesListener(intento = 0) {
   }
 }
 
+// "Una vez por cuenta", no por navegador: antes esto vivía solo en
+// localStorage, así que leer una notificación en el celular no se reflejaba
+// en la laptop de la misma cuenta. Ahora el servidor es la fuente real
+// (notif_estado/{uid}); localStorage queda solo como respaldo si el
+// servidor no se pudo consultar (sin internet, etc.).
+window.__notifsEstadoServidor = { leidas: [], eliminadas: [], cargado: false };
+
+async function cargarNotifsEstadoServidor() {
+  try {
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+    const r = await fetch(`${base}/api/notificaciones/estado`, { headers: await window.__authHeaders() });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'No se pudo cargar');
+    window.__notifsEstadoServidor = { leidas: data.leidas || [], eliminadas: data.eliminadas || [], cargado: true };
+  } catch (e) {
+    console.warn('[notif] estado del servidor no disponible, se usa respaldo local:', e.message);
+  }
+  actualizarBadgeNotif();
+}
+
+function marcarNotifEstadoEnServidor(ids, accion) {
+  try {
+    const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+    window.__authHeaders().then(headers => {
+      fetch(`${base}/api/notificaciones/marcar`, { method: 'POST', headers, body: JSON.stringify({ ids, accion }) }).catch(() => {});
+    });
+  } catch (e) {}
+}
+
 // Devuelve IDs de notificaciones ya leídas (por usuario)
 function getNotifsLeidas() {
+  if (window.__notifsEstadoServidor.cargado) return window.__notifsEstadoServidor.leidas;
   const uid = window.UserState?.uid || 'guest';
   try {
     return JSON.parse(localStorage.getItem('sentia_notif_read_' + uid) || '[]');
@@ -15003,28 +15053,34 @@ function marcarNotifsLeidas(ids) {
   const uid = window.UserState?.uid || 'guest';
   const ya = getNotifsLeidas();
   const todas = Array.from(new Set([...ya, ...ids]));
+  window.__notifsEstadoServidor.leidas = todas;
   try {
     localStorage.setItem('sentia_notif_read_' + uid, JSON.stringify(todas));
   } catch(e) {}
+  marcarNotifEstadoEnServidor(ids, 'leida');
 }
 
-// [Eliminar notif · solo cliente] Devuelve IDs de notificaciones eliminadas (ocultas solo para
-// este usuario en localStorage · la colección global `notificaciones` en Firestore NUNCA se toca)
+// Devuelve IDs de notificaciones eliminadas (ocultas solo para este usuario,
+// la colección global `notificaciones` en Firestore NUNCA se toca)
 function getNotifsEliminadas() {
+  if (window.__notifsEstadoServidor.cargado) return window.__notifsEstadoServidor.eliminadas;
   const uid = window.UserState?.uid || 'guest';
   try {
     return JSON.parse(localStorage.getItem('sentia_notif_deleted_' + uid) || '[]');
   } catch(e) { return []; }
 }
 
-// [Eliminar notif · solo cliente] Marca un array de IDs como eliminados (solo localStorage)
+// Marca un array de IDs como eliminados (solo oculta para esta cuenta, nunca
+// borra el documento global en Firestore)
 function marcarNotifsEliminadas(ids) {
   const uid = window.UserState?.uid || 'guest';
   const ya = getNotifsEliminadas();
   const todas = Array.from(new Set([...ya, ...ids]));
+  window.__notifsEstadoServidor.eliminadas = todas;
   try {
     localStorage.setItem('sentia_notif_deleted_' + uid, JSON.stringify(todas));
   } catch(e) {}
+  marcarNotifEstadoEnServidor(ids, 'eliminada');
 }
 
 // Cuenta cuántas notif son nuevas (no leídas y no eliminadas)

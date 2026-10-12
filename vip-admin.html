@@ -1804,6 +1804,34 @@ const Pages={
                 </div>
               </div>
 
+              <div>
+                <label style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Audiencia</label>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                  ${[['todos','Todos'],['vip','Solo VIP'],['no-vip','Solo no-VIP']].map(([key,label],i) => `
+                    <button type="button" class="notif-audiencia-btn ${i===0?'is-active':''}" data-audiencia="${key}" style="
+                      padding:9px 4px;border-radius:9px;cursor:pointer;text-align:center;
+                      background:${i===0 ? 'color-mix(in srgb,var(--primary) 18%, transparent)' : 'var(--surface-2)'};
+                      border:1.5px solid ${i===0 ? 'var(--primary)' : 'var(--border-2)'};
+                      color:${i===0 ? 'var(--primary)' : 'var(--text-2)'};
+                      font-family:'Sora',sans-serif;font-size:11px;font-weight:700;
+                      transition:all .15s;
+                    ">${label}</button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div>
+                <label for="notif-fecha-evento" style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Fecha del evento (opcional)</label>
+                <input id="notif-fecha-evento" type="date" style="
+                  width:100%;padding:11px 14px;border-radius:10px;
+                  background:var(--surface-2);border:1px solid var(--border-2);
+                  color:var(--text);font-size:14px;font-family:inherit;
+                " />
+                <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;font-family:'Instrument Sans',monospace;line-height:1.5;">
+                  Si la pones, el aviso se oculta solo a los miembros al día siguiente — no hace falta borrarlo a mano.
+                </div>
+              </div>
+
               <!-- Preview -->
               <div>
                 <label style="font-family:'Instrument Sans',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);font-weight:700;display:block;margin-bottom:6px;">Vista previa</label>
@@ -1888,10 +1916,12 @@ const Pages={
                         <span style="font-family:'Instrument Sans',monospace;font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:${color};font-weight:700;padding:2px 6px;background:color-mix(in srgb,${color} 14%, transparent);border-radius:4px;">${tipoInfo.label}</span>
                       </div>
                       <div style="font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:6px;">${(n.descripcion || '').replace(/</g,'&lt;')}</div>
-                      <div style="display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-3);font-family:'Instrument Sans',monospace;letter-spacing:.3px;text-transform:uppercase;font-weight:600;">
+                      <div style="display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-3);font-family:'Instrument Sans',monospace;letter-spacing:.3px;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
                         <span>${formatTime(ms)}</span>
                         <span>·</span>
                         <span>Por ${creadoPor}</span>
+                        ${n.audiencia === 'vip' ? '<span>·</span><span style="color:#A855F7;">Solo VIP</span>' : n.audiencia === 'no-vip' ? '<span>·</span><span style="color:#A855F7;">Solo no-VIP</span>' : ''}
+                        ${n.fechaEvento ? `<span>·</span><span>Evento: ${n.fechaEvento}</span>` : ''}
                       </div>
                     </div>
 
@@ -1924,11 +1954,31 @@ const Pages={
     const previewDesc = p.querySelector('#notif-preview-desc');
     const btnEnviar = p.querySelector('#notif-enviar-btn');
     const tipoBtns = p.querySelectorAll('.notif-tipo-btn');
+    const audienciaBtns = p.querySelectorAll('.notif-audiencia-btn');
+    const inputFechaEvento = p.querySelector('#notif-fecha-evento');
 
     // Estado actual del form
     let tipoSeleccionado = 'clase';
     let colorSeleccionado = TIPOS.clase.color;
     let iconoSeleccionado = TIPOS.clase.icono;
+    let audienciaSeleccionada = 'todos';
+
+    // Selector de audiencia
+    audienciaBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        audienciaBtns.forEach(b => {
+          b.classList.remove('is-active');
+          b.style.background = 'var(--surface-2)';
+          b.style.borderColor = 'var(--border-2)';
+          b.style.color = 'var(--text-2)';
+        });
+        btn.classList.add('is-active');
+        btn.style.background = 'color-mix(in srgb,var(--primary) 18%, transparent)';
+        btn.style.borderColor = 'var(--primary)';
+        btn.style.color = 'var(--primary)';
+        audienciaSeleccionada = btn.dataset.audiencia;
+      });
+    });
 
     // Selector de tipo
     tipoBtns.forEach(btn => {
@@ -1996,15 +2046,26 @@ const Pages={
       try {
         const user = window._fb?.auth?.currentUser;
         if (!user) throw new Error('Sesión admin no disponible');
-        const fb = window._fb;
-        await fb.addDoc(fb.collection(fb.db, 'notificaciones'), {
-          titulo, descripcion, tipo: tipoSeleccionado, icono: iconoSeleccionado, color: colorSeleccionado,
-          creadoPor: user.uid, createdAt: fb.serverTimestamp()
+        // MODIFICADO: ya no escribe directo a Firestore (`fb.addDoc`) — esa
+        // escritura dependía de que las reglas lo permitieran "por accidente";
+        // ahora pasa por el webhook, que valida el rol admin de verdad y
+        // aplica el límite de 20/hora, como ya decía el comentario del
+        // servidor que nadie conectaba.
+        const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + await user.getIdToken() },
+          body: JSON.stringify({
+            titulo, descripcion, tipo: tipoSeleccionado, icono: iconoSeleccionado, color: colorSeleccionado,
+            audiencia: audienciaSeleccionada, fechaEvento: inputFechaEvento.value || null
+          })
         });
-        Toast.success('¡Notificación enviada!', 'Aparecerá en la campanita de todos los miembros VIP');
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'No se pudo enviar');
+        Toast.success('¡Notificación enviada!', 'Aparecerá en la campanita de los miembros según la audiencia elegida');
         // Limpiar form
         inputTitulo.value = '';
         inputDesc.value = '';
+        inputFechaEvento.value = '';
         countTitulo.textContent = '0';
         countDesc.textContent = '0';
         previewTitulo.textContent = 'Título de la notificación';
@@ -2014,11 +2075,7 @@ const Pages={
         // El listener de Firestore va a re-renderear la lista automáticamente
       } catch (err) {
         console.error('[notif] error enviar:', err);
-        if (err.message?.includes('permission')) {
-          Toast.error('Permisos faltantes', 'Las reglas de Firestore no permiten escritura en `notificaciones`. Revisa la configuración.');
-        } else {
-          Toast.error('Error al enviar', err.message || 'Intenta de nuevo');
-        }
+        Toast.error('Error al enviar', err.message || 'Intenta de nuevo');
       } finally {
         btnEnviar.disabled = false;
         btnEnviar.style.opacity = '1';
@@ -2045,8 +2102,12 @@ const Pages={
           }
           const user = window._fb?.auth?.currentUser;
           if (!user) throw new Error('Sesión admin no disponible');
-          const fb = window._fb;
-          await fb.deleteDoc(fb.doc(fb.db, 'notificaciones', id));
+          const r = await fetch(`${Pages._webhookUrl}/admin/notificaciones/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + await user.getIdToken() }
+          });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(data.error || 'No se pudo eliminar');
           Toast.success('Notificación eliminada');
           // El listener auto re-renderea
         } catch (err) {

@@ -225,6 +225,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Qué notificaciones ya leyó/eliminó esta cuenta (no este navegador).
+    // Mismo motivo que arriba: si el navegador pudiera escribir aquí,
+    // cualquiera podría marcar como "leído" el estado de otra cuenta. Solo
+    // Railway lo registra, ligado al uid real del token.
+    match /notif_estado/{uid} {
+      allow read, write: if false;
+    }
+
     match /notificaciones/{id} {
       allow read: if signedIn();
       // La publicación global pasa por el webhook autenticado; ni siquiera
