@@ -4395,7 +4395,9 @@ if (window.__isDemoMode) {
       // Va aquí (no en init) porque ya se sabe si es VIP, sin-membresía o admin,
       // y las secciones se renderizan según ese estado.
       window.__restaurarSeccionPanel && window.__restaurarSeccionPanel();
-      window.__initPresencia && window.__initPresencia(user.uid);
+      // En preview no se marca presencia real — si no, el nombre del admin
+      // aparecería como "en línea" en el Foro para cualquier miembro real.
+      if (!window.__previewActivo) window.__initPresencia && window.__initPresencia(user.uid);
     }, 50);
 
     // ─── Fila de popups de bienvenida, UNO A LA VEZ (nunca en paralelo) ───
