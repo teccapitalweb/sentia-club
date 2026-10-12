@@ -157,5 +157,41 @@ window.SENTIA_QUESTIONS = {
         { label: 'Que estoy más actualizado/a que antes',                icon: 'refresh',points: { AP: 3 }, tags: ['actualizacion_profesional'], formato: 'actualizacion' }
       ]
     }
+  ],
+
+  // 3 preguntas de segmentación/marketing, iguales para todos, al final.
+  // A diferencia de "general", sus opciones NO suman puntos de perfil — solo
+  // guardan un valor fijo en `campo` (se usa en armarRegistro() de app.js
+  // para guardar cada una como su propio dato en el registro, para las
+  // gráficas del admin).
+  marketing: [
+    {
+      text: '¿Cuándo te gustaría empezar?',
+      campo: 'urgencia',
+      options: [
+        { label: 'Lo antes posible',          icon: 'target',    value: 'antes_posible' },
+        { label: 'Solo estoy explorando',      icon: 'compass',   value: 'explorando' },
+        { label: 'En el próximo mes',          icon: 'clipboard', value: 'proximo_mes' }
+      ]
+    },
+    {
+      text: '¿Qué es lo que más te detiene hoy?',
+      campo: 'que_detiene',
+      options: [
+        { label: 'El tiempo',                      icon: 'pulse', value: 'tiempo' },
+        { label: 'El costo',                        icon: 'case',  value: 'costo' },
+        { label: 'Todavía no estoy seguro/a',       icon: 'dots',  value: 'inseguro' }
+      ]
+    },
+    {
+      text: '¿Qué te gustaría lograr este año?',
+      campo: 'objetivo_anio',
+      options: [
+        { label: 'Crecer profesionalmente',                      icon: 'refresh',   value: 'crecer_profesionalmente' },
+        { label: 'Certificarme y destacar',                      icon: 'clipboard', value: 'certificarme' },
+        { label: 'Mejorar mi práctica o consulta',                icon: 'tool',      value: 'mejorar_practica' },
+        { label: 'Conocerme y gestionar mejor mis emociones',     icon: 'heart',     value: 'autoconocimiento' }
+      ]
+    }
   ]
 };

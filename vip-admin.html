@@ -5963,6 +5963,28 @@ const Pages={
     items.forEach(i => { if (i.utm_campaign) cCampana[i.utm_campaign] = (cCampana[i.utm_campaign] || 0) + 1; });
     const entriesCampana = Object.entries(cCampana).sort((a, b) => b[1] - a[1]);
     Pages._renderBarList(document.getElementById('pm-dist-campanas'), entriesCampana, { total: Object.values(cCampana).reduce((a, b) => a + b, 0) || 1 });
+
+    // 3 preguntas de segmentación/marketing agregadas al quiz — mismo patrón
+    // que las de arriba, solo cuentan quien sí contestó cada una (no todas
+    // las cuentas que llenaron el test tienen por qué traer estos 3 campos,
+    // p.ej. si se registraron antes de que existieran).
+    const URGENCIA_LABELS = { antes_posible: 'Lo antes posible', explorando: 'Solo explorando', proximo_mes: 'En el próximo mes' };
+    const cUrgencia = {};
+    items.forEach(i => { if (i.urgencia) cUrgencia[i.urgencia] = (cUrgencia[i.urgencia] || 0) + 1; });
+    const entriesUrgencia = Object.entries(cUrgencia).sort((a, b) => b[1] - a[1]).map(([k, v]) => [URGENCIA_LABELS[k] || k, v]);
+    Pages._renderBarList(document.getElementById('pm-dist-urgencia'), entriesUrgencia, { total: Object.values(cUrgencia).reduce((a, b) => a + b, 0) || 1 });
+
+    const DETIENE_LABELS = { tiempo: 'El tiempo', costo: 'El costo', inseguro: 'No está seguro/a' };
+    const cDetiene = {};
+    items.forEach(i => { if (i.que_detiene) cDetiene[i.que_detiene] = (cDetiene[i.que_detiene] || 0) + 1; });
+    const entriesDetiene = Object.entries(cDetiene).sort((a, b) => b[1] - a[1]).map(([k, v]) => [DETIENE_LABELS[k] || k, v]);
+    Pages._renderBarList(document.getElementById('pm-dist-detiene'), entriesDetiene, { total: Object.values(cDetiene).reduce((a, b) => a + b, 0) || 1 });
+
+    const OBJETIVO_LABELS = { crecer_profesionalmente: 'Crecer profesionalmente', certificarme: 'Certificarse y destacar', mejorar_practica: 'Mejorar su práctica/consulta', autoconocimiento: 'Conocerse y gestionar sus emociones' };
+    const cObjetivo = {};
+    items.forEach(i => { if (i.objetivo_anio) cObjetivo[i.objetivo_anio] = (cObjetivo[i.objetivo_anio] || 0) + 1; });
+    const entriesObjetivo = Object.entries(cObjetivo).sort((a, b) => b[1] - a[1]).map(([k, v]) => [OBJETIVO_LABELS[k] || k, v]);
+    Pages._renderBarList(document.getElementById('pm-dist-objetivo'), entriesObjetivo, { total: Object.values(cObjetivo).reduce((a, b) => a + b, 0) || 1 });
   },
 
   'perfiles-metricas'(p) {
@@ -5988,6 +6010,18 @@ const Pages={
           <div class="dash-card" style="grid-column:1/-1;">
             <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-zap"/></svg>Campañas (utm_campaign)</div></div>
             <div id="pm-dist-campanas" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>¿Cuándo quieren empezar?</div></div>
+            <div id="pm-dist-urgencia" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué los detiene</div></div>
+            <div id="pm-dist-detiene" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card" style="grid-column:1/-1;">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué quieren lograr este año</div></div>
+            <div id="pm-dist-objetivo" style="padding:4px 4px 10px;"></div>
           </div>
         </div>
       </div>

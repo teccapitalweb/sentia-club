@@ -46,9 +46,10 @@
     tags: new Set(),
     formatos: new Set(),
     objetivos: [],    // respuesta de la pregunta contextual (su meta específica)
-    queue: [],        // preguntas 2..7 (contextual + 5 generales), una vez conocido perfilBase
-    step: 0,          // 0 = pregunta base; 1..6 = índice dentro de queue
-    total: 7,
+    marketing: {},    // respuestas de las 3 preguntas de segmentación (campo → value)
+    queue: [],        // preguntas 2..10 (contextual + 5 generales + 3 marketing), una vez conocido perfilBase
+    step: 0,          // 0 = pregunta base; 1..9 = índice dentro de queue
+    total: 10,
     genero: null,     // 'f' | 'm' | null (opcional) — se pregunta al terminar las preguntas, antes del resultado
     resultado: null,  // se llena al terminar el test
     resultadoId: null, // id estable del registro, fijado al llegar al resultado (sobrevive un recargo de página)
@@ -63,6 +64,7 @@
       tags: new Set(state.tags),
       formatos: new Set(state.formatos),
       objetivos: state.objetivos.slice(),
+      marketing: Object.assign({}, state.marketing),
       queue: state.queue.slice(),
       step: state.step
     };
@@ -75,6 +77,7 @@
     state.tags = s.tags;
     state.formatos = s.formatos;
     state.objetivos = s.objetivos;
+    state.marketing = s.marketing;
     state.queue = s.queue;
     state.step = s.step;
   }
@@ -96,6 +99,7 @@
         tags: Array.from(state.tags),
         formatos: Array.from(state.formatos),
         objetivos: state.objetivos,
+        marketing: state.marketing,
         step: state.step
       }));
     } catch (e) {}
@@ -128,6 +132,7 @@
         tags: Array.from(state.tags),
         formatos: Array.from(state.formatos),
         objetivos: state.objetivos,
+        marketing: state.marketing,
         genero: state.genero
       }));
     } catch (e) {}
@@ -172,6 +177,7 @@
     state.tags = new Set();
     state.formatos = new Set();
     state.objetivos = [];
+    state.marketing = {};
     state.queue = [];
     state.step = 0;
     state.genero = null;
@@ -207,7 +213,8 @@
         // Construir la ruta de 6 preguntas restantes: contextual + 5 generales
         const contextual = Q.contextual[state.perfilBase] || Q.contextual._fallback;
         state.queue = [{ tipo: 'contextual', data: contextual }]
-          .concat(Q.general.map(g => ({ tipo: 'general', data: g })));
+          .concat(Q.general.map(g => ({ tipo: 'general', data: g })))
+          .concat(Q.marketing.map(g => ({ tipo: 'marketing', data: g })));
         state.step = 1;
         guardarProgreso();
         mostrarMensajeContexto(Q.contextMessage[state.perfilBase] || Q.contextMessage.otro, () => renderQueueStep());
@@ -240,6 +247,7 @@
         (opt.tags || []).forEach(t => state.tags.add(t));
         if (opt.formato) state.formatos.add(opt.formato);
         if (item.tipo === 'contextual') state.objetivos.push(opt.label);
+        if (item.tipo === 'marketing' && item.data.campo) state.marketing[item.data.campo] = opt.value;
         state.step += 1;
         guardarProgreso();
         if (state.step - 1 < state.queue.length) {
@@ -614,6 +622,12 @@
       ruta_recomendada: principal.recommendations,
       tags: Array.from(new Set(tags)),
 
+      // 3 preguntas de segmentación/marketing (sección "Métricas" del admin),
+      // sin relación con el cálculo de perfil.
+      urgencia: state.marketing.urgencia || null,
+      que_detiene: state.marketing.que_detiene || null,
+      objetivo_anio: state.marketing.objetivo_anio || null,
+
       // Datos de contacto: null hasta que el usuario decida dejarlos (sección 3, 16, 20)
       nombre: null, telefono: null, correo: null,
       acepta_comunicaciones: false, fecha_consentimiento: null,
@@ -643,9 +657,12 @@
     state.tags = new Set(g.tags || []);
     state.formatos = new Set(g.formatos || []);
     state.objetivos = g.objetivos || [];
+    state.marketing = g.marketing || {};
     state.step = g.step || 0;
     const contextual = Q.contextual[state.perfilBase] || Q.contextual._fallback;
-    state.queue = [{ tipo: 'contextual', data: contextual }].concat(Q.general.map(gq => ({ tipo: 'general', data: gq })));
+    state.queue = [{ tipo: 'contextual', data: contextual }]
+      .concat(Q.general.map(gq => ({ tipo: 'general', data: gq })))
+      .concat(Q.marketing.map(gq => ({ tipo: 'marketing', data: gq })));
     showScreen('question');
     if (state.step - 1 < state.queue.length) renderQueueStep(); else showScreen('genero');
     return true;
@@ -664,6 +681,7 @@
     state.tags = new Set(g.tags || []);
     state.formatos = new Set(g.formatos || []);
     state.objetivos = g.objetivos || [];
+    state.marketing = g.marketing || {};
     state.genero = g.genero;
     renderResult();
     return true;
