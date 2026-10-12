@@ -444,6 +444,10 @@ const ICON_OK  = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></
 window.showAlert = function(type, title, msg){
   const z = document.getElementById('alert-zone');
   z.innerHTML = '<div class="alert alert--' + type + '">' + (type==='error'?ICON_ERR:ICON_OK) + '<div class="alert__msg"><strong>' + title + '</strong>' + (msg?'<br>'+msg:'') + '</div></div>';
+  // El mensaje aparece arriba del formulario; si el usuario tiene el scroll
+  // abajo (normal en celular al llenar el registro), el mensaje queda fuera
+  // de pantalla y parece que no pasó nada al dar clic. Se lleva la vista ahí.
+  z.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 window.clearAlert = function(){ document.getElementById('alert-zone').innerHTML = ''; };
 
@@ -554,6 +558,7 @@ function mostrarVerificacionPendiente(user) {
   const z = document.getElementById('alert-zone');
   const correo = String(user.email || '').replace(/[<>&"]/g, '');
   z.innerHTML = `<div class="alert alert--error"><div class="alert__msg"><strong>Confirma tu correo para continuar</strong><br>Enviamos un enlace a ${correo}. Hasta confirmarlo no podrás entrar al panel ni obtener certificados.<br><br><button type="button" class="btn google" id="resend-verification" style="height:38px;min-height:38px;font-size:12px;">Reenviar enlace</button> <button type="button" class="btn google" id="check-verification" style="height:38px;min-height:38px;font-size:12px;">Ya confirmé</button></div></div>`;
+  z.scrollIntoView({ behavior: 'smooth', block: 'start' });
   z.querySelector('#resend-verification')?.addEventListener('click', async () => {
     try { await sendEmailVerification(user, { url: location.origin + '/vip-auth.html', handleCodeInApp: false }); showAlert('success', 'Enlace reenviado', 'Revisa tu bandeja de entrada y spam.'); }
     catch (e) { showAlert('error', 'No pudimos reenviar el enlace', translateError(e.code)); }
