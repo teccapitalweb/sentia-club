@@ -21,7 +21,8 @@ service cloud.firestore {
         // notificaciones. Esos datos los gestiona el servidor o un admin.
         && request.resource.data.keys().hasOnly([
           'uid', 'email', 'nombre', 'displayName', 'activa', 'activo', 'plan',
-          'source', 'origen', 'fechaRegistro', 'createdAt', 'lastUpdatedAt', 'referidoPor'
+          'source', 'origen', 'fechaRegistro', 'createdAt', 'lastUpdatedAt', 'referidoPor',
+          'fuenteMarketing'
         ])
         && request.resource.data.uid == uid
         && request.resource.data.email is string && request.resource.data.email.size() <= 254
@@ -30,6 +31,11 @@ service cloud.firestore {
         && (!('displayName' in request.resource.data) || (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100))
         && request.resource.data.activa == false
         && (!('activo' in request.resource.data) || request.resource.data.activo == false)
+        // De dónde vino la visita que terminó en esta cuenta (Google,
+        // Instagram, Directo, etc.) — para la gráfica "de dónde vienen tus
+        // miembros" del admin. Solo se siembra al crear, nunca se edita
+        // después.
+        && (!('fuenteMarketing' in request.resource.data) || (request.resource.data.fuenteMarketing is string && request.resource.data.fuenteMarketing.size() <= 60))
         // Quién la invitó (para el logro de "invita y gana"). Solo se puede
         // sembrar al crear la cuenta, nunca editar después, y no a sí mismo.
         && (!('referidoPor' in request.resource.data) || (request.resource.data.referidoPor is string && request.resource.data.referidoPor.matches('^[A-Za-z0-9]{10,40}$') && request.resource.data.referidoPor != uid));

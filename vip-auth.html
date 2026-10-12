@@ -593,6 +593,28 @@ async function actualizarPrecioHero(){
 
 /* CTA eliminado — registro directo en el formulario */
 
+// De dónde vino la visita que terminó registrándose (para "¿de dónde vienen
+// tus miembros?" en el admin) — capturado UNA vez al cargar la página (no al
+// enviar el formulario), mismo criterio que ya usa el quiz "Encuentra tu
+// perfil Sentia", y misma clasificación que las visitas del servidor.
+const FUENTE_MARKETING = (function () {
+  const ref = document.referrer;
+  if (!ref) return 'Directo';
+  let host;
+  try { host = new URL(ref).hostname.replace(/^www\./, ''); } catch (e) { return 'Directo'; }
+  if (host === 'club.sentiamx.com' || host === 'sentiamx.com') return 'Dentro del sitio';
+  if (/google\./.test(host)) return 'Google';
+  if (/bing\./.test(host)) return 'Bing';
+  if (/instagram\./.test(host)) return 'Instagram';
+  if (/facebook\.|fb\.com|l\.facebook\.com/.test(host)) return 'Facebook';
+  if (/t\.co|twitter\.|x\.com/.test(host)) return 'X (Twitter)';
+  if (/linkedin\./.test(host)) return 'LinkedIn';
+  if (/wa\.me|whatsapp\./.test(host)) return 'WhatsApp';
+  if (/tiktok\./.test(host)) return 'TikTok';
+  if (/youtube\.|youtu\.be/.test(host)) return 'YouTube';
+  return host;
+})();
+
 async function ensureMiembroDoc(user, displayName, origen){
   if (!user || !user.uid) return { ok:false, reason:'no-user' };
   try{
@@ -620,6 +642,7 @@ async function ensureMiembroDoc(user, displayName, origen){
       activa: false,
       plan: null,
       source: 'sentia',
+      fuenteMarketing: FUENTE_MARKETING,
       fechaRegistro: serverTimestamp(),
       createdAt: serverTimestamp(),
       lastUpdatedAt: serverTimestamp(),

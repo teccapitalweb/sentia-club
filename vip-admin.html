@@ -6047,6 +6047,34 @@ const Pages={
           <div id="vis-chart-dias" style="padding:14px 10px 4px;"></div>
         </div>
 
+        <h2 style="font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;margin:28px 0 14px;">De dónde vienen tus miembros</h2>
+        <div id="vis-miembros-origen"></div>
+
+        <h2 style="font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;margin:28px 0 14px;">Cuándo y desde dónde entran</h2>
+        <div class="dash-card">
+          <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Mapa de calor · día y hora</div></div>
+          <p style="margin:0 0 10px;padding:0 10px;font-size:11.5px;color:var(--text-3);">Cuándo entra la gente (hora de México). Más oscuro = más visitas.</p>
+          <div id="vis-mapa-calor" style="padding:4px 10px 14px;overflow-x:auto;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivos</div></div>
+            <div id="vis-dispositivos" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>Redes sociales</div></div>
+            <div id="vis-redes" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Países</div></div>
+            <div id="vis-paises" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-eye"/></svg>Páginas más vistas</div></div>
+            <div id="vis-paginas" style="padding:4px 4px 10px;"></div>
+          </div>
+        </div>
+
         <div class="dash-card" style="margin-top:20px;">
           <div class="dash-card__header">
             <div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-eye"/></svg>Visitas del periodo</div>
@@ -6084,6 +6112,12 @@ const Pages={
       Pages._renderKpisVisitas(data);
       Pages._renderChartDiasVisitas(data);
       Pages._renderFeedVisitas(data);
+      Pages._renderMapaCalorVisitas(data);
+      Pages._renderDispositivosVisitas(data);
+      Pages._renderRedesVisitas(data);
+      Pages._renderPaisesVisitas(data);
+      Pages._renderPaginasVisitas(data);
+      Pages._renderOrigenMiembros();
     } catch (e) {
       if (kpisEl) kpisEl.innerHTML = `<div style="padding:20px 4px;color:var(--danger);font-size:13px;">${adminEsc(e.message || 'No se pudo cargar')}</div>`;
       if (feedEl) feedEl.innerHTML = '';
@@ -6170,6 +6204,120 @@ const Pages={
           </div>
         </div>`;
     }).join('');
+  },
+
+  _renderMapaCalorVisitas(data) {
+    const el = document.getElementById('vis-mapa-calor');
+    if (!el) return;
+    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const mapa = data.mapaCalor || {};
+    let max = 1;
+    dias.forEach(d => (mapa[d] || []).forEach(v => { if (v > max) max = v; }));
+    const horasEtiqueta = [0, 6, 12, 18];
+    el.innerHTML = `
+      <div style="display:flex;gap:3px;padding-left:34px;margin-bottom:4px;">
+        ${Array.from({ length: 24 }).map((_, h) => `<div style="flex:1;min-width:14px;font-size:9px;color:var(--text-3);text-align:center;">${horasEtiqueta.includes(h) ? h + 'h' : ''}</div>`).join('')}
+      </div>
+      ${dias.map(d => `
+        <div style="display:flex;align-items:center;gap:3px;margin-bottom:3px;">
+          <div style="width:30px;flex-shrink:0;font-size:10.5px;color:var(--text-3);font-weight:600;">${d}</div>
+          ${(mapa[d] || new Array(24).fill(0)).map(v => {
+            const op = v === 0 ? 0.06 : Math.min(0.15 + (v / max) * 0.85, 1);
+            return `<div title="${d} · ${v} visitas" style="flex:1;min-width:14px;aspect-ratio:1;border-radius:3px;background:color-mix(in srgb,var(--primary) ${Math.round(op * 100)}%, var(--surface-2));"></div>`;
+          }).join('')}
+        </div>
+      `).join('')}
+    `;
+  },
+
+  _renderDispositivosVisitas(data) {
+    const d = data.dispositivos || {};
+    const entries = [['Teléfono', d.telefono || 0], ['Tableta', d.tableta || 0], ['Computadora', d.computadora || 0]].filter(([, v]) => v > 0);
+    Pages._renderBarList(document.getElementById('vis-dispositivos'), entries, { total: data.visitas || 1 });
+  },
+
+  _renderRedesVisitas(data) {
+    const entries = Object.entries(data.redesSociales || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    const el = document.getElementById('vis-redes');
+    if (!entries.length) { if (el) el.innerHTML = '<div style="padding:18px 4px;text-align:center;color:var(--text-3);font-size:12.5px;">Todavía nadie llegó desde una red social. Comparte tus enlaces con <code>?utm_source=facebook</code>, <code>?utm_source=instagram</code>, etc., para medirlo con exactitud.</div>'; return; }
+    Pages._renderBarList(el, entries, { total: data.visitas || 1, colorFor: (label) => Pages._VIS_ORIGEN_COLOR[label] || 'var(--primary)' });
+  },
+
+  _VIS_PAISES: { MX: 'México', US: 'Estados Unidos', ES: 'España', CO: 'Colombia', AR: 'Argentina', PE: 'Perú', CL: 'Chile', BR: 'Brasil', CA: 'Canadá', GT: 'Guatemala', EC: 'Ecuador', VE: 'Venezuela', BO: 'Bolivia', UY: 'Uruguay', PY: 'Paraguay', CR: 'Costa Rica', PA: 'Panamá', DO: 'República Dominicana', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua' },
+  _renderPaisesVisitas(data) {
+    const entries = Object.entries(data.paises || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => [Pages._VIS_PAISES[k] || k, v]);
+    Pages._renderBarList(document.getElementById('vis-paises'), entries, { total: data.visitas || 1 });
+  },
+
+  _VIS_PAGINAS: { '/index.html': 'Página principal', '/': 'Página principal', '/vip-auth.html': 'Inicio de sesión', '/vip-panel.html': 'Panel de miembros', '/vip-admin.html': 'Panel admin', '/perfil-sentia.html': 'Encuentra tu perfil Sentia' },
+  _renderPaginasVisitas(data) {
+    const entries = Object.entries(data.paginas || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => [Pages._VIS_PAGINAS[k] || k, v]);
+    Pages._renderBarList(document.getElementById('vis-paginas'), entries, { total: data.visitas || 1 });
+  },
+
+  // "De dónde vienen tus miembros": cuentas NUEVAS del mismo periodo elegido
+  // arriba, agrupadas por fuenteMarketing (se guarda desde vip-auth.html al
+  // registrarse) — y cuántas de esas ya son VIP (conversión). Viene de
+  // AdminStore (ya cargado en vivo), no hace falta pedirlo al webhook.
+  _renderOrigenMiembros() {
+    const el = document.getElementById('vis-miembros-origen');
+    if (!el) return;
+    const periodo = Pages._visState.periodo;
+    const hoy = new Date();
+    let desde;
+    if (periodo === 'hoy') { desde = new Date(hoy); desde.setHours(0, 0, 0, 0); }
+    else if (periodo === 'ayer') { desde = new Date(hoy); desde.setDate(desde.getDate() - 1); desde.setHours(0, 0, 0, 0); }
+    else if (periodo === '7dias') { desde = new Date(hoy); desde.setDate(desde.getDate() - 6); desde.setHours(0, 0, 0, 0); }
+    else { desde = new Date(hoy); desde.setDate(desde.getDate() - 29); desde.setHours(0, 0, 0, 0); }
+    let hasta = new Date(hoy);
+    if (periodo === 'ayer') { hasta = new Date(desde); hasta.setHours(23, 59, 59, 999); }
+
+    const miembros = (window.AdminStore?.miembros || []).filter(m => {
+      const f = m.fechaRegistro?.toDate ? m.fechaRegistro.toDate() : (m.fechaRegistro ? new Date(m.fechaRegistro) : null);
+      return f && f >= desde && f <= hasta;
+    });
+    if (!miembros.length) {
+      el.innerHTML = '<div class="dash-card"><div style="padding:18px 4px;text-align:center;color:var(--text-3);font-size:12.5px;">Sin cuentas nuevas en este periodo.</div></div>';
+      return;
+    }
+    const sinOrigen = miembros.filter(m => !m.fuenteMarketing).length;
+    const porOrigen = {};
+    miembros.forEach(m => {
+      if (!m.fuenteMarketing) return;
+      if (!porOrigen[m.fuenteMarketing]) porOrigen[m.fuenteMarketing] = { total: 0, vip: 0 };
+      porOrigen[m.fuenteMarketing].total++;
+      if (m.activo === true || m.activa === true) porOrigen[m.fuenteMarketing].vip++;
+    });
+    const filas = Object.entries(porOrigen).sort((a, b) => b[1].total - a[1].total);
+    const mejor = filas[0];
+    el.innerHTML = `
+      <div class="dash-card">
+        ${mejor ? `
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 10px;background:var(--surface-2);border-radius:12px;margin-bottom:14px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:${Pages._VIS_ORIGEN_COLOR[mejor[0]] || 'var(--primary)'};flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;">${adminEsc(mejor[0][0])}</div>
+            <div style="font-size:13px;"><b>${adminEsc(mejor[0])}</b> es de donde más miembros llegaron: <b>${mejor[1].total}</b> de ${miembros.length} cuentas nuevas (${Math.round(mejor[1].total / miembros.length * 100)}%).</div>
+          </div>
+        ` : ''}
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+            <thead><tr style="text-align:left;color:var(--text-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;">
+              <th style="padding:6px 10px;">Origen</th><th style="padding:6px 10px;">Cuentas</th><th style="padding:6px 10px;">VIP</th><th style="padding:6px 10px;">Conversión</th>
+            </tr></thead>
+            <tbody>
+              ${filas.map(([origen, v]) => `
+                <tr style="border-top:1px solid var(--border);">
+                  <td style="padding:8px 10px;font-weight:700;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${Pages._VIS_ORIGEN_COLOR[origen] || 'var(--primary)'};margin-right:6px;"></span>${adminEsc(origen)}</td>
+                  <td style="padding:8px 10px;">${v.total}</td>
+                  <td style="padding:8px 10px;">${v.vip}</td>
+                  <td style="padding:8px 10px;"><span class="tag ${v.vip > 0 ? 'tag--success' : ''}">${Math.round(v.vip / v.total * 100)}%</span></td>
+                </tr>
+              `).join('')}
+              ${sinOrigen ? `<tr style="border-top:1px solid var(--border);color:var(--text-3);"><td style="padding:8px 10px;">Sin origen registrado</td><td style="padding:8px 10px;">${sinOrigen}</td><td style="padding:8px 10px;" colspan="2">Cuentas de antes de este cambio</td></tr>` : ''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
   },
 
   // ─── Pruebas gratuitas: qué curso elige cada cuenta nueva y cuántas
