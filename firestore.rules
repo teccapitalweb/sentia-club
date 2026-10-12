@@ -233,6 +233,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Registro de visitas (panel + landing), analítica del admin. Lleva IP
+    // hasheada y país — nunca debe poder leerlo ni escribirlo el navegador
+    // directo, ni siquiera un admin. Solo Railway (Admin SDK), vía
+    // /api/visitas/registrar y /api/admin/visitas/resumen.
+    match /visitas/{id} {
+      allow read, write: if false;
+    }
+
     match /notificaciones/{id} {
       allow read: if signedIn();
       // La publicación global pasa por el webhook autenticado; ni siquiera

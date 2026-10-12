@@ -4474,6 +4474,20 @@ if (window.__isDemoMode) {
     // Corrige sola la tarjeta del Directorio si el VIP real ya no coincide
     // con lo que tenía guardado (silencioso, sin UI, no bloquea nada más).
     setTimeout(() => { try { window.__dirSincronizarVip && window.__dirSincronizarVip(); } catch(e){} }, 100);
+
+    // Analítica de visitas (fase 1) — un pulso silencioso, sin UI. Se manda
+    // con el token de sesión para que "quiénes entraron" del admin pueda
+    // mostrar el nombre en vez de "visitante anónimo".
+    setTimeout(async () => {
+      try {
+        const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
+        const headers = await window.__authHeaders();
+        fetch(`${base}/api/visitas/registrar`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ site: 'club', pagina: location.pathname, referrer: document.referrer || '' })
+        }).catch(() => {});
+      } catch (e) {}
+    }, 100);
   });
 }
 

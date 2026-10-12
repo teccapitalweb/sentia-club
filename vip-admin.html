@@ -1281,7 +1281,7 @@ instalarCierreAdminPorInactividad();
     <div class="nav-section">
       <div class="nav-label">Marketing</div>
       <a class="nav-item" data-section="perfiles-sentia"><svg class="ic"><use href="#i-chart-bar"/></svg>Perfiles<span class="nav-item__badge" id="badge-perfiles">0</span></a>
-      <a class="nav-item" data-section="perfiles-metricas"><svg class="ic"><use href="#i-trend"/></svg>Métricas</a>
+      <a class="nav-item" data-section="visitas"><svg class="ic"><use href="#i-trend"/></svg>Visitas</a>
       <a class="nav-item" data-section="pruebas-gratuitas"><svg class="ic"><use href="#i-zap"/></svg>Pruebas gratuitas</a>
     </div>
 
@@ -5742,6 +5742,35 @@ const Pages={
           </div>
         </div>
 
+        <h2 style="font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;margin:28px 0 14px;">De dónde vinieron y qué buscan</h2>
+        <div class="kpi-grid" id="pm-kpis"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>De dónde vinieron</div></div>
+            <div id="pm-dist-fuentes" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivo</div></div>
+            <div id="pm-dist-dispositivo" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card" style="grid-column:1/-1;">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-zap"/></svg>Campañas (utm_campaign)</div></div>
+            <div id="pm-dist-campanas" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>¿Cuándo quieren empezar?</div></div>
+            <div id="pm-dist-urgencia" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué los detiene</div></div>
+            <div id="pm-dist-detiene" style="padding:4px 4px 10px;"></div>
+          </div>
+          <div class="dash-card" style="grid-column:1/-1;">
+            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué quieren lograr este año</div></div>
+            <div id="pm-dist-objetivo" style="padding:4px 4px 10px;"></div>
+          </div>
+        </div>
+
         <div style="margin-top:28px;">
           <div class="curso-toolbar">
             <div class="curso-search-wrap">
@@ -5792,6 +5821,8 @@ const Pages={
     Pages._renderKpisPerfiles();
     Pages._renderDistribucionesPerfiles();
     Pages._renderListaPerfiles();
+    Pages._renderKpisMetricas();
+    Pages._renderDistribucionesMetricas();
   },
 
   _renderPillsPerfiles() {
@@ -5987,47 +6018,158 @@ const Pages={
     Pages._renderBarList(document.getElementById('pm-dist-objetivo'), entriesObjetivo, { total: Object.values(cObjetivo).reduce((a, b) => a + b, 0) || 1 });
   },
 
-  'perfiles-metricas'(p) {
+  // ─── Visitas (fase 1): cuánta gente visita el panel y el landing, de
+  // dónde llega y quién entró. Se pide al webhook bajo demanda (no vive en
+  // AdminStore/Firestore en vivo como el resto del panel) porque el
+  // periodo elegido cambia la consulta.
+  _visState: { periodo: 'hoy' },
+  'visitas'(p) {
+    const S = Pages._visState;
     p.innerHTML = `
       <div class="fade-up">
         <div class="sec-hero">
-          <span class="sec-hero__eyebrow">Analítica de usuarios</span>
-          <h1 class="sec-hero__title">Métricas</h1>
-          <p class="sec-hero__sub">De dónde vienen las visitas que hacen "Encuentra tu perfil Sentia": campaña, referencia y tipo de dispositivo.</p>
+          <span class="sec-hero__eyebrow">Marketing</span>
+          <h1 class="sec-hero__title">Visitas</h1>
+          <p class="sec-hero__sub">Cuánta gente visita el panel y el sitio público de SENTIA, desde dónde llega y quién entró. Conteo anónimo y sin cookies; se guarda día a día para poder consultar el historial.</p>
         </div>
 
-        <div class="kpi-grid" id="pm-kpis"></div>
+        <div class="curso-pills" id="vis-periodo-pills">
+          <button class="curso-pill" data-vis-periodo="hoy" ${S.periodo === 'hoy' ? 'data-active="1"' : ''}>Hoy</button>
+          <button class="curso-pill" data-vis-periodo="ayer" ${S.periodo === 'ayer' ? 'data-active="1"' : ''}>Ayer</button>
+          <button class="curso-pill" data-vis-periodo="7dias" ${S.periodo === '7dias' ? 'data-active="1"' : ''}>7 días</button>
+          <button class="curso-pill" data-vis-periodo="30dias" ${S.periodo === '30dias' ? 'data-active="1"' : ''}>30 días</button>
+        </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-broadcast"/></svg>De dónde vinieron</div></div>
-            <div id="pm-dist-fuentes" style="padding:4px 4px 10px;"></div>
+        <div class="kpi-grid" id="vis-kpis"></div>
+
+        <div class="dash-card" style="margin-top:20px;">
+          <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Visitas por día de la semana</div></div>
+          <div id="vis-chart-dias" style="padding:14px 10px 4px;"></div>
+        </div>
+
+        <div class="dash-card" style="margin-top:20px;">
+          <div class="dash-card__header">
+            <div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-eye"/></svg>Visitas del periodo</div>
+            <button class="icon-action" id="vis-refrescar" title="Actualizar"><svg class="ic"><use href="#i-refresh"/></svg></button>
           </div>
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-chart-bar"/></svg>Dispositivo</div></div>
-            <div id="pm-dist-dispositivo" style="padding:4px 4px 10px;"></div>
-          </div>
-          <div class="dash-card" style="grid-column:1/-1;">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-zap"/></svg>Campañas (utm_campaign)</div></div>
-            <div id="pm-dist-campanas" style="padding:4px 4px 10px;"></div>
-          </div>
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>¿Cuándo quieren empezar?</div></div>
-            <div id="pm-dist-urgencia" style="padding:4px 4px 10px;"></div>
-          </div>
-          <div class="dash-card">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué los detiene</div></div>
-            <div id="pm-dist-detiene" style="padding:4px 4px 10px;"></div>
-          </div>
-          <div class="dash-card" style="grid-column:1/-1;">
-            <div class="dash-card__header"><div class="dash-card__title"><svg class="ic" style="color:var(--primary);"><use href="#i-trend"/></svg>Qué quieren lograr este año</div></div>
-            <div id="pm-dist-objetivo" style="padding:4px 4px 10px;"></div>
-          </div>
+          <div id="vis-feed-info" style="padding:0 10px 8px;font-size:11.5px;color:var(--text-3);"></div>
+          <div id="vis-feed"></div>
         </div>
       </div>
     `;
-    Pages._renderKpisMetricas();
-    Pages._renderDistribucionesMetricas();
+    p.querySelectorAll('[data-vis-periodo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        p.querySelectorAll('[data-vis-periodo]').forEach(b => b.removeAttribute('data-active'));
+        btn.setAttribute('data-active', '1');
+        Pages._visState.periodo = btn.dataset.visPeriodo;
+        Pages._cargarVisitas();
+      });
+    });
+    p.querySelector('#vis-refrescar')?.addEventListener('click', () => Pages._cargarVisitas());
+    Pages._cargarVisitas();
+  },
+
+  async _cargarVisitas() {
+    const kpisEl = document.getElementById('vis-kpis');
+    const feedEl = document.getElementById('vis-feed');
+    if (kpisEl) kpisEl.innerHTML = '<div style="padding:20px 4px;color:var(--text-3);font-size:13px;">Cargando…</div>';
+    try {
+      const user = window._fb?.auth?.currentUser;
+      if (!user) throw new Error('Sesión admin no disponible');
+      const r = await fetch(`${Pages._webhookUrl}/api/admin/visitas/resumen?periodo=${encodeURIComponent(Pages._visState.periodo)}`, {
+        headers: { 'Authorization': 'Bearer ' + await user.getIdToken() }
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'No se pudo cargar');
+      Pages._renderKpisVisitas(data);
+      Pages._renderChartDiasVisitas(data);
+      Pages._renderFeedVisitas(data);
+    } catch (e) {
+      if (kpisEl) kpisEl.innerHTML = `<div style="padding:20px 4px;color:var(--danger);font-size:13px;">${adminEsc(e.message || 'No se pudo cargar')}</div>`;
+      if (feedEl) feedEl.innerHTML = '';
+    }
+  },
+
+  _renderKpisVisitas(data) {
+    const el = document.getElementById('vis-kpis');
+    if (!el) return;
+    el.innerHTML = `
+      <div class="kpi-card" style="--c1:#2fbf2e;--c2:#3ddc5a;">
+        <div class="kpi-card__label">Visitas</div>
+        <div class="kpi-card__value">${data.visitas}</div>
+        <div class="kpi-card__sub">Páginas vistas</div>
+      </div>
+      <div class="kpi-card" style="--c1:#3B82F6;--c2:#60A5FA;">
+        <div class="kpi-card__label">Personas distintas</div>
+        <div class="kpi-card__value">${data.personasDistintas}</div>
+        <div class="kpi-card__sub">Visitantes únicos del periodo</div>
+      </div>
+      <div class="kpi-card" style="--c1:#F59E0B;--c2:#FBBF24;">
+        <div class="kpi-card__label">Cuentas nuevas</div>
+        <div class="kpi-card__value">${data.cuentasNuevas}</div>
+        <div class="kpi-card__sub">Personas que crearon su cuenta</div>
+      </div>
+      <div class="kpi-card" style="--c1:#A78BFA;--c2:#C4B5FD;">
+        <div class="kpi-card__label">Promedio por día</div>
+        <div class="kpi-card__value">${data.promedioPorDia}</div>
+        <div class="kpi-card__sub">Visitas entre días del periodo</div>
+      </div>
+    `;
+  },
+
+  _renderChartDiasVisitas(data) {
+    const el = document.getElementById('vis-chart-dias');
+    if (!el) return;
+    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const valores = dias.map(d => (data.porDiaSemana && data.porDiaSemana[d]) || 0);
+    const max = Math.max(1, ...valores);
+    el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:10px;height:140px;">` +
+      dias.map((d, i) => {
+        const v = valores[i];
+        const h = Math.max(Math.round((v / max) * 100), v > 0 ? 4 : 0);
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;">
+          <div style="font-size:11px;font-weight:700;color:var(--text-2);">${v}</div>
+          <div style="width:100%;height:${h}%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--primary),color-mix(in srgb,var(--primary) 55%, transparent));"></div>
+          <div style="font-size:11px;color:var(--text-3);">${d}</div>
+        </div>`;
+      }).join('') + `</div>`;
+  },
+
+  _VIS_DISPOSITIVO_LABELS: { telefono: 'Teléfono', tableta: 'Tableta', computadora: 'Computadora' },
+  _VIS_ORIGEN_COLOR: { 'Google': '#4285F4', 'Bing': '#008373', 'Instagram': '#E1306C', 'Facebook': '#1877F2', 'X (Twitter)': '#000000', 'LinkedIn': '#0A66C2', 'WhatsApp': '#25D366', 'TikTok': '#000000', 'YouTube': '#FF0000', 'Dentro del sitio': 'var(--text-3)', 'Directo': 'var(--text-3)' },
+  _renderFeedVisitas(data) {
+    const info = document.getElementById('vis-feed-info');
+    if (info) {
+      const masTexto = data.totalFeed > data.feed.length ? ` · mostrando las últimas ${data.feed.length}` : '';
+      info.textContent = `${data.visitas} visitas · ${data.personasDistintas} personas en este periodo${masTexto}`;
+    }
+    const el = document.getElementById('vis-feed');
+    if (!el) return;
+    if (!data.feed.length) {
+      el.innerHTML = '<div style="padding:30px 16px;text-align:center;color:var(--text-3);font-size:12.5px;">Sin visitas en este periodo todavía.</div>';
+      return;
+    }
+    el.innerHTML = data.feed.map(v => {
+      const hora = v.timestamp ? new Date(v.timestamp).toLocaleString('es-MX', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '—';
+      const dot = Pages._VIS_ORIGEN_COLOR[v.origen] || 'var(--primary)';
+      const dispLabel = Pages._VIS_DISPOSITIVO_LABELS[v.dispositivo] || v.dispositivo || '—';
+      const quien = v.nombreVisible ? adminEsc(v.nombreVisible) : 'Visitante anónimo';
+      return `
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 10px;border-top:1px solid var(--border);font-size:12.5px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;font-weight:700;color:var(--text);">
+              <span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
+              ${adminEsc(v.origen || 'Directo')}
+              ${v.esPrimeraDelDia ? '<span style="font-size:10px;color:var(--text-3);font-weight:600;">· primera del día</span>' : ''}
+            </div>
+            <div style="color:var(--text-3);margin-top:3px;">${quien}${v.pagina ? ' · ' + adminEsc(v.pagina) : ''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;color:var(--text-2);">
+            <div>${hora}</div>
+            <div style="color:var(--text-3);">${v.pais || '—'} · ${dispLabel}</div>
+          </div>
+        </div>`;
+    }).join('');
   },
 
   // ─── Pruebas gratuitas: qué curso elige cada cuenta nueva y cuántas
@@ -6802,7 +6944,7 @@ function dirAdminCargar(){
    refresh te deja donde estabas, los botones atrás/adelante del
    navegador funcionan y puedes compartir un link directo a la sección.
    ═══════════════════════════════════════════════════════════════════ */
-const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia','perfiles-metricas','pruebas-gratuitas'];
+const SECCIONES_VALIDAS = ['dashboard','notificaciones','cursos','webinars','pdfs','certificados','miembros','noticias','config','foro','directorio','perfiles-sentia','visitas','pruebas-gratuitas'];
 
 function seccionDesdeHash(){
   const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
@@ -7112,11 +7254,11 @@ const AdminStore = {
       if (typeof Pages._renderKpisMiembros === 'function') Pages._renderKpisMiembros();
       if (typeof Pages._renderListaMiembros === 'function') Pages._renderListaMiembros();
     } else if (section === 'perfiles-sentia' && Pages[section]) {
-      // Perfiles Sentia: refrescar KPIs + distribuciones + lista (sin perder el filtro activo)
+      // Perfiles Sentia: refrescar KPIs + distribuciones + lista (sin perder el filtro activo),
+      // incluidas las de "de dónde vinieron" (antes vivían en su propia sección)
       if (typeof Pages._renderKpisPerfiles === 'function') Pages._renderKpisPerfiles();
       if (typeof Pages._renderDistribucionesPerfiles === 'function') Pages._renderDistribucionesPerfiles();
       if (typeof Pages._renderListaPerfiles === 'function') Pages._renderListaPerfiles();
-    } else if (section === 'perfiles-metricas' && Pages[section]) {
       if (typeof Pages._renderKpisMetricas === 'function') Pages._renderKpisMetricas();
       if (typeof Pages._renderDistribucionesMetricas === 'function') Pages._renderDistribucionesMetricas();
     } else if (section === 'pruebas-gratuitas' && Pages[section]) {

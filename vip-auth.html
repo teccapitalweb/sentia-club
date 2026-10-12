@@ -795,5 +795,18 @@ document.getElementById('forgot-link').addEventListener('click', async (e) => {
 
 <script src="pwa.js" defer></script>
 <script src="cookies.js" defer></script>
+<script>
+// Analítica de visitas (fase 1) — pulso anónimo, sin UI, nunca bloquea nada.
+(function () {
+  try {
+    var base = location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://sentia-academy-webhook-production.up.railway.app';
+    fetch(base + '/api/visitas/registrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site: 'club', pagina: location.pathname, referrer: document.referrer || '' })
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
