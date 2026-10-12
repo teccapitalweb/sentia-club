@@ -8499,7 +8499,13 @@ const Sections = (function(){
       setTimeout(() => { pop.remove(); if (despues) despues(); resolve(); }, 220);
     };
     pop.querySelectorAll('[data-fci-later]').forEach(el => el.addEventListener('click', () => cerrar()));
-    pop.querySelector('[data-fci-go]').addEventListener('click', () => cerrar(() => { if (typeof navigateToSection === 'function') navigateToSection('cursos'); }));
+    pop.querySelector('[data-fci-go]').addEventListener('click', () => {
+      // Se va a explorar/comparar cursos activamente — no lo interrumpimos
+      // con el aviso de instalar la app en esta misma sesión, aparece solo
+      // hasta la próxima vez que abra el panel.
+      window.__saltarInstalarEstaSesion = true;
+      cerrar(() => { if (typeof navigateToSection === 'function') navigateToSection('cursos'); });
+    });
     });
   }
   window.__mostrarInvitacionCursoGratis = mostrarInvitacionCursoGratis;
@@ -16598,12 +16604,14 @@ html[data-mode="vip"] .tools-catalog__footer{display:none}
     function conFila(intentos){
       if (window.__filaBienvenidaLista) {
         window.__filaBienvenidaLista.then(function(){
-          if (yaInstalada() || fueDescartada()) return; // pudo cambiar mientras esperaba
+          // Si eligió "Elegir mi curso gratis" se fue a explorar cursos —
+          // no lo interrumpimos ahora, aparece hasta la próxima visita.
+          if (yaInstalada() || fueDescartada() || window.__saltarInstalarEstaSesion) return;
           pop.classList.add('show');
         });
       } else if (intentos < 25) {
         setTimeout(function(){ conFila(intentos + 1); }, 200);
-      } else if (!yaInstalada() && !fueDescartada()) {
+      } else if (!yaInstalada() && !fueDescartada() && !window.__saltarInstalarEstaSesion) {
         pop.classList.add('show');
       }
     }
