@@ -4454,6 +4454,12 @@ if (window.__isDemoMode) {
       setTimeout(resolve, 20000);
     });
     setTimeout(async () => {
+      // En preview ("Ver como VIP"/"Ver como no-VIP" desde el admin) ningún
+      // aviso de esta fila debe aparecer ni guardar nada — todo esto corre
+      // sobre la cuenta REAL del admin por dentro, y nadie debería ver su
+      // ficha pidiendo datos, su racha inflándose, ni terminar "eligiendo"
+      // un curso gratis de verdad solo por estar viendo cómo se ve.
+      if (window.__previewActivo) { __resolverFilaBienvenida(); return; }
       try { await window.__maybeAskProfile?.(); } catch(e){}
       await respiro(1100);
       try { await window.__maybeShowBienvenidaInvitado?.(); } catch(e){}
@@ -4479,6 +4485,7 @@ if (window.__isDemoMode) {
     // con el token de sesión para que "quiénes entraron" del admin pueda
     // mostrar el nombre en vez de "visitante anónimo".
     setTimeout(async () => {
+      if (window.__previewActivo) return; // no mezclar al admin "de paseo" con tráfico real
       try {
         const base = location.hostname === 'localhost' ? 'http://localhost:8081' : window.WEBHOOK_URL;
         const headers = await window.__authHeaders();
@@ -6231,6 +6238,14 @@ const Sections = (function(){
   const PREVIEW_AS_USER = _urlParams.get('como') === 'user';
   const PREVIEW_AS_VIP = _urlParams.get('como') === 'vip';
   const PREVIEW_DIAS = _urlParams.get('dias') !== null ? parseInt(_urlParams.get('dias'), 10) : null;
+  // Expuesto en window porque algunas de las cosas que debe bloquear viven
+  // en otro scope del archivo (Directorio, etc.) — ver más abajo y la fila
+  // de bienvenida. El preview sigue usando la cuenta REAL del admin por
+  // dentro (mismo uid, mismo Firestore) — nada más cambia qué ve en
+  // pantalla — así que cualquier escritura automática normal (crear tarjeta
+  // del Directorio, marcar perfil completado, etc.) se guardaría de verdad y
+  // la vería cualquier miembro real. Esto evita que eso pase.
+  window.__previewActivo = PREVIEW_AS_USER || PREVIEW_AS_VIP;
 
   function esAdminReal() {
     return window.UserState?.isAdmin && !PREVIEW_AS_USER && !PREVIEW_AS_VIP;
@@ -6466,7 +6481,7 @@ const Sections = (function(){
         : `Vista previa como miembro SIN VIP · día ${calcularDiasMembresia()} de membresía`;
       banner.innerHTML = `
         <span>${texto}</span>
-        <a href="?" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Salir del preview</a>
+        <a href="vip-admin.html" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Volver al admin</a>
       `;
       document.body.appendChild(banner);
     });
@@ -12528,6 +12543,7 @@ const Sections = (function(){
   // justo después de la ficha profesional; si ya existe, no se toca para no
   // pisar lo que la persona haya personalizado después.
   window.__dirAutoCrear = async function(){
+    if (window.__previewActivo) return false; // ver nota en PREVIEW_AS_VIP
     const fs = window.__fs;
     const uid = window.UserState?.uid;
     if (!fs || !uid || !window.__currentUser) return false;
@@ -12563,6 +12579,7 @@ const Sections = (function(){
   // verificados". Esto la corrige sola y en silencio, sin tocar nada más
   // de lo que la persona ya haya personalizado (nombre, bio, foto, etc.).
   window.__dirSincronizarVip = async function(){
+    if (window.__previewActivo) return; // ver nota en PREVIEW_AS_VIP
     const fs = window.__fs;
     const uid = window.UserState?.uid;
     if (!fs || !uid || !window.__currentUser) return;
