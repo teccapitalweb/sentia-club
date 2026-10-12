@@ -667,13 +667,22 @@ async function ensureMiembroDoc(user, displayName, origen){
 
 onAuthStateChanged(auth, async (user) => {
   if (user){
-    await ensureMiembroDoc(user, user.displayName, 'login-web');
-    try{ localStorage.setItem('sentia_last_user', JSON.stringify({ email:user.email||'', nombre:user.displayName||'' })); }catch(e){}
-    if (requiereVerificacionCorreo(user)) {
-      mostrarVerificacionPendiente(user);
-      return;
+    // MODIFICADO: sin este try/catch, si esAdministrador() (pide refrescar el
+    // token) o cualquier paso de aquí fallaba, todo el proceso se caía en
+    // silencio — la cuenta SÍ quedaba creada pero nunca se redirigía ni se
+    // avisaba nada, así que la pantalla de registro/login se quedaba igual.
+    try {
+      await ensureMiembroDoc(user, user.displayName, 'login-web');
+      try{ localStorage.setItem('sentia_last_user', JSON.stringify({ email:user.email||'', nombre:user.displayName||'' })); }catch(e){}
+      if (requiereVerificacionCorreo(user)) {
+        mostrarVerificacionPendiente(user);
+        return;
+      }
+      await redirigirSegunRol(user);
+    } catch (e) {
+      console.error('[onAuthStateChanged] No se pudo completar el acceso:', e);
+      showAlert('error', 'Entraste, pero no pudimos abrir tu panel', 'Intenta de nuevo en unos segundos. Si el problema sigue, recarga la página.');
     }
-    await redirigirSegunRol(user);
   }
 });
 
