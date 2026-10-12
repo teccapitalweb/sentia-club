@@ -6494,16 +6494,13 @@ const Sections = (function(){
     if (!(PREVIEW_AS_USER || PREVIEW_AS_VIP)) return;
     if (!window.UserState?.isAdmin) return;
     if (document.getElementById('preview-banner')) return;
-    const banner = document.createElement('div');
+    // Simple y discreto: solo el link de regreso, sin pill de colores ni
+    // texto extra — así lo pidió el usuario, nada que distraiga de la vista.
+    const banner = document.createElement('a');
     banner.id = 'preview-banner';
-    banner.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1b5df0,#2fbf2e);color:#081225;padding:11px 18px;border-radius:13px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:-.1px;box-shadow:0 12px 28px rgba(27,93,240,.35);display:flex;align-items:center;gap:14px;';
-    const texto = PREVIEW_AS_VIP
-      ? 'Vista previa como miembro VIP'
-      : 'Vista previa como miembro SIN VIP';
-    banner.innerHTML = `
-      <span>${texto}</span>
-      <a href="vip-admin.html" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Volver al admin</a>
-    `;
+    banner.href = 'vip-admin.html';
+    banner.style.cssText = 'position:fixed;top:14px;left:14px;z-index:9998;background:#0f1d38;color:#e6eeff;padding:9px 14px;border-radius:10px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:-.1px;box-shadow:0 8px 20px rgba(0,0,0,.25);text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid #1e2f52;';
+    banner.innerHTML = '← Volver al admin';
     document.body.appendChild(banner);
   };
 
