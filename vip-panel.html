@@ -4443,6 +4443,16 @@ if (window.__isDemoMode) {
         setTimeout(() => { if (window.__resolverRecorridoCerrado === resolve) { window.__resolverRecorridoCerrado = null; resolve(); } }, 13000);
       });
     }
+    // El aviso de instalar la app (#sentia-install-pop) dispara su propio
+    // temporizador aparte (ver su <script> más abajo) y antes podía
+    // encimarse con esta fila. Ahora espera esta promesa antes de
+    // mostrarse — se resuelve al terminar la fila, o sola a los 20s por si
+    // algo truena y la fila nunca llega a la última línea.
+    let __resolverFilaBienvenida;
+    window.__filaBienvenidaLista = new Promise(resolve => {
+      __resolverFilaBienvenida = resolve;
+      setTimeout(resolve, 20000);
+    });
     setTimeout(async () => {
       try { await window.__maybeAskProfile?.(); } catch(e){}
       await respiro(1100);
@@ -4455,6 +4465,7 @@ if (window.__isDemoMode) {
       try { await window.__pingLogrosVisita?.(); } catch(e){}
       await respiro(0);
       try { await window.__maybeShowCursoGratisIntro?.(); } catch(e){}
+      __resolverFilaBienvenida();
     }, 800);
 
     // Arrancar listener de notificaciones de Firestore (tiempo real)
@@ -16578,7 +16589,25 @@ html[data-mode="vip"] .tools-catalog__footer{display:none}
   }
   function mostrar(){
     if (yaInstalada() || fueDescartada()) return;
-    pop.classList.add('show');
+    // Espera a que termine la fila de bienvenida (ficha, recorrido, logros,
+    // curso gratis) para no encimarse con esos avisos — antes cada uno
+    // corría por su cuenta y podían aparecer al mismo tiempo. La promesa se
+    // crea del lado del boot del panel, que puede tardar un poco más que
+    // este temporizador en arrancar (espera de sesión); por eso reintenta
+    // unos segundos en vez de asumir "no existe = ya terminó".
+    function conFila(intentos){
+      if (window.__filaBienvenidaLista) {
+        window.__filaBienvenidaLista.then(function(){
+          if (yaInstalada() || fueDescartada()) return; // pudo cambiar mientras esperaba
+          pop.classList.add('show');
+        });
+      } else if (intentos < 25) {
+        setTimeout(function(){ conFila(intentos + 1); }, 200);
+      } else if (!yaInstalada() && !fueDescartada()) {
+        pop.classList.add('show');
+      }
+    }
+    conFila(0);
   }
   function ocultar(recordar){
     pop.classList.remove('show');
