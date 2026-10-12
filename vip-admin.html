@@ -6170,6 +6170,7 @@ const Pages={
   },
 
   _VIS_DISPOSITIVO_LABELS: { telefono: 'Teléfono', tableta: 'Tableta', computadora: 'Computadora' },
+  _VIS_SITIO_LABELS: { club: 'Panel', landing: 'Sitio', admin: 'Admin' },
   _VIS_ORIGEN_COLOR: { 'Google': '#4285F4', 'Bing': '#008373', 'Instagram': '#E1306C', 'Facebook': '#1877F2', 'X (Twitter)': '#000000', 'LinkedIn': '#0A66C2', 'WhatsApp': '#25D366', 'TikTok': '#000000', 'YouTube': '#FF0000', 'Dentro del sitio': 'var(--text-3)', 'Directo': 'var(--text-3)' },
   _renderFeedVisitas(data) {
     const info = document.getElementById('vis-feed-info');
@@ -6188,12 +6189,15 @@ const Pages={
       const dot = Pages._VIS_ORIGEN_COLOR[v.origen] || 'var(--primary)';
       const dispLabel = Pages._VIS_DISPOSITIVO_LABELS[v.dispositivo] || v.dispositivo || '—';
       const quien = v.nombreVisible ? adminEsc(v.nombreVisible) : 'Visitante anónimo';
+      // "Dentro del sitio" por sí solo no dice de cuál — se aclara con la
+      // parte de SENTIA de la que ya venía navegando.
+      const origenLabel = v.origen === 'Dentro del sitio' ? (Pages._VIS_SITIO_LABELS[v.site] || v.origen) : (v.origen || 'Directo');
       return `
         <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 10px;border-top:1px solid var(--border);font-size:12.5px;">
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:7px;font-weight:700;color:var(--text);">
               <span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
-              ${adminEsc(v.origen || 'Directo')}
+              ${adminEsc(origenLabel)}
               ${v.esPrimeraDelDia ? '<span style="font-size:10px;color:var(--text-3);font-weight:600;">· primera del día</span>' : ''}
             </div>
             <div style="color:var(--text-3);margin-top:3px;">${quien}${v.pagina ? ' · ' + adminEsc(v.pagina) : ''}</div>
