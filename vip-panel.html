@@ -14923,6 +14923,17 @@ const NOTIFS_DEMO = [
   {id:'demo-3', tipo:'logro', icono:'i-trophy', color:'#FBBF24', titulo:'5 niveles de progresión', descripcion:'Desde Aprendiz hasta Maestro', createdAtMs: Date.now()-2*86400000}
 ];
 
+// Mismo cálculo que tieneAccesoVipCompleto(), pero esa función vive en un
+// scope distinto (no accesible desde aquí) — llamarla directo rompía con
+// un ReferenceError silencioso que vaciaba TODA la lista de notificaciones,
+// no solo las filtradas por audiencia. Se repite la lógica en vez de
+// exportarla, para no tocar ese otro scope.
+function esVipParaNotif() {
+  const previewAsUser = new URLSearchParams(location.search).get('como') === 'user';
+  if (previewAsUser) return false;
+  return window.UserState?.modo === 'vip' || !!window.UserState?.isAdmin;
+}
+
 // Decide si una notificación le toca a ESTE miembro: por audiencia (todos/
 // solo VIP/solo no-VIP) y por fecha de evento (se oculta sola al día
 // siguiente de esa fecha, sin que el admin tenga que borrarla a mano).
@@ -14972,7 +14983,7 @@ function setupNotificacionesListener(intento = 0) {
       fs.limit(15)
     );
     window.__notifsState.unsubscribe = fs.onSnapshot(q, (snap) => {
-      const esVip = tieneAccesoVipCompleto();
+      const esVip = esVipParaNotif();
       const items = snap.docs.map(d => {
         const data = d.data();
         return {
