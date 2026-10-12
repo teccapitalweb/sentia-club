@@ -4300,7 +4300,16 @@ if (window.__isDemoMode) {
       window.UserState.isAdmin = false;
     }
 
-    if (window.UserState.isAdmin) {
+    // MODIFICADO: en preview (?como=vip / ?como=user) el admin no debe verse
+    // como admin en el sidebar ("SENTIA VIP · ADMIN") — el punto de la vista
+    // previa es ver el panel tal como lo ve un miembro real, sin rastro de admin.
+    const _previewQS = new URLSearchParams(window.location.search).get('como');
+    const _enPreviewBoot = _previewQS === 'user' || _previewQS === 'vip';
+    if (window.UserState.isAdmin && _enPreviewBoot) {
+      window.UserState.modo = (_previewQS === 'vip') ? 'vip' : 'sin-membresia';
+      window.UserState.plan = (_previewQS === 'vip') ? 'mensual' : null;
+      window.UserState.membership = { activo: _previewQS === 'vip', plan: (_previewQS === 'vip') ? 'mensual' : null };
+    } else if (window.UserState.isAdmin) {
       window.UserState.modo = 'vip';
       window.UserState.plan = 'admin';
       window.UserState.membership = { activo:true, plan:'admin' };
@@ -4398,6 +4407,7 @@ if (window.__isDemoMode) {
       // En preview no se marca presencia real — si no, el nombre del admin
       // aparecería como "en línea" en el Foro para cualquier miembro real.
       if (!window.__previewActivo) window.__initPresencia && window.__initPresencia(user.uid);
+      window.__mostrarBannerPreview && window.__mostrarBannerPreview();
     }, 50);
 
     // ─── Fila de popups de bienvenida, UNO A LA VEZ (nunca en paralelo) ───
@@ -5290,7 +5300,6 @@ function toolEsVIP(){
   if (!S) return false;
   if (S.modo === 'vip') return true;
   if (typeof esAdminReal === 'function' && esAdminReal()) return true;
-  if (S.isAdmin) return true;
   return false;
 }
 // MODIFICADO: lo bloqueado lleva directo a la pantalla de planes, sin ventana intermedia
@@ -6473,21 +6482,27 @@ const Sections = (function(){
   // Mostrar banner si está en modo preview (solo admins lo ven). El texto
   // decía "como usuario VIP" en los dos casos por error — ?como=user en
   // realidad simula SIN VIP; se corrige y se distingue de ?como=vip.
-  if (PREVIEW_AS_USER || PREVIEW_AS_VIP) {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!window.UserState?.isAdmin) return;
-      const banner = document.createElement('div');
-      banner.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1b5df0,#2fbf2e);color:#081225;padding:11px 18px;border-radius:13px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:-.1px;box-shadow:0 12px 28px rgba(27,93,240,.35);display:flex;align-items:center;gap:14px;';
-      const texto = PREVIEW_AS_VIP
-        ? `Vista previa como miembro VIP · día ${calcularDiasMembresia()} de membresía`
-        : `Vista previa como miembro SIN VIP · día ${calcularDiasMembresia()} de membresía`;
-      banner.innerHTML = `
-        <span>${texto}</span>
-        <a href="vip-admin.html" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Volver al admin</a>
-      `;
-      document.body.appendChild(banner);
-    });
-  }
+  // MODIFICADO: antes esto corría en DOMContentLoaded, que dispara ANTES de
+  // que Firebase confirme la sesión — en ese momento window.UserState.isAdmin
+  // todavía no existe, así que el banner nunca llegaba a aparecer. Ahora es
+  // una función que se llama ya con la sesión confirmada (ver boot, junto a
+  // __initPresencia), expuesta en window porque se llama desde otro scope.
+  window.__mostrarBannerPreview = function(){
+    if (!(PREVIEW_AS_USER || PREVIEW_AS_VIP)) return;
+    if (!window.UserState?.isAdmin) return;
+    if (document.getElementById('preview-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'preview-banner';
+    banner.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#1b5df0,#2fbf2e);color:#081225;padding:11px 18px;border-radius:13px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:-.1px;box-shadow:0 12px 28px rgba(27,93,240,.35);display:flex;align-items:center;gap:14px;';
+    const texto = PREVIEW_AS_VIP
+      ? `Vista previa como miembro VIP · día ${calcularDiasMembresia()} de membresía`
+      : `Vista previa como miembro SIN VIP · día ${calcularDiasMembresia()} de membresía`;
+    banner.innerHTML = `
+      <span>${texto}</span>
+      <a href="vip-admin.html" style="background:#081225;color:#2fbf2e;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.3px;">Volver al admin</a>
+    `;
+    document.body.appendChild(banner);
+  };
 
   // ═══════════════════════════════════════════════════════════════
   // PROGRESO POR USUARIO · localStorage (Sprint 7)
@@ -8763,7 +8778,7 @@ const Sections = (function(){
   async function actualizarWidgetsActividad() {
     const fs = window.__fs;
     const uid = window.UserState?.uid;
-    const esVipUser = window.UserState?.modo === 'vip' || (typeof esAdminReal === 'function' && esAdminReal()) || window.UserState?.isAdmin;
+    const esVipUser = window.UserState?.modo === 'vip' || (typeof esAdminReal === 'function' && esAdminReal());
     const setBar = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = Math.max(0, Math.min(100, pct)) + '%'; };
     const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
 
