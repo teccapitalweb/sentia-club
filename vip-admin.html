@@ -3102,8 +3102,11 @@ const Pages={
       const st = document.createElement('style'); st.id = 'actq-css';
       st.textContent = `.actbox{border:1px dashed var(--border-2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
       .actbox--empty{padding:8px 10px}
-      .actbox__head{display:grid;grid-template-columns:150px 1fr auto 30px;gap:8px;align-items:center}
-      .actbox__min{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);white-space:nowrap}.actbox__min input{width:64px;padding:7px 8px}
+      .actbox__head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+      .actbox__head > .actq__sel{flex:0 1 180px;min-width:130px}
+      .actbox__head > input.input{flex:1 1 160px;min-width:140px}
+      .actbox__head > .actq__x{flex:0 0 30px}
+      .actbox__min{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);white-space:nowrap;flex:0 0 auto}.actbox__min input{width:64px;padding:7px 8px}
       .actq{border:1px dashed var(--border-2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
       .actq__top{display:flex;gap:8px;align-items:flex-start}.actq__txt{flex:1;font-size:13.5px;line-height:1.45;font-family:inherit;resize:vertical}
       .actq__row{display:flex;align-items:center;gap:8px}.actq__lbl{font-size:12px;color:var(--text-3)}
@@ -3122,8 +3125,7 @@ const Pages={
       .actw__help{font-size:11.5px;color:var(--text-3)}
       .actpz{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start}
       .actpz__prev{width:120px;height:120px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2) center/cover no-repeat;display:grid;place-items:center;font-size:11px;color:var(--text-3)}
-      .actpz__cfg{display:flex;flex-direction:column;gap:8px}.actpz__cfg .input{padding:8px 11px;font-size:13px}
-      .actbox__head{grid-template-columns:minmax(150px,210px) 1fr auto 30px!important}`;
+      .actpz__cfg{display:flex;flex-direction:column;gap:8px}.actpz__cfg .input{padding:8px 11px;font-size:13px}`;
       document.head.appendChild(st);
     }
     const ses = i => Pages._modalCurso.sesiones[i];
