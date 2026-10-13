@@ -4271,6 +4271,10 @@ window.__cargarPreciosClub = async function(){
     // MODIFICADO: contacto y comunidad editables desde Admin > Configuracion
     window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', direccion: c.whatsappDireccion || '', miembros: Number(c.miembrosComunidad) || 0, instagram: c.instagram || '', facebook: c.facebook || '', emailContacto: c.emailContacto || '' };
     if (typeof window.__aplicarContactoClub === 'function') window.__aplicarContactoClub();
+    // MODIFICADO: antes la llave pública de Stripe se quedaba fija en '' sin
+    // importar lo que se guardara en Admin > Configuración — el checkout real
+    // nunca se activaba aunque Stripe ya estuviera configurado en el backend.
+    if (typeof c.stripePublicKey === 'string' && c.stripePublicKey.trim()) window.SENTIA_STRIPE_PK = c.stripePublicKey.trim();
   } catch (e) { console.warn('[SENTIA] No se pudo leer config/club:', e.message); }
   return window.__preciosClub;
 };
