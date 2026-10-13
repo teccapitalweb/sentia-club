@@ -3672,6 +3672,14 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .pcard-hero__cta{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
 .pcard-hero__cta--caso{color:#118261}
 .pcard-hero__cta--mapa{color:#534AB7}
+.pcard-hero__visual--observacion{padding:0;height:148px;overflow:hidden}
+.pcard-hero__visual--observacion img{width:100%;height:100%;object-fit:cover;display:block}
+.pcard-hero__meta{display:flex;gap:6px;margin:12px 0 8px}
+.pcard-hero__meta .pcard-hero__tag{margin:0;color:#00695c}
+.pcard-hero__cta--observacion{color:#00695c}
+.pcard-hero--done{position:relative}
+.pcard-hero__done-badge{position:absolute;top:10px;right:10px;z-index:1;display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;background:#1E8F1D;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.pcard-hero__done-badge .ic{width:11px;height:11px}
 @media(max-width:760px){.pcard-hero__visual{padding:12px 14px 6px}}
 
 /* Panel Caso Clínico */
@@ -3714,6 +3722,9 @@ html:not([data-mode="vip"]) .mobile-drawer__item[data-tool] .nav-item__lock{disp
 .retos-level__badge--aplicacion{background:#e8f5e9;color:#2e7d32}
 .retos-level__badge--simulacion{background:#ede7f6;color:#4527a0}
 .retos-level__badge--juego{background:#e8eaf6;color:#283593}
+.retos-level__badge--observacion{background:#e0f2f1;color:#00695c}
+.retos-level__title{margin:10px 0 2px;font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.retos-level__sub{margin:0 0 12px;color:var(--text-3);font-size:11.5px;letter-spacing:.02em}
 .retos-level__head small{color:#7886a0;font-size:11px}
 
 /* Hero card color variants — widget style */
@@ -11267,6 +11278,196 @@ const Sections = (function(){
     });
   }
 
+  // ═══ Observación guiada: escenas con hallazgos clicables + pregunta final ═══
+  // Local-only (sin servidor), igual que Flashcards/Modo historia: los datos
+  // viven aquí, el progreso se guarda en localStorage y se marca con
+  // registrarAccionProgreso() para sumar racha/logros, sin inventar backend.
+  const OBSERVACION_MISIONES = [
+    {
+      id:'obs-aula', numero:1, imagen:'aula-en-equilibrio.png', duracion:'5 min',
+      titulo:'Aula en equilibrio',
+      descripcion:'Observa la dinámica e identifica qué conviene revisar antes de intervenir.',
+      instruccion:'Explora la escena y selecciona los tres detalles relevantes antes de continuar.',
+      hallazgos:[
+        {id:'mano', x:87, y:36, titulo:'Mano levantada', explicacion:'Alguien busca participar de forma activa en la actividad.'},
+        {id:'materiales', x:30, y:57, titulo:'Materiales de la actividad', explicacion:'Algunas personas están revisando la consigna con más dificultad que otras.'},
+        {id:'participacion', x:9, y:58, titulo:'Participación desigual', explicacion:'No todas las personas están interactuando de la misma manera con la dinámica.'}
+      ],
+      decoy:{id:'mapa-mundi', x:83, y:14},
+      pregunta:'Antes de intervenir, ¿qué información conviene reunir?',
+      opciones:[
+        {texto:'Observar quién participa, comprobar si la consigna fue comprendida y preguntar qué apoyos o ajustes facilitarían la actividad.', mejor:true},
+        {texto:'Asumir que una persona no quiere participar y continuar sin más.', mejor:false},
+        {texto:'Cambiar toda la actividad de inmediato, sin observar primero.', mejor:false}
+      ],
+      retroalimentacion:'Antes de ajustar una actividad, conviene mirar la dinámica completa y preguntar. La observación evita suposiciones y ayuda a elegir apoyos más pertinentes.'
+    },
+    {
+      id:'obs-privacidad', numero:2, imagen:'privacidad-primero.png', duracion:'5 min',
+      titulo:'Privacidad primero',
+      descripcion:'Reconoce los detalles del entorno que conviene asegurar antes de iniciar.',
+      instruccion:'Explora la escena y selecciona los tres detalles relevantes antes de continuar.',
+      hallazgos:[
+        {id:'puerta', x:63, y:22, titulo:'Acceso al espacio', explicacion:'Controlar el acceso antes de iniciar.'},
+        {id:'documentos', x:20, y:66, titulo:'Documentos visibles', explicacion:'Guardar lo que no se utilizará.'},
+        {id:'telefono', x:32, y:80, titulo:'Dispositivo activo', explicacion:'Silenciar o bloquear el teléfono.'}
+      ],
+      decoy:{id:'planta', x:7, y:56},
+      pregunta:'¿Qué acciones reducen primero los riesgos de privacidad?',
+      opciones:[
+        {texto:'Controlar el acceso al espacio, guardar documentos que no se usan y silenciar o bloquear el teléfono.', mejor:true},
+        {texto:'Modificar la iluminación de la oficina.', mejor:false},
+        {texto:'Empezar la reunión dejando los elementos como están.', mejor:false}
+      ],
+      retroalimentacion:'Preparar el entorno también forma parte del cuidado profesional: privacidad del espacio, documentos y dispositivos.'
+    },
+    {
+      id:'obs-historia', numero:3, imagen:'historia-incompleta.png', duracion:'6 min',
+      titulo:'Historia incompleta',
+      descripcion:'Identifica qué información falta antes de formular una conclusión.',
+      instruccion:'Explora la escena y selecciona los tres detalles relevantes antes de continuar.',
+      hallazgos:[
+        {id:'linea-tiempo', x:57, y:80, titulo:'Línea de tiempo incompleta', explicacion:'Uno de los segmentos de la línea de tiempo está vacío.'},
+        {id:'lista', x:45, y:55, titulo:'Verificación sin completar', explicacion:'La lista de verificación tiene puntos sin marcar.'},
+        {id:'preguntas', x:80, y:72, titulo:'Preguntas pendientes', explicacion:'Todavía hay preguntas sin respuesta sobre el caso.'}
+      ],
+      decoy:{id:'taza-cafe', x:80, y:45},
+      pregunta:'¿Cuál es el siguiente paso más cuidadoso?',
+      opciones:[
+        {texto:'Identificar qué información falta y reunir contexto adicional antes de formular una conclusión o recomendación.', mejor:true},
+        {texto:'Concluir con los datos disponibles hasta ahora.', mejor:false},
+        {texto:'Elegir una categoría o etiqueta que parezca encajar.', mejor:false}
+      ],
+      retroalimentacion:'Un análisis responsable reconoce sus límites. Cuando faltan datos relevantes, el siguiente paso es preguntar, contrastar y ampliar el contexto.'
+    }
+  ];
+
+  function _obsCompletada(id){
+    try { return !!(JSON.parse(localStorage.getItem('sentia:observacion')||'{}')[id]); } catch(e){ return false; }
+  }
+  function _obsGuardarCompletada(id){
+    try {
+      const d = JSON.parse(localStorage.getItem('sentia:observacion')||'{}');
+      d[id] = { fecha: new Date().toISOString() };
+      localStorage.setItem('sentia:observacion', JSON.stringify(d));
+    } catch(e){}
+  }
+
+  function _obsInjectarCSS(){
+    if (document.getElementById('obs-css')) return;
+    const st = document.createElement('style'); st.id = 'obs-css';
+    st.textContent = `.obs-view{max-width:760px;margin:0 auto}
+      .obs-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+      .obs-head__kicker{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#00695c}
+      .obs-head__title{margin:4px 0 6px;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--text)}
+      .obs-head__tag{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--text-3);font-size:10.5px;font-weight:700}
+      .obs-instruccion{color:var(--text-2);font-size:13.5px;line-height:1.5;margin:0 0 12px}
+      .obs-aviso{background:#e6f7f1;border:1px solid #b9e4d4;color:#0d6b52;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:12px}
+      .obs-scene{position:relative;border-radius:16px;overflow:hidden;margin-bottom:16px;line-height:0}
+      .obs-scene img{width:100%;display:block}
+      .obs-hotspot{position:absolute;width:38px;height:38px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.85);background:rgba(0,105,92,.28);cursor:pointer;transition:background .15s,transform .15s;padding:0}
+      .obs-hotspot:hover,.obs-hotspot:focus-visible{background:rgba(0,105,92,.45);transform:translate(-50%,-50%) scale(1.08);outline:none}
+      .obs-hotspot.is-found{background:#1E8F1D;border-color:#fff;opacity:.6;cursor:default}
+      .obs-hotspot--decoy{background:rgba(255,255,255,.16)}
+      .obs-hallazgos{display:flex;gap:12px;margin-bottom:16px}
+      .obs-hallazgo{flex:1;display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;padding:12px}
+      .obs-hallazgo.is-found{border-color:#1E8F1D}
+      .obs-hallazgo__num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--surface-2);color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+      .obs-hallazgo.is-found .obs-hallazgo__num{background:#1E8F1D;color:#fff}
+      .obs-hallazgo.is-found .obs-hallazgo__num .ic{width:14px;height:14px}
+      .obs-hallazgo__title{font-size:12.5px;font-weight:800;color:var(--text)}
+      .obs-hallazgo__desc{font-size:11.5px;color:var(--text-3);line-height:1.4;margin-top:2px}
+      .obs-pregunta{background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:18px}
+      .obs-pregunta.is-locked{display:flex;align-items:center;gap:10px;color:var(--text-3);font-size:13px}
+      .obs-pregunta.is-locked .ic{width:18px;height:18px;flex-shrink:0}
+      .obs-pregunta__q{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px}
+      .obs-pregunta__ops{display:flex;flex-direction:column;gap:8px}
+      .obs-op{text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--border-2);background:var(--surface-2);font-size:13px;color:var(--text);cursor:pointer;font-family:inherit}
+      .obs-op:hover:not(:disabled){border-color:#00695c}
+      .obs-op.is-best{border-color:#1E8F1D;background:color-mix(in srgb,#1E8F1D 12%,var(--surface-2))}
+      .obs-op.is-picked{border-color:var(--border-strong)}
+      .obs-pregunta__fb{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;background:var(--surface-2);color:var(--text-2)}
+      .obs-pregunta__fb.is-ok{background:#e6f7f1;color:#0d6b52}
+      @media(max-width:760px){.obs-hallazgos{flex-direction:column}.obs-hotspot{width:32px;height:32px}}`;
+    document.head.appendChild(st);
+  }
+
+  function _renderObservacionView(container, misionId){
+    _obsInjectarCSS();
+    _retosContainer = container;
+    const m = OBSERVACION_MISIONES.find(x=>x.id===misionId);
+    if (!m) { renderRetos(container); return; }
+    const encontrados = new Set();
+    let avisoMsg = '';
+    let respondida = false, opcionElegida = null;
+
+    function pintar(){
+      const todosEncontrados = encontrados.size === m.hallazgos.length;
+      const hotspotsHTML = m.hallazgos.map(h => `<button type="button" class="obs-hotspot ${encontrados.has(h.id)?'is-found':''}" style="left:${h.x}%;top:${h.y}%" data-hallazgo="${h.id}" aria-label="${escapeHtml(h.titulo)}"></button>`).join('')
+        + (m.decoy ? `<button type="button" class="obs-hotspot obs-hotspot--decoy" style="left:${m.decoy.x}%;top:${m.decoy.y}%" data-decoy="1" aria-label="Detalle del contexto"></button>` : '');
+
+      const hallazgosHTML = m.hallazgos.map((h,i) => {
+        const ok = encontrados.has(h.id);
+        return `<div class="obs-hallazgo ${ok?'is-found':''}">
+          <div class="obs-hallazgo__num">${ok?'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':(i+1)}</div>
+          <div class="obs-hallazgo__body">
+            <div class="obs-hallazgo__title">${ok?escapeHtml(h.titulo):'Hallazgo pendiente'}</div>
+            <div class="obs-hallazgo__desc">${ok?escapeHtml(h.explicacion):'Busca un detalle relevante en la escena'}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      const acerto = respondida && opcionElegida !== null && m.opciones[opcionElegida].mejor;
+      const preguntaHTML = todosEncontrados ? `<section class="obs-pregunta">
+          <div class="obs-pregunta__q">${escapeHtml(m.pregunta)}</div>
+          <div class="obs-pregunta__ops">${m.opciones.map((o,i)=>`<button type="button" class="obs-op ${respondida && o.mejor?'is-best':''} ${respondida && !o.mejor && opcionElegida===i?'is-picked':''}" data-op="${i}" ${respondida?'disabled':''}>${escapeHtml(o.texto)}</button>`).join('')}</div>
+          ${respondida ? `<div class="obs-pregunta__fb ${acerto?'is-ok':''}">${acerto ? escapeHtml(m.retroalimentacion) : 'Vale la pena revisar los hallazgos otra vez antes de decidir — ahí está la pista del paso más cuidadoso.'}</div>` : ''}
+        </section>`
+        : `<section class="obs-pregunta is-locked"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Encuentra los ${m.hallazgos.length} hallazgos para desbloquear la pregunta final</section>`;
+
+      container.innerHTML = `
+        <div class="fade-up obs-view">
+          <div class="obs-head">
+            <div>
+              <div class="obs-head__kicker">Misión 0${m.numero} · Observación guiada</div>
+              <h1 class="obs-head__title">${escapeHtml(m.titulo)}</h1>
+              <span class="obs-head__tag">Caso ficticio · contenido educativo</span>
+            </div>
+            <button type="button" class="btn btn--ghost" id="obs-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a Retos</button>
+          </div>
+          <p class="obs-instruccion">${escapeHtml(m.instruccion)}</p>
+          ${avisoMsg ? `<div class="obs-aviso">${escapeHtml(avisoMsg)}</div>` : ''}
+          <div class="obs-scene"><img src="assets/retos/observacion-guiada/${m.imagen}" alt="Escena de la misión">${hotspotsHTML}</div>
+          <div class="obs-hallazgos">${hallazgosHTML}</div>
+          ${preguntaHTML}
+        </div>`;
+
+      container.querySelector('#obs-volver-retos')?.addEventListener('click',()=>renderRetos(container));
+      container.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click',()=>{
+        const h = m.hallazgos.find(x=>x.id===b.dataset.hallazgo);
+        if (!h || encontrados.has(h.id)) return;
+        encontrados.add(h.id);
+        avisoMsg = `Hallazgo identificado. ${h.explicacion}`;
+        pintar();
+      }));
+      container.querySelector('[data-decoy]')?.addEventListener('click',()=>{
+        avisoMsg = 'Este detalle forma parte del contexto, pero no es una señal prioritaria en esta misión.';
+        pintar();
+      });
+      container.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+        if (respondida) return;
+        opcionElegida = Number(b.dataset.op);
+        respondida = true;
+        if (m.opciones[opcionElegida].mejor) {
+          _obsGuardarCompletada(m.id);
+          try { registrarAccionProgreso(m.id); } catch(e){}
+        }
+        pintar();
+      }));
+    }
+    pintar();
+  }
+
   function renderRetos(container){
     _retosContainer=container;
     evaluarLogros();
@@ -11434,6 +11635,25 @@ const Sections = (function(){
           </div>
 
           <div class="retos-level">
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--observacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Observación guiada</span><small>5–8 min</small></div>
+            <h3 class="retos-level__title">Observa, analiza y decide</h3>
+            <p class="retos-level__sub">Casos ficticios · contenido educativo</p>
+            <div class="practice-experiences__grid">
+              ${OBSERVACION_MISIONES.map((m,i) => `
+              <div class="pcard-hero ${_obsCompletada(m.id) ? 'pcard-hero--done' : ''}" data-practice="${m.id}" data-lockable="true">
+                ${_obsCompletada(m.id) ? `<span class="pcard-hero__done-badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Completada</span>` : ''}
+                <div class="pcard-hero__visual pcard-hero__visual--observacion"><img src="assets/retos/observacion-guiada/${m.imagen}" alt="" loading="lazy"></div>
+                <div class="pcard-hero__body">
+                  <div class="pcard-hero__meta"><span class="pcard-hero__tag">${m.duracion}</span><span class="pcard-hero__tag">${m.hallazgos.length} pistas</span></div>
+                  <h3 class="pcard-hero__title">${m.titulo}</h3>
+                  <p class="pcard-hero__desc">${m.descripcion}</p>
+                  <span class="pcard-hero__cta pcard-hero__cta--observacion">Iniciar misión<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </div>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--aplicacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Aplicación</span><small>10–15 min</small></div>
             <div class="practice-experiences__grid practice-experiences__grid--2">
               <div class="pcard-hero" data-practice="caso-clinico" data-lockable="true">
@@ -11526,6 +11746,7 @@ const Sections = (function(){
       if(tipo==='sopa') _renderSopaView(container);
       if(tipo==='memorama') _renderMemoramaView(container);
       if(tipo==='rompecabezas') _renderRompecabezasView(container);
+      if(tipo.startsWith('obs-')) _renderObservacionView(container, tipo);
     }));
 
     // El resumen de arriba pinta primero con el cálculo local (instantáneo);
