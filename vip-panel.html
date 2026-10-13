@@ -2265,6 +2265,31 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .wa-rule__text{font-size:12.5px;color:var(--text-2);line-height:1.5}
 .wa-rule__text strong{color:var(--text)}
 
+.wa-link-row{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:0.5px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin-top:12px;
+  text-decoration:none;color:inherit;cursor:pointer;
+  transition:border-color .15s,transform .15s;
+}
+.wa-link-row:hover{border-color:var(--primary);transform:translateY(-1px)}
+.wa-link-row__icon{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.wa-link-row__icon .ic{width:21px;height:21px}
+.wa-link-row__icon--wa{background:var(--whatsapp)}
+.wa-link-row__icon--ig{background:linear-gradient(135deg,#f58529,#dd2a7b 45%,#8134af 70%,#515bd4)}
+.wa-link-row__icon--fb{background:#1877F2}
+.wa-link-row__body{flex:1;min-width:0}
+.wa-link-row__title{font-size:13.5px;font-weight:600}
+.wa-link-row__desc{font-size:12px;color:var(--text-2);margin-top:2px}
+.wa-link-row__arrow{color:var(--text-3);flex-shrink:0}
+.wa-link-row__arrow .ic{width:16px;height:16px}
+.wa-social{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.wa-social .wa-link-row{margin-top:0}
+@media (max-width:640px){.wa-social{grid-template-columns:1fr}}
+
 /* =========================================================
    MI PERFIL · cards
    ========================================================= */
@@ -4243,7 +4268,7 @@ window.__cargarPreciosClub = async function(){
     const ano = Number(c.precioAno) > 0 ? Number(c.precioAno) : 1980;
     window.__preciosClub = { mes, ano, equivMes: Math.round(ano / 12), ahorro: Math.max(0, (mes * 12) - ano), cargado: true };
     // MODIFICADO: contacto y comunidad editables desde Admin > Configuracion
-    window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', direccion: c.whatsappDireccion || '', miembros: Number(c.miembrosComunidad) || 0 };
+    window.__contactoClub = { whatsapp: c.whatsapp || '', canal: c.whatsappCanal || '', grupo: c.whatsappGrupo || '', direccion: c.whatsappDireccion || '', miembros: Number(c.miembrosComunidad) || 0, instagram: c.instagram || '', facebook: c.facebook || '', emailContacto: c.emailContacto || '' };
     if (typeof window.__aplicarContactoClub === 'function') window.__aplicarContactoClub();
   } catch (e) { console.warn('[SENTIA] No se pudo leer config/club:', e.message); }
   return window.__preciosClub;
@@ -4770,6 +4795,8 @@ window.__setDisplayName = async (nombre) => {
 <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
 <symbol id="i-messages" viewBox="0 0 24 24"><path d="M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10"/><path d="M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2"/></symbol>
 <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/></symbol>
+<symbol id="i-instagram" viewBox="0 0 24 24"><path d="M4 4m0 4a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4z"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M16.5 7.5l0 .01"/></symbol>
+<symbol id="i-facebook" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 0 0 -5 5v3h-3v4h3v8h4v-8h3l1 -4h-4v-3a1 1 0 0 1 1 -1h3z"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></symbol>
 <symbol id="i-credit-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></symbol>
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></symbol>
@@ -13718,8 +13745,9 @@ const Sections = (function(){
 
           <div class="wa-stats">
             <div class="wa-stat" id="wa-stat-miembros" style="display:none"><div class="wa-stat__num" id="wa-stat-num"></div><div class="wa-stat__lbl">Miembros</div></div>
-            <div class="wa-stat"><div class="wa-stat__num">24</div><div class="wa-stat__lbl">Mensajes/día</div></div>
-            <div class="wa-stat"><div class="wa-stat__num">98%</div><div class="wa-stat__lbl">Activos</div></div>
+            <div class="wa-stat"><div class="wa-stat__num">24/7</div><div class="wa-stat__lbl">Activo</div></div>
+            <div class="wa-stat"><div class="wa-stat__num">100%</div><div class="wa-stat__lbl">Profesional</div></div>
+            <div class="wa-stat"><div class="wa-stat__num">0</div><div class="wa-stat__lbl">Spam</div></div>
           </div>
 
           <div style="position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
@@ -13727,6 +13755,34 @@ const Sections = (function(){
             <button class="btn btn--ghost" id="btn-wa-canal-share"><svg class="ic"><use href="#i-arrow-right"/></svg>Compartir invitación</button>
           </div>
         </section>
+
+        <a class="wa-link-row" id="wa-row-soporte" href="${SENTIA_CONTACT.waLink(SENTIA_CONTACT.msgSoporte())}" target="_blank" rel="noopener">
+          <div class="wa-link-row__icon wa-link-row__icon--wa"><svg class="ic"><use href="#i-whatsapp"/></svg></div>
+          <div class="wa-link-row__body">
+            <div class="wa-link-row__title">Soporte por WhatsApp</div>
+            <div class="wa-link-row__desc">Ayuda con tu acceso, membresía, pagos o contenido de la plataforma</div>
+          </div>
+          <div class="wa-link-row__arrow"><svg class="ic"><use href="#i-arrow-right"/></svg></div>
+        </a>
+
+        <div class="wa-social">
+          <a class="wa-link-row" id="wa-row-ig" href="${SENTIA_CONTACT.instagram}" target="_blank" rel="noopener" style="${SENTIA_CONTACT.instagram ? '' : 'display:none'}">
+            <div class="wa-link-row__icon wa-link-row__icon--ig"><svg class="ic"><use href="#i-instagram"/></svg></div>
+            <div class="wa-link-row__body">
+              <div class="wa-link-row__title">Síguenos en Instagram</div>
+              <div class="wa-link-row__desc">Contenido, novedades y comunidad SENTIA</div>
+            </div>
+            <div class="wa-link-row__arrow"><svg class="ic"><use href="#i-arrow-right"/></svg></div>
+          </a>
+          <a class="wa-link-row" id="wa-row-fb" href="${SENTIA_CONTACT.facebook}" target="_blank" rel="noopener" style="${SENTIA_CONTACT.facebook ? '' : 'display:none'}">
+            <div class="wa-link-row__icon wa-link-row__icon--fb"><svg class="ic"><use href="#i-facebook"/></svg></div>
+            <div class="wa-link-row__body">
+              <div class="wa-link-row__title">Síguenos en Facebook</div>
+              <div class="wa-link-row__desc">Noticias, lanzamientos y clases en vivo</div>
+            </div>
+            <div class="wa-link-row__arrow"><svg class="ic"><use href="#i-arrow-right"/></svg></div>
+          </a>
+        </div>
 
         <div class="wa-rules">
           <div class="wa-rules__title">Reglas de la comunidad</div>
@@ -14567,6 +14623,9 @@ const SENTIA_CONTACT = {
   director: '',  // MODIFICADO: WhatsApp de dirección (opcional, desde el admin)
   // Canal de difusión oficial
   canal: 'https://whatsapp.com/channel/0029Vb92Oc2HgZWbxDOgCb3W',
+  // Redes sociales (se configuran en Admin > Configuración > Contacto)
+  instagram: '',
+  facebook: '',
   // Zoom de la próxima clase (muestra · sustituir por el real al confirmar webinar)
   zoom: 'https://zoom.us/j/85234567890?pwd=SENTIA2026OEE',
   // Sitio público
@@ -14604,13 +14663,20 @@ window.__aplicarContactoClub = function(){
   if (/^https?:\/\//.test(k.grupo)) SENTIA_CONTACT.grupo = k.grupo;
   let dir = String(k.direccion || '').replace(/[^0-9]/g, ''); if (dir.length === 10) dir = '52' + dir;
   SENTIA_CONTACT.director = dir.length >= 11 ? dir : SENTIA_CONTACT.whatsapp;
+  if (/^https?:\/\//.test(k.instagram)) SENTIA_CONTACT.instagram = k.instagram;
+  if (/^https?:\/\//.test(k.facebook)) SENTIA_CONTACT.facebook = k.facebook;
   const n = k.miembros > 0 ? k.miembros.toLocaleString('es-MX') : '';
   const cc = document.getElementById('com-count');
   if (cc) { cc.style.display = n ? '' : 'none'; if (n) cc.innerHTML = n + '<span style="font-size:13px; opacity:.6; font-weight:500"> miembros</span>'; }
   const ws = document.getElementById('wa-stat-miembros'), wn = document.getElementById('wa-stat-num');
   if (ws && wn) { ws.style.display = n ? '' : 'none'; wn.textContent = n; }
   const lb = document.getElementById('btn-wa-lbl'); if (lb) lb.textContent = SENTIA_CONTACT.grupo ? 'Abrir grupo' : 'Unirme al canal';
-  console.info('[SENTIA] Contacto desde admin →', { whatsapp: SENTIA_CONTACT.whatsapp, canal: SENTIA_CONTACT.canal, grupo: SENTIA_CONTACT.grupo || '(sin grupo)' });
+  const rowIg = document.getElementById('wa-row-ig'), rowFb = document.getElementById('wa-row-fb');
+  if (rowIg) rowIg.style.display = SENTIA_CONTACT.instagram ? '' : 'none';
+  if (rowFb) rowFb.style.display = SENTIA_CONTACT.facebook ? '' : 'none';
+  if (rowIg) rowIg.href = SENTIA_CONTACT.instagram;
+  if (rowFb) rowFb.href = SENTIA_CONTACT.facebook;
+  console.info('[SENTIA] Contacto desde admin →', { whatsapp: SENTIA_CONTACT.whatsapp, canal: SENTIA_CONTACT.canal, grupo: SENTIA_CONTACT.grupo || '(sin grupo)', instagram: SENTIA_CONTACT.instagram || '(sin ig)', facebook: SENTIA_CONTACT.facebook || '(sin fb)' });
 };
 // Numero de soporte con formato +52 238 000 0000
 window.__fmtWa = function(){ const w = String(SENTIA_CONTACT.whatsapp || ''); return w.length === 12 ? '+' + w.slice(0,2) + ' ' + w.slice(2,5) + ' ' + w.slice(5,8) + ' ' + w.slice(8) : '+' + w; };
