@@ -11471,6 +11471,7 @@ const Sections = (function(){
       .obs-mision__meta{font-size:11.5px;color:var(--text-3)}
       .obs-instruccion{color:var(--text-2);font-size:13px;line-height:1.5;margin:0 0 12px}
       .obs-aviso{background:#e6f7f1;border:1px solid #b9e4d4;color:#0d6b52;border-radius:10px;padding:10px 14px;font-size:12.5px;font-weight:600;margin-bottom:12px}
+      .obs-aviso--neutro{background:var(--surface-2);border-color:var(--border-2);color:var(--text-2);font-weight:500}
       .obs-scene{position:relative;border-radius:14px;overflow:hidden;margin-bottom:16px;height:460px}
       .obs-scene img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
       @media(max-width:900px){.obs-scene{height:370px}}
@@ -11479,8 +11480,9 @@ const Sections = (function(){
       .obs-hotspot{position:absolute;width:34px;height:34px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.95);background:rgba(27,93,240,.28);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;animation:obs-pulso 2.2s ease-in-out infinite;transition:background .15s,border-color .15s}
       .obs-hotspot .ic{width:16px;height:16px;color:#fff;opacity:0}
       .obs-hotspot:hover,.obs-hotspot:focus-visible{border-color:#fff;background:rgba(27,93,240,.42);outline:none}
-      .obs-hotspot.is-found,.obs-hotspot.is-visto{animation:none;background:#1E8F1D;border-color:#fff}
+      .obs-hotspot.is-found{animation:none;background:#1E8F1D;border-color:#fff}
       .obs-hotspot.is-found .ic,.obs-hotspot.is-visto .ic{opacity:1}
+      .obs-hotspot.is-visto{animation:none;background:rgba(71,85,105,.55);border-color:rgba(255,255,255,.75)}
       @media(max-width:600px){.obs-hotspot{width:30px;height:30px}.obs-hotspot .ic{width:14px;height:14px}}
       .obs-hallazgos{display:flex;gap:10px;margin-bottom:10px}
       .obs-hallazgo{flex:1;display:flex;gap:9px;align-items:flex-start;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;padding:11px}
@@ -11493,8 +11495,7 @@ const Sections = (function(){
       .obs-detalles{margin-bottom:14px}
       .obs-detalles__title{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
       .obs-detalles__list{display:flex;flex-wrap:wrap;gap:6px}
-      .obs-detalle-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:11px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border-2)}
-      .obs-detalle-chip.is-visto{background:#e6f7f1;color:#0d6b52;border-color:color-mix(in srgb,#1E8F1D 30%,transparent)}
+      .obs-detalle-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:11px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border-strong)}
       .obs-pregunta{background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:16px}
       .obs-pregunta.is-locked{display:flex;align-items:center;gap:10px;color:var(--text-3);font-size:12.5px}
       .obs-pregunta.is-locked .ic{width:18px;height:18px;flex-shrink:0}
@@ -11595,12 +11596,16 @@ const Sections = (function(){
       const completada = reg.status === 'completed';
 
       const obsCheck = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      // Los puntos contextuales NUNCA llevan palomita: al revisarse muestran un
+      // icono discreto de información y un tono neutro — se ve que ya se
+      // exploraron, pero sin presentarse como respuesta correcta.
+      const obsInfo = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
       const hotspotsHTML = m.hallazgos.map(h=>{
         const ok = encontrados.has(h.id);
         return `<button type="button" class="obs-hotspot ${ok?'is-found':''}" style="left:${h.x}%;top:${h.y}%" data-hallazgo="${h.id}" aria-label="${ok?`Hallazgo identificado: ${escapeHtml(h.titulo)}`:`Explorar observación: ${escapeHtml(h.titulo)}`}">${obsCheck}</button>`;
       }).join('') + m.detalles.map(d=>{
         const ok = vistos.has(d.id);
-        return `<button type="button" class="obs-hotspot ${ok?'is-visto':''}" style="left:${d.x}%;top:${d.y}%" data-detalle="${d.id}" aria-label="${ok?`Observación explorada: ${escapeHtml(d.titulo)}`:`Explorar observación: ${escapeHtml(d.titulo)}`}">${obsCheck}</button>`;
+        return `<button type="button" class="obs-hotspot ${ok?'is-visto':''}" style="left:${d.x}%;top:${d.y}%" data-detalle="${d.id}" aria-label="${ok?`Elemento revisado: ${escapeHtml(d.titulo)}`:`Explorar observación: ${escapeHtml(d.titulo)}`}">${obsInfo}</button>`;
       }).join('');
 
       const hallazgosHTML = m.hallazgos.map((h,i)=>{
@@ -11615,8 +11620,8 @@ const Sections = (function(){
       }).join('');
 
       const detallesHTML = (vistos.size>0) ? `<div class="obs-detalles">
-        <div class="obs-detalles__title">Observaciones exploradas</div>
-        <div class="obs-detalles__list">${m.detalles.filter(d=>vistos.has(d.id)).map(d=>`<span class="obs-detalle-chip is-visto"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px"><polyline points="20 6 9 17 4 12"/></svg>${escapeHtml(d.titulo)}</span>`).join('')}</div>
+        <div class="obs-detalles__title">Elementos revisados</div>
+        <div class="obs-detalles__list">${m.detalles.filter(d=>vistos.has(d.id)).map(d=>`<span class="obs-detalle-chip"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>${escapeHtml(d.titulo)}</span>`).join('')}</div>
       </div>` : '';
 
       const respondioMal = reg.ultimaOpcionMal != null;
@@ -11637,8 +11642,8 @@ const Sections = (function(){
           </div>
           <button type="button" class="btn btn--ghost" id="obs-volver-lista"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a casos</button>
         </div>
-        <p class="obs-instruccion">Observa la escena y analiza sus puntos relevantes. Identifica los 3 hallazgos clave para desbloquear la reflexión final.</p>
-        ${aviso ? `<div class="obs-aviso">${escapeHtml(aviso)}</div>` : ''}
+        <p class="obs-instruccion">Analiza los puntos señalados en la escena. Identifica los 3 hallazgos clave para desbloquear la reflexión final.</p>
+        ${aviso ? `<div class="obs-aviso ${aviso.tipo==='neutro'?'obs-aviso--neutro':''}">${escapeHtml(aviso.texto)}</div>` : ''}
         <div class="obs-scene">
           <img src="assets/retos/observacion-guiada/${m.imagen}" alt="Escena del caso">
           ${hotspotsHTML}
@@ -11649,29 +11654,38 @@ const Sections = (function(){
       </div>`;
 
       container.querySelector('#obs-volver-lista')?.addEventListener('click',()=>{ vistaCaso=null; aviso=null; pintar(); });
+      // Si el guardado en servidor falla, el error se MUESTRA (antes era un
+      // console.warn silencioso y parecía que el clic "no hacía nada").
+      const avisoErrorGuardado = (e) => {
+        aviso = { tipo:'neutro', texto:`No se pudo guardar tu avance (${e.message}). Revisa tu conexión e intenta de nuevo.` };
+        pintar();
+      };
       container.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click', async ()=>{
         const h = m.hallazgos.find(x=>x.id===b.dataset.hallazgo);
         if (!h) return;
         // Ya identificado: solo vuelve a mostrar la explicación, sin llamar
         // al servidor otra vez ni duplicar nada.
-        if (encontrados.has(h.id)) { aviso = `Hallazgo identificado. ${h.explicacion}`; pintar(); return; }
-        try { await _obsEnviarAccion(m.id, 'hallazgo', h.id); } catch(e){ console.warn('[observacion]', e.message); return; }
-        aviso = `Hallazgo identificado. ${h.explicacion}`;
+        if (encontrados.has(h.id)) { aviso = { tipo:'ok', texto:`Hallazgo identificado. ${h.explicacion}` }; pintar(); return; }
+        try { await _obsEnviarAccion(m.id, 'hallazgo', h.id); } catch(e){ avisoErrorGuardado(e); return; }
+        aviso = { tipo:'ok', texto:`Hallazgo identificado. ${h.explicacion}` };
         pintar();
       }));
       container.querySelectorAll('[data-detalle]').forEach(b=>b.addEventListener('click', async ()=>{
         const d = m.detalles.find(x=>x.id===b.dataset.detalle);
         if (!d) return;
-        if (vistos.has(d.id)) { aviso = `Observación explorada. ${d.mensaje}`; pintar(); return; }
-        try { await _obsEnviarAccion(m.id, 'detalle', d.id); } catch(e){ console.warn('[observacion]', e.message); return; }
-        aviso = `Observación explorada. ${d.mensaje}`;
+        // Punto contextual: cuenta como revisado, nunca como respuesta
+        // correcta — tono neutro, sin palomita y sin tocar el contador 3/3.
+        const texto = `Este elemento aporta contexto, pero no es uno de los hallazgos centrales. ${d.mensaje}`;
+        if (vistos.has(d.id)) { aviso = { tipo:'neutro', texto }; pintar(); return; }
+        try { await _obsEnviarAccion(m.id, 'detalle', d.id); } catch(e){ avisoErrorGuardado(e); return; }
+        aviso = { tipo:'neutro', texto };
         pintar();
       }));
       container.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click', async ()=>{
         if (reg.preguntaCorrecta) return;
         const i = Number(b.dataset.op);
         let r;
-        try { r = await _obsEnviarAccion(m.id, 'respuesta', i); } catch(e){ console.warn('[observacion]', e.message); return; }
+        try { r = await _obsEnviarAccion(m.id, 'respuesta', i); } catch(e){ avisoErrorGuardado(e); return; }
         if (r.puntosOtorgados && r.status==='completed') { try { registrarAccionProgreso(m.id); } catch(e){} }
         pintar();
       }));
