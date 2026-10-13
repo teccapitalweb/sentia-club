@@ -13751,7 +13751,9 @@ const Sections = (function(){
           </div>
 
           <div style="position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            <button class="btn btn--wa" id="btn-wa-canal-open"><svg class="ic"><use href="#i-whatsapp"/></svg>${SENTIA_CONTACT.grupo ? 'Abrir grupo' : 'Unirme al canal'}</button>
+            <button class="btn btn--wa" id="btn-wa-canal-open">${tieneAccesoVipCompleto()
+              ? `<svg class="ic"><use href="#i-whatsapp"/></svg>${SENTIA_CONTACT.grupo ? 'Abrir grupo' : 'Unirme al canal'}`
+              : `<svg class="ic"><use href="#i-lock"/></svg>Suscríbete para unirte`}</button>
             <button class="btn btn--ghost" id="btn-wa-canal-share"><svg class="ic"><use href="#i-arrow-right"/></svg>Compartir invitación</button>
           </div>
         </section>
@@ -15861,8 +15863,10 @@ function initNav(){
       }
     }
 
-    // Sección Canal WhatsApp · abrir grupo
+    // Sección Canal WhatsApp · abrir grupo (solo VIP: se puede VER la sección
+    // sin membresía, pero unirse al grupo/comunidad exige estar suscrito)
     if(t.closest('#btn-wa-canal-open')){
+      if (!tieneAccesoVipCompleto()) { mostrarPaywallCurso(); return; }
       window.open(SENTIA_CONTACT.grupo || SENTIA_CONTACT.canal,'_blank');
       Toast.success('Abriendo comunidad','Comunidad SENTIA');
       return;
