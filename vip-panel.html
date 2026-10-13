@@ -11387,63 +11387,75 @@ const Sections = (function(){
   function _obsGuardarRegistro(misionId, reg){
     const t = _obsLeerTodo(); t[misionId] = reg; _obsGuardarTodo(t);
   }
-  function _obsEstadoVisible(idx){
-    const reg = _obsRegistro(OBSERVACION_MISIONES[idx].id);
-    if (reg.status === 'completed') return 'completed';
-    if (idx === 0) return 'available';
-    return (_obsRegistro(OBSERVACION_MISIONES[idx-1].id).status === 'completed') ? 'available' : 'locked';
+  function _obsResumenRuta(){
+    const estados = OBSERVACION_MISIONES.map(m=>_obsRegistro(m.id).status);
+    const completadas = estados.filter(s=>s==='completed').length;
+    const iniciado = estados.some(s=>s==='in_progress'||s==='completed');
+    return { completadas, iniciado, total: OBSERVACION_MISIONES.length };
+  }
+  function _obsCtaRuta(r){
+    r = r || _obsResumenRuta();
+    if (r.completadas===r.total) return 'Ver ruta';
+    if (r.completadas>0 || r.iniciado) return 'Continuar ruta';
+    return 'Iniciar ruta';
   }
 
   function _obsInjectarCSS(){
     if (document.getElementById('obs-css')) return;
     const st = document.createElement('style'); st.id = 'obs-css';
-    st.textContent = `.obs-ruta{background:var(--surface);border:1px solid var(--border-2);border-radius:18px;padding:20px}
-      .obs-ruta__badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#e0f2f1;color:#00695c;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-      .obs-ruta__badge .ic{width:13px;height:13px}
-      .obs-ruta__dur{margin-left:8px;font-size:11px;color:var(--text-3)}
-      .obs-ruta__title{margin:10px 0 2px;font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-      .obs-ruta__sub{margin:0 0 12px;color:var(--text-3);font-size:12px}
-      .obs-ruta__progreso{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-      .obs-ruta__bar{flex:1;max-width:220px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
-      .obs-ruta__bar span{display:block;height:100%;background:#00695c;border-radius:999px;transition:width .25s}
-      .obs-ruta__progreso small{font-size:11px;color:var(--text-3);font-weight:700;white-space:nowrap}
-      .obs-pasos{display:flex;align-items:stretch}
-      .obs-pasos .obs-paso+.obs-paso{margin-left:22px}
-      .obs-paso{position:relative;flex:1;display:flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--border-2);border-radius:14px;overflow:hidden}
-      .obs-pasos .obs-paso:not(:first-child)::before{content:'';position:absolute;top:44px;left:-22px;width:22px;height:2px;background:var(--border-strong)}
-      .obs-paso--locked{opacity:.65}
-      .obs-paso__img{position:relative;height:88px;overflow:hidden}
-      .obs-paso__img img{width:100%;height:100%;object-fit:cover;display:block}
-      .obs-paso--locked .obs-paso__img img{filter:grayscale(.5)}
-      .obs-paso__badge{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:800;background:#1E8F1D;color:#fff}
-      .obs-paso__badge .ic{width:10px;height:10px}
-      .obs-paso__lock{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(10,15,30,.6);color:#fff;display:flex;align-items:center;justify-content:center}
-      .obs-paso__lock .ic{width:13px;height:13px}
-      .obs-paso__body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
-      .obs-paso__body small{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#00695c}
-      .obs-paso__body h4{margin:0;font-size:13.5px;font-weight:800;color:var(--text)}
-      .obs-paso__body p{margin:0;font-size:11px;color:var(--text-3);line-height:1.4;flex:1}
-      .obs-paso__meta{font-size:10px;color:var(--text-3)}
-      .obs-paso__cta{margin-top:6px;display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border-radius:9px;background:#00695c;color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;border:none;cursor:pointer;font-family:inherit}
-      .obs-paso__cta.is-locked{background:transparent;color:var(--text-3);font-weight:600;text-transform:none;letter-spacing:0;font-size:11px;padding:6px 2px;cursor:default}
-      .obs-paso.is-open{outline:2px solid #00695c;outline-offset:2px}
-      .obs-expand:not(:empty){margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
-      .obs-mision__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-      .obs-mision__kicker{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#00695c}
-      .obs-mision__title{margin:4px 0 6px;font-size:18px;font-weight:800;color:var(--text)}
-      .obs-mision__tag{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--text-3);font-size:10.5px;font-weight:700}
-      .obs-instruccion{color:var(--text-2);font-size:13px;line-height:1.5;margin:0 0 10px}
-      .obs-aviso{background:#e6f7f1;border:1px solid #b9e4d4;color:#0d6b52;border-radius:10px;padding:10px 14px;font-size:12.5px;font-weight:600;margin-bottom:10px}
-      .obs-aviso.is-guia{background:var(--surface-2);border-color:var(--border-2);color:var(--text-2);font-weight:500}
-      .obs-scene{position:relative;border-radius:14px;overflow:hidden;margin-bottom:12px;line-height:0}
+    st.textContent = `.obs-entry-card{display:flex;background:var(--surface);border:1px solid var(--border-2);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+      .obs-entry-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-card)}
+      .obs-entry-card__img{flex:0 0 220px;min-height:150px;overflow:hidden}
+      .obs-entry-card__img img{width:100%;height:100%;object-fit:cover;display:block}
+      .obs-entry-card__body{flex:1;padding:18px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0}
+      .obs-entry-card__title{margin:0;font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+      .obs-entry-card__desc{margin:0;color:var(--text-3);font-size:12.5px;line-height:1.45;max-width:460px}
+      .obs-entry-card__progreso{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
+      .obs-entry-card__bar{flex:1;max-width:180px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+      .obs-entry-card__bar span{display:block;height:100%;background:#00695c;border-radius:999px;transition:width .25s}
+      .obs-entry-card__progreso small{font-size:11px;color:var(--text-3);font-weight:700;white-space:nowrap}
+      .obs-entry-card__cta{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#00695c;margin-top:4px}
+      .obs-entry-card__cta .ic{width:14px;height:14px}
+      @media(max-width:620px){.obs-entry-card{flex-direction:column}.obs-entry-card__img{flex:0 0 140px;width:100%}.obs-entry-card__body{padding:14px 16px 16px}}
+      .obs-panel-banner{position:relative;padding:34px 38px;border-radius:24px;background:linear-gradient(135deg,#00433b,#00695c 55%,#1ba089);color:#fff;overflow:hidden;margin-bottom:22px}
+      .obs-panel-banner__eyebrow{display:flex;align-items:center;gap:7px;color:#a8f3e4;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+      .obs-panel-banner h1{max-width:520px;margin:13px 0 12px;color:#fff;font-size:clamp(26px,3.3vw,38px);letter-spacing:-.04em;line-height:1.1}
+      .obs-panel-banner p{margin:0;max-width:460px;color:rgba(255,255,255,.8);font-size:13.5px;line-height:1.5}
+      .obs-panel-banner__progreso{display:flex;align-items:center;gap:10px;margin-top:16px;max-width:320px}
+      .obs-panel-banner__bar{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden}
+      .obs-panel-banner__bar span{display:block;height:100%;background:#fff;border-radius:999px;transition:width .25s}
+      .obs-panel-banner__progreso small{font-size:11px;color:rgba(255,255,255,.85);font-weight:700;white-space:nowrap}
+      .obs-panel-banner__back{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border:0;border-radius:999px;background:#fff;color:#00433b;font:750 12px 'Montserrat',sans-serif;cursor:pointer;transition:transform .15s}
+      .obs-panel-banner__back:hover{transform:scale(1.03)}
+      .obs-panel-banner__back .ic{width:15px;height:15px}
+      @media(max-width:760px){.obs-panel-banner{padding:27px 22px}}
+      .obs-casos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+      @media(max-width:900px){.obs-casos-grid{grid-template-columns:1fr}}
+      .obs-caso-card{background:var(--surface);border:1px solid var(--border-2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+      .obs-caso-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-card)}
+      .obs-caso-card__img{position:relative;height:120px;overflow:hidden}
+      .obs-caso-card__img img{width:100%;height:100%;object-fit:cover;display:block}
+      .obs-caso-card__badge{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:800;background:#1E8F1D;color:#fff}
+      .obs-caso-card__badge .ic{width:10px;height:10px}
+      .obs-caso-card__body{padding:13px 15px 15px;display:flex;flex-direction:column;gap:5px;flex:1}
+      .obs-caso-card__tags{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#00695c}
+      .obs-caso-card__body h3{margin:0;font-size:14px;font-weight:800;color:var(--text)}
+      .obs-caso-card__body p{margin:0;font-size:11.5px;color:var(--text-3);line-height:1.4;flex:1}
+      .obs-caso-card__cta{margin-top:8px;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:9px;background:#00695c;color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;border:none;cursor:pointer;font-family:inherit}
+      .obs-caso-card__cta.is-ghost{background:var(--surface-2);color:var(--text-2)}
+      .obs-ruta-completa{margin-top:16px;padding:12px 16px;border-radius:12px;background:#e6f7f1;color:#0d6b52;font-size:13px;font-weight:700;text-align:center}
+      .obs-mision__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+      .obs-mision__tag{display:inline-block;padding:3px 10px;border-radius:999px;background:#e0f2f1;color:#00695c;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+      .obs-mision__title{margin:2px 0 4px;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+      .obs-mision__meta{font-size:11.5px;color:var(--text-3)}
+      .obs-aviso{background:#e6f7f1;border:1px solid #b9e4d4;color:#0d6b52;border-radius:10px;padding:10px 14px;font-size:12.5px;font-weight:600;margin-bottom:12px}
+      .obs-scene{position:relative;border-radius:14px;overflow:hidden;margin-bottom:16px;line-height:0}
       .obs-scene img{width:100%;display:block}
-      .obs-hotspot{position:absolute;width:38px;height:38px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.9);background:rgba(0,105,92,.35);cursor:pointer;padding:0;opacity:0;transition:opacity .15s,transform .15s}
-      .obs-hotspot:hover,.obs-hotspot:focus-visible{opacity:1;outline:none;transform:translate(-50%,-50%) scale(1.08)}
-      .obs-scene.show-hints .obs-hotspot{opacity:.85}
-      .obs-hotspot.is-found{opacity:1;background:#1E8F1D;border-color:#fff;cursor:default}
-      .obs-hotspot.is-visto{opacity:1;background:rgba(27,93,240,.55)}
-      .obs-hotspot--detalle{background:rgba(27,93,240,.3)}
-      .obs-scene__pista{position:absolute;bottom:10px;right:10px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:rgba(10,20,40,.72);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+      .obs-hotspot{position:absolute;width:40px;height:40px;border-radius:50%;transform:translate(-50%,-50%);border:none;background:transparent;cursor:pointer;padding:0;opacity:0}
+      .obs-hotspot:focus-visible{opacity:1;outline:2px solid #00695c;outline-offset:2px;background:rgba(0,105,92,.15)}
+      .obs-hotspot.is-found{opacity:1;background:rgba(30,143,29,.22);border:2px solid rgba(30,143,29,.55)}
+      .obs-hotspot.is-visto{opacity:1;background:rgba(27,93,240,.18);border:2px solid rgba(27,93,240,.5)}
+      @media(max-width:760px){.obs-hotspot{width:36px;height:36px}}
       .obs-hallazgos{display:flex;gap:10px;margin-bottom:10px}
       .obs-hallazgo{flex:1;display:flex;gap:9px;align-items:flex-start;background:var(--surface);border:1px solid var(--border-2);border-radius:12px;padding:11px}
       .obs-hallazgo.is-found{border-color:#1E8F1D}
@@ -11468,79 +11480,89 @@ const Sections = (function(){
       .obs-op.is-picked-wrong{border-color:var(--border-strong)}
       .obs-pregunta__fb{margin-top:10px;padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.5;background:var(--surface-2);color:var(--text-2)}
       .obs-pregunta__fb.is-ok{background:#e6f7f1;color:#0d6b52}
-      .obs-ruta-completa{margin-top:14px;padding:12px 16px;border-radius:12px;background:#e6f7f1;color:#0d6b52;font-size:13px;font-weight:700;text-align:center}
-      @media(max-width:760px){
-        .obs-pasos{flex-direction:column}
-        .obs-pasos .obs-paso+.obs-paso{margin-left:0;margin-top:20px}
-        .obs-pasos .obs-paso:not(:first-child)::before{top:-20px;left:30px;width:2px;height:20px}
-        .obs-hallazgos{flex-direction:column}
-        .obs-hotspot{width:34px;height:34px}
-      }`;
+      @media(max-width:760px){.obs-hallazgos{flex-direction:column}}`;
     document.head.appendChild(st);
   }
 
-  function _obsMontarRuta(root){
-    if (!root) return;
+  // Vista interna de la ruta: lista de los 3 casos (disponibles desde el inicio,
+  // sin bloqueo secuencial) y, dentro de ella, el detalle de cada caso. Sustituye
+  // por completo el listado principal de Retos (no se expande debajo); "Volver a
+  // Retos" regresa a renderRetos en el mismo contenedor, igual que el resto de
+  // las vistas de práctica (_renderCasoClinicoView, _renderMapaEmocionalView, etc).
+  function _renderObservacionView(container){
+    _retosContainer = container;
     _obsInjectarCSS();
-    let abiertaIdx = null;
-    let showHints = false;
+    let vistaCaso = null;
     let aviso = null;
 
-    function pintarRuta(){
-      const estados = OBSERVACION_MISIONES.map((_,i)=>_obsEstadoVisible(i));
-      const completadas = estados.filter(e=>e==='completed').length;
+    function pintar(){
+      if (vistaCaso === null) pintarLista(); else pintarCaso(vistaCaso);
+    }
+
+    function pintarLista(){
+      const estados = OBSERVACION_MISIONES.map(m=>_obsRegistro(m.id).status);
+      const completadas = estados.filter(s=>s==='completed').length;
       const pct = Math.round(completadas / OBSERVACION_MISIONES.length * 100);
 
-      const pasosHTML = OBSERVACION_MISIONES.map((m,i)=>{
-        const estado = estados[i];
-        return `<div class="obs-paso obs-paso--${estado} ${abiertaIdx===i?'is-open':''}" data-paso="${i}">
-          <div class="obs-paso__img"><img src="assets/retos/observacion-guiada/${m.imagen}" alt="" loading="lazy"></div>
-          ${estado==='completed' ? `<span class="obs-paso__badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Completada</span>` : ''}
-          ${estado==='locked' ? `<span class="obs-paso__lock"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>` : ''}
-          <div class="obs-paso__body">
-            <small>Misión 0${m.numero}</small>
-            <h4>${escapeHtml(m.titulo)}</h4>
+      const casosHTML = OBSERVACION_MISIONES.map((m,i)=>{
+        const status = estados[i];
+        const completada = status === 'completed';
+        const ctaTxt = completada ? 'Repasar misión' : (status === 'in_progress' ? 'Continuar misión' : 'Iniciar misión');
+        return `<div class="obs-caso-card" data-caso="${i}" role="button" tabindex="0" aria-label="${escapeHtml(m.titulo)} — ${ctaTxt}">
+          <div class="obs-caso-card__img">
+            <img src="assets/retos/observacion-guiada/${m.imagen}" alt="" loading="lazy">
+            ${completada ? `<span class="obs-caso-card__badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Completada</span>` : ''}
+          </div>
+          <div class="obs-caso-card__body">
+            <span class="obs-caso-card__tags">${m.duracion} · Observación guiada</span>
+            <h3>${escapeHtml(m.titulo)}</h3>
             <p>${escapeHtml(m.descripcion)}</p>
-            <span class="obs-paso__meta">${m.duracion} · ${m.hallazgos.length} hallazgos clave</span>
-            ${estado==='locked'
-              ? `<span class="obs-paso__cta is-locked">Completa la misión anterior para desbloquearla</span>`
-              : `<button type="button" class="obs-paso__cta" data-abrir="${i}">${estado==='completed' ? 'Repasar misión' : 'Iniciar misión'}</button>`}
+            <button type="button" class="obs-caso-card__cta ${completada?'is-ghost':''}" data-abrir-caso="${i}">${ctaTxt}</button>
           </div>
         </div>`;
       }).join('');
 
-      root.innerHTML = `<div class="obs-ruta">
-        <div class="obs-ruta__head">
-          <span class="obs-ruta__badge"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Observación guiada</span><span class="obs-ruta__dur">5–8 min</span>
-          <h3 class="obs-ruta__title">Observa, analiza y decide</h3>
-          <p class="obs-ruta__sub">Casos ficticios · contenido educativo</p>
-          <div class="obs-ruta__progreso"><div class="obs-ruta__bar"><span style="width:${pct}%"></span></div><small>${completadas}/${OBSERVACION_MISIONES.length} misiones completadas</small></div>
+      container.innerHTML = `<div class="fade-up">
+        <div class="obs-panel-banner">
+          <span class="obs-panel-banner__eyebrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Observación guiada</span>
+          <h1>Observa, analiza y decide</h1>
+          <p>Casos ficticios · contenido educativo</p>
+          <div class="obs-panel-banner__progreso"><div class="obs-panel-banner__bar"><span style="width:${pct}%"></span></div><small>${completadas}/${OBSERVACION_MISIONES.length} misiones completadas</small></div>
+          <button type="button" class="obs-panel-banner__back" id="obs-volver-retos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a Retos</button>
         </div>
-        <div class="obs-pasos">${pasosHTML}</div>
-        <div class="obs-expand">${abiertaIdx!==null ? renderMisionAbierta(abiertaIdx) : ''}</div>
+        <div class="obs-casos-grid">${casosHTML}</div>
         ${completadas===OBSERVACION_MISIONES.length ? `<div class="obs-ruta-completa">Ruta de observación completada</div>` : ''}
       </div>`;
 
-      root.querySelectorAll('[data-abrir]').forEach(b=>b.addEventListener('click',()=>{
-        const i = Number(b.dataset.abrir);
-        if (estados[i]==='locked') return;
-        abiertaIdx = i; showHints = false; aviso = null;
-        pintarRuta();
-        root.querySelector('.obs-expand')?.scrollIntoView({behavior:'smooth', block:'nearest'});
+      container.querySelector('#obs-volver-retos')?.addEventListener('click', ()=>renderRetos(container));
+      container.querySelectorAll('[data-abrir-caso]').forEach(b=>b.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        vistaCaso = Number(b.dataset.abrirCaso);
+        pintar();
       }));
-      if (abiertaIdx!==null) wireMisionAbierta(abiertaIdx);
+      container.querySelectorAll('[data-caso]').forEach(el=>{
+        const abrir=()=>{ vistaCaso = Number(el.dataset.caso); pintar(); };
+        el.addEventListener('click',(e)=>{ if (e.target.closest('[data-abrir-caso]')) return; abrir(); });
+        el.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); abrir(); } });
+      });
     }
 
-    function renderMisionAbierta(idx){
+    function pintarCaso(idx){
       const m = OBSERVACION_MISIONES[idx];
       const reg = _obsRegistro(m.id);
+      if (!reg.status) { reg.status = 'in_progress'; _obsGuardarRegistro(m.id, reg); }
       const encontrados = new Set(reg.hallazgosClave||[]);
       const vistos = new Set(reg.detallesVistos||[]);
       const todosEncontrados = encontrados.size === m.hallazgos.length;
-      const completada = reg.status==='completed';
+      const completada = reg.status === 'completed';
 
-      const hotspotsHTML = m.hallazgos.map(h=>`<button type="button" class="obs-hotspot ${encontrados.has(h.id)?'is-found':''}" style="left:${h.x}%;top:${h.y}%" data-hallazgo="${h.id}" aria-label="${escapeHtml(h.titulo)}"></button>`).join('')
-        + m.detalles.map(d=>`<button type="button" class="obs-hotspot obs-hotspot--detalle ${vistos.has(d.id)?'is-visto':''}" style="left:${d.x}%;top:${d.y}%" data-detalle="${d.id}" aria-label="${escapeHtml(d.titulo)}"></button>`).join('');
+      const hotspotsHTML = m.hallazgos.map(h=>{
+        const ok = encontrados.has(h.id);
+        return `<button type="button" class="obs-hotspot ${ok?'is-found':''}" style="left:${h.x}%;top:${h.y}%" data-hallazgo="${h.id}" aria-label="${ok?escapeHtml(h.titulo):'Explorar esta zona de la escena'}"></button>`;
+      }).join('') + m.detalles.map(d=>{
+        const ok = vistos.has(d.id);
+        return `<button type="button" class="obs-hotspot ${ok?'is-visto':''}" style="left:${d.x}%;top:${d.y}%" data-detalle="${d.id}" aria-label="${ok?escapeHtml(d.titulo):'Explorar esta zona de la escena'}"></button>`;
+      }).join('');
 
       const hallazgosHTML = m.hallazgos.map((h,i)=>{
         const ok = encontrados.has(h.id);
@@ -11548,14 +11570,14 @@ const Sections = (function(){
           <div class="obs-hallazgo__num">${ok?'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':(i+1)}</div>
           <div>
             <div class="obs-hallazgo__title">${ok?escapeHtml(h.titulo):'Hallazgo pendiente'}</div>
-            <div class="obs-hallazgo__desc">${ok?escapeHtml(h.explicacion):'Busca una condición o señal relevante en la escena.'}</div>
+            <div class="obs-hallazgo__desc">${ok?escapeHtml(h.explicacion):'Explora la escena e identifica una señal relevante.'}</div>
           </div>
         </div>`;
       }).join('');
 
-      const detallesHTML = m.detalles.length ? `<div class="obs-detalles">
+      const detallesHTML = (vistos.size>0) ? `<div class="obs-detalles">
         <div class="obs-detalles__title">Detalles observados</div>
-        <div class="obs-detalles__list">${m.detalles.map(d=>`<span class="obs-detalle-chip ${vistos.has(d.id)?'is-visto':''}">${vistos.has(d.id)?'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px"><polyline points="20 6 9 17 4 12"/></svg>':''}${escapeHtml(d.titulo)}</span>`).join('')}</div>
+        <div class="obs-detalles__list">${m.detalles.filter(d=>vistos.has(d.id)).map(d=>`<span class="obs-detalle-chip is-visto"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px"><polyline points="20 6 9 17 4 12"/></svg>${escapeHtml(d.titulo)}</span>`).join('')}</div>
       </div>` : '';
 
       const respondioMal = reg.ultimaOpcionMal != null;
@@ -11564,90 +11586,70 @@ const Sections = (function(){
           <div class="obs-pregunta__ops">${m.opciones.map((o,i)=>`<button type="button" class="obs-op ${(completada||reg.preguntaCorrecta)&&o.mejor?'is-best':''} ${respondioMal && reg.ultimaOpcionMal===i?'is-picked-wrong':''}" data-op="${i}">${escapeHtml(o.texto)}</button>`).join('')}</div>
           ${reg.preguntaCorrecta ? `<div class="obs-pregunta__fb is-ok">${escapeHtml(m.opciones.find(o=>o.mejor).retro)}</div>` : (respondioMal ? `<div class="obs-pregunta__fb">${escapeHtml(m.opciones[reg.ultimaOpcionMal].retro)}</div>` : '')}
         </section>`
-        : `<section class="obs-pregunta is-locked"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Encuentra los ${m.hallazgos.length} hallazgos clave para desbloquear la pregunta final</section>`;
+        : `<section class="obs-pregunta is-locked"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Encuentra los ${m.hallazgos.length} hallazgos clave para desbloquear la reflexión final</section>`;
 
-      return `<div class="fade-up">
+      container.innerHTML = `<div class="fade-up">
         <div class="obs-mision__head">
           <div>
-            <div class="obs-mision__kicker">Misión 0${m.numero} · Observación guiada</div>
-            <h2 class="obs-mision__title">${escapeHtml(m.titulo)}</h2>
             <span class="obs-mision__tag">Caso ficticio · contenido educativo</span>
+            <h2 class="obs-mision__title">${escapeHtml(m.titulo)}</h2>
+            <div class="obs-mision__meta">${m.duracion} · Observación guiada</div>
           </div>
-          <div class="obs-mision__actions">
-            <button type="button" class="btn btn--ghost" id="obs-cerrar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cerrar</button>
-          </div>
+          <button type="button" class="btn btn--ghost" id="obs-volver-lista"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Volver a casos</button>
         </div>
-        <p class="obs-instruccion">Explora la escena y selecciona los hallazgos clave. También puedes revisar otros detalles que dan contexto.</p>
-        ${aviso ? `<div class="obs-aviso ${aviso.tipo==='guia'?'is-guia':''}">${escapeHtml(aviso.texto)}</div>` : ''}
-        <div class="obs-scene ${showHints?'show-hints':''}">
-          <img src="assets/retos/observacion-guiada/${m.imagen}" alt="Escena de la misión">
+        ${aviso ? `<div class="obs-aviso">${escapeHtml(aviso)}</div>` : ''}
+        <div class="obs-scene">
+          <img src="assets/retos/observacion-guiada/${m.imagen}" alt="Escena del caso">
           ${hotspotsHTML}
-          <button type="button" class="obs-scene__pista" id="obs-toggle-pista">${showHints?'Ocultar pistas':'Mostrar una pista'}</button>
         </div>
         <div class="obs-hallazgos">${hallazgosHTML}</div>
         ${detallesHTML}
         ${preguntaHTML}
       </div>`;
-    }
 
-    function wireMisionAbierta(idx){
-      const m = OBSERVACION_MISIONES[idx];
-      root.querySelector('#obs-cerrar')?.addEventListener('click',()=>{ abiertaIdx=null; pintarRuta(); });
-      root.querySelector('#obs-toggle-pista')?.addEventListener('click',()=>{ showHints=!showHints; pintarRuta(); });
-      root.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click',(e)=>{
-        e.stopPropagation();
+      container.querySelector('#obs-volver-lista')?.addEventListener('click',()=>{ vistaCaso=null; aviso=null; pintar(); });
+      container.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click',()=>{
         const h = m.hallazgos.find(x=>x.id===b.dataset.hallazgo);
         if (!h) return;
-        const reg = _obsRegistro(m.id);
-        const set = new Set(reg.hallazgosClave||[]);
-        if (!set.has(h.id)) {
-          set.add(h.id);
-          reg.hallazgosClave = Array.from(set);
-          if (!reg.status) reg.status = 'in-progress';
-          _obsGuardarRegistro(m.id, reg);
-        }
-        aviso = { tipo:'hallazgo', texto:`Hallazgo identificado. ${h.explicacion}` };
-        pintarRuta();
+        const r = _obsRegistro(m.id);
+        const set = new Set(r.hallazgosClave||[]);
+        if (!set.has(h.id)) { set.add(h.id); r.hallazgosClave = Array.from(set); _obsGuardarRegistro(m.id, r); }
+        aviso = `Hallazgo identificado. ${h.explicacion}`;
+        pintar();
       }));
-      root.querySelectorAll('[data-detalle]').forEach(b=>b.addEventListener('click',(e)=>{
-        e.stopPropagation();
+      container.querySelectorAll('[data-detalle]').forEach(b=>b.addEventListener('click',()=>{
         const d = m.detalles.find(x=>x.id===b.dataset.detalle);
         if (!d) return;
-        const reg = _obsRegistro(m.id);
-        const set = new Set(reg.detallesVistos||[]);
-        if (!set.has(d.id)) { set.add(d.id); reg.detallesVistos = Array.from(set); if (!reg.status) reg.status='in-progress'; _obsGuardarRegistro(m.id, reg); }
-        aviso = { tipo:'detalle', texto:d.mensaje };
-        pintarRuta();
+        const r = _obsRegistro(m.id);
+        const set = new Set(r.detallesVistos||[]);
+        if (!set.has(d.id)) { set.add(d.id); r.detallesVistos = Array.from(set); _obsGuardarRegistro(m.id, r); }
+        aviso = d.mensaje;
+        pintar();
       }));
-      root.querySelector('.obs-scene')?.addEventListener('click',(e)=>{
-        if (e.target.closest('[data-hallazgo],[data-detalle],#obs-toggle-pista')) return;
-        aviso = { tipo:'guia', texto:'Sigue explorando: identifica los elementos que podrían orientar una decisión profesional.' };
-        pintarRuta();
-      });
-      root.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
-        const reg = _obsRegistro(m.id);
-        if (reg.preguntaCorrecta) return;
+      container.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+        const r = _obsRegistro(m.id);
+        if (r.preguntaCorrecta) return;
         const i = Number(b.dataset.op);
         const opt = m.opciones[i];
         if (opt.mejor) {
-          reg.preguntaCorrecta = true;
-          reg.status = 'completed';
-          reg.completedAt = new Date().toISOString();
-          reg.ultimaOpcionMal = null;
-          if (!reg.puntosOtorgados) {
-            reg.puntosOtorgados = OBS_PUNTOS_POR_MISION[idx];
-            reg.logroOtorgado = OBS_LOGRO_POR_MISION[idx];
+          r.preguntaCorrecta = true;
+          r.status = 'completed';
+          r.completedAt = new Date().toISOString();
+          r.ultimaOpcionMal = null;
+          if (!r.puntosOtorgados) {
+            r.puntosOtorgados = OBS_PUNTOS_POR_MISION[idx];
+            r.logroOtorgado = OBS_LOGRO_POR_MISION[idx];
             try { registrarAccionProgreso(m.id); } catch(e){}
           }
         } else {
-          reg.ultimaOpcionMal = i;
+          r.ultimaOpcionMal = i;
         }
-        _obsGuardarRegistro(m.id, reg);
-        pintarRuta();
+        _obsGuardarRegistro(m.id, r);
+        pintar();
       }));
     }
 
-    pintarRuta();
+    pintar();
   }
 
   function renderRetos(container){
@@ -11665,6 +11667,10 @@ const Sections = (function(){
     const totalNiveles=historiaMundos.reduce((s,m)=>s+m.niveles.length,0);
     const nivelesCompletos=Object.keys(historiaProg).length;
     const minutoHoy=minutoRetos[retoIndiceDelDia(minutoRetos)];
+    _obsInjectarCSS();
+    const obsResumen=_obsResumenRuta();
+    const obsPct=Math.round(obsResumen.completadas/obsResumen.total*100);
+    const obsCtaLabel=_obsCtaRuta(obsResumen);
 
     container.innerHTML=`
       <div class="fade-up">
@@ -11816,7 +11822,18 @@ const Sections = (function(){
             </div>
           </div>
 
-          <div class="retos-level"><div id="obs-ruta-root"></div></div>
+          <div class="retos-level">
+            <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--observacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Observación guiada</span><small>5–8 min</small></div>
+            <div class="obs-entry-card" id="obs-entry-card" role="button" tabindex="0" aria-label="Observa, analiza y decide — ${escapeHtml(obsCtaLabel)}">
+              <div class="obs-entry-card__img"><img src="assets/retos/observacion-guiada/aula-en-equilibrio.png" alt="" loading="lazy"></div>
+              <div class="obs-entry-card__body">
+                <h3 class="obs-entry-card__title">Observa, analiza y decide</h3>
+                <p class="obs-entry-card__desc">Casos ficticios para practicar observación, análisis y toma de decisiones.</p>
+                <div class="obs-entry-card__progreso"><div class="obs-entry-card__bar"><span style="width:${obsPct}%"></span></div><small>${obsResumen.completadas}/${obsResumen.total} misiones completadas</small></div>
+                <span class="obs-entry-card__cta">${escapeHtml(obsCtaLabel)}<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg></span>
+              </div>
+            </div>
+          </div>
 
           <div class="retos-level">
             <div class="retos-level__head"><span class="retos-level__badge retos-level__badge--aplicacion"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Aplicación</span><small>10–15 min</small></div>
@@ -11912,7 +11929,9 @@ const Sections = (function(){
       if(tipo==='memorama') _renderMemoramaView(container);
       if(tipo==='rompecabezas') _renderRompecabezasView(container);
     }));
-    _obsMontarRuta(container.querySelector('#obs-ruta-root'));
+    const obsEntryCard = container.querySelector('#obs-entry-card');
+    obsEntryCard?.addEventListener('click', ()=>_renderObservacionView(container));
+    obsEntryCard?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); _renderObservacionView(container); } });
 
     // El resumen de arriba pinta primero con el cálculo local (instantáneo);
     // en cuanto el servidor responde (mismos puntos/racha que "Mis logros"),
