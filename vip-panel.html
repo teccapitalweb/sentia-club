@@ -6723,6 +6723,19 @@ const Sections = (function(){
 
   function actBarajar(arr){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
+  // Abre un link externo (wa.me, canal de WhatsApp, etc.) de forma confiable.
+  // window.open(url,'_blank') puede fallar en silencio dentro de la PWA
+  // instalada (modo standalone) o si el navegador bloquea el popup — en
+  // ambos casos no pasa nada visible y parece que "el botón no funciona".
+  // Si window.open no devuelve una ventana real, se navega de frente.
+  function abrirEnlaceExterno(url){
+    if (!url) return;
+    const esStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (esStandalone) { location.href = url; return; }
+    const win = window.open(url, '_blank');
+    if (!win) location.href = url;
+  }
+
   window.abrirActividadSentia = function(cursoId, idx){
     const curso = cursos.find(c => c.id === cursoId); const s = curso && curso.sesiones && curso.sesiones[idx];
     if (!s || !tieneActividad(s)) return;
@@ -15869,13 +15882,13 @@ function initNav(){
     // sin membresía, pero unirse al grupo/comunidad exige estar suscrito)
     if(t.closest('#btn-wa-canal-open')){
       if (!tieneAccesoVipCompleto()) { mostrarPaywallCurso(); return; }
-      window.open(SENTIA_CONTACT.grupo || SENTIA_CONTACT.canal,'_blank');
+      abrirEnlaceExterno(SENTIA_CONTACT.grupo || SENTIA_CONTACT.canal);
       Toast.success('Abriendo comunidad','Comunidad SENTIA');
       return;
     }
     // Sección Canal WhatsApp · compartir
     if(t.closest('#btn-wa-canal-share')){
-      window.open(SENTIA_CONTACT.shareInvitacion(),'_blank');
+      abrirEnlaceExterno(SENTIA_CONTACT.shareInvitacion());
       Toast.success('Compartiendo','Selecciona contactos');
       return;
     }
