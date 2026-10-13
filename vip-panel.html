@@ -11291,15 +11291,13 @@ const Sections = (function(){
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // Observación guiada · ruta secuencial de 3 misiones (entre Express y
-  // Aplicación). Una sola tarjeta: encabezado + hilera de pasos conectados
-  // + el contenido de la misión abierta se expande debajo, sin navegar a
-  // otra pantalla. Sin servidor nuevo: el progreso vive en localStorage,
-  // una clave por usuario (no se comparte entre cuentas en el mismo
-  // navegador), y usa registrarAccionProgreso() -el mismo gancho que
-  // Flashcards/Modo historia- para sumar logros reales sin inventar una
-  // economía de puntos aparte. Estructura lista para moverse a backend más
-  // adelante sin tocar la interfaz: solo cambiarían _obsLeerTodo/_obsGuardarTodo.
+  // Observación guiada · 3 casos fijos (sin orden obligatorio), entre Express
+  // y Aplicación. Una sola tarjeta de entrada en Retos abre una vista interna
+  // propia (_renderObservacionView), igual que caso clínico o mapa emocional.
+  // El progreso vive en Firestore vía el webhook (/api/retos/observacion-guiada),
+  // no en localStorage, para que sea real por cuenta y no por navegador; el
+  // logro "Ruta de observación" (rtobs1/2/3) se verifica en servidor dentro de
+  // /api/logros/estado, igual que cualquier otro logro.
   // ═══════════════════════════════════════════════════════════════════
   const OBSERVACION_MISIONES = [
     {
@@ -11369,23 +11367,36 @@ const Sections = (function(){
   const OBS_LOGRO_POR_MISION = ['rtobs1','rtobs2','rtobs3'];
   const OBS_PUNTOS_POR_MISION = [40, 40, 70];
 
-  // Persistencia por usuario: una clave de localStorage por uid, nunca
-  // compartida entre cuentas en el mismo navegador. Forma mínima por misión:
-  // {status, hallazgosClave:[], detallesVistos:[], preguntaCorrecta, completedAt, puntosOtorgados, logroOtorgado}.
-  function _obsUid(){ return (window.UserState && window.UserState.uid) || 'anon'; }
-  function _obsLeerTodo(){
-    try { return JSON.parse(localStorage.getItem('sentia:observacion:'+_obsUid()) || '{}'); }
-    catch(e){ return {}; }
+  // Persistencia por usuario: igual que el resto de retos (caso clínico, mapa
+  // emocional, etc.), vive en Firestore vía el webhook (`retos_progreso/{uid}`),
+  // no en localStorage — así el avance es real por cuenta, no por navegador, y
+  // el logro "Ruta de observación" se puede verificar en servidor en
+  // /api/logros/estado igual que cualquier otro logro.
+  // `_obsCache` guarda la última respuesta del servidor para esta sesión, para
+  // no tener que esperar una llamada de red en cada pintado síncrono.
+  let _obsCache = null;
+  async function _obsFetchTodo(){
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/retos/observacion-guiada`, { headers: await window.__authHeaders() });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'No se pudo cargar tu progreso');
+      _obsCache = data.misiones || {};
+    } catch(e){ console.warn('[observacion] sin servidor:', e.message); if (!_obsCache) _obsCache = {}; }
+    return _obsCache;
   }
-  function _obsGuardarTodo(t){
-    try { localStorage.setItem('sentia:observacion:'+_obsUid(), JSON.stringify(t)); } catch(e){}
+  async function _obsEnviarAccion(missionId, accion, valor){
+    const r = await fetch(`${retosWebhookBase()}/api/retos/observacion-guiada`, {
+      method:'POST', headers: await window.__authHeaders(), body: JSON.stringify({ missionId, accion, valor })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'No se pudo registrar tu avance');
+    if (!_obsCache) _obsCache = {};
+    _obsCache[missionId] = data.registro;
+    return data.registro;
   }
   function _obsRegistro(misionId){
-    const t = _obsLeerTodo();
-    return t[misionId] || { userId:_obsUid(), missionId:misionId, status:null, hallazgosClave:[], detallesVistos:[], preguntaCorrecta:false, completedAt:null, puntosOtorgados:0, logroOtorgado:null };
-  }
-  function _obsGuardarRegistro(misionId, reg){
-    const t = _obsLeerTodo(); t[misionId] = reg; _obsGuardarTodo(t);
+    const reg = (_obsCache || {})[misionId];
+    return reg || { userId:(window.UserState&&window.UserState.uid)||null, missionId:misionId, status:null, hallazgosClave:[], detallesVistos:[], preguntaCorrecta:false, completedAt:null, puntosOtorgados:0, logroOtorgado:null, ultimaOpcionMal:null };
   }
   function _obsResumenRuta(){
     const estados = OBSERVACION_MISIONES.map(m=>_obsRegistro(m.id).status);
@@ -11489,11 +11500,23 @@ const Sections = (function(){
   // por completo el listado principal de Retos (no se expande debajo); "Volver a
   // Retos" regresa a renderRetos en el mismo contenedor, igual que el resto de
   // las vistas de práctica (_renderCasoClinicoView, _renderMapaEmocionalView, etc).
-  function _renderObservacionView(container){
+  async function _renderObservacionView(container){
     _retosContainer = container;
     _obsInjectarCSS();
     let vistaCaso = null;
     let aviso = null;
+
+    container.innerHTML = `<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">Cargando tu progreso…</div>`;
+    try {
+      const r = await fetch(`${retosWebhookBase()}/api/retos/observacion-guiada`, { headers: await window.__authHeaders() });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'No se pudo cargar tu progreso');
+      _obsCache = data.misiones || {};
+    } catch(e){
+      container.innerHTML = `<div class="fade-up" style="padding:40px;text-align:center;color:var(--text-3)">No se pudo cargar tu progreso. <button type="button" class="btn btn--ghost" id="obs-volver-err">Volver a retos</button></div>`;
+      container.querySelector('#obs-volver-err')?.addEventListener('click',()=>renderRetos(container));
+      return;
+    }
 
     function pintar(){
       if (vistaCaso === null) pintarLista(); else pintarCaso(vistaCaso);
@@ -11550,7 +11573,6 @@ const Sections = (function(){
     function pintarCaso(idx){
       const m = OBSERVACION_MISIONES[idx];
       const reg = _obsRegistro(m.id);
-      if (!reg.status) { reg.status = 'in_progress'; _obsGuardarRegistro(m.id, reg); }
       const encontrados = new Set(reg.hallazgosClave||[]);
       const vistos = new Set(reg.detallesVistos||[]);
       const todosEncontrados = encontrados.size === m.hallazgos.length;
@@ -11608,43 +11630,26 @@ const Sections = (function(){
       </div>`;
 
       container.querySelector('#obs-volver-lista')?.addEventListener('click',()=>{ vistaCaso=null; aviso=null; pintar(); });
-      container.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click',()=>{
+      container.querySelectorAll('[data-hallazgo]').forEach(b=>b.addEventListener('click', async ()=>{
         const h = m.hallazgos.find(x=>x.id===b.dataset.hallazgo);
-        if (!h) return;
-        const r = _obsRegistro(m.id);
-        const set = new Set(r.hallazgosClave||[]);
-        if (!set.has(h.id)) { set.add(h.id); r.hallazgosClave = Array.from(set); _obsGuardarRegistro(m.id, r); }
+        if (!h || encontrados.has(h.id)) return;
+        try { await _obsEnviarAccion(m.id, 'hallazgo', h.id); } catch(e){ console.warn('[observacion]', e.message); return; }
         aviso = `Hallazgo identificado. ${h.explicacion}`;
         pintar();
       }));
-      container.querySelectorAll('[data-detalle]').forEach(b=>b.addEventListener('click',()=>{
+      container.querySelectorAll('[data-detalle]').forEach(b=>b.addEventListener('click', async ()=>{
         const d = m.detalles.find(x=>x.id===b.dataset.detalle);
-        if (!d) return;
-        const r = _obsRegistro(m.id);
-        const set = new Set(r.detallesVistos||[]);
-        if (!set.has(d.id)) { set.add(d.id); r.detallesVistos = Array.from(set); _obsGuardarRegistro(m.id, r); }
+        if (!d || vistos.has(d.id)) return;
+        try { await _obsEnviarAccion(m.id, 'detalle', d.id); } catch(e){ console.warn('[observacion]', e.message); return; }
         aviso = d.mensaje;
         pintar();
       }));
-      container.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
-        const r = _obsRegistro(m.id);
-        if (r.preguntaCorrecta) return;
+      container.querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click', async ()=>{
+        if (reg.preguntaCorrecta) return;
         const i = Number(b.dataset.op);
-        const opt = m.opciones[i];
-        if (opt.mejor) {
-          r.preguntaCorrecta = true;
-          r.status = 'completed';
-          r.completedAt = new Date().toISOString();
-          r.ultimaOpcionMal = null;
-          if (!r.puntosOtorgados) {
-            r.puntosOtorgados = OBS_PUNTOS_POR_MISION[idx];
-            r.logroOtorgado = OBS_LOGRO_POR_MISION[idx];
-            try { registrarAccionProgreso(m.id); } catch(e){}
-          }
-        } else {
-          r.ultimaOpcionMal = i;
-        }
-        _obsGuardarRegistro(m.id, r);
+        let r;
+        try { r = await _obsEnviarAccion(m.id, 'respuesta', i); } catch(e){ console.warn('[observacion]', e.message); return; }
+        if (r.puntosOtorgados && r.status==='completed') { try { registrarAccionProgreso(m.id); } catch(e){} }
         pintar();
       }));
     }
@@ -11829,8 +11834,8 @@ const Sections = (function(){
               <div class="obs-entry-card__body">
                 <h3 class="obs-entry-card__title">Observa, analiza y decide</h3>
                 <p class="obs-entry-card__desc">Casos ficticios para practicar observación, análisis y toma de decisiones.</p>
-                <div class="obs-entry-card__progreso"><div class="obs-entry-card__bar"><span style="width:${obsPct}%"></span></div><small>${obsResumen.completadas}/${obsResumen.total} misiones completadas</small></div>
-                <span class="obs-entry-card__cta">${escapeHtml(obsCtaLabel)}<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg></span>
+                <div class="obs-entry-card__progreso"><div class="obs-entry-card__bar"><span id="obs-entry-bar" style="width:${obsPct}%"></span></div><small id="obs-entry-progtxt">${obsResumen.completadas}/${obsResumen.total} misiones completadas</small></div>
+                <span class="obs-entry-card__cta"><span id="obs-entry-ctatxt">${escapeHtml(obsCtaLabel)}</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg></span>
               </div>
             </div>
           </div>
@@ -11932,6 +11937,23 @@ const Sections = (function(){
     const obsEntryCard = container.querySelector('#obs-entry-card');
     obsEntryCard?.addEventListener('click', ()=>_renderObservacionView(container));
     obsEntryCard?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); _renderObservacionView(container); } });
+    // La tarjeta pinta primero con lo que ya había en caché (instantáneo);
+    // en cuanto el servidor responde se actualiza solo el número y el CTA,
+    // sin rehacer el resto de Retos — mismo patrón que el resumen de arriba.
+    _obsFetchTodo().then(()=>{
+      const card = container.querySelector('#obs-entry-card');
+      if (!card) return;
+      const r = _obsResumenRuta();
+      const pct = Math.round(r.completadas / r.total * 100);
+      const cta = _obsCtaRuta(r);
+      const bar = card.querySelector('#obs-entry-bar');
+      const prog = card.querySelector('#obs-entry-progtxt');
+      const ctaTxt = card.querySelector('#obs-entry-ctatxt');
+      if (bar) bar.style.width = pct + '%';
+      if (prog) prog.textContent = `${r.completadas}/${r.total} misiones completadas`;
+      if (ctaTxt) ctaTxt.textContent = cta;
+      card.setAttribute('aria-label', `Observa, analiza y decide — ${cta}`);
+    });
 
     // El resumen de arriba pinta primero con el cálculo local (instantáneo);
     // en cuanto el servidor responde (mismos puntos/racha que "Mis logros"),
