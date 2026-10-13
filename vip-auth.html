@@ -691,6 +691,8 @@ onAuthStateChanged(auth, async (user) => {
     // silencio — la cuenta SÍ quedaba creada pero nunca se redirigía ni se
     // avisaba nada, así que la pantalla de registro/login se quedaba igual.
     try {
+      // La sesión llegó bien: ya no aplica el aviso de "redirección perdida".
+      try { localStorage.removeItem('sentia_google_pendiente'); } catch(e){}
       const docResult = await ensureMiembroDoc(user, user.displayName, 'login-web');
       try{ localStorage.setItem('sentia_last_user', JSON.stringify({ email:user.email||'', nombre:user.displayName||'' })); }catch(e){}
       if (requiereVerificacionCorreo(user)) {
@@ -792,35 +794,78 @@ document.getElementById('btn-register').addEventListener('click', async () => {
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
-// App instalada (PWA) o navegador de celular · el popup de Google no logra devolver el
-// resultado de forma confiable en ninguno de los dos casos, así que ahí usamos
-// redirección de página completa. Solo el navegador de escritorio usa popup.
-const esAppInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const usarRedireccion = esAppInstalada || esMovil;
+// MODIFICADO (auditoría de acceso): antes el celular y la app instalada usaban
+// signInWithRedirect. La redirección depende de que LA MISMA pestaña, con su
+// sessionStorage intacto, sobreviva el viaje completo a Google y de regreso;
+// en Android real eso falla seguido (Chrome descarta la pestaña original, y la
+// app instalada regresa en una pestaña distinta), así que el resultado se
+// perdía y el usuario volvía al login sin sesión aunque SÍ se autenticó.
+// El motivo original para evitar el popup era que authDomain vivía en
+// firebaseapp.com (otro sitio, almacenamiento particionado); desde que
+// authDomain es auth.sentiamx.com (mismo sitio que club.sentiamx.com) el popup
+// es confiable también en celular y PWA. Ahora el popup es la vía principal en
+// TODAS las plataformas y la redirección queda solo como respaldo automático
+// cuando el navegador de plano no puede abrir la ventana.
 document.querySelectorAll('[data-google]').forEach(btn => {
   btn.addEventListener('click', async () => {
     clearAlert();
     btn.disabled = true;
     try{
-      if (usarRedireccion) {
-        await signInWithRedirect(auth, googleProvider);
-        return; // la página navega a Google; el resultado se procesa al volver
-      }
       await signInWithPopup(auth, googleProvider);
       showAlert('success', 'Listo!', 'Entrando con Google...');
     }catch(e){
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') { btn.disabled = false; return; }
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        // Respaldo: redirección de página completa. El marcador vive en
+        // localStorage (no sessionStorage) porque sobrevive descartes de
+        // pestaña y cambios de contexto; si al volver no llega ningún usuario,
+        // la pantalla avisa y ofrece reintentar en vez de quedarse muda.
+        try { localStorage.setItem('sentia_google_pendiente', String(Date.now())); } catch(_){}
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return; // la página navega a Google; el resultado se procesa al volver
+        } catch (e2) {
+          try { localStorage.removeItem('sentia_google_pendiente'); } catch(_){}
+          btn.disabled = false;
+          showAlert('error', 'No pudimos entrar con Google', translateError(e2.code));
+          return;
+        }
+      }
       btn.disabled = false;
-      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
       showAlert('error', 'No pudimos entrar con Google', translateError(e.code));
     }
   });
 });
 
-// Procesa el resultado si acabamos de volver de la redirección de Google (celular o app instalada)
+// Procesa el resultado si acabamos de volver de la redirección de Google (respaldo)
 getRedirectResult(auth).catch((e) => {
+  try { localStorage.removeItem('sentia_google_pendiente'); } catch(_){}
   showAlert('error', 'No pudimos entrar con Google', translateError(e.code));
 });
+
+// Red de seguridad del respaldo por redirección: si el marcador dice que
+// salimos hacia Google pero en ~8 segundos no se restauró ninguna sesión,
+// el resultado se perdió en el camino (pasa en Android cuando la pestaña
+// original se descarta). En vez de dejar el login mudo, se explica qué pasó
+// y se ofrece reintentar — el reintento usa popup, que no depende de la
+// continuidad de la pestaña. Sin tokens ni datos técnicos en pantalla.
+(function vigilarRedireccionPerdida(){
+  let marca = null;
+  try { marca = localStorage.getItem('sentia_google_pendiente'); } catch(_){}
+  if (!marca) return;
+  setTimeout(() => {
+    if (auth.currentUser) return; // el flujo normal ya lo atendió
+    try { localStorage.removeItem('sentia_google_pendiente'); } catch(_){}
+    const z = document.getElementById('alert-zone');
+    if (!z) return;
+    z.innerHTML = `<div class="alert alert--error"><div class="alert__msg"><strong>Hubo un problema al preparar tu acceso</strong><br>Tu cuenta puede haberse creado correctamente. Intenta continuar de nuevo; si el problema sigue, escríbenos y te ayudamos.<br><br><button type="button" class="btn google" id="retry-google" style="height:38px;min-height:38px;font-size:12px;">Reintentar con Google</button></div></div>`;
+    z.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    z.querySelector('#retry-google')?.addEventListener('click', () => {
+      const b = document.querySelector('[data-google]');
+      if (b) { b.disabled = false; b.click(); }
+    });
+  }, 8000);
+})();
 
 document.getElementById('forgot-link').addEventListener('click', async (e) => {
   e.preventDefault();

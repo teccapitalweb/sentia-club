@@ -4377,6 +4377,16 @@ if (window.__isDemoMode) {
             : null;
         } else {
           window.memberData = null;
+          // MODIFICADO (auditoría de acceso): usuario autenticado SIN doc de
+          // miembro = registro que quedó a medias (p. ej. Google en celular
+          // donde vip-auth no alcanzó a crear el perfil). Nunca se le regresa
+          // al login por esto — el panel funciona en modo sin-membresía y el
+          // servidor crea el perfil base en segundo plano para el siguiente uso.
+          try {
+            fetch(WEBHOOK_URL + '/api/perfil/reparar', { method: 'POST', headers: await window.__authHeaders() })
+              .then(r => r.ok ? console.log('[perfil] inicializado en servidor') : null)
+              .catch(() => {});
+          } catch (e) {}
         }
       } catch(e) {
         console.warn('No se pudo leer miembros/' + user.uid, e.message);

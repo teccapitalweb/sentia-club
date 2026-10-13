@@ -3,7 +3,7 @@
 //    hay conexión, se usa la copia en caché (modo offline).
 //  - Otros recursos (css, imágenes): CACHÉ PRIMERO (rápido), con respaldo de red.
 // Sube VERSION al cambiar archivos del shell para limpiar cachés viejas.
-const VERSION = 'sentia-v35-pwa-iconos';
+const VERSION = 'sentia-v36-auth-popup';
 const CACHE_SHELL = VERSION + '-shell';
 const CACHE_RUNTIME = VERSION + '-runtime';
 
