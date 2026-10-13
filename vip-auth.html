@@ -536,16 +536,23 @@ try {
 
 async function esAdministrador(user){
   if (!user) return false;
-  const token = await user.getIdTokenResult(true);
+  // MODIFICADO: sin forzar refresh — justo al iniciar sesión el token que
+  // entrega Firebase ya viene fresco con los claims actuales; forzarlo aquí
+  // solo agregaba una vuelta de red extra y hacía más lento el redireccionamiento.
+  const token = await user.getIdTokenResult();
   return token.claims.admin === true;
 }
 
-async function redirigirSegunRol(user){
+async function redirigirSegunRol(user, esCuentaNueva){
   if (requiereVerificacionCorreo(user)) {
     mostrarVerificacionPendiente(user);
     return;
   }
-  const destino = await esAdministrador(user) ? 'vip-admin.html' : 'vip-panel.html';
+  // Una cuenta recién creada por auto-registro nunca puede ser admin (eso solo
+  // se asigna manualmente desde el backend), así que nos ahorramos por completo
+  // la consulta de rol y mandamos directo al panel — es la vía más lenta para
+  // alguien que se está registrando con Google por primera vez.
+  const destino = esCuentaNueva ? 'vip-panel.html' : (await esAdministrador(user) ? 'vip-admin.html' : 'vip-panel.html');
   window.location.href = destino;
 }
 
@@ -630,6 +637,18 @@ async function ensureMiembroDoc(user, displayName, origen){
       if (data.activa !== true && displayName && !data.nombre){
         await setDoc(ref, { nombre: displayName, displayName: displayName, lastUpdatedAt: serverTimestamp() }, { merge:true });
       }
+      // MODIFICADO: si el documento ya existe pero le faltan campos base
+      // (email, activa, plan...) — porque se creó por otra vía antes de que
+      // este flujo terminara, por ejemplo tras quedarse atorado a medio
+      // registro — las reglas de Firestore ya no dejan al cliente "crearlo"
+      // de nuevo con esos campos. Se repara server-side (best-effort, sin
+      // bloquear el acceso si falla).
+      if (typeof data.email !== 'string' || !data.fechaRegistro) {
+        try {
+          const base = location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://sentia-academy-webhook-production.up.railway.app';
+          await fetch(base + '/api/perfil/reparar', { method:'POST', headers:{ 'Authorization':'Bearer ' + await user.getIdToken() } });
+        } catch (e) { console.warn('[ensureMiembroDoc] no se pudo reparar el perfil:', e.message); }
+      }
       console.log('[ensureMiembroDoc] ya existia:', user.uid);
       return { ok:true, action:'exists', uid:user.uid };
     }
@@ -672,13 +691,13 @@ onAuthStateChanged(auth, async (user) => {
     // silencio — la cuenta SÍ quedaba creada pero nunca se redirigía ni se
     // avisaba nada, así que la pantalla de registro/login se quedaba igual.
     try {
-      await ensureMiembroDoc(user, user.displayName, 'login-web');
+      const docResult = await ensureMiembroDoc(user, user.displayName, 'login-web');
       try{ localStorage.setItem('sentia_last_user', JSON.stringify({ email:user.email||'', nombre:user.displayName||'' })); }catch(e){}
       if (requiereVerificacionCorreo(user)) {
         mostrarVerificacionPendiente(user);
         return;
       }
-      await redirigirSegunRol(user);
+      await redirigirSegunRol(user, docResult?.action === 'created');
     } catch (e) {
       console.error('[onAuthStateChanged] No se pudo completar el acceso:', e);
       showAlert('error', 'Entraste, pero no pudimos abrir tu panel', 'Intenta de nuevo en unos segundos. Si el problema sigue, recarga la página.');
@@ -761,7 +780,7 @@ document.getElementById('btn-register').addEventListener('click', async () => {
         ? 'Tu cuenta SI se creo, pero falta actualizar las reglas Firestore para guardar tu perfil. Entrando a tu panel...'
         : 'Tu cuenta se creo pero hubo un problema al guardar tu perfil (' + motivo + '). Entrando a tu panel...';
       showAlert('error', 'Cuenta creada - advertencia', txt);
-      setTimeout(() => { redirigirSegunRol(cred.user); }, 4000);
+      setTimeout(() => { redirigirSegunRol(cred.user, true); }, 4000);
       return;
     }
     mostrarVerificacionPendiente(cred.user);
