@@ -1991,8 +1991,9 @@ body::after{
 .dir-cta{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--surface-3,var(--surface-2));border:1px solid var(--border-2);color:var(--text-2);transition:.15s;text-decoration:none}
 .dir-cta:hover{transform:translateY(-2px);color:var(--primary);border-color:var(--primary)}
 .dir-cta .ic{width:17px;height:17px}
-.dir-cta--wa{color:#25D366}.dir-cta--wa:hover{border-color:#25D366}
-.dir-cta--li{color:#0A66C2}.dir-cta--li:hover{border-color:#0A66C2}
+.dir-cta--wa{color:#25D366}.dir-cta--wa:hover{color:#fff;border-color:#25D366;background:#25D366}
+.dir-cta--li{color:#0A66C2}.dir-cta--li:hover{color:#fff;border-color:#0A66C2;background:#0A66C2}
+.dir-cta--mail:hover{color:#fff;border-color:var(--primary);background:var(--primary)}
 .dir-cta--ig{color:#E1306C}.dir-cta--ig:hover{color:#fff;border-color:#E1306C;background:linear-gradient(135deg,#feda75,#fa7e1e 28%,#d62976 55%,#4f5bd5)}
 .dir-card__sincontacto{font-size:11px;color:var(--text-3);margin-top:auto;padding-top:6px;font-style:italic}
 .dir-cta--lock{width:auto;padding:0 14px;gap:6px;font-size:11.5px;font-weight:700;color:var(--text-2)}
@@ -13712,6 +13713,10 @@ const Sections = (function(){
       const btn = footer.querySelector('#dirf-guardar'); btn.disabled=true; btn.textContent='Guardando…';
       try {
         await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp, linkedin, instagram, web }) });
+        // El contacto que se MUESTRA sale de _dirMeta (la respuesta del
+        // servidor al abrir el Directorio). Sin esto, el ícono nuevo no
+        // aparecía hasta recargar la página.
+        _dirMeta.myContact = { ...(_dirMeta.myContact || {}), whatsapp, linkedin, instagram, web };
       } catch(e){ Toast.error('No se pudo guardar tu contacto', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; return; }
       const payload = {
         uid,
@@ -13740,6 +13745,9 @@ const Sections = (function(){
         await fs.setDoc(fs.doc(fs.db,'directorio',uid), payload);
         Toast.success('Tarjeta guardada','Ya apareces en el directorio');
         m.close();
+        // Repinta la vista al instante con el contacto recién guardado
+        // (antes los íconos nuevos solo aparecían al recargar la página).
+        try { dirPintar(); } catch(e){}
       } catch(e){ console.error(e); Toast.error('No se pudo guardar', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; }
     });
   }
@@ -15073,6 +15081,7 @@ const Sections = (function(){
       b.addEventListener('click',()=>{videotecaState.mes=b.dataset.vmes;renderVideoteca(container);});
     });
   }
+
 
   return {
     renderers:{
