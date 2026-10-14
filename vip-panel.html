@@ -1991,8 +1991,9 @@ body::after{
 .dir-cta{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--surface-3,var(--surface-2));border:1px solid var(--border-2);color:var(--text-2);transition:.15s;text-decoration:none}
 .dir-cta:hover{transform:translateY(-2px);color:var(--primary);border-color:var(--primary)}
 .dir-cta .ic{width:17px;height:17px}
-.dir-cta--wa:hover{color:#25D366;border-color:#25D366}
-.dir-cta--li:hover{color:#0A66C2;border-color:#0A66C2}
+.dir-cta--wa{color:#25D366}.dir-cta--wa:hover{border-color:#25D366}
+.dir-cta--li{color:#0A66C2}.dir-cta--li:hover{border-color:#0A66C2}
+.dir-cta--ig{color:#E1306C}.dir-cta--ig:hover{color:#fff;border-color:#E1306C;background:linear-gradient(135deg,#feda75,#fa7e1e 28%,#d62976 55%,#4f5bd5)}
 .dir-card__sincontacto{font-size:11px;color:var(--text-3);margin-top:auto;padding-top:6px;font-style:italic}
 .dir-cta--lock{width:auto;padding:0 14px;gap:6px;font-size:11.5px;font-weight:700;color:var(--text-2)}
 .dir-cta--lock:hover{color:var(--primary);border-color:var(--primary)}
@@ -2072,8 +2073,9 @@ button.dir-det__row{background:var(--surface-2);border:1px solid var(--border-2)
 .dir-det__row:hover{border-color:var(--primary);transform:translateX(2px)}
 .dir-det__row-ic{width:38px;height:38px;border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--text-2);flex-shrink:0}
 .dir-det__row-ic .ic{width:18px;height:18px}
-.dir-det__row--wa:hover .dir-det__row-ic{color:#25D366}
-.dir-det__row--li:hover .dir-det__row-ic{color:#0A66C2}
+.dir-det__row--wa .dir-det__row-ic{color:#25D366}
+.dir-det__row--li .dir-det__row-ic{color:#0A66C2}
+.dir-det__row--ig .dir-det__row-ic{color:#E1306C}
 .dir-det__row-tx{display:flex;flex-direction:column;min-width:0;flex:1}
 .dir-det__row-lbl{font-size:11px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .dir-det__row-val{font-size:13.5px;color:var(--text);font-weight:600;word-break:break-word}
@@ -13440,10 +13442,12 @@ const Sections = (function(){
     const contactos = [];
     if (contacto) {
       const linkedinSeguro = /^https:\/\//i.test(String(contacto.linkedin||'')) ? contacto.linkedin : '';
+      const instagramSeguro = /^https:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9._]{1,30}\/?$/i.test(String(contacto.instagram||'')) ? contacto.instagram : '';
       const webSeguro = /^https:\/\//i.test(String(contacto.web||'')) ? contacto.web : '';
       if (contacto.whatsapp) contactos.push(`<a class="dir-cta dir-cta--wa" href="https://wa.me/${(contacto.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" title="WhatsApp"><svg class="ic"><use href="#i-whatsapp"/></svg></a>`);
       if (contacto.email) contactos.push(`<button class="dir-cta dir-cta--mail" data-email="${escapeHtml(contacto.email)}" title="Copiar correo: ${escapeHtml(contacto.email)}"><svg class="ic"><use href="#i-mail"/></svg></button>`);
       if (linkedinSeguro) contactos.push(`<a class="dir-cta dir-cta--li" href="${escapeHtml(linkedinSeguro)}" target="_blank" rel="noopener" title="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>`);
+      if (instagramSeguro) contactos.push(`<a class="dir-cta dir-cta--ig" href="${escapeHtml(instagramSeguro)}" target="_blank" rel="noopener" title="Instagram"><svg class="ic"><use href="#i-instagram"/></svg></a>`);
       if (webSeguro) contactos.push(`<a class="dir-cta" href="${escapeHtml(webSeguro)}" target="_blank" rel="noopener" title="Sitio web"><svg class="ic"><use href="#i-link"/></svg></a>`);
     }
     // En tu propia tarjeta nunca tiene sentido el candado "hazte VIP para
@@ -13526,6 +13530,7 @@ const Sections = (function(){
          </a>` : '';
     const contacto = dirContactoVisible(c);
     const linkedinSeguro = contacto && /^https:\/\//i.test(String(contacto.linkedin||'')) ? contacto.linkedin : '';
+    const instagramSeguro = contacto && /^https:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9._]{1,30}\/?$/i.test(String(contacto.instagram||'')) ? contacto.instagram : '';
     const webSeguro = contacto && /^https:\/\//i.test(String(contacto.web||'')) ? contacto.web : '';
     const waNum = contacto ? (contacto.whatsapp||'').replace(/[^0-9]/g,'') : '';
     const estado = DIR_ESTADOS[c.estado];
@@ -13538,8 +13543,9 @@ const Sections = (function(){
              <span class="dir-det__row-tx"><span class="dir-det__row-lbl">Correo · toca para copiar</span><span class="dir-det__row-val">${escapeHtml(contacto.email)}</span></span>
            </button>`:''}
           ${row('i-linkedin','LinkedIn',linkedinSeguro, linkedinSeguro, 'dir-det__row--li')}
+          ${row('i-instagram','Instagram',instagramSeguro, instagramSeguro, 'dir-det__row--ig')}
           ${row('i-link','Sitio web',webSeguro, webSeguro)}
-          ${(!contacto.whatsapp&&!contacto.email&&!linkedinSeguro&&!webSeguro)?'<div class="dir-det__sincontacto">Este miembro no agregó datos de contacto.</div>':''}
+          ${(!contacto.whatsapp&&!contacto.email&&!linkedinSeguro&&!instagramSeguro&&!webSeguro)?'<div class="dir-det__sincontacto">Este miembro no agregó datos de contacto.</div>':''}
         </div>`;
     const body = `
       <div class="dir-det">
@@ -13630,6 +13636,8 @@ const Sections = (function(){
         <input class="dir-form__in" id="dirf-wa" maxlength="20" value="${(contacto.whatsapp||'').replace(/"/g,'&quot;')}" placeholder="Ej. 52 238 123 4567">
         <label class="dir-form__lbl">LinkedIn</label>
         <input class="dir-form__in" id="dirf-linkedin" maxlength="120" value="${(contacto.linkedin||'').replace(/"/g,'&quot;')}" placeholder="linkedin.com/in/tu-perfil">
+        <label class="dir-form__lbl">Instagram</label>
+        <input class="dir-form__in" id="dirf-instagram" maxlength="120" value="${(contacto.instagram||'').replace(/"/g,'&quot;')}" placeholder="@tu_usuario o instagram.com/tu_usuario" autocapitalize="off" autocomplete="url">
         <label class="dir-form__lbl">Sitio web</label>
         <input class="dir-form__in" id="dirf-web" maxlength="120" value="${(contacto.web||'').replace(/"/g,'&quot;')}" placeholder="tusitio.com">
         <label class="dir-form__check"><input type="checkbox" id="dirf-visible" ${data.visible!==false?'checked':''}> Mostrar mi tarjeta en el directorio</label>
@@ -13684,11 +13692,26 @@ const Sections = (function(){
       const linkedin = enlaceSeguro(document.getElementById('dirf-linkedin').value);
       const web = enlaceSeguro(document.getElementById('dirf-web').value);
       if (linkedin === null || web === null) { Toast.error('Enlace inválido','LinkedIn y sitio web deben usar HTTPS.'); return; }
+      const instagramSeguro = valor => {
+        const entrada = String(valor || '').trim(); if (!entrada) return '';
+        let usuario = '';
+        if (/^@?[A-Za-z0-9._]{1,30}$/.test(entrada)) usuario = entrada.replace(/^@/, '');
+        else { try {
+          const url = new URL(/^https?:\/\//i.test(entrada) ? entrada : `https://${entrada}`);
+          const host = url.hostname.toLowerCase().replace(/^www\./, '');
+          const partes = url.pathname.split('/').filter(Boolean);
+          if (host !== 'instagram.com' || partes.length !== 1) return null;
+          usuario = partes[0];
+        } catch (_) { return null; } }
+        return /^[A-Za-z0-9._]{1,30}$/.test(usuario) ? `https://www.instagram.com/${usuario}/` : null;
+      };
+      const instagram = instagramSeguro(document.getElementById('dirf-instagram').value);
+      if (instagram === null) { Toast.error('Instagram inválido','Usa @usuario o un enlace de instagram.com.'); return; }
       const whatsapp = document.getElementById('dirf-wa').value.trim();
       if (!/^[0-9 +()-]*$/.test(whatsapp)) { Toast.error('WhatsApp inválido',''); return; }
       const btn = footer.querySelector('#dirf-guardar'); btn.disabled=true; btn.textContent='Guardando…';
       try {
-        await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp, linkedin, web }) });
+        await fetch(`${retosWebhookBase()}/api/directorio/contact`, { method:'PUT', headers: await window.__authHeaders(), body: JSON.stringify({ whatsapp, linkedin, instagram, web }) });
       } catch(e){ Toast.error('No se pudo guardar tu contacto', e.message||''); btn.disabled=false; btn.textContent='Guardar tarjeta'; return; }
       const payload = {
         uid,
