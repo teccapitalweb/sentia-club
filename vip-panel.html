@@ -556,7 +556,7 @@ body::after{
 .btn--sm{padding:7px 12px;font-size:11px}
 
 /* MODALES */
-.modal-backdrop{position:fixed;inset:0;z-index:9500;background:rgba(7,5,3,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-backdrop{position:fixed;inset:0;z-index:9500;box-sizing:border-box;background:rgba(7,5,3,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
 :root[data-theme="day"] .modal-backdrop{background:rgba(15,23,42,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .modal-backdrop.is-open{opacity:1;pointer-events:auto}
 .modal{background:var(--bg);border:0.5px solid var(--border-2);border-radius:18px;width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);transform:translateY(20px) scale(.98);opacity:0;transition:transform .3s,opacity .25s}
@@ -573,6 +573,13 @@ body::after{
 .modal__close .ic{width:14px;height:14px;stroke-width:2.2}
 .modal__body{padding:22px 24px;overflow-y:auto;flex:1}
 .modal__footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--surface)}
+/* En iPad/iPhone Safari la barra del navegador cambia el alto visible mientras
+   se desplaza. Usar unidades dinámicas evita una franja libre bajo los modales,
+   sin modificar el tamaño ni el contenido de cada ventana. */
+@supports (height:100dvh){
+  .modal-backdrop{height:100dvh;min-height:100dvh;padding-top:max(20px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .modal{max-height:88dvh}
+}
 
 /* Toast */
 .toast-container{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
@@ -13443,7 +13450,7 @@ const Sections = (function(){
     // contactar" — es tu propio contacto. Si no has llenado nada, se invita
     // a completarlo en vez de mostrar el candado.
     const ctasHTML = esMia
-      ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<button class="dir-cta" data-dirmia-editar="1" title="Agrega tu contacto"><svg class="ic"><use href="#i-edit"/></svg>Agrega tu contacto</button>')
+      ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'')
       : (contacto
         ? (contactos.length?`<div class="dir-card__ctas">${contactos.join('')}</div>`:'<div class="dir-card__sincontacto">Sin datos de contacto</div>')
         : `<button class="dir-cta dir-cta--lock" data-dirlock="1" title="Hazte VIP para contactar"><svg class="ic"><use href="#i-lock"/></svg>Solo VIP</button>`);
@@ -13498,9 +13505,6 @@ const Sections = (function(){
       });
       grid.querySelectorAll('[data-dirlock]').forEach(b=>{
         b.addEventListener('click', (e)=>{ e.stopPropagation(); window.__irASuscripcion && window.__irASuscripcion(); });
-      });
-      grid.querySelectorAll('[data-dirmia-editar]').forEach(b=>{
-        b.addEventListener('click', (e)=>{ e.stopPropagation(); dirEditarMiTarjeta(); });
       });
     });
   }
