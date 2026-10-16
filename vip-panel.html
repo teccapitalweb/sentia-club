@@ -4320,7 +4320,14 @@ if (window.__isDemoMode) {
 } else {
   // ─── Auth normal · puede ser sin-membresia o vip ───
   onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'vip-auth.html'; return; }
+    if (!user) {
+      // Sin sesión: se recuerda a qué sección iba (p. ej. #suscripcion desde un
+      // correo) para volver ahí tras iniciar sesión. Solo nombres simples de
+      // sección; vip-auth.html vuelve a validarlos contra su propia lista.
+      const hDestino = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      window.location.href = 'vip-auth.html' + (/^[a-z]{3,20}$/.test(hDestino) && hDestino !== 'inicio' ? '?volver=' + hDestino : '');
+      return;
+    }
 
     const usaContrasena = (user.providerData || []).some(p => p.providerId === 'password');
     if (usaContrasena && user.emailVerified !== true) {
@@ -14469,6 +14476,45 @@ const Sections = (function(){
     renderSuscripcionActivar(container, S);
   }
 
+  // Beneficio de bienvenida: solo MUESTRA lo que el servidor ya decidió. El
+  // descuento real lo aplica /stripe/checkout según la cuenta, así que aunque
+  // alguien manipulara esta pantalla no cambiaría lo que se cobra.
+  function _pintarOfertaBienvenida(oferta, p){
+    const monto = Number(oferta && oferta.monto);
+    const venceMs = Date.parse(oferta && oferta.venceEn);
+    if (!monto || !venceMs || venceMs <= Date.now()) return;
+    const box = document.getElementById('oferta-bienvenida');
+    if (!box) return; // la persona ya salió de la sección
+    const fmt = n => '$' + Number(n).toLocaleString('es-MX');
+    const partes = {};
+    new Intl.DateTimeFormat('es-MX', { timeZone:'America/Mexico_City', weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit', hour12:true })
+      .formatToParts(new Date(venceMs)).forEach(x => { if (x.type !== 'literal') partes[x.type] = x.value; });
+    const periodo = String(partes.dayPeriod || '').toLowerCase().replace(/[.\s]/g, '') === 'pm' ? 'p. m.' : 'a. m.';
+    const fecha = `${partes.weekday} ${partes.day} de ${partes.month}, ${partes.hour}:${partes.minute} ${periodo} (hora CDMX)`;
+    const horas = (venceMs - Date.now()) / 3600000;
+    const quedan = horas >= 1.5 ? `Quedan unas ${Math.round(horas)} horas.` : (horas >= 1 ? 'Queda cerca de 1 hora.' : 'Queda menos de 1 hora.');
+    box.innerHTML = `<div role="status" style="margin:18px 0 0;padding:14px 18px;border-radius:14px;border:1px solid color-mix(in srgb,var(--success) 40%,transparent);background:color-mix(in srgb,var(--success) 11%,var(--surface));text-align:left">
+        <div style="font-weight:800;font-size:14.5px;color:var(--text);margin-bottom:3px">Beneficio de bienvenida: ${fmt(monto)} MXN de descuento</div>
+        <div style="font-size:12.5px;line-height:1.55;color:var(--text-2)">Se aplica automáticamente en tu primer pago, en el plan que elijas. Vence el <b>${fecha}</b>. ${quedan}</div>
+      </div>`;
+    if (p && p.cargado) {
+      [['mensual', p.mes], ['anual', p.ano]].forEach(([plan, precio]) => {
+        const bloque = document.querySelector(`#plan-picker [data-plan="${plan}"] .plan-picker__price-block`);
+        if (!bloque || bloque.parentNode.querySelector('.plan-picker__oferta')) return;
+        const linea = document.createElement('div');
+        linea.className = 'plan-picker__oferta';
+        linea.style.cssText = 'font-size:12px;font-weight:700;color:var(--success);margin:2px 0 4px';
+        linea.innerHTML = `Primer pago: <b>${fmt(Math.max(0, Number(precio) - monto))}</b> MXN`;
+        bloque.insertAdjacentElement('afterend', linea);
+      });
+    }
+    // Al vencer, el aviso y los precios con descuento se retiran solos.
+    setTimeout(() => {
+      const b = document.getElementById('oferta-bienvenida'); if (b) b.innerHTML = '';
+      document.querySelectorAll('.plan-picker__oferta').forEach(e => e.remove());
+    }, Math.min(venceMs - Date.now(), 2147483000));
+  }
+
   /* ─── Estado: SIN membresía (logueado pero no pagó) o INVITADO (demo) ─── */
   function renderSuscripcionActivar(container, S){
     const intentPlan = localStorage.getItem('sentia_intent_plan') || 'anual';
@@ -14483,6 +14529,8 @@ const Sections = (function(){
             ? 'Crea tu cuenta y activa tu membresía para desbloquear cursos, clases en vivo y herramientas pro.'
             : 'Estás a un click de acceder a todo el contenido de SENTIA VIP. Elige tu plan y completa tu suscripción.'}</p>
         </div>
+
+        ${!isInvitado ? '<div id="oferta-bienvenida"></div>' : ''}
 
         <div class="sub-empty">
           <div class="sub-empty__ic">
@@ -14572,6 +14620,18 @@ const Sections = (function(){
       document.querySelectorAll('[data-precio-picker-ano]').forEach(el => el.textContent = fmt(p.ano));
       document.querySelectorAll('[data-precio-picker-ahorro]').forEach(el => el.textContent = '~' + fmt(p.equivMes) + '/mes · ahorras ' + fmt(p.ahorro));
     });
+
+    // Oferta de bienvenida: se consulta al servidor; si no hay (o falla), la
+    // pantalla queda exactamente como siempre.
+    (async () => {
+      try {
+        const r = await fetch(`${window.WEBHOOK_URL || 'https://sentia-academy-webhook-production.up.railway.app'}/api/oferta/estado`, { headers: await window.__authHeaders() });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!d || !d.oferta) return;
+        _pintarOfertaBienvenida(d.oferta, await window.__cargarPreciosClub());
+      } catch (e) {}
+    })();
 
     // Destruir cualquier checkout previo que haya quedado vivo de un render anterior
     // (al salir y volver a la pestaña, esta función se re-ejecuta; la instancia

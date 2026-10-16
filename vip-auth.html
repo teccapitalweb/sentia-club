@@ -534,6 +534,21 @@ try {
   if (cursoSugeridoParam && /^[A-Za-z0-9]{10,40}$/.test(cursoSugeridoParam)) sessionStorage.setItem('sentia_curso_sugerido', cursoSugeridoParam);
 } catch (e) {}
 
+// ── Volver a donde iba: si el panel (o un enlace de correo) mandó a iniciar
+// sesión con "?volver=suscripcion", tras entrar se regresa a esa sección.
+// SOLO nombres de sección de NUESTRO panel (lista cerrada): nunca una URL,
+// así no existe forma de usar esto para mandar a alguien a un sitio externo. ──
+const SECCIONES_VOLVER = ['suscripcion', 'cursos', 'certificados', 'retos', 'logros', 'webinars', 'pdfs', 'foro', 'directorio', 'canal', 'perfil'];
+try {
+  const volverParam = new URLSearchParams(location.search).get('volver');
+  if (volverParam && SECCIONES_VOLVER.includes(volverParam)) sessionStorage.setItem('sentia_volver', volverParam);
+} catch (e) {}
+function destinoPanel() {
+  let v = null;
+  try { v = sessionStorage.getItem('sentia_volver'); sessionStorage.removeItem('sentia_volver'); } catch (e) {}
+  return 'vip-panel.html' + (v && SECCIONES_VOLVER.includes(v) ? '#' + v : '');
+}
+
 async function esAdministrador(user){
   if (!user) return false;
   // MODIFICADO: sin forzar refresh — justo al iniciar sesión el token que
@@ -552,7 +567,7 @@ async function redirigirSegunRol(user, esCuentaNueva){
   // se asigna manualmente desde el backend), así que nos ahorramos por completo
   // la consulta de rol y mandamos directo al panel — es la vía más lenta para
   // alguien que se está registrando con Google por primera vez.
-  const destino = esCuentaNueva ? 'vip-panel.html' : (await esAdministrador(user) ? 'vip-admin.html' : 'vip-panel.html');
+  const destino = esCuentaNueva ? destinoPanel() : (await esAdministrador(user) ? 'vip-admin.html' : destinoPanel());
   window.location.href = destino;
 }
 
