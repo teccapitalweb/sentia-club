@@ -14495,7 +14495,7 @@ const Sections = (function(){
     const quedan = horas >= 1.5 ? `Quedan unas ${Math.round(horas)} horas.` : (horas >= 1 ? 'Queda cerca de 1 hora.' : 'Queda menos de 1 hora.');
     box.innerHTML = `<div role="status" style="margin:18px 0 0;padding:14px 18px;border-radius:14px;border:1px solid color-mix(in srgb,var(--success) 40%,transparent);background:color-mix(in srgb,var(--success) 11%,var(--surface));text-align:left">
         <div style="font-weight:800;font-size:14.5px;color:var(--text);margin-bottom:3px">Beneficio de bienvenida: ${fmt(monto)} MXN de descuento</div>
-        <div style="font-size:12.5px;line-height:1.55;color:var(--text-2)">Se aplica automáticamente en tu primer pago, en el plan que elijas. Vence el <b>${fecha}</b>. ${quedan}</div>
+        <div style="font-size:12.5px;line-height:1.55;color:var(--text-2)">Se aplica automáticamente <b>solo en tu primer pago</b>: el primer mes si eliges el plan mensual, o el primer año si eliges el anual. Después, tu plan se renueva al precio vigente. Vence el <b>${fecha}</b>. ${quedan}</div>
       </div>`;
     if (p && p.cargado) {
       [['mensual', p.mes], ['anual', p.ano]].forEach(([plan, precio]) => {
@@ -14504,7 +14504,7 @@ const Sections = (function(){
         const linea = document.createElement('div');
         linea.className = 'plan-picker__oferta';
         linea.style.cssText = 'font-size:12px;font-weight:700;color:var(--success);margin:2px 0 4px';
-        linea.innerHTML = `Primer pago: <b>${fmt(Math.max(0, Number(precio) - monto))}</b> MXN`;
+        linea.innerHTML = `${plan === 'mensual' ? 'Primer mes' : 'Primer año'}: <b>${fmt(Math.max(0, Number(precio) - monto))}</b> MXN · después ${fmt(precio)}${plan === 'mensual' ? ' al mes' : ' al año'}`;
         bloque.insertAdjacentElement('afterend', linea);
       });
     }
