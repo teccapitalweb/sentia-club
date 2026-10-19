@@ -649,8 +649,28 @@ async function ensureMiembroDoc(user, displayName, origen){
     const snap = await getDoc(ref);
     if (snap.exists()){
       const data = snap.data();
-      if (data.activa !== true && displayName && !data.nombre){
-        await setDoc(ref, { nombre: displayName, displayName: displayName, lastUpdatedAt: serverTimestamp() }, { merge:true });
+      // Firebase puede disparar onAuthStateChanged justo después de crear la
+      // cuenta, antes de que updateProfile alcance a guardar el nombre. Si en
+      // ese instante otra parte del flujo creó/activó miembros/{uid}, antes el
+      // nombre ya no se completaba (sobre todo si la cuenta ya era VIP). Solo
+      // sustituimos los valores provisionales y nunca un nombre confirmado.
+      const nombreGuardado = String(data.nombre || '').trim();
+      const correoGuardado = String(data.email || '').trim().toLowerCase();
+      const correoActual = String(user.email || '').trim().toLowerCase();
+      const nombreProvisional = !nombreGuardado
+        || nombreGuardado === 'Sin nombre'
+        || (correoActual && nombreGuardado.toLowerCase() === correoActual.split('@')[0]);
+      const parche = {};
+      if (displayName && nombreProvisional && data.nombreConfirmado !== true) {
+        parche.nombre = displayName;
+        parche.displayName = displayName;
+      } else if (displayName && !String(data.displayName || '').trim()) {
+        parche.displayName = displayName;
+      }
+      if (correoActual && !correoGuardado) parche.email = correoActual;
+      if (Object.keys(parche).length) {
+        parche.lastUpdatedAt = serverTimestamp();
+        await setDoc(ref, parche, { merge:true });
       }
       // MODIFICADO: si el documento ya existe pero le faltan campos base
       // (email, activa, plan...) — porque se creó por otra vía antes de que

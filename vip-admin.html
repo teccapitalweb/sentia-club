@@ -4804,6 +4804,9 @@ const Pages={
               <svg class="ic"><use href="#i-plus"/></svg>
               Agregar acceso manual
             </button>
+            <button class="btn btn--ghost" id="repair-member-identities-btn" title="Recupera nombre y correo desde Firebase Auth sin tocar pagos ni membresías">
+              Recuperar datos de cuentas
+            </button>
           </div>
         </div>
 
@@ -4881,6 +4884,9 @@ const Pages={
     p.querySelector('#new-mb-btn')?.addEventListener('click', () => {
       Pages._abrirModalBuscarEmail();
     });
+    p.querySelector('#repair-member-identities-btn')?.addEventListener('click', () => {
+      Pages._repararIdentidadesMiembros();
+    });
 
     // Click en botón "..." de cada card · abre menú de acciones
     p.addEventListener('click', (e) => {
@@ -4918,6 +4924,35 @@ const Pages={
     const expira = Pages._mbToDate(m.expiraEn);
     if (!expira) return false;
     return expira.getTime() <= Date.now();
+  },
+
+  async _repararIdentidadesMiembros() {
+    const incompletas = (window.AdminStore?.miembros || []).filter(m =>
+      !(m.nombre || '').trim() || !(m.email || '').trim() || !(m.displayName || '').trim()
+    );
+    if (!incompletas.length) {
+      Toast.info('No hay cuentas incompletas', 'Los nombres y correos visibles ya están completos.');
+      return;
+    }
+    const plural = incompletas.length === 1 ? 'cuenta' : 'cuentas';
+    if (!confirm(`Se consultará Firebase Auth para recuperar nombre y correo de ${incompletas.length} ${plural}. No se tocarán pagos, planes ni fechas. ¿Continuar?`)) return;
+    const boton = document.getElementById('repair-member-identities-btn');
+    if (boton) { boton.disabled = true; boton.textContent = 'Recuperando…'; }
+    try {
+      const token = await Pages._getAuthToken();
+      const r = await fetch(Pages._webhookUrl + '/admin/miembros/reparar-identidad', {
+        method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'No se pudo completar la recuperación');
+      const sinDatos = Number(data.pendientes || 0) + Number(data.noEncontrados || 0);
+      Toast.success(`${data.reparados || 0} ${data.reparados === 1 ? 'cuenta actualizada' : 'cuentas actualizadas'}`, sinDatos ? `${sinDatos} requieren revisión manual.` : 'Los datos se recuperaron sin alterar membresías.');
+    } catch (e) {
+      console.error('[reparar-identidades]', e);
+      Toast.error('No se pudieron recuperar los datos', e.message || 'Intenta nuevamente.');
+    } finally {
+      if (boton) { boton.disabled = false; boton.textContent = 'Recuperar datos de cuentas'; }
+    }
   },
 
   _renderKpisMiembros() {
