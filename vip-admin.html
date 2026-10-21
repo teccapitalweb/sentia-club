@@ -5183,6 +5183,14 @@ const Pages={
       fechaContextual = fechaRegistro ? `Registrado ${fmtFecha(fechaRegistro)}` : '';
     }
 
+    // Cobro rechazado en Stripe (past_due): el acceso sigue unos días mientras
+    // Stripe reintenta, pero NO es un pago al corriente y no debe verse como "Activo".
+    if (activo && m.stripeStatus === 'past_due') {
+      estadoColor = '#F59E0B';
+      estadoTxt = 'Pago pendiente';
+      fechaContextual = 'Cobro rechazado · Stripe lo reintenta';
+    }
+
     const nombreEsc = nombre.replace(/"/g,'&quot;').replace(/</g,'&lt;');
     const emailEsc = email.replace(/"/g,'&quot;').replace(/</g,'&lt;');
     const tooltip = (m.uid || m.id || '');
